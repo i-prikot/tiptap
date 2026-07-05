@@ -1,0 +1,76 @@
+<template>
+  <span
+    ref="referenceRef"
+    class="tiptap-tooltip-trigger"
+    :data-tooltip-state="open ? 'open' : 'closed'"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
+    @focusin="show"
+    @focusout="hide"
+  >
+    <slot />
+  </span>
+  <Teleport to="body">
+    <div v-if="open" ref="floatingRef" class="tiptap-tooltip" role="tooltip" :style="floatingStyles">
+      <slot name="content" />
+    </div>
+  </Teleport>
+</template>
+
+<script setup lang="ts">
+/**
+ * Tooltip на floating-ui: hover (только мышь) и focus, задержка открытия,
+ * placement top c offset 4 / flip / shift — как в оригинальном примитиве
+ * из чанка 3q2p49kc-ifgd.
+ */
+import { ref } from 'vue'
+import { flip, offset, shift, useFloating, autoUpdate } from '@floating-ui/vue'
+
+const props = withDefaults(
+  defineProps<{
+    delay?: number
+    closeDelay?: number
+    placement?: 'top' | 'bottom' | 'left' | 'right'
+  }>(),
+  { delay: 200, closeDelay: 0, placement: 'top' },
+)
+
+const open = ref(false)
+const referenceRef = ref<HTMLElement | null>(null)
+const floatingRef = ref<HTMLElement | null>(null)
+
+const { floatingStyles } = useFloating(referenceRef, floatingRef, {
+  placement: props.placement,
+  whileElementsMounted: autoUpdate,
+  middleware: [offset(4), flip({ fallbackAxisSideDirection: 'start', padding: 4 }), shift({ padding: 4 })],
+})
+
+let openTimer: number | undefined
+let closeTimer: number | undefined
+
+function show() {
+  window.clearTimeout(closeTimer)
+  open.value = true
+}
+
+function hide() {
+  window.clearTimeout(openTimer)
+  if (props.closeDelay > 0) {
+    closeTimer = window.setTimeout(() => {
+      open.value = false
+    }, props.closeDelay)
+  } else {
+    open.value = false
+  }
+}
+
+function handleMouseEnter() {
+  window.clearTimeout(closeTimer)
+  openTimer = window.setTimeout(show, props.delay)
+}
+
+function handleMouseLeave() {
+  window.clearTimeout(openTimer)
+  hide()
+}
+</script>

@@ -1,0 +1,58 @@
+<template>
+  <Button
+    v-if="isVisible"
+    type="button"
+    variant="ghost"
+    role="button"
+    :tabindex="-1"
+    :aria-label="del.label"
+    tooltip="Delete"
+    :disabled="!del.canDeleteNode.value"
+    @click="handleClick"
+  >
+    <slot>
+      <component :is="del.Icon" class="tiptap-button-icon" />
+      <span v-if="text" class="tiptap-button-text">{{ text }}</span>
+      <Badge v-if="showShortcut">{{ shortcutText }}</Badge>
+    </slot>
+  </Button>
+</template>
+
+<script setup lang="ts">
+// Кнопка удаления блока (порт DeleteNodeButton из чанка 34p294mqk5mqb).
+import { computed } from 'vue'
+import type { Editor } from '@tiptap/vue-3'
+import Button from '../primitives/Button.vue'
+import Badge from '../primitives/Badge.vue'
+import { useTiptapEditor } from '../../composables/useTiptapEditor'
+import { useDeleteNode } from '../../composables/useNodeActions'
+import { parseShortcutKeys } from '../../utils/tiptap-utils'
+
+const props = withDefaults(
+  defineProps<{
+    editor?: Editor | null
+    text?: string
+    hideWhenUnavailable?: boolean
+    showShortcut?: boolean
+  }>(),
+  { hideWhenUnavailable: false, showShortcut: false },
+)
+
+const emit = defineEmits<{ deleted: [] }>()
+
+const editor = useTiptapEditor(computed(() => props.editor))
+const del = useDeleteNode(editor)
+
+const isVisible = computed(() => {
+  const instance = editor.value
+  if (!instance) return false
+  if (!props.hideWhenUnavailable) return true
+  return !!instance.isEditable && (!!instance.isActive('code') || del.canDeleteNode.value)
+})
+
+const shortcutText = computed(() => parseShortcutKeys({ shortcutKeys: del.shortcutKeys }).join(''))
+
+function handleClick() {
+  if (del.handleDeleteNode()) emit('deleted')
+}
+</script>

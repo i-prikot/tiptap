@@ -1,0 +1,1 @@
+.drag-handle{transition-property:top;transition-duration:.2s;transition-timing-function:ease-out}.drag-handle:before{content:"";width:var(--drag-handle-main-axis-offset,16px);pointer-events:auto;height:100%;position:absolute;top:0;left:100%}

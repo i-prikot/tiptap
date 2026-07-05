@@ -1,0 +1,51 @@
+import { createApp } from 'vue'
+import App from './App.vue'
+import 'katex/dist/katex.min.css'
+// базовые токены и сброс (40ba9r0t45n1c)
+import './editor/styles/design-tokens.css'
+// оболочка Notion-like редактора (2kp4kan5tau8p) и экраны ошибок (0azch_pgoau8y)
+import './editor/styles/notion-editor.css'
+import './editor/styles/setup-error.css'
+// базовые состояния ProseMirror: selection, placeholder, carets, threads (2pxhxhddvbrwu)
+import './editor/styles/prosemirror-base.css'
+// стили узлов редактора
+import './editor/styles/heading-node.css'
+import './editor/styles/blockquote-node.css'
+import './editor/styles/list-node.css'
+import './editor/styles/code-node.css'
+import './editor/styles/horizontal-rule-node.css'
+import './editor/styles/image-base.css'
+import './editor/styles/image-node.css'
+import './editor/styles/image-upload-node.css'
+import './editor/styles/toc.css'
+import './editor/styles/slash-decoration.css'
+import './editor/styles/drag-handle.css'
+// таблицы
+import './editor/styles/table.css'
+import './editor/styles/table-handle.css'
+import './editor/styles/table-extend.css'
+// UI-примитивы
+import './editor/styles/button.css'
+import './editor/styles/button-group.css'
+import './editor/styles/button-highlight.css'
+import './editor/styles/button-color-text.css'
+import './editor/styles/badge.css'
+import './editor/styles/toolbar.css'
+import './editor/styles/separator.css'
+import './editor/styles/dropdown-menu.css'
+import './editor/styles/menu.css'
+import './editor/styles/popover.css'
+import './editor/styles/card.css'
+import './editor/styles/combobox.css'
+import './editor/styles/avatar.css'
+import './editor/styles/input.css'
+import './editor/styles/textarea.css'
+import './editor/styles/link-input.css'
+import './editor/styles/emoji-input.css'
+import './editor/styles/outline.css'
+import './editor/styles/expandable-menu-button.css'
+import './editor/styles/ai-prompt-input.css'
+// легаси-стили табличных меню Vue-порта (table-menu, mobile-table-menu)
+import './editor/styles/editor.css'
+
+createApp(App).mount('#app')
