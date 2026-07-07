@@ -16,7 +16,7 @@
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="start">
-      <TurnIntoDropdownContent :editor="editor" :block-types="blockTypes" />
+      <TurnIntoDropdownContent :editor="activeEditor" :block-types="blockTypes" />
     </DropdownMenuContent>
   </DropdownMenu>
 </template>
@@ -51,7 +51,7 @@ const props = withDefaults(
 const emit = defineEmits<{ openChange: [value: boolean] }>()
 
 const editorRef = useTiptapEditor(computed(() => props.editor))
-const editor = computed(() => editorRef.value)
+const activeEditor = computed(() => editorRef.value)
 const signal = useEditorSelectionSignal(editorRef)
 
 const open = ref(false)

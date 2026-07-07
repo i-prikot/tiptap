@@ -10,7 +10,7 @@
         :tooltip="link.label"
       />
     </template>
-    <LinkContent :editor="editor" @set-link="onSetLink" />
+    <LinkContent :editor="activeEditor" @set-link="onSetLink" />
   </Popover>
 </template>
 
@@ -39,7 +39,7 @@ const props = withDefaults(
 const emit = defineEmits<{ setLink: []; openChange: [value: boolean] }>()
 
 const editorRef = useTiptapEditor(computed(() => props.editor))
-const editor = computed(() => editorRef.value)
+const activeEditor = computed(() => editorRef.value)
 const link = useLinkPopover({ editor: editorRef, hideWhenUnavailable: props.hideWhenUnavailable })
 
 const open = ref(false)

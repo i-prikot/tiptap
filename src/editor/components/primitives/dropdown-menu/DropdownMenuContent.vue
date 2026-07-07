@@ -12,7 +12,7 @@
         class="tiptap-dropdown-menu-content"
         role="menu"
         data-state="open"
-        :data-side="side"
+        :data-side="resolvedSide"
         @click="handleContentClick"
       >
         <slot />
@@ -83,7 +83,7 @@ const { floatingStyles, placement: resolvedPlacement } = useFloating(context.ref
   ],
 })
 
-const side = computed(() => resolvedPlacement.value.split('-')[0])
+const resolvedSide = computed(() => resolvedPlacement.value.split('-')[0])
 
 // origin зависит от итогового placement (после flip)
 watchEffect(() => {

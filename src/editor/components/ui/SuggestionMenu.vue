@@ -10,7 +10,7 @@
       aria-label="Suggestions"
       @pointerdown.prevent
     >
-      <slot :items="items" :selected-index="selectedIndex" :on-select="handleSelect" />
+      <slot :items="suggestionItems" :selected-index="selectedIndex" :on-select="handleSelect" />
     </div>
   </Teleport>
 </template>
@@ -59,7 +59,7 @@ const editor = useTiptapEditor(computed(() => props.editor))
 const open = ref(false)
 const referenceRect = shallowRef<(() => DOMRect | null) | null>(null)
 const commandFn = shallowRef<((item: SuggestionItem) => void) | null>(null)
-const items = shallowRef<SuggestionItem[]>([])
+const suggestionItems = shallowRef<SuggestionItem[]>([])
 const query = ref('')
 
 const menuRef = ref<HTMLElement | null>(null)
@@ -103,7 +103,7 @@ function handleSelect(item: SuggestionItem) {
 const { selectedIndex } = useMenuNavigation<SuggestionItem>({
   editor,
   query,
-  items,
+  items: suggestionItems,
   onSelect: handleSelect,
 })
 
@@ -181,7 +181,7 @@ watch(
         onExit: () => {
           referenceRect.value = null
           commandFn.value = null
-          items.value = []
+          suggestionItems.value = []
           query.value = ''
           open.value = false
         },
@@ -191,7 +191,7 @@ watch(
     function applyState(state: SuggestionProps<SuggestionItem, SuggestionItem>) {
       referenceRect.value = state.clientRect
       commandFn.value = state.command
-      items.value = state.items
+      suggestionItems.value = state.items
       query.value = state.query
     }
 
