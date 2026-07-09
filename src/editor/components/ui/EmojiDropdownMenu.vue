@@ -1,4 +1,5 @@
 <template>
+  <!-- @vue-generic {EmojiSuggestionItem} -->
   <SuggestionMenu
     char=":"
     plugin-key="emojiDropdownMenu"
@@ -13,7 +14,7 @@
             <EmojiMenuItem
               v-for="(item, index) in items"
               :key="item.title"
-              :emoji="item.context as EmojiItem"
+              :emoji="item.context"
               :is-selected="index === selectedIndex"
               selector="[data-selector='tiptap-emoji-dropdown-menu']"
               @select="onSelect(item)"
@@ -30,17 +31,34 @@
  * Меню эмодзи по `:` — фильтрация по имени/шорткодам/тегам, максимум 100.
  * Порт EmojiDropdownMenu из чанка 34p294mqk5mqb (модуль 248967).
  */
+import type { Editor as CoreEditor } from '@tiptap/core'
 import type { Editor } from '@tiptap/vue-3'
-import type { EmojiItem } from '@tiptap/extension-emoji'
 import SuggestionMenu from './SuggestionMenu.vue'
 import EmojiMenuItem from './EmojiMenuItem.vue'
 import Card from '../primitives/card/Card.vue'
 import CardBody from '../primitives/card/CardBody.vue'
 import CardItemGroup from '../primitives/card/CardItemGroup.vue'
 import type { SuggestionItem } from '../../utils/suggestion/suggestion'
+import type { EditorEmojiItem, EditorEmojiStorage } from '../../extensions/tiptap-command-types'
+
+type SuggestionRange = { from: number; to: number }
+
+interface EmojiSuggestionItem extends SuggestionItem {
+  context: EditorEmojiItem
+  onSelect: (props: { editor: CoreEditor; range?: SuggestionRange; context?: unknown }) => void
+}
+
+function isEditorEmojiItem(context: unknown): context is EditorEmojiItem {
+  return (
+    typeof context === 'object' &&
+    context !== null &&
+    'name' in context &&
+    typeof context.name === 'string'
+  )
+}
 
 /** Фильтрация базы эмодзи по запросу (порт getFilteredEmojis). */
-function getFilteredEmojis(args: { query: string; emojis: EmojiItem[] }): EmojiItem[] {
+function getFilteredEmojis(args: { query: string; emojis: EditorEmojiItem[] }): EditorEmojiItem[] {
   const { query, emojis } = args
   const trimmed = query.trim()
   const matched = trimmed
@@ -58,15 +76,22 @@ function getFilteredEmojis(args: { query: string; emojis: EmojiItem[] }): EmojiI
   return matched.sort((a, b) => a.name.localeCompare(b.name))
 }
 
-function getEmojiItems({ query, editor }: { query: string; editor: Editor }): SuggestionItem[] {
-  const emojis: EmojiItem[] = editor.extensionStorage.emoji?.emojis || []
+function getEmojiItems({
+  query,
+  editor,
+}: {
+  query: string
+  editor: Editor
+}): EmojiSuggestionItem[] {
+  const emojiStorage: EditorEmojiStorage | undefined = editor.extensionStorage.emoji
+  const emojis = emojiStorage?.emojis || []
   return getFilteredEmojis({ query, emojis }).map((emoji) => ({
     title: emoji.name,
     subtext: emoji.shortcodes.join(', '),
     context: emoji,
     onSelect: ({ editor: selectedEditor, range, context }) => {
-      if (selectedEditor && range && context) {
-        ;(selectedEditor.chain().focus() as any).setEmoji((context as EmojiItem).name).run()
+      if (selectedEditor && range && isEditorEmojiItem(context)) {
+        selectedEditor.chain().focus().setEmoji(context.name).run()
       }
     },
   }))

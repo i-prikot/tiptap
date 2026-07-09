@@ -1,7 +1,11 @@
 import '@tiptap/core'
+import type { EmojiItem, EmojiStorage } from '@tiptap/extension-emoji'
 import type { UiEditorState } from './ui-state'
 
 export type AiTextPromptFormat = 'rich-text'
+
+export type EditorEmojiItem = EmojiItem
+export type EditorEmojiStorage = EmojiStorage
 
 export interface AiTextPromptOptions {
   stream: boolean
@@ -30,9 +34,16 @@ declare module '@tiptap/core' {
     aiTextPrompt: {
       aiTextPrompt: (options: AiTextPromptOptions) => ReturnType
     }
+    ai: {
+      aiAccept: () => ReturnType
+    }
+    emoji: {
+      setEmoji: (name: string) => ReturnType
+    }
   }
 
   interface Storage {
     uiState: UiEditorState
+    emoji: EditorEmojiStorage
   }
 }

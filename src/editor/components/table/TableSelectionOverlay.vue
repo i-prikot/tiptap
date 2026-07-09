@@ -63,6 +63,21 @@ import { domCellAround, getTable, rectEq } from '../../utils/table-utils'
 
 type Corner = 'tl' | 'tr' | 'bl' | 'br'
 
+interface ColumnResizeTransactionPayload {
+  transaction: {
+    getMeta(key: typeof columnResizingPluginKey): unknown
+  }
+}
+
+interface ColumnResizePluginMeta {
+  setDragging?: unknown | null
+  setHandle?: unknown | null
+}
+
+function isColumnResizePluginMeta(meta: unknown): meta is ColumnResizePluginMeta {
+  return typeof meta === 'object' && meta !== null
+}
+
 const props = withDefaults(defineProps<{ showResizeHandles?: boolean }>(), {
   showResizeHandles: true,
 })
@@ -190,10 +205,10 @@ watch(
       computeSelectionRect()
       updateTableDom()
     }
-    const onTransaction = ({ transaction }: { transaction: { getMeta(key: unknown): any } }) => {
+    const onTransaction = ({ transaction }: ColumnResizeTransactionPayload) => {
       computeSelectionRect()
       const meta = transaction.getMeta(columnResizingPluginKey)
-      if (meta) {
+      if (isColumnResizePluginMeta(meta)) {
         if (Object.prototype.hasOwnProperty.call(meta, 'setDragging') && meta.setDragging)
           trackColumnResize()
         if (Object.prototype.hasOwnProperty.call(meta, 'setDragging') && meta.setDragging == null) {

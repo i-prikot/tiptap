@@ -52,7 +52,7 @@ watch(
   ([hasMessage, isLoading, isSelection]) => {
     const instance = editor.value
     if (instance && !isLoading && isSelection && hasMessage) {
-      ;(instance.chain().focus() as any).aiAccept().run()
+      instance.chain().focus().aiAccept().run()
       instance.commands.resetUiState()
     }
   },
