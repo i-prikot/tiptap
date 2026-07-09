@@ -19,10 +19,10 @@ export type TocItem = TableOfContentDataItem
 export function normalizeHeadingDepths(items: TocItem[]): number[] {
   if (items.length === 0) return []
 
-  const levels = items.map(item => item.originalLevel ?? item.level ?? 1)
-  const positive = levels.filter(level => level > 0)
+  const levels = items.map((item) => item.originalLevel ?? item.level ?? 1)
+  const positive = levels.filter((level) => level > 0)
   const baseLevel = positive.includes(1) ? 1 : Math.min(...positive)
-  const shifted = levels.map(level => Math.max(1, level - (baseLevel - 1)))
+  const shifted = levels.map((level) => Math.max(1, level - (baseLevel - 1)))
 
   const depths: number[] = []
   const stack: Array<{ level: number; depth: number }> = []
@@ -41,7 +41,10 @@ export function getScrollableAncestor(element: HTMLElement): HTMLElement | Windo
   let parent = element.parentElement
   while (parent) {
     const { overflowY } = getComputedStyle(parent)
-    if ((overflowY === 'auto' || overflowY === 'scroll') && parent.scrollHeight > parent.clientHeight) {
+    if (
+      (overflowY === 'auto' || overflowY === 'scroll') &&
+      parent.scrollHeight > parent.clientHeight
+    ) {
       return parent
     }
     parent = parent.parentElement
@@ -53,7 +56,9 @@ export function getScrollableAncestor(element: HTMLElement): HTMLElement | Windo
 export function selectNodeAndHideFloating(editor: Editor | null, pos: number) {
   if (!editor) return
   const { state, view } = editor
-  view.dispatch(state.tr.setSelection(NodeSelection.create(state.doc, pos)).setMeta(HIDE_FLOATING_META, true))
+  view.dispatch(
+    state.tr.setSelection(NodeSelection.create(state.doc, pos)).setMeta(HIDE_FLOATING_META, true),
+  )
 }
 
 export interface NavigateToHeadingOptions {
@@ -68,7 +73,8 @@ export function navigateToHeading(item: TocItem, options: NavigateToHeadingOptio
 
   const rect = item.dom.getBoundingClientRect()
   const viewportHeight = window.innerHeight || document.documentElement.clientHeight
-  const alreadyVisible = rect.top >= topOffset && rect.bottom > topOffset && rect.top < viewportHeight
+  const alreadyVisible =
+    rect.top >= topOffset && rect.bottom > topOffset && rect.top < viewportHeight
 
   if (!alreadyVisible) {
     const scrollParent = getScrollableAncestor(item.dom)

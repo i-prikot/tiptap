@@ -39,12 +39,12 @@
 }
 
 .tiptap-table-handle-menu.row {
-  width: .75rem;
+  width: 0.75rem;
   height: var(--table-handle-ref-height);
 }
 
 .tiptap-table-handle-menu.column {
-  height: .75rem;
+  height: 0.75rem;
   width: var(--table-handle-ref-width);
 }
 

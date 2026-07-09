@@ -6,5 +6,7 @@
 
 <script setup lang="ts">
 // Группа пунктов меню.
-withDefaults(defineProps<{ orientation?: 'vertical' | 'horizontal' }>(), { orientation: 'vertical' })
+withDefaults(defineProps<{ orientation?: 'vertical' | 'horizontal' }>(), {
+  orientation: 'vertical',
+})
 </script>

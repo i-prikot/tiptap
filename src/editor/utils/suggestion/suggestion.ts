@@ -31,7 +31,14 @@ export interface FindSuggestionMatchConfig {
 
 /** Ищет активный триггер (`/query`) перед курсором. */
 export function findSuggestionMatch(config: FindSuggestionMatchConfig): SuggestionMatch | null {
-  const { char, allowSpaces: allowSpacesOption, allowToIncludeChar, allowedPrefixes, startOfLine, $position } = config
+  const {
+    char,
+    allowSpaces: allowSpacesOption,
+    allowToIncludeChar,
+    allowedPrefixes,
+    startOfLine,
+    $position,
+  } = config
   const allowSpaces = allowSpacesOption && !allowToIncludeChar
 
   const escapedChar = escapeForRegEx(char)
@@ -87,7 +94,12 @@ export interface SuggestionProps<Item = unknown, SelectedProps = unknown> {
 }
 
 export interface MountOptions {
-  onPosition?: (position: { x: number; y: number; placement: Placement; strategy: Strategy }) => void
+  onPosition?: (position: {
+    x: number
+    y: number
+    placement: Placement
+    strategy: Strategy
+  }) => void
   autoUpdate?: Parameters<typeof autoUpdate>[3]
 }
 
@@ -97,7 +109,11 @@ export interface SuggestionRenderer<Item = unknown, SelectedProps = unknown> {
   onBeforeUpdate?: (props: SuggestionProps<Item, SelectedProps>) => void
   onUpdate?: (props: SuggestionProps<Item, SelectedProps>) => void
   onExit?: (props: SuggestionProps<Item, SelectedProps>) => void
-  onKeyDown?: (props: { view: EditorView; event: KeyboardEvent; range: { from: number; to: number } }) => boolean | void
+  onKeyDown?: (props: {
+    view: EditorView
+    event: KeyboardEvent
+    range: { from: number; to: number }
+  }) => boolean | void
 }
 
 export interface SuggestionOptions<Item = unknown, SelectedProps = unknown> {
@@ -112,8 +128,16 @@ export interface SuggestionOptions<Item = unknown, SelectedProps = unknown> {
   decorationClass?: string
   decorationContent?: string
   decorationEmptyClass?: string
-  command?: (props: { editor: Editor; range: { from: number; to: number }; props: SelectedProps }) => void
-  items?: (props: { editor: Editor; query: string; signal?: AbortSignal }) => Item[] | Promise<Item[]>
+  command?: (props: {
+    editor: Editor
+    range: { from: number; to: number }
+    props: SelectedProps
+  }) => void
+  items?: (props: {
+    editor: Editor
+    query: string
+    signal?: AbortSignal
+  }) => Item[] | Promise<Item[]>
   minQueryLength?: number
   debounce?: number
   initialItems?: Item[]
@@ -173,7 +197,9 @@ function resolveContainer(container: HTMLElement | string | undefined): HTMLElem
   return document.body
 }
 
-export function Suggestion<Item = unknown, SelectedProps = unknown>(options: SuggestionOptions<Item, SelectedProps>) {
+export function Suggestion<Item = unknown, SelectedProps = unknown>(
+  options: SuggestionOptions<Item, SelectedProps>,
+) {
   const {
     pluginKey = SuggestionPluginKey,
     editor,
@@ -207,7 +233,10 @@ export function Suggestion<Item = unknown, SelectedProps = unknown>(options: Sug
   const renderer: SuggestionRenderer<Item, SelectedProps> = render?.() ?? {}
   const effectiveAllowSpaces = allowSpaces && !allowToIncludeChar
 
-  const clientRectFor = (view: EditorView, decorationNode: Element | null): (() => DOMRect | null) => {
+  const clientRectFor = (
+    view: EditorView,
+    decorationNode: Element | null,
+  ): (() => DOMRect | null) => {
     if (!decorationNode) {
       return () => {
         const pos = editor.state.selection.$anchor.pos
@@ -255,7 +284,7 @@ export function Suggestion<Item = unknown, SelectedProps = unknown>(options: Sug
       abort()
       const current = (controller = new AbortController())
       if (delay > 0) {
-        await new Promise<void>(resolve => {
+        await new Promise<void>((resolve) => {
           resolveWait = resolve
           timer = setTimeout(() => {
             timer = null
@@ -331,9 +360,14 @@ export function Suggestion<Item = unknown, SelectedProps = unknown>(options: Sug
         mountOptions.autoUpdate,
       )
       if (dismissOnOutsideClick) {
-        outsideHandler = event => {
+        outsideHandler = (event) => {
           const target = event.target
-          if (!(target instanceof Node) || element.contains(target) || contextElement.contains(target)) return
+          if (
+            !(target instanceof Node) ||
+            element.contains(target) ||
+            contextElement.contains(target)
+          )
+            return
           dispatchExit(editor.view)
         }
         document.addEventListener('pointerdown', outsideHandler, true)
@@ -370,8 +404,10 @@ export function Suggestion<Item = unknown, SelectedProps = unknown>(options: Sug
       match.range.from === dismissedRange.from &&
       !(
         transaction.docChanged &&
-        transaction.steps.some(step => {
-          const slice = (step as unknown as { slice?: { content?: import('@tiptap/pm/model').Fragment } }).slice
+        transaction.steps.some((step) => {
+          const slice = (
+            step as unknown as { slice?: { content?: import('@tiptap/pm/model').Fragment } }
+          ).slice
           if (!slice?.content) return false
           const inserted = slice.content.textBetween(0, slice.content.size, '\n')
           return /\s/.test(inserted)
@@ -387,7 +423,10 @@ export function Suggestion<Item = unknown, SelectedProps = unknown>(options: Sug
       let currentProps: SuggestionProps<Item, SelectedProps> | undefined
       const fetcher = createItemsFetcher()
 
-      const emit = (phase: 'started' | 'updated' | 'stopped', props: SuggestionProps<Item, SelectedProps>) => {
+      const emit = (
+        phase: 'started' | 'updated' | 'stopped',
+        props: SuggestionProps<Item, SelectedProps>,
+      ) => {
         if (phase === 'started') renderer?.onStart?.(props)
         else if (phase === 'updated') renderer?.onUpdate?.(props)
         else renderer?.onExit?.(props)
@@ -402,7 +441,8 @@ export function Suggestion<Item = unknown, SelectedProps = unknown>(options: Sug
           let phase: 'started' | 'updated' | 'stopped' | null = null
           const queryChanged = prev.query !== next.query
           const textChanged = prev.text !== next.text
-          const rangeChanged = prev.range.from !== next.range.from || prev.range.to !== next.range.to
+          const rangeChanged =
+            prev.range.from !== next.range.from || prev.range.to !== next.range.to
 
           if (!prev.active && next.active) phase = 'started'
           else if (prev.active && !next.active) phase = 'stopped'
@@ -412,9 +452,12 @@ export function Suggestion<Item = unknown, SelectedProps = unknown>(options: Sug
           }
 
           const state = phase === 'stopped' ? prev : next
-          const decorationNode = view.dom.querySelector(`[data-decoration-id="${state.decorationId}"]`)
+          const decorationNode = view.dom.querySelector(
+            `[data-decoration-id="${state.decorationId}"]`,
+          )
           const referenceRect = clientRectFor(view, decorationNode)
-          const meetsMinQuery = minQueryLength === 0 || (!!state.query && state.query.length >= minQueryLength)
+          const meetsMinQuery =
+            minQueryLength === 0 || (!!state.query && state.query.length >= minQueryLength)
           const willLoad = (phase === 'started' || phase === 'updated') && meetsMinQuery
 
           currentProps = {
@@ -423,16 +466,23 @@ export function Suggestion<Item = unknown, SelectedProps = unknown>(options: Sug
             query: state.query || '',
             text: state.text || '',
             items: initialItems ?? [],
-            command: selectedProps => command({ editor, range: state.range, props: selectedProps }),
+            command: (selectedProps) =>
+              command({ editor, range: state.range, props: selectedProps }),
             decorationNode,
             clientRect: referenceRect,
             loading: willLoad,
             placement,
-            offset: { mainAxis: offsetOption.mainAxis ?? 4, crossAxis: offsetOption.crossAxis ?? 0 },
+            offset: {
+              mainAxis: offsetOption.mainAxis ?? 4,
+              crossAxis: offsetOption.crossAxis ?? 0,
+            },
             container,
             flip: flipOption,
             floatingUi: floatingConfig,
-            mount: createMount({ getReferenceRect: referenceRect, contextElement: view.dom as HTMLElement }),
+            mount: createMount({
+              getReferenceRect: referenceRect,
+              contextElement: view.dom as HTMLElement,
+            }),
           }
 
           if (phase === 'started') renderer?.onBeforeStart?.(currentProps)
@@ -529,11 +579,22 @@ export function Suggestion<Item = unknown, SelectedProps = unknown>(options: Sug
             match &&
             allow({ editor, state, range: match.range, isActive: prev.active }) &&
             (!shouldShow ||
-              shouldShow({ editor, range: match.range, query: match.query, text: match.text, transaction }))
+              shouldShow({
+                editor,
+                range: match.range,
+                query: match.query,
+                text: match.text,
+                transaction,
+              }))
           ) {
             if (
               next.dismissedRange !== null &&
-              !shouldKeepDismissed({ match, dismissedRange: next.dismissedRange, state, transaction })
+              !shouldKeepDismissed({
+                match,
+                dismissedRange: next.dismissedRange,
+                state,
+                transaction,
+              })
             ) {
               next.dismissedRange = null
             }
@@ -614,7 +675,11 @@ export interface SuggestionItem<Context = unknown> {
   group?: string
   keywords?: string[]
   context?: Context
-  onSelect: (props: { editor: Editor; range?: { from: number; to: number }; context?: Context }) => void
+  onSelect: (props: {
+    editor: Editor
+    range?: { from: number; to: number }
+    context?: Context
+  }) => void
 }
 
 /** Фильтрация + сортировка пунктов по запросу (точное совпадение, префикс). */
@@ -623,11 +688,11 @@ export function filterSuggestionItems<T extends SuggestionItem>(items: T[], quer
   if (!normalized) return items
   return items
     .filter(
-      item =>
+      (item) =>
         !!(
           item.title.toLowerCase().includes(normalized) ||
           item.subtext?.toLowerCase().includes(normalized) ||
-          item.keywords?.some(keyword => keyword.toLowerCase().includes(normalized))
+          item.keywords?.some((keyword) => keyword.toLowerCase().includes(normalized))
         ),
     )
     .sort((a, b) => {

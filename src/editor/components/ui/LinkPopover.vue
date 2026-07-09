@@ -54,7 +54,7 @@ function onSetLink() {
   onOpenChange(false)
 }
 
-watch(link.isActive, active => {
+watch(link.isActive, (active) => {
   if (props.autoOpenOnLinkActive && active) onOpenChange(true)
 })
 </script>

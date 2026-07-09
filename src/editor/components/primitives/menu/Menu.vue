@@ -34,7 +34,7 @@ const triggerWrapperRef = ref<HTMLElement | null>(null)
 
 watch(
   () => props.open,
-  value => {
+  (value) => {
     if (value !== undefined) open.value = value
   },
 )

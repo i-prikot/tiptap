@@ -43,7 +43,9 @@ const props = withDefaults(
 const emit = defineEmits<{ moved: [direction: MoveDirection] }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
-const move = useMoveNode(editor, props.direction, props.hideWhenUnavailable, direction => emit('moved', direction))
+const move = useMoveNode(editor, props.direction, props.hideWhenUnavailable, (direction) =>
+  emit('moved', direction),
+)
 
 const shortcutText = computed(() => parseShortcutKeys({ shortcutKeys: move.shortcutKeys }).join(''))
 

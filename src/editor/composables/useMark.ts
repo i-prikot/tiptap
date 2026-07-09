@@ -18,7 +18,8 @@ import {
   UnderlineIcon,
 } from '../icons'
 
-export type MarkType = 'bold' | 'italic' | 'underline' | 'strike' | 'code' | 'superscript' | 'subscript'
+export type MarkType =
+  'bold' | 'italic' | 'underline' | 'strike' | 'code' | 'superscript' | 'subscript'
 
 export const markIcons: Record<MarkType, FunctionalComponent> = {
   bold: BoldIcon,
@@ -41,25 +42,41 @@ export const MARK_SHORTCUT_KEYS: Record<MarkType, string> = {
 }
 
 export function canToggleMark(editor: Editor | null, type: MarkType): boolean {
-  if (!editor || !editor.isEditable || !isMarkInSchema(type, editor) || isNodeTypeSelected(editor, ['image'])) {
+  if (
+    !editor ||
+    !editor.isEditable ||
+    !isMarkInSchema(type, editor) ||
+    isNodeTypeSelected(editor, ['image'])
+  ) {
     return false
   }
   return editor.can().toggleMark(type)
 }
 
-export function useMark(editor: ComputedRef<Editor | null>, type: MarkType, hideWhenUnavailable = false) {
+export function useMark(
+  editor: ComputedRef<Editor | null>,
+  type: MarkType,
+  hideWhenUnavailable = false,
+) {
   const signal = useEditorSelectionSignal(editor)
 
   const canToggle = computed(() => (signal.value, canToggleMark(editor.value, type)))
   const isActive = computed(
-    () => (signal.value, !!editor.value && !!editor.value.isEditable && editor.value.isActive(type)),
+    () => (
+      signal.value,
+      !!editor.value && !!editor.value.isEditable && editor.value.isActive(type)
+    ),
   )
   const isVisible = computed(() => {
     void signal.value
     const instance = editor.value
     if (!instance) return false
     if (!hideWhenUnavailable) return true
-    return !!instance.isEditable && !!isMarkInSchema(type, instance) && (!!instance.isActive('code') || canToggleMark(instance, type))
+    return (
+      !!instance.isEditable &&
+      !!isMarkInSchema(type, instance) &&
+      (!!instance.isActive('code') || canToggleMark(instance, type))
+    )
   })
 
   const handleMark = (): boolean => {

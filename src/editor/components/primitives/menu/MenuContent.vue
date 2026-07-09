@@ -40,30 +40,40 @@ const context = injected
 
 const floatingRef = ref<HTMLElement | null>(null)
 
-const { floatingStyles, placement: resolvedPlacement } = useFloating(context.reference, floatingRef, {
-  placement: context.placement as Placement,
-  whileElementsMounted: autoUpdate,
-  middleware: [
-    offset(4),
-    flip({ padding: 8 }),
-    shift({ padding: 8 }),
-    size({
-      padding: 8,
-      apply({ elements, availableWidth, availableHeight, rects }) {
-        const wrapper = elements.floating
-        wrapper.style.setProperty('--popover-anchor-width', `${Math.round(rects.reference.width)}px`)
-        wrapper.style.setProperty('--popover-available-width', `${Math.floor(availableWidth)}px`)
-        wrapper.style.setProperty('--popover-available-height', `${Math.floor(availableHeight)}px`)
-      },
-    }),
-  ],
-})
+const { floatingStyles, placement: resolvedPlacement } = useFloating(
+  context.reference,
+  floatingRef,
+  {
+    placement: context.placement as Placement,
+    whileElementsMounted: autoUpdate,
+    middleware: [
+      offset(4),
+      flip({ padding: 8 }),
+      shift({ padding: 8 }),
+      size({
+        padding: 8,
+        apply({ elements, availableWidth, availableHeight, rects }) {
+          const wrapper = elements.floating
+          wrapper.style.setProperty(
+            '--popover-anchor-width',
+            `${Math.round(rects.reference.width)}px`,
+          )
+          wrapper.style.setProperty('--popover-available-width', `${Math.floor(availableWidth)}px`)
+          wrapper.style.setProperty(
+            '--popover-available-height',
+            `${Math.floor(availableHeight)}px`,
+          )
+        },
+      }),
+    ],
+  },
+)
 
 const side = computed(() => resolvedPlacement.value.split('-')[0])
 
 watch(
   () => context.open.value,
-  isOpen => {
+  (isOpen) => {
     if (!isOpen) emit('close')
   },
 )
@@ -97,7 +107,7 @@ onMounted(() => {
   floatingRef.value?.addEventListener('click', handleContentClick)
 })
 
-watch(floatingRef, element => {
+watch(floatingRef, (element) => {
   element?.addEventListener('click', handleContentClick)
 })
 

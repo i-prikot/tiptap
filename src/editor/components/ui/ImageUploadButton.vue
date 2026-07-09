@@ -44,7 +44,10 @@ export interface ImageUploadButtonProps {
 
 const IMAGE_UPLOAD_SHORTCUT_KEY = 'mod+shift+i'
 
-const props = withDefaults(defineProps<ImageUploadButtonProps>(), { hideWhenUnavailable: false, showShortcut: false })
+const props = withDefaults(defineProps<ImageUploadButtonProps>(), {
+  hideWhenUnavailable: false,
+  showShortcut: false,
+})
 
 const emit = defineEmits<{ inserted: [] }>()
 
@@ -62,17 +65,25 @@ function canInsertImageUpload(instance: Editor | null): boolean {
 
 const canInsert = computed(() => (signal.value, canInsertImageUpload(editor.value)))
 const isActive = computed(
-  () => (signal.value, !!editor.value && !!editor.value.isEditable && editor.value.isActive('imageUpload')),
+  () => (
+    signal.value,
+    !!editor.value && !!editor.value.isEditable && editor.value.isActive('imageUpload')
+  ),
 )
 const isVisible = computed(() => {
   void signal.value
   const instance = editor.value
   if (!instance || !instance.isEditable) return false
   if (!props.hideWhenUnavailable) return true
-  return !!isExtensionAvailable(instance, 'imageUpload') && (!!instance.isActive('code') || canInsertImageUpload(instance))
+  return (
+    !!isExtensionAvailable(instance, 'imageUpload') &&
+    (!!instance.isActive('code') || canInsertImageUpload(instance))
+  )
 })
 
-const shortcutText = computed(() => parseShortcutKeys({ shortcutKeys: IMAGE_UPLOAD_SHORTCUT_KEY }).join(''))
+const shortcutText = computed(() =>
+  parseShortcutKeys({ shortcutKeys: IMAGE_UPLOAD_SHORTCUT_KEY }).join(''),
+)
 
 function handleClick() {
   const instance = editor.value

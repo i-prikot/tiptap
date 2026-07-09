@@ -35,10 +35,10 @@
 .tiptap-table-extend-row-column-button.tiptap-table-row-end-add-remove {
   cursor: row-resize;
   width: 100%;
-  height: .75rem;
+  height: 0.75rem;
 }
 
 .tiptap-table-extend-row-column-button.tiptap-table-column-end-add-remove {
   cursor: col-resize;
-  width: .75rem;
+  width: 0.75rem;
 }

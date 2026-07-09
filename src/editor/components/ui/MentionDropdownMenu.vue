@@ -77,13 +77,15 @@ async function searchUsers(query: string): Promise<MentionUser[]> {
   if (!query) return USER_DIRECTORY
   const normalized = query.toLowerCase()
   return USER_DIRECTORY.filter(
-    user => user.name.toLowerCase().includes(normalized) || user.position.toLowerCase().includes(normalized),
+    (user) =>
+      user.name.toLowerCase().includes(normalized) ||
+      user.position.toLowerCase().includes(normalized),
   )
 }
 
 async function getMentionItems({ query }: { query: string }): Promise<SuggestionItem[]> {
   const users = await searchUsers(query)
-  return users.map(user => ({
+  return users.map((user) => ({
     title: user.name,
     subtext: user.position,
     context: user,

@@ -144,10 +144,13 @@ const editor = useEditor({
     HorizontalRule,
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
     ...collabExtensions,
-    Placeholder.configure({ placeholder: props.placeholder, emptyNodeClass: 'is-empty with-slash' }),
+    Placeholder.configure({
+      placeholder: props.placeholder,
+      emptyNodeClass: 'is-empty with-slash',
+    }),
     Mention,
     Emoji.configure({
-      emojis: gitHubEmojis.filter(emoji => !emoji.name.includes('regional')),
+      emojis: gitHubEmojis.filter((emoji) => !emoji.name.includes('regional')),
       forceFallbackImages: true,
     }),
     TableKit.configure({ table: { resizable: true, cellMinWidth: 120 } }),
@@ -190,7 +193,7 @@ const editor = useEditor({
       maxSize: MAX_FILE_SIZE,
       limit: 3,
       upload: handleImageUpload,
-      onError: error => console.error('Upload failed:', error),
+      onError: (error) => console.error('Upload failed:', error),
     }),
     UniqueID.configure({
       types: [
@@ -204,7 +207,7 @@ const editor = useEditor({
         'codeBlock',
         'tocNode',
       ],
-      filterTransaction: transaction => !isChangeOrigin(transaction),
+      filterTransaction: (transaction) => !isChangeOrigin(transaction),
     }),
     Typography,
     UiState,
@@ -215,7 +218,7 @@ const editor = useEditor({
 provideTiptapEditor(editor as never)
 
 // сбрасываем TOC при уничтожении редактора
-watch(editor, instance => {
+watch(editor, (instance) => {
   if (!instance) setTocContent(null)
 })
 

@@ -6,7 +6,12 @@
     :data-active-state="isSelected ? 'on' : 'off'"
     @click="emit('select')"
   >
-    <img v-if="emoji.fallbackImage" class="tiptap-button-emoji" :src="emoji.fallbackImage" :alt="emoji.name">
+    <img
+      v-if="emoji.fallbackImage"
+      class="tiptap-button-emoji"
+      :src="emoji.fallbackImage"
+      :alt="emoji.name"
+    />
     <span v-else class="tiptap-button-emoji">{{ emoji.emoji }}</span>
     <span class="tiptap-button-text">:{{ emoji.name }}:</span>
   </Button>
@@ -27,7 +32,7 @@ const buttonRef = ref<ComponentPublicInstance | null>(null)
 
 watch(
   () => props.isSelected,
-  selected => {
+  (selected) => {
     if (!selected) return
     const container = document.querySelector(props.selector)
     const element = buttonRef.value?.$el as HTMLElement | undefined

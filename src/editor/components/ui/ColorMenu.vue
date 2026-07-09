@@ -14,12 +14,27 @@
       <div class="tiptap-combobox-list">
         <MenuGroup v-if="isInitialized && recentColors.length">
           <MenuGroupLabel>Recent colors</MenuGroupLabel>
-          <MenuItem v-for="recent in recentItems" :key="`recent-${recent.type}-${recent.value}`" @select="recent.apply">
+          <MenuItem
+            v-for="recent in recentItems"
+            :key="`recent-${recent.type}-${recent.value}`"
+            @select="recent.apply"
+          >
             <Button variant="ghost" :data-active-state="recent.isActive ? 'on' : 'off'">
-              <span v-if="recent.type === 'text'" class="tiptap-button-color-text" :style="{ color: recent.value }">
-                <TextColorSmallIcon class="tiptap-button-icon" :style="{ color: recent.value, flexGrow: 1 }" />
+              <span
+                v-if="recent.type === 'text'"
+                class="tiptap-button-color-text"
+                :style="{ color: recent.value }"
+              >
+                <TextColorSmallIcon
+                  class="tiptap-button-icon"
+                  :style="{ color: recent.value, flexGrow: 1 }"
+                />
               </span>
-              <span v-else class="tiptap-button-highlight" :style="{ '--highlight-color': recent.value }" />
+              <span
+                v-else
+                class="tiptap-button-highlight"
+                :style="{ '--highlight-color': recent.value }"
+              />
               <span class="tiptap-button-text">{{ recent.label }}</span>
             </Button>
           </MenuItem>
@@ -30,7 +45,10 @@
           <MenuItem v-for="item in textItems" :key="item.value" @select="item.apply">
             <Button variant="ghost" :data-active-state="item.isActive ? 'on' : 'off'">
               <span class="tiptap-button-color-text" :style="{ color: item.value }">
-                <TextColorSmallIcon class="tiptap-button-icon" :style="{ color: item.value, flexGrow: 1 }" />
+                <TextColorSmallIcon
+                  class="tiptap-button-icon"
+                  :style="{ color: item.value, flexGrow: 1 }"
+                />
               </span>
               <span class="tiptap-button-text">{{ item.label }}</span>
             </Button>
@@ -75,7 +93,9 @@ import { useRecentColors, getColorByValue } from '../../composables/useRecentCol
 import { selectCurrentBlockContent } from '../../utils/tiptap-utils'
 import { ChevronRightIcon, PaintBucketIcon, TextColorSmallIcon } from '../../icons'
 
-const props = withDefaults(defineProps<{ editor?: Editor | null; label?: string }>(), { label: 'Color' })
+const props = withDefaults(defineProps<{ editor?: Editor | null; label?: string }>(), {
+  label: 'Color',
+})
 
 const editor = useTiptapEditor(computed(() => props.editor))
 const signal = useEditorSelectionSignal(editor)
@@ -86,7 +106,9 @@ const canShow = computed(() => {
   const instance = editor.value
   if (!instance) return false
   return (
-    !!instance.can().setMark('textStyle') || !!instance.can().setMark('highlight') || canColorHighlight(instance, 'node')
+    !!instance.can().setMark('textStyle') ||
+    !!instance.can().setMark('highlight') ||
+    canColorHighlight(instance, 'node')
   )
 })
 
@@ -135,7 +157,7 @@ function isBackgroundActive(color: string): boolean {
 
 const textItems = computed(() => {
   void signal.value
-  return TEXT_COLORS.map(color => ({
+  return TEXT_COLORS.map((color) => ({
     value: color.value,
     label: color.label,
     isActive: isTextColorActive(color.value),
@@ -145,7 +167,7 @@ const textItems = computed(() => {
 
 const backgroundItems = computed(() => {
   void signal.value
-  return HIGHLIGHT_COLORS.map(color => ({
+  return HIGHLIGHT_COLORS.map((color) => ({
     value: color.value,
     label: color.label,
     isActive: isBackgroundActive(color.value),
@@ -155,14 +177,15 @@ const backgroundItems = computed(() => {
 
 const recentItems = computed(() => {
   void signal.value
-  return recentColors.value.map(recent => {
+  return recentColors.value.map((recent) => {
     const palette = recent.type === 'text' ? TEXT_COLORS : HIGHLIGHT_COLORS
     const resolved = getColorByValue(recent.value, palette)
     return {
       type: recent.type,
       value: recent.value,
       label: resolved.label === resolved.value ? recent.label : resolved.label,
-      isActive: recent.type === 'text' ? isTextColorActive(recent.value) : isBackgroundActive(recent.value),
+      isActive:
+        recent.type === 'text' ? isTextColorActive(recent.value) : isBackgroundActive(recent.value),
       apply: () =>
         recent.type === 'text'
           ? applyTextColor(recent.value, recent.label)

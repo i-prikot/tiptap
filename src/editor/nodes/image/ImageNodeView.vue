@@ -7,7 +7,11 @@
     @mouseleave="handleMouseLeave"
     @touchstart="handleTouchStart"
   >
-    <div ref="containerRef" class="tiptap-image-container" :style="{ width: width ? `${width}px` : 'fit-content' }">
+    <div
+      ref="containerRef"
+      class="tiptap-image-container"
+      :style="{ width: width ? `${width}px` : 'fit-content' }"
+    >
       <div class="tiptap-image-content">
         <img
           :src="src"
@@ -17,7 +21,7 @@
           draggable="false"
           :style="{ cursor: editor?.isEditable ? 'pointer' : 'default' }"
           @click="handleImageClick"
-        >
+        />
         <template v-if="handlesVisible && editor?.isEditable">
           <div
             ref="leftHandleRef"
@@ -150,7 +154,9 @@ function handlePointerMove(event: MouseEvent | TouchEvent) {
   const fromLeft = state.handleUsed === 'left'
   // при выравнивании по центру картинка растёт в обе стороны
   const multiplier = align.value === 'center' ? 2 : 1
-  const delta = fromLeft ? (state.initialClientX - clientX) * multiplier : (clientX - state.initialClientX) * multiplier
+  const delta = fromLeft
+    ? (state.initialClientX - clientX) * multiplier
+    : (clientX - state.initialClientX) * multiplier
   const maxWidth = editor.value.view.dom?.firstElementChild?.clientWidth || MAX_WIDTH
   const nextWidth = Math.min(Math.max(state.initialWidth + delta, MIN_WIDTH), maxWidth)
   width.value = nextWidth
@@ -162,16 +168,23 @@ function handlePointerUp(event: MouseEvent | TouchEvent) {
 
   const target =
     'changedTouches' in event
-      ? document.elementFromPoint(event.changedTouches[0]?.clientX ?? 0, event.changedTouches[0]?.clientY ?? 0)
+      ? document.elementFromPoint(
+          event.changedTouches[0]?.clientX ?? 0,
+          event.changedTouches[0]?.clientY ?? 0,
+        )
       : (event.target as Element | null)
-  if ((!(target && containerRef.value?.contains(target)) || !editor.value.isEditable) && handlesVisible.value) {
+  if (
+    (!(target && containerRef.value?.contains(target)) || !editor.value.isEditable) &&
+    handlesVisible.value
+  ) {
     handlesVisible.value = false
   }
 
   if (!resizeState.value) return
 
   const hadNodeSelection =
-    editor.value.state.selection instanceof NodeSelection && editor.value.state.selection.node.type.name === 'image'
+    editor.value.state.selection instanceof NodeSelection &&
+    editor.value.state.selection.node.type.name === 'image'
 
   resizeState.value = undefined
   props.updateAttributes({ width: width.value })

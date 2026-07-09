@@ -1,5 +1,5 @@
 <template>
-  <img v-if="status === 'loaded'" alt="" :src="src" class="tiptap-avatar-image">
+  <img v-if="status === 'loaded'" alt="" :src="src" class="tiptap-avatar-image" />
 </template>
 
 <script setup lang="ts">
@@ -43,7 +43,11 @@ watch(
   { immediate: true },
 )
 
-watch(status, value => {
-  if (value !== 'idle') context.onImageLoadingStatusChange(value)
-}, { immediate: true })
+watch(
+  status,
+  (value) => {
+    if (value !== 'idle') context.onImageLoadingStatusChange(value)
+  },
+  { immediate: true },
+)
 </script>

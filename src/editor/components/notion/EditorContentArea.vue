@@ -43,7 +43,12 @@ useScrollToHash(editor)
 
 // как только AI-генерация по выделению завершилась сообщением — принять её
 watch(
-  () => [uiState.aiGenerationHasMessage, uiState.aiGenerationIsLoading, uiState.aiGenerationIsSelection] as const,
+  () =>
+    [
+      uiState.aiGenerationHasMessage,
+      uiState.aiGenerationIsLoading,
+      uiState.aiGenerationIsSelection,
+    ] as const,
   ([hasMessage, isLoading, isSelection]) => {
     const instance = editor.value
     if (instance && !isLoading && isSelection && hasMessage) {

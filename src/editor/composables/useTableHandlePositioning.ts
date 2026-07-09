@@ -36,7 +36,12 @@ function handleReferenceRect(
     case 'col': {
       if (dragging?.draggedCellOrientation === 'col') {
         const pos = dragging.mousePos + (dragging.initialOffset ?? 0)
-        return new DOMRect(clamp(pos, table.x, table.right - cell.width), table.y, cell.width, table.height)
+        return new DOMRect(
+          clamp(pos, table.x, table.right - cell.width),
+          table.y,
+          cell.width,
+          table.height,
+        )
       }
       return new DOMRect(cell.x, table.y, cell.width, table.height)
     }
@@ -71,9 +76,12 @@ export function useTableHandlePosition(
           if (!elements.floating) return
           const cell = cellRect.value
           const table = tableRect.value
-          const width = (orientation === 'col' ? (cell?.width ?? table?.width) : table?.width) ?? rects.reference.width
+          const width =
+            (orientation === 'col' ? (cell?.width ?? table?.width) : table?.width) ??
+            rects.reference.width
           const height =
-            (orientation === 'row' ? (cell?.height ?? table?.height) : table?.height) ?? rects.reference.height
+            (orientation === 'row' ? (cell?.height ?? table?.height) : table?.height) ??
+            rects.reference.height
           elements.floating.style.setProperty('--table-handle-ref-width', `${width}px`)
           elements.floating.style.setProperty('--table-handle-ref-height', `${height}px`)
           elements.floating.style.setProperty(

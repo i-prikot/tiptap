@@ -53,7 +53,10 @@
                       </MenuGroup>
                     </MenuContent>
                   </Menu>
-                  <MenuItem v-if="resetFormatting.canReset.value" @select="resetFormatting.handleResetFormatting">
+                  <MenuItem
+                    v-if="resetFormatting.canReset.value"
+                    @select="resetFormatting.handleResetFormatting"
+                  >
                     <Button variant="ghost" data-active-state="off">
                       <component :is="resetFormatting.Icon" class="tiptap-button-icon" />
                       <span class="tiptap-button-text">Reset formatting</span>
@@ -62,7 +65,10 @@
                 </MenuGroup>
                 <Separator orientation="horizontal" />
                 <MenuGroup>
-                  <MenuItem :disabled="!duplicate.canDuplicate.value" @select="duplicate.handleDuplicate">
+                  <MenuItem
+                    :disabled="!duplicate.canDuplicate.value"
+                    @select="duplicate.handleDuplicate"
+                  >
                     <Button variant="ghost" :disabled="!duplicate.canDuplicate.value">
                       <component :is="duplicate.Icon" class="tiptap-button-icon" />
                       <span class="tiptap-button-text">Duplicate node</span>
@@ -89,7 +95,10 @@
                 </MenuGroup>
                 <Separator orientation="horizontal" />
                 <MenuGroup>
-                  <MenuItem :disabled="!deleteNode.canDeleteNode.value" @select="deleteNode.handleDeleteNode">
+                  <MenuItem
+                    :disabled="!deleteNode.canDeleteNode.value"
+                    @select="deleteNode.handleDeleteNode"
+                  >
                     <Button variant="ghost" :disabled="!deleteNode.canDeleteNode.value">
                       <component :is="deleteNode.Icon" class="tiptap-button-icon" />
                       <span class="tiptap-button-text">Delete</span>
@@ -243,7 +252,7 @@ const viewId = ref<MobileToolbarView>('main')
 const menuOpen = ref(false)
 
 // при выходе из мобильного режима возвращаемся в main
-watch(isMobile, mobile => {
+watch(isMobile, (mobile) => {
   if (!mobile) viewId.value = 'main'
 })
 
@@ -286,15 +295,25 @@ interface TurnIntoItem {
 }
 
 const turnIntoItems = computed<TurnIntoItem[]>(() => {
-  const conversions = [textBlock, heading1, heading2, heading3, bulletList, orderedList, taskList, blockquote, codeBlock]
-  const items = conversions.map(conversion => ({
+  const conversions = [
+    textBlock,
+    heading1,
+    heading2,
+    heading3,
+    bulletList,
+    orderedList,
+    taskList,
+    blockquote,
+    codeBlock,
+  ]
+  const items = conversions.map((conversion) => ({
     icon: conversion.Icon,
     label: conversion.label,
     onClick: conversion.handleToggle,
     disabled: !conversion.canToggle.value,
     isActive: conversion.isActive.value,
   }))
-  return items.every(item => item.disabled) ? [] : items
+  return items.every((item) => item.disabled) ? [] : items
 })
 
 const resetFormatting = useResetAllFormatting(editor, ['inlineThread'])

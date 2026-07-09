@@ -74,7 +74,8 @@ watch(
       canExecute.value = canExecuteAction(instance, props.action)
       isVisible.value =
         !props.hideWhenUnavailable ||
-        (!!instance.isEditable && (!!instance.isActive('code') || canExecuteAction(instance, props.action)))
+        (!!instance.isEditable &&
+          (!!instance.isActive('code') || canExecuteAction(instance, props.action)))
     }
     update()
     instance.on('transaction', update)

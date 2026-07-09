@@ -5,7 +5,10 @@
 import { onBeforeUnmount, ref } from 'vue'
 import type { Ref } from 'vue'
 
-export function useIsBreakpoint(mode: 'min' | 'max' = 'max', width = 768): Ref<boolean | undefined> {
+export function useIsBreakpoint(
+  mode: 'min' | 'max' = 'max',
+  width = 768,
+): Ref<boolean | undefined> {
   const matches = ref<boolean | undefined>(undefined)
 
   const query = mode === 'min' ? `(min-width: ${width}px)` : `(max-width: ${width - 1}px)`

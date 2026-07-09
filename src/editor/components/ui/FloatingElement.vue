@@ -82,14 +82,17 @@ function handleOutsidePointerDown(event: PointerEvent) {
   const instance = editor.value
   const editorDom = instance?.view.dom
   if (editorDom && (editorDom === target || editorDom.parentElement?.contains(target))) return
-  if (target.closest?.('[data-radix-popper-content-wrapper], .tiptap-menu-content, .tiptap-tooltip')) return
+  if (
+    target.closest?.('[data-radix-popper-content-wrapper], .tiptap-menu-content, .tiptap-tooltip')
+  )
+    return
   if (props.resetTextSelectionOnClose) resetTextSelection()
   setOpen(false)
 }
 
 watch(
   () => props.shouldShow,
-  value => {
+  (value) => {
     if (open.value !== value) {
       open.value = value
       emit('update:open', value)
@@ -103,8 +106,8 @@ watch(
 let cleanups: Array<() => void> = []
 watch(
   editor,
-  instance => {
-    cleanups.forEach(fn => fn())
+  (instance) => {
+    cleanups.forEach((fn) => fn())
     cleanups = []
     if (!instance) return
 
@@ -142,7 +145,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  cleanups.forEach(fn => fn())
+  cleanups.forEach((fn) => fn())
   document.removeEventListener('pointerdown', handleOutsidePointerDown, true)
 })
 </script>

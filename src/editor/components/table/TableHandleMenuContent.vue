@@ -4,7 +4,11 @@
     <template v-if="header.visible">
       <MenuGroup>
         <MenuItem :disabled="!header.enabled" @select="header.toggle">
-          <Button variant="ghost" :data-active-state="header.isActive ? 'on' : 'off'" :disabled="!header.enabled">
+          <Button
+            variant="ghost"
+            :data-active-state="header.isActive ? 'on' : 'off'"
+            :disabled="!header.enabled"
+          >
             <component :is="header.icon" class="tiptap-button-icon" />
             <span class="tiptap-button-text">{{ header.label }}</span>
           </Button>
@@ -16,7 +20,12 @@
     <!-- Move -->
     <template v-if="moveItems.length">
       <MenuGroup>
-        <MenuItem v-for="item in moveItems" :key="item.label" :disabled="item.disabled" @select="item.onClick">
+        <MenuItem
+          v-for="item in moveItems"
+          :key="item.label"
+          :disabled="item.disabled"
+          @select="item.onClick"
+        >
           <Button variant="ghost" data-active-state="off" :disabled="item.disabled">
             <component :is="item.icon" class="tiptap-button-icon" />
             <span class="tiptap-button-text">{{ item.label }}</span>
@@ -29,7 +38,12 @@
     <!-- Add -->
     <template v-if="addItems.length">
       <MenuGroup>
-        <MenuItem v-for="item in addItems" :key="item.label" :disabled="item.disabled" @select="item.onClick">
+        <MenuItem
+          v-for="item in addItems"
+          :key="item.label"
+          :disabled="item.disabled"
+          @select="item.onClick"
+        >
           <Button variant="ghost" data-active-state="off" :disabled="item.disabled">
             <component :is="item.icon" class="tiptap-button-icon" />
             <span class="tiptap-button-text">{{ item.label }}</span>
@@ -42,7 +56,12 @@
     <!-- Sort -->
     <template v-if="sortItems.length">
       <MenuGroup>
-        <MenuItem v-for="item in sortItems" :key="item.label" :disabled="item.disabled" @select="item.onClick">
+        <MenuItem
+          v-for="item in sortItems"
+          :key="item.label"
+          :disabled="item.disabled"
+          @select="item.onClick"
+        >
           <Button variant="ghost" data-active-state="off" :disabled="item.disabled">
             <component :is="item.icon" class="tiptap-button-icon" />
             <span class="tiptap-button-text">{{ item.label }}</span>
@@ -166,7 +185,12 @@ const signal = useEditorSelectionSignal(editor)
 
 const args = computed(() => {
   void signal.value
-  return { editor: editor.value, index: props.index, orientation: props.orientation, tablePos: props.tablePos }
+  return {
+    editor: editor.value,
+    index: props.index,
+    orientation: props.orientation,
+    tablePos: props.tablePos,
+  }
 })
 
 // -------- header (виден только для первой строки/столбца)
@@ -193,7 +217,8 @@ const MOVE_ICONS: Record<MoveDirection, FunctionalComponent> = {
 
 const moveItems = computed<MenuActionItem[]>(() => {
   const base = args.value
-  const directions: MoveDirection[] = props.orientation === 'row' ? ['up', 'down'] : ['left', 'right']
+  const directions: MoveDirection[] =
+    props.orientation === 'row' ? ['up', 'down'] : ['left', 'right']
   return directions
     .map((direction): MenuActionItem | null => {
       const can = canMoveRowColumn({ ...base, direction })
@@ -240,7 +265,7 @@ const sortItems = computed<MenuActionItem[]>(() => {
   const canSort = canSortRowColumn(base)
   if (!canSort) return []
   const directions: SortDirection[] = ['asc', 'desc']
-  return directions.map(direction => ({
+  return directions.map((direction) => ({
     icon: direction === 'asc' ? ArrowDownAZIcon : ArrowDownZAIcon,
     label: SORT_LABELS[props.orientation][direction],
     disabled: !canSort,
@@ -252,7 +277,12 @@ const sortItems = computed<MenuActionItem[]>(() => {
 const clear = computed(() => {
   const base = args.value
   const can = canClearRowColumnContent(base)
-  const selectionType = getTableSelectionType(editor.value, props.index, props.orientation, props.tablePos)
+  const selectionType = getTableSelectionType(
+    editor.value,
+    props.index,
+    props.orientation,
+    props.tablePos,
+  )
   return {
     visible: isClearRowColumnVisible(base) && can,
     enabled: can,

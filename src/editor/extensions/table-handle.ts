@@ -94,7 +94,8 @@ class TableHandleView {
     let inCell = false
     for (let depth = $pos.depth; depth >= 0; depth--) {
       const node = $pos.node(depth)
-      if (!inCell && (node.type === nodes.tableCell || node.type === nodes.tableHeader)) inCell = true
+      if (!inCell && (node.type === nodes.tableCell || node.type === nodes.tableHeader))
+        inCell = true
       if (paragraphDepth === -1 && node.type === nodes.paragraph) paragraphDepth = depth
       if (inCell && paragraphDepth !== -1) break
     }
@@ -116,7 +117,8 @@ class TableHandleView {
   mouseMoveHandler = (event: MouseEvent) => {
     if (this.menuFrozen || this.mouseState === 'selecting') return
     const target = event.target
-    if (isHTMLElement(target) && this.editorView.dom.contains(target)) this.handleMouseMoveNow(event)
+    if (isHTMLElement(target) && this.editorView.dom.contains(target))
+      this.handleMouseMoveNow(event)
   }
 
   hideHandles() {
@@ -171,7 +173,8 @@ class TableHandleView {
 
     if (cellInfo.type === 'wrapper') {
       // курсор на рамке таблицы: у нижнего/правого края — extend-кнопки
-      const nearBottom = event.clientY >= tbodyRect.bottom - 1 && event.clientY < tbodyRect.bottom + 20
+      const nearBottom =
+        event.clientY >= tbodyRect.bottom - 1 && event.clientY < tbodyRect.bottom + 20
       const nearRight = event.clientX >= tbodyRect.right - 1 && event.clientX < tbodyRect.right + 20
       const outside = event.clientX > tbodyRect.right || event.clientY > tbodyRect.bottom
       this.state = {
@@ -225,8 +228,10 @@ class TableHandleView {
     event.preventDefault()
     event.dataTransfer!.dropEffect = 'move'
     ;(this.editorView.root as Document | ShadowRoot)
-      .querySelectorAll<HTMLElement>('.prosemirror-dropcursor-block, .prosemirror-dropcursor-inline')
-      .forEach(element => {
+      .querySelectorAll<HTMLElement>(
+        '.prosemirror-dropcursor-block, .prosemirror-dropcursor-inline',
+      )
+      .forEach((element) => {
         element.style.visibility = 'hidden'
       })
     const { left, right, top, bottom } = this.state.referencePosTable
@@ -236,7 +241,7 @@ class TableHandleView {
     }
     const cells = (this.editorView.root as Document | ShadowRoot)
       .elementsFromPoint(point.left, point.top)
-      .filter(element => element.tagName === 'TD' || element.tagName === 'TH')
+      .filter((element) => element.tagName === 'TD' || element.tagName === 'TH')
     if (cells.length === 0) return
     const cell = cells[0]
     if (!isHTMLElement(cell)) return
@@ -274,7 +279,9 @@ class TableHandleView {
       (draggingState.draggedCellOrientation === 'row' && rowIndex === undefined) ||
       (draggingState.draggedCellOrientation === 'col' && colIndex === undefined)
     ) {
-      throw new Error('Attempted to drop table row or column, but no table block was hovered prior.')
+      throw new Error(
+        'Attempted to drop table row or column, but no table block was hovered prior.',
+      )
     }
     const isRow = draggingState.draggedCellOrientation === 'row'
     const targetIndex = (isRow ? rowIndex : colIndex) as number
@@ -289,15 +296,19 @@ class TableHandleView {
     if (!selectedState) return false
     const dispatch = (tr: import('@tiptap/pm/state').Transaction) => this.editor.view.dispatch(tr)
     if (isRow) {
-      moveTableRow({ from: draggingState.originalIndex, to: targetIndex, select: true, pos: blockPos + 1 })(
-        selectedState as EditorState,
-        dispatch,
-      )
+      moveTableRow({
+        from: draggingState.originalIndex,
+        to: targetIndex,
+        select: true,
+        pos: blockPos + 1,
+      })(selectedState as EditorState, dispatch)
     } else {
-      moveTableColumn({ from: draggingState.originalIndex, to: targetIndex, select: true, pos: blockPos + 1 })(
-        selectedState as EditorState,
-        dispatch,
-      )
+      moveTableColumn({
+        from: draggingState.originalIndex,
+        to: targetIndex,
+        select: true,
+        pos: blockPos + 1,
+      })(selectedState as EditorState, dispatch)
     }
     this.state = { ...state, draggingState: undefined }
     this.emitUpdate()
@@ -330,7 +341,10 @@ class TableHandleView {
     if (colIndex !== undefined && colIndex >= width) colIndex = width ? width - 1 : undefined
 
     const tbody = this.tableElement.querySelector('tbody')
-    if (!tbody) throw new Error("Table block does not contain a 'tbody' HTML element. This should never happen.")
+    if (!tbody)
+      throw new Error(
+        "Table block does not contain a 'tbody' HTML element. This should never happen.",
+      )
 
     let cellRect = this.state.referencePosCell
     if (rowIndex !== undefined && colIndex !== undefined) {
@@ -345,7 +359,8 @@ class TableHandleView {
     }
     const tbodyRect = tbody.getBoundingClientRect()
     const indexChanged = rowIndex !== this.state.rowIndex || colIndex !== this.state.colIndex
-    const rectChanged = cellRect !== this.state.referencePosCell || tbodyRect !== this.state.referencePosTable
+    const rectChanged =
+      cellRect !== this.state.referencePosCell || tbodyRect !== this.state.referencePosTable
     if (blockChanged || indexChanged || rectChanged) {
       this.state = {
         ...this.state,
@@ -415,7 +430,7 @@ const CLONED_STYLE_PROPS = [
   'backgroundClip',
 ]
 
-const toKebab = (value: string) => value.replace(/[A-Z]/g, char => '-' + char.toLowerCase())
+const toKebab = (value: string) => value.replace(/[A-Z]/g, (char) => '-' + char.toLowerCase())
 
 /** Глубокий клон DOM-узла с копированием вычисленных стилей. */
 function cloneWithStyles(source: HTMLElement): HTMLElement {
@@ -431,7 +446,8 @@ function cloneWithStyles(source: HTMLElement): HTMLElement {
       }
       dst.style.overflow = 'hidden'
       dst.style.textOverflow = 'ellipsis'
-      if (computed.whiteSpace === '' || computed.whiteSpace === 'normal') dst.style.whiteSpace = 'nowrap'
+      if (computed.whiteSpace === '' || computed.whiteSpace === 'normal')
+        dst.style.whiteSpace = 'nowrap'
     }
     const srcChildren = Array.from(src.children)
     const dstChildren = Array.from(dst.children)
@@ -532,10 +548,14 @@ function createDragImage(
   }
   const width = Math.min(tableDom.getBoundingClientRect().width, editorRect.width)
   container.style.width = `${width}px`
-  const preview = orientation === 'row' ? buildRowPreview(tableDom, index) : buildColumnPreview(tableDom, index)
+  const preview =
+    orientation === 'row' ? buildRowPreview(tableDom, index) : buildColumnPreview(tableDom, index)
   if (preview) {
     const inner = document.createElement('div')
-    Object.assign(inner.style, { background: 'var(--drag-image-bg, transparent)', overflow: 'hidden' })
+    Object.assign(inner.style, {
+      background: 'var(--drag-image-bg, transparent)',
+      overflow: 'hidden',
+    })
     inner.appendChild(preview)
     container.appendChild(inner)
   }
@@ -571,7 +591,8 @@ function startDrag(orientation: DraggedCellOrientation, event: DragEvent) {
   const dragImage = createDragImage(editor, orientation, index, blockPos)
   if (event.dataTransfer) {
     const targetRect = (event.currentTarget as HTMLElement).getBoundingClientRect()
-    const offset = orientation === 'col' ? { x: targetRect.width / 2, y: 0 } : { x: 0, y: targetRect.height / 2 }
+    const offset =
+      orientation === 'col' ? { x: targetRect.width / 2, y: 0 } : { x: 0, y: targetRect.height / 2 }
     event.dataTransfer.effectAllowed = orientation === 'col' ? 'move' : 'copyMove'
     event.dataTransfer.setDragImage(dragImage, offset.x, offset.y)
   }
@@ -584,7 +605,12 @@ function startDrag(orientation: DraggedCellOrientation, event: DragEvent) {
     : 0
   activeHandleView.state = {
     ...state,
-    draggingState: { draggedCellOrientation: orientation, originalIndex: index, mousePos, initialOffset },
+    draggingState: {
+      draggedCellOrientation: orientation,
+      originalIndex: index,
+      mousePos,
+      initialOffset,
+    },
   }
   activeHandleView.emitUpdate()
   editor.view.dispatch(editor.state.tr.setMeta(tableHandlePluginKey, true))
@@ -613,9 +639,9 @@ export function TableHandlePlugin(editor: Editor, emit: (state: TableHandleState
         return meta !== undefined ? meta : value
       },
     },
-    view: view => (activeHandleView = new TableHandleView(editor, view, emit)),
+    view: (view) => (activeHandleView = new TableHandleView(editor, view, emit)),
     props: {
-      decorations: state => {
+      decorations: (state) => {
         if (!activeHandleView) return null
         if (
           activeHandleView.state === undefined ||
@@ -634,10 +660,12 @@ export function TableHandlePlugin(editor: Editor, emit: (state: TableHandleState
         const sourceCells = isRow
           ? getRowCells(editor, originalIndex, blockPos).cells
           : getColumnCells(editor, originalIndex, blockPos).cells
-        sourceCells.forEach(cell => {
+        sourceCells.forEach((cell) => {
           if (cell.node) {
             decorations.push(
-              Decoration.node(cell.pos, cell.pos + cell.node.nodeSize, { class: 'table-cell-dragging-source' }),
+              Decoration.node(cell.pos, cell.pos + cell.node.nodeSize, {
+                class: 'table-cell-dragging-source',
+              }),
             )
           }
         })
@@ -645,7 +673,7 @@ export function TableHandlePlugin(editor: Editor, emit: (state: TableHandleState
           const targetCells = isRow
             ? getRowCells(editor, hoverIndex, blockPos).cells
             : getColumnCells(editor, hoverIndex, blockPos).cells
-          targetCells.forEach(cell => {
+          targetCells.forEach((cell) => {
             const node = cell.node
             if (!node) return
             const widgetPos = cell.pos + (hoverIndex > originalIndex ? node.nodeSize - 2 : 2)
@@ -700,7 +728,7 @@ export const TableHandleExtension = Extension.create({
   addProseMirrorPlugins() {
     const { editor } = this
     return [
-      TableHandlePlugin(editor, state => {
+      TableHandlePlugin(editor, (state) => {
         this.editor.emit('tableHandleState', state)
       }),
     ]

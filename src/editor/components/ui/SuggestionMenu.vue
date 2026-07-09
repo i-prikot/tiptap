@@ -25,7 +25,14 @@
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import type { CSSProperties } from 'vue'
 import { PluginKey } from '@tiptap/pm/state'
-import { flip, offset as offsetMiddleware, shift, size, autoUpdate, useFloating } from '@floating-ui/vue'
+import {
+  flip,
+  offset as offsetMiddleware,
+  shift,
+  size,
+  autoUpdate,
+  useFloating,
+} from '@floating-ui/vue'
 import type { Editor } from '@tiptap/vue-3'
 import { useTiptapEditor } from '../../composables/useTiptapEditor'
 import { useMenuNavigation } from '../../composables/useMenuNavigation'
@@ -81,7 +88,9 @@ const { floatingStyles: rawFloatingStyles } = useFloating(virtualReference, menu
     size({
       apply({ availableHeight, elements }) {
         if (elements.floating) {
-          const height = props.maxHeight ? Math.min(props.maxHeight, availableHeight) : availableHeight
+          const height = props.maxHeight
+            ? Math.min(props.maxHeight, availableHeight)
+            : availableHeight
           elements.floating.style.setProperty('--suggestion-menu-max-height', `${height}px`)
         }
       },
@@ -111,7 +120,7 @@ let registeredKey: PluginKey | null = null
 
 watch(
   editor,
-  instance => {
+  (instance) => {
     if (registeredKey && instance && !instance.isDestroyed) {
       instance.unregisterPlugin(registeredKey)
       registeredKey = null
@@ -124,10 +133,11 @@ watch(
 
     // если mention-расширение обслуживает этот символ — его настройки наследуются
     const mentionServesChar = (candidate: Editor) =>
-      candidate.extensionManager.extensions.some(extension => {
+      candidate.extensionManager.extensions.some((extension) => {
         if (extension.name !== 'mention') return false
         const suggestions = (extension.options as Record<string, any>)?.suggestions
-        if (suggestions?.length) return suggestions.some((s: { char?: string }) => (s.char ?? '@') === triggerChar)
+        if (suggestions?.length)
+          return suggestions.some((s: { char?: string }) => (s.char ?? '@') === triggerChar)
         return ((extension.options as Record<string, any>)?.suggestion?.char ?? '@') === triggerChar
       })
 
@@ -155,7 +165,9 @@ watch(
         if (!mentionServesChar(cmdEditor as Editor)) {
           const pos = selection.$from.pos
           const nodeBefore = selection.$head?.nodeBefore
-          const start = nodeBefore ? calculateStartPosition(pos, nodeBefore, triggerChar) : selection.$from.start()
+          const start = nodeBefore
+            ? calculateStartPosition(pos, nodeBefore, triggerChar)
+            : selection.$from.start()
           view.dispatch(state.tr.deleteRange(start, pos))
         }
         const adjustedRange = { ...range }
@@ -164,11 +176,11 @@ watch(
         item.onSelect({ editor: cmdEditor as Editor, range: adjustedRange, context: item.context })
       },
       render: () => ({
-        onStart: state => {
+        onStart: (state) => {
           applyState(state)
           open.value = true
         },
-        onUpdate: state => {
+        onUpdate: (state) => {
           applyState(state)
         },
         onKeyDown: ({ event }) => {

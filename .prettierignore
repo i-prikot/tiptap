@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+.vite/
+.npm-cache/
+
+.ai-factory/
+.claude/
+.codex/
+.opencode/
+
+.env
+.env.*
+*.local
+
+package-lock.json

@@ -36,7 +36,11 @@ import { AlignCenterVerticalIcon, AlignEndVerticalIcon, AlignStartVerticalIcon }
 
 type ImageAlign = 'left' | 'center' | 'right'
 
-const SHORTCUTS: Record<ImageAlign, string> = { left: 'alt+shift+l', center: 'alt+shift+e', right: 'alt+shift+r' }
+const SHORTCUTS: Record<ImageAlign, string> = {
+  left: 'alt+shift+l',
+  center: 'alt+shift+e',
+  right: 'alt+shift+r',
+}
 const LABELS: Record<ImageAlign, string> = {
   left: 'Image align left',
   center: 'Image align center',
@@ -59,7 +63,12 @@ const props = withDefaults(
     hideWhenUnavailable?: boolean
     showShortcut?: boolean
   }>(),
-  { extensionName: 'image', attributeName: 'data-align', hideWhenUnavailable: false, showShortcut: false },
+  {
+    extensionName: 'image',
+    attributeName: 'data-align',
+    hideWhenUnavailable: false,
+    showShortcut: false,
+  },
 )
 
 const emit = defineEmits<{ aligned: [] }>()
@@ -80,8 +89,11 @@ const canAlign = computed(() => (signal.value, canAlignImage(editor.value)))
 const isActive = computed(() => {
   void signal.value
   const instance = editor.value
-  if (!instance || !instance.isEditable || !isExtensionAvailable(instance, [props.extensionName])) return false
-  return (instance.getAttributes(props.extensionName)[props.attributeName] || 'left') === props.align
+  if (!instance || !instance.isEditable || !isExtensionAvailable(instance, [props.extensionName]))
+    return false
+  return (
+    (instance.getAttributes(props.extensionName)[props.attributeName] || 'left') === props.align
+  )
 })
 const isVisible = computed(() => {
   void signal.value
@@ -92,7 +104,9 @@ const isVisible = computed(() => {
 })
 
 const label = LABELS[props.align]
-const shortcutText = computed(() => parseShortcutKeys({ shortcutKeys: SHORTCUTS[props.align] }).join(''))
+const shortcutText = computed(() =>
+  parseShortcutKeys({ shortcutKeys: SHORTCUTS[props.align] }).join(''),
+)
 
 function handleClick() {
   const instance = editor.value

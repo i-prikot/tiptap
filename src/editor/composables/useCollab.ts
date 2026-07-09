@@ -59,7 +59,7 @@ export function provideCollab(room: string): CollabContext {
   const ydoc = new Y.Doc()
 
   if (hasCollab.value) {
-    fetchCollabToken().then(token => {
+    fetchCollabToken().then((token) => {
       if (!token) {
         setupError.value = true
         return

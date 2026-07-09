@@ -94,7 +94,7 @@
       :multiple="limit > 1"
       @change="handleFileInputChange"
       @click.stop
-    >
+    />
   </NodeViewWrapper>
 </template>
 
@@ -185,7 +185,9 @@ function formatFileSize(bytes: number) {
 async function uploadSingleFile(file: File): Promise<string | null> {
   const options = uploadOptions.value
   if (file.size > options.maxSize) {
-    options.onError?.(new Error(`File size exceeds maximum allowed (${options.maxSize / 1024 / 1024}MB)`))
+    options.onError?.(
+      new Error(`File size exceeds maximum allowed (${options.maxSize / 1024 / 1024}MB)`),
+    )
     return null
   }
 
@@ -198,8 +200,8 @@ async function uploadSingleFile(file: File): Promise<string | null> {
     if (!options.upload) throw new Error('Upload function is not defined')
     const url = await options.upload(
       file,
-      event => {
-        fileItems.value = fileItems.value.map(entry =>
+      (event) => {
+        fileItems.value = fileItems.value.map((entry) =>
           entry.id === id ? { ...entry, progress: event.progress } : entry,
         )
       },
@@ -208,14 +210,14 @@ async function uploadSingleFile(file: File): Promise<string | null> {
     if (!url) throw new Error('Upload failed: No URL returned')
     if (abortController.signal.aborted) return null
 
-    fileItems.value = fileItems.value.map(entry =>
+    fileItems.value = fileItems.value.map((entry) =>
       entry.id === id ? { ...entry, status: 'success' as const, url, progress: 100 } : entry,
     )
     options.onSuccess?.(url)
     return url
   } catch (error) {
     if (!abortController.signal.aborted) {
-      fileItems.value = fileItems.value.map(entry =>
+      fileItems.value = fileItems.value.map((entry) =>
         entry.id === id ? { ...entry, status: 'error' as const, progress: 0 } : entry,
       )
       options.onError?.(error instanceof Error ? error : new Error('Upload failed'))
@@ -231,22 +233,24 @@ async function uploadFiles(files: File[]): Promise<string[]> {
     return []
   }
   if (options.limit && files.length > options.limit) {
-    options.onError?.(new Error(`Maximum ${options.limit} file${options.limit === 1 ? '' : 's'} allowed`))
+    options.onError?.(
+      new Error(`Maximum ${options.limit} file${options.limit === 1 ? '' : 's'} allowed`),
+    )
     return []
   }
-  const results = await Promise.all(files.map(file => uploadSingleFile(file)))
+  const results = await Promise.all(files.map((file) => uploadSingleFile(file)))
   return results.filter((url): url is string => url !== null)
 }
 
 function removeFileItem(id: string) {
-  const item = fileItems.value.find(entry => entry.id === id)
+  const item = fileItems.value.find((entry) => entry.id === id)
   if (item?.abortController) item.abortController.abort()
   if (item?.url) URL.revokeObjectURL(item.url)
-  fileItems.value = fileItems.value.filter(entry => entry.id !== id)
+  fileItems.value = fileItems.value.filter((entry) => entry.id !== id)
 }
 
 function clearAllFiles() {
-  fileItems.value.forEach(item => {
+  fileItems.value.forEach((item) => {
     if (item.abortController) item.abortController.abort()
     if (item.url) URL.revokeObjectURL(item.url)
   })

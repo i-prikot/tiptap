@@ -71,7 +71,13 @@ export function useLinkPopover(options: UseLinkPopoverOptions) {
   const removeLink = () => {
     const instance = editor.value
     if (!instance) return
-    instance.chain().focus().extendMarkRange('link').unsetLink().setMeta('preventAutolink', true).run()
+    instance
+      .chain()
+      .focus()
+      .extendMarkRange('link')
+      .unsetLink()
+      .setMeta('preventAutolink', true)
+      .run()
     url.value = ''
   }
 

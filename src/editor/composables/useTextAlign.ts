@@ -47,7 +47,11 @@ export function isTextAlignActive(editor: Editor | null, align: TextAlign): bool
   return !!editor && !!editor.isEditable && editor.isActive({ textAlign: align })
 }
 
-export function useTextAlign(editor: ComputedRef<Editor | null>, align: TextAlign, hideWhenUnavailable = false) {
+export function useTextAlign(
+  editor: ComputedRef<Editor | null>,
+  align: TextAlign,
+  hideWhenUnavailable = false,
+) {
   const signal = useEditorSelectionSignal(editor)
 
   const canAlign = computed(() => (signal.value, canSetTextAlign(editor.value, align)))

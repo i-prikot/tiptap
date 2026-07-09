@@ -5,7 +5,13 @@
  */
 import { inject, provide } from 'vue'
 import type { InjectionKey } from 'vue'
-import { getAvatar, getStoredOrCreate, randomUserColor, randomUserId, randomUserName } from '../utils/user-utils'
+import {
+  getAvatar,
+  getStoredOrCreate,
+  randomUserColor,
+  randomUserId,
+  randomUserName,
+} from '../utils/user-utils'
 
 export interface CollabUser {
   color: string

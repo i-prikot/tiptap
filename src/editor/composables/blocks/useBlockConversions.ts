@@ -90,21 +90,35 @@ export function canToggleText(editor: Editor | null, turnInto = true): boolean {
 export function useTextBlock(editor: ComputedRef<Editor | null>): BlockConversionApi {
   const signal = useEditorSelectionSignal(editor)
   const canToggle = computed(() => (signal.value, canToggleText(editor.value)))
-  const isActive = computed(() => (signal.value, !!editor.value && editor.value.isActive('paragraph')))
+  const isActive = computed(
+    () => (signal.value, !!editor.value && editor.value.isActive('paragraph')),
+  )
 
   const handleToggle = () => {
     const instance = editor.value
     if (!instance || !instance.isEditable || !canToggleText(instance)) return false
-    return convertSelectedBlock(instance, chain =>
+    return convertSelectedBlock(instance, (chain) =>
       instance.isActive('paragraph') ? chain : chain.setNode('paragraph'),
     )
   }
 
-  return { isActive, canToggle, handleToggle, label: 'Text', shortcutKeys: TEXT_SHORTCUT_KEY, Icon: TypeIcon }
+  return {
+    isActive,
+    canToggle,
+    handleToggle,
+    label: 'Text',
+    shortcutKeys: TEXT_SHORTCUT_KEY,
+    Icon: TypeIcon,
+  }
 }
 
 export function canToggleHeading(editor: Editor | null, level?: number, turnInto = true): boolean {
-  if (!editor || !editor.isEditable || !isNodeInSchema('heading', editor) || isNodeTypeSelected(editor, ['image'])) {
+  if (
+    !editor ||
+    !editor.isEditable ||
+    !isNodeInSchema('heading', editor) ||
+    isNodeTypeSelected(editor, ['image'])
+  ) {
     return false
   }
   if (!turnInto) {
@@ -118,18 +132,26 @@ export function canToggleHeading(editor: Editor | null, level?: number, turnInto
   )
 }
 
-export function useHeadingBlock(editor: ComputedRef<Editor | null>, level: number): BlockConversionApi {
+export function useHeadingBlock(
+  editor: ComputedRef<Editor | null>,
+  level: number,
+): BlockConversionApi {
   const signal = useEditorSelectionSignal(editor)
   const canToggle = computed(() => (signal.value, canToggleHeading(editor.value, level)))
   const isActive = computed(
-    () => (signal.value, !!editor.value && editor.value.isEditable && editor.value.isActive('heading', { level })),
+    () => (
+      signal.value,
+      !!editor.value && editor.value.isEditable && editor.value.isActive('heading', { level })
+    ),
   )
 
   const handleToggle = () => {
     const instance = editor.value
     if (!instance || !instance.isEditable || !canToggleHeading(instance, level)) return false
-    return convertSelectedBlock(instance, chain =>
-      instance.isActive('heading', { level }) ? chain.setNode('paragraph') : chain.setNode('heading', { level }),
+    return convertSelectedBlock(instance, (chain) =>
+      instance.isActive('heading', { level })
+        ? chain.setNode('paragraph')
+        : chain.setNode('heading', { level }),
     )
   }
 
@@ -144,7 +166,12 @@ export function useHeadingBlock(editor: ComputedRef<Editor | null>, level: numbe
 }
 
 export function canToggleList(editor: Editor | null, type: ListType): boolean {
-  if (!editor || !editor.isEditable || !isNodeInSchema(type, editor) || isNodeTypeSelected(editor, ['image'])) {
+  if (
+    !editor ||
+    !editor.isEditable ||
+    !isNodeInSchema(type, editor) ||
+    isNodeTypeSelected(editor, ['image'])
+  ) {
     return false
   }
   if (!selectionWithinConvertibleTypes(editor, CONVERTIBLE_TYPES)) return false
@@ -160,7 +187,10 @@ export function canToggleList(editor: Editor | null, type: ListType): boolean {
   }
 }
 
-export function useListBlock(editor: ComputedRef<Editor | null>, type: ListType): BlockConversionApi {
+export function useListBlock(
+  editor: ComputedRef<Editor | null>,
+  type: ListType,
+): BlockConversionApi {
   const signal = useEditorSelectionSignal(editor)
   const canToggle = computed(() => (signal.value, canToggleList(editor.value, type)))
   const isActive = computed(
@@ -170,9 +200,13 @@ export function useListBlock(editor: ComputedRef<Editor | null>, type: ListType)
   const handleToggle = () => {
     const instance = editor.value
     if (!instance || !instance.isEditable || !canToggleList(instance, type)) return false
-    return convertSelectedBlock(instance, chain => {
+    return convertSelectedBlock(instance, (chain) => {
       if (instance.isActive(type)) {
-        return chain.liftListItem('listItem').lift('bulletList').lift('orderedList').lift('taskList')
+        return chain
+          .liftListItem('listItem')
+          .lift('bulletList')
+          .lift('orderedList')
+          .lift('taskList')
       }
       switch (type) {
         case 'bulletList':
@@ -196,7 +230,12 @@ export function useListBlock(editor: ComputedRef<Editor | null>, type: ListType)
 }
 
 export function canToggleBlockquote(editor: Editor | null, turnInto = true): boolean {
-  if (!editor || !editor.isEditable || !isNodeInSchema('blockquote', editor) || isNodeTypeSelected(editor, ['image'])) {
+  if (
+    !editor ||
+    !editor.isEditable ||
+    !isNodeInSchema('blockquote', editor) ||
+    isNodeTypeSelected(editor, ['image'])
+  ) {
     return false
   }
   if (!turnInto) return editor.can().toggleWrap('blockquote')
@@ -214,7 +253,7 @@ export function useBlockquoteBlock(editor: ComputedRef<Editor | null>): BlockCon
   const handleToggle = () => {
     const instance = editor.value
     if (!instance || !instance.isEditable || !canToggleBlockquote(instance)) return false
-    return convertSelectedBlock(instance, chain =>
+    return convertSelectedBlock(instance, (chain) =>
       instance.isActive('blockquote') ? chain.lift('blockquote') : chain.wrapIn('blockquote'),
     )
   }
@@ -230,7 +269,12 @@ export function useBlockquoteBlock(editor: ComputedRef<Editor | null>): BlockCon
 }
 
 export function canToggleCodeBlock(editor: Editor | null, turnInto = true): boolean {
-  if (!editor || !editor.isEditable || !isNodeInSchema('codeBlock', editor) || isNodeTypeSelected(editor, ['image'])) {
+  if (
+    !editor ||
+    !editor.isEditable ||
+    !isNodeInSchema('codeBlock', editor) ||
+    isNodeTypeSelected(editor, ['image'])
+  ) {
     return false
   }
   if (!turnInto) return editor.can().toggleNode('codeBlock', 'paragraph')
@@ -248,7 +292,7 @@ export function useCodeBlockBlock(editor: ComputedRef<Editor | null>): BlockConv
   const handleToggle = () => {
     const instance = editor.value
     if (!instance || !instance.isEditable || !canToggleCodeBlock(instance)) return false
-    return convertSelectedBlock(instance, chain => chain.toggleNode('codeBlock', 'paragraph'))
+    return convertSelectedBlock(instance, (chain) => chain.toggleNode('codeBlock', 'paragraph'))
   }
 
   return {

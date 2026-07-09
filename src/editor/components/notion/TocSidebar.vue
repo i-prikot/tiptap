@@ -71,10 +71,16 @@ const visibleWithDepth = computed(() => {
 })
 const hasItems = computed(() => items.value.length > 0)
 
-const lastActiveItem = computed(() => [...items.value].reverse().find(item => item.isActive) ?? null)
-const firstActiveId = computed(() => items.value.find(item => item.isActive)?.id ?? null)
+const lastActiveItem = computed(
+  () => [...items.value].reverse().find((item) => item.isActive) ?? null,
+)
+const firstActiveId = computed(() => items.value.find((item) => item.isActive)?.id ?? null)
 const activeId = computed(
-  () => manualActiveId.value || (lastActiveItem.value?.id ? lastActiveItem.value.id : firstActiveId.value || items.value[0]?.id),
+  () =>
+    manualActiveId.value ||
+    (lastActiveItem.value?.id
+      ? lastActiveItem.value.id
+      : firstActiveId.value || items.value[0]?.id),
 )
 
 function handleItemClick(event: MouseEvent, item: TocItem) {
@@ -88,11 +94,11 @@ function handleItemClick(event: MouseEvent, item: TocItem) {
 // первичная подсветка по hash из URL
 watch(
   items,
-  list => {
+  (list) => {
     if (initializedFromHash.value || !list.length) return
     const hash = window.location.hash.replace(/^#/, '')
     if (!hash) return
-    const match = list.find(item => item.id === hash)
+    const match = list.find((item) => item.id === hash)
     if (match) {
       manualActiveId.value = match.id
       initializedFromHash.value = true

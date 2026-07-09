@@ -15,7 +15,10 @@
       >
         <CardBody class="tiptap-slash-card-body">
           <template v-if="showGroups">
-            <template v-for="(group, groupIndex) in groupItems(items)" :key="`group-${groupIndex}-${group.label}`">
+            <template
+              v-for="(group, groupIndex) in groupItems(items)"
+              :key="`group-${groupIndex}-${group.label}`"
+            >
               <Separator v-if="groupIndex > 0" orientation="horizontal" />
               <CardItemGroup v-if="group.label">
                 <CardGroupLabel>{{ group.label }}</CardGroupLabel>

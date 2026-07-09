@@ -26,7 +26,9 @@ const slots = useSlots()
 const allChildren = computed<VNode[]>(() => {
   const children = slots.default?.() ?? []
   // разворачиваем фрагменты от v-for
-  return children.flatMap(child => (Array.isArray(child.children) ? (child.children as VNode[]) : [child]))
+  return children.flatMap((child) =>
+    Array.isArray(child.children) ? (child.children as VNode[]) : [child],
+  )
 })
 
 const visibleChildren = computed(() =>

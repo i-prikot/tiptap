@@ -4,7 +4,11 @@
       <button
         v-if="editor?.isEditable"
         type="button"
-        :class="['tiptap-table-extend-row-column-button', 'tiptap-table-row-end-add-remove', rowEditing && 'editing']"
+        :class="[
+          'tiptap-table-extend-row-column-button',
+          'tiptap-table-row-end-add-remove',
+          rowEditing && 'editing',
+        ]"
         aria-label="Add or remove rows"
         @click="onClick('row')"
         @mousedown="onMouseDown('row', $event)"
@@ -16,7 +20,11 @@
       <button
         v-if="editor?.isEditable"
         type="button"
-        :class="['tiptap-table-extend-row-column-button', 'tiptap-table-column-end-add-remove', colEditing && 'editing']"
+        :class="[
+          'tiptap-table-extend-row-column-button',
+          'tiptap-table-column-end-add-remove',
+          colEditing && 'editing',
+        ]"
         aria-label="Add or remove columns"
         @click="onClick('column')"
         @mousedown="onMouseDown('column', $event)"
@@ -117,7 +125,10 @@ function onMouseDown(orientation: 'row' | 'column', event: MouseEvent) {
     const cellSize = isRow ? EMPTY_CELL_HEIGHT : EMPTY_CELL_WIDTH
     const currentMap = TableMap.get(state.value?.block ?? current.block)
     const currentCount = isRow ? currentMap.height : currentMap.width
-    const targetCount = Math.max(1, (isRow ? drag.originalHeight : drag.originalWidth) + marginRound(delta / cellSize, 0.3))
+    const targetCount = Math.max(
+      1,
+      (isRow ? drag.originalHeight : drag.originalWidth) + marginRound(delta / cellSize, 0.3),
+    )
     const diff = targetCount - currentCount
     if (diff === 0) return
     const block = state.value?.block ?? current.block
@@ -134,7 +145,9 @@ function onMouseDown(orientation: 'row' | 'column', event: MouseEvent) {
       runPreservingCursor(instance, () => {
         const removable = Math.min(
           Math.abs(diff),
-          isRow ? countEmptyRowsFromEnd(instance, blockPos) : countEmptyColumnsFromEnd(instance, blockPos),
+          isRow
+            ? countEmptyRowsFromEnd(instance, blockPos)
+            : countEmptyColumnsFromEnd(instance, blockPos),
           currentCount - 1,
         )
         selectLastCell(instance, block, blockPos, orientation)

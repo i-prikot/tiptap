@@ -37,20 +37,29 @@ const props = defineProps(nodeViewProps)
 
 const { tocContent, navigateToHeading, normalizeHeadingDepths } = useToc()
 
-const options = computed(() => props.extension.options as {
-  topOffset: number
-  maxShowCount: number
-  showTitle: boolean
-})
+const options = computed(
+  () =>
+    props.extension.options as {
+      topOffset: number
+      maxShowCount: number
+      showTitle: boolean
+    },
+)
 
 const backgroundColor = computed(() => (props.node.attrs.backgroundColor as string | null) ?? null)
-const topOffset = computed(() => (props.node.attrs.topOffset as number | null) ?? options.value.topOffset ?? 0)
+const topOffset = computed(
+  () => (props.node.attrs.topOffset as number | null) ?? options.value.topOffset ?? 0,
+)
 const maxShowCount = computed(
   () => (props.node.attrs.maxShowCount as number | null) ?? options.value.maxShowCount ?? 20,
 )
-const showTitle = computed(() => (props.node.attrs.showTitle as boolean | null) ?? options.value.showTitle ?? true)
+const showTitle = computed(
+  () => (props.node.attrs.showTitle as boolean | null) ?? options.value.showTitle ?? true,
+)
 
-const visibleItems = computed<TocItem[]>(() => (tocContent.value ?? []).slice(0, maxShowCount.value))
+const visibleItems = computed<TocItem[]>(() =>
+  (tocContent.value ?? []).slice(0, maxShowCount.value),
+)
 const itemsWithDepth = computed(() => {
   const depths = normalizeHeadingDepths(visibleItems.value)
   return visibleItems.value.map((item, index) => ({ item, depth: depths[index] ?? 1 }))

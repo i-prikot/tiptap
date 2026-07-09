@@ -14,7 +14,13 @@ import type { AnyExtension } from '@tiptap/core'
 import { Table, TableCell, TableHeader, TableRow } from '@tiptap/extension-table'
 import { TextSelection } from '@tiptap/pm/state'
 import { findParentNodeClosestToPos } from '@tiptap/core'
-import { CellSelection, TableView, cellAround, columnResizing, tableEditing } from '@tiptap/pm/tables'
+import {
+  CellSelection,
+  TableView,
+  cellAround,
+  columnResizing,
+  tableEditing,
+} from '@tiptap/pm/tables'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import { EMPTY_CELL_WIDTH, RESIZE_MIN_WIDTH } from '../utils/table-utils'
 
@@ -23,8 +29,11 @@ const deleteTableWhenAllCellsSelected = ({ editor }: { editor: import('@tiptap/c
   const { selection } = editor.state
   if (!(selection instanceof CellSelection)) return false
   let cellCount = 0
-  const table = findParentNodeClosestToPos(selection.ranges[0].$from, node => node.type.name === 'table')
-  table?.node.descendants(node => {
+  const table = findParentNodeClosestToPos(
+    selection.ranges[0].$from,
+    (node) => node.type.name === 'table',
+  )
+  table?.node.descendants((node) => {
     if (node.type.name === 'table') return false
     if (['tableCell', 'tableHeader'].includes(node.type.name)) cellCount += 1
   })
@@ -181,8 +190,10 @@ export const TableKit = Extension.create<TableKitOptions>({
   addExtensions() {
     const extensions: AnyExtension[] = []
     if (this.options.table !== false) extensions.push(NotionTable.configure(this.options.table))
-    if (this.options.tableCell !== false) extensions.push(NotionTableCell.configure(this.options.tableCell))
-    if (this.options.tableHeader !== false) extensions.push(TableHeader.configure(this.options.tableHeader))
+    if (this.options.tableCell !== false)
+      extensions.push(NotionTableCell.configure(this.options.tableCell))
+    if (this.options.tableHeader !== false)
+      extensions.push(TableHeader.configure(this.options.tableHeader))
     if (this.options.tableRow !== false) extensions.push(TableRow.configure(this.options.tableRow))
     return extensions
   },

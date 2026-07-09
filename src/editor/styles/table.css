@@ -4,7 +4,7 @@
   --tt-table-selected-bg: #c3bdff66;
   --tt-table-selected-stroke: var(--tt-brand-color-400);
   --tt-table-column-resize-handle-bg: var(--tt-brand-color-400);
-  --tt-table-cell-padding: .5rem;
+  --tt-table-cell-padding: 0.5rem;
   --tt-table-margin-block: 1.25rem;
   --tt-table-pad-block-start: 1rem;
   --tt-table-pad-block-end: 1.5rem;
@@ -23,11 +23,11 @@
   overflow-x: auto;
 }
 
-.tiptap [data-content-type="table"] {
+.tiptap [data-content-type='table'] {
   margin-block: var(--tt-table-margin-block);
 }
 
-.tiptap [data-content-type="table"] .tableWrapper {
+.tiptap [data-content-type='table'] .tableWrapper {
   width: 100%;
   margin-left: -1rem;
   padding-block-start: var(--tt-table-pad-block-start);
@@ -38,7 +38,7 @@
   overflow-y: hidden;
 }
 
-.tiptap [data-content-type="table"] .table-container {
+.tiptap [data-content-type='table'] .table-container {
   position: relative;
   width: max-content;
 }
@@ -88,7 +88,7 @@
 
 .ProseMirror .selectedCell::after {
   z-index: 2;
-  content: "";
+  content: '';
   pointer-events: none;
   background: var(--tt-table-selected-bg);
   position: absolute;
@@ -104,7 +104,7 @@
   width: 2px;
   height: calc(100% + 2px);
   margin-top: -1px;
-  transition: background .15s 50ms;
+  transition: background 0.15s 50ms;
   position: absolute;
   top: 0;
   right: 0;
@@ -134,33 +134,33 @@
   background-color: var(--cell-background-color);
 }
 
-.tiptap td[data-text-align="left"],
-.tiptap th[data-text-align="left"] {
+.tiptap td[data-text-align='left'],
+.tiptap th[data-text-align='left'] {
   text-align: left;
 }
 
-.tiptap td[data-text-align="center"],
-.tiptap th[data-text-align="center"] {
+.tiptap td[data-text-align='center'],
+.tiptap th[data-text-align='center'] {
   text-align: center;
 }
 
-.tiptap td[data-text-align="right"],
-.tiptap th[data-text-align="right"] {
+.tiptap td[data-text-align='right'],
+.tiptap th[data-text-align='right'] {
   text-align: right;
 }
 
-.tiptap td[data-vertical-align="top"],
-.tiptap th[data-vertical-align="top"] {
+.tiptap td[data-vertical-align='top'],
+.tiptap th[data-vertical-align='top'] {
   vertical-align: top;
 }
 
-.tiptap td[data-vertical-align="middle"],
-.tiptap th[data-vertical-align="middle"] {
+.tiptap td[data-vertical-align='middle'],
+.tiptap th[data-vertical-align='middle'] {
   vertical-align: middle;
 }
 
-.tiptap td[data-vertical-align="bottom"],
-.tiptap th[data-vertical-align="bottom"] {
+.tiptap td[data-vertical-align='bottom'],
+.tiptap th[data-vertical-align='bottom'] {
   vertical-align: bottom;
 }
 

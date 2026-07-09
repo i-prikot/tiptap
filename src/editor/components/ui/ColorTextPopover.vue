@@ -13,9 +13,14 @@
       >
         <span
           class="tiptap-button-color-text-popover"
-          :style="activeHighlight.color ? { '--active-highlight-color': activeHighlight.color } : {}"
+          :style="
+            activeHighlight.color ? { '--active-highlight-color': activeHighlight.color } : {}
+          "
         >
-          <TextColorSmallIcon class="tiptap-button-icon" :style="{ color: activeTextStyle.color || undefined }" />
+          <TextColorSmallIcon
+            class="tiptap-button-icon"
+            :style="{ color: activeTextStyle.color || undefined }"
+          />
         </span>
         <ChevronDownIcon class="tiptap-button-dropdown-small" />
       </Button>
@@ -67,7 +72,10 @@ const isVisible = computed(() => {
   const instance = editor.value
   if (!instance) return false
   if (!props.hideWhenUnavailable) return true
-  return !!instance.isEditable && (!!instance.isActive('code') || canColorText(instance) || canColorHighlight(instance))
+  return (
+    !!instance.isEditable &&
+    (!!instance.isActive('code') || canColorText(instance) || canColorHighlight(instance))
+  )
 })
 
 const activeTextStyle = computed<Record<string, any>>(

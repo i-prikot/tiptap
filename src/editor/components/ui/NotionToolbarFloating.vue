@@ -25,7 +25,13 @@
         <ToolbarGroup>
           <Popover>
             <template #trigger>
-              <Button type="button" variant="ghost" role="button" :tabindex="-1" tooltip="More options">
+              <Button
+                type="button"
+                variant="ghost"
+                role="button"
+                :tabindex="-1"
+                tooltip="More options"
+              >
                 <MoreVerticalIcon class="tiptap-button-icon" />
               </Button>
             </template>
@@ -115,7 +121,7 @@ watch(
 let unbindSuppressReset: (() => void) | null = null
 watch(
   editor,
-  instance => {
+  (instance) => {
     unbindSuppressReset?.()
     unbindSuppressReset = null
     if (!instance) return
@@ -136,7 +142,8 @@ watch(
 onBeforeUnmount(() => unbindSuppressReset?.())
 
 const hidden = computed(
-  () => uiState.lockDragHandle || uiState.isDragging || suppressedAfterDrag.value || !!isMobile.value,
+  () =>
+    uiState.lockDragHandle || uiState.isDragging || suppressedAfterDrag.value || !!isMobile.value,
 )
 
 // «More options»: есть куда выравнивать или супер/подскрипт (es из оригинала)
@@ -146,8 +153,10 @@ const moreOptionsVisible = computed(() => {
   if (!instance) return false
   if (!instance.isActive('code')) {
     const aligns: TextAlign[] = ['left', 'center', 'right', 'justify']
-    const canAlign = aligns.some(align => canSetTextAlign(instance, align))
-    const canScript = (['superscript', 'subscript'] as const).some(type => canToggleMark(instance, type))
+    const canAlign = aligns.some((align) => canSetTextAlign(instance, align))
+    const canScript = (['superscript', 'subscript'] as const).some((type) =>
+      canToggleMark(instance, type),
+    )
     return canScript || canAlign
   }
   return !!instance.isEditable

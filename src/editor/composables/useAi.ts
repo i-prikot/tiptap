@@ -19,7 +19,10 @@ const STATIC_AI_TOKEN = import.meta.env.VITE_TIPTAP_AI_TOKEN || ''
 export async function fetchAiToken(): Promise<string | null> {
   if (STATIC_AI_TOKEN) return STATIC_AI_TOKEN
   try {
-    const response = await fetch(AI_TOKEN_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+    const response = await fetch(AI_TOKEN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    })
     if (!response.ok) throw new Error(`Failed to fetch token: ${response.status}`)
     return (await response.json()).token
   } catch (error) {
@@ -43,7 +46,7 @@ export function provideAi(): AiContext {
   const setupError = shallowRef(false)
 
   if (aiConfigured) {
-    fetchAiToken().then(token => {
+    fetchAiToken().then((token) => {
       aiToken.value = token
       if (!token) setupError.value = true
     })

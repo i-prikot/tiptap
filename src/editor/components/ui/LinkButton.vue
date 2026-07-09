@@ -1,5 +1,12 @@
 <template>
-  <Button type="button" variant="ghost" role="button" :tabindex="-1" aria-label="Link" tooltip="Link">
+  <Button
+    type="button"
+    variant="ghost"
+    role="button"
+    :tabindex="-1"
+    aria-label="Link"
+    tooltip="Link"
+  >
     <slot>
       <LinkIcon class="tiptap-button-icon" />
     </slot>

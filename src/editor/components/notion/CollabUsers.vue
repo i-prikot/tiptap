@@ -58,12 +58,13 @@ const users = ref<CaretUser[]>([])
 
 function readUsers() {
   const instance = editor.value
-  const caretStorage = instance?.storage.collaborationCaret as { users?: Array<Record<string, unknown>> } | undefined
+  const caretStorage = instance?.storage.collaborationCaret as
+    { users?: Array<Record<string, unknown>> } | undefined
   if (!instance || !caretStorage) {
     users.value = []
     return
   }
-  users.value = (caretStorage.users ?? []).map(user => ({
+  users.value = (caretStorage.users ?? []).map((user) => ({
     clientId: user.clientId as number,
     id: String(user.clientId),
     name: (user.name as string) || 'Anonymous',
@@ -74,7 +75,7 @@ function readUsers() {
 let unsubscribe: (() => void) | null = null
 watch(
   editor,
-  instance => {
+  (instance) => {
     unsubscribe?.()
     unsubscribe = null
     readUsers()

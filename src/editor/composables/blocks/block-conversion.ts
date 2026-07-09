@@ -30,7 +30,10 @@ export const CONVERTIBLE_TYPES = [
  * NodeSelection → текстовое выделение содержимого + clearNodes), затем
  * вызывает apply с подготовленной цепочкой.
  */
-export function convertSelectedBlock(editor: Editor, apply: (chain: ChainedCommands) => ChainedCommands): boolean {
+export function convertSelectedBlock(
+  editor: Editor,
+  apply: (chain: ChainedCommands) => ChainedCommands,
+): boolean {
   try {
     const view = editor.view
     let state = view.state
@@ -40,7 +43,10 @@ export function convertSelectedBlock(editor: Editor, apply: (chain: ChainedComma
     const isSingleConvertibleBlock =
       selectionWithinConvertibleTypes(editor, CONVERTIBLE_TYPES) && selectedBlocks.length === 1
 
-    if ((state.selection.empty || state.selection instanceof TextSelection) && isSingleConvertibleBlock) {
+    if (
+      (state.selection.empty || state.selection instanceof TextSelection) &&
+      isSingleConvertibleBlock
+    ) {
       const pos = findNodePosition({ editor, node: state.selection.$anchor.node(1) })?.pos
       if (!isValidPosition(pos)) return false
       tr = tr.setSelection(NodeSelection.create(state.doc, pos))

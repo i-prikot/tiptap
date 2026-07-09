@@ -4,7 +4,10 @@
       <CardItemGroup v-if="isInitialized && recentColors.length">
         <CardGroupLabel>Recently used</CardGroupLabel>
         <ButtonGroup orientation="horizontal">
-          <template v-for="(recent, index) in recentColors" :key="`recent-${recent.type}-${recent.value}`">
+          <template
+            v-for="(recent, index) in recentColors"
+            :key="`recent-${recent.type}-${recent.value}`"
+          >
             <ColorTextButton
               v-if="recent.type === 'text'"
               :text-color="recent.value"
@@ -29,7 +32,11 @@
 
       <CardItemGroup>
         <CardGroupLabel>Text color</CardGroupLabel>
-        <ButtonGroup v-for="(row, rowIndex) in textColorRows" :key="`text-row-${rowIndex}`" orientation="horizontal">
+        <ButtonGroup
+          v-for="(row, rowIndex) in textColorRows"
+          :key="`text-row-${rowIndex}`"
+          orientation="horizontal"
+        >
           <ColorTextButton
             v-for="(color, colIndex) in row"
             :key="color.value"
@@ -90,10 +97,13 @@ import type { RecentColor } from '../../composables/useRecentColors'
 import { useMenuNavigation } from '../../composables/useMenuNavigation'
 import { chunkArray } from '../../utils/tiptap-utils'
 
-const props = withDefaults(defineProps<{ maxColorsPerGroup?: number; maxRecentColors?: number }>(), {
-  maxColorsPerGroup: 5,
-  maxRecentColors: 3,
-})
+const props = withDefaults(
+  defineProps<{ maxColorsPerGroup?: number; maxRecentColors?: number }>(),
+  {
+    maxColorsPerGroup: 5,
+    maxRecentColors: 3,
+  },
+)
 
 const emit = defineEmits<{ colorChanged: [payload: RecentColor] }>()
 
@@ -129,8 +139,10 @@ const navItems = computed<NavItem[]>(() => {
       items.push({ type: recent.type, value: recent.value, label: recentLabel(recent) })
     }
   }
-  for (const color of TEXT_COLORS) items.push({ type: 'text', value: color.value, label: color.label })
-  for (const color of HIGHLIGHT_COLORS) items.push({ type: 'highlight', value: color.value, label: color.label })
+  for (const color of TEXT_COLORS)
+    items.push({ type: 'text', value: color.value, label: color.label })
+  for (const color of HIGHLIGHT_COLORS)
+    items.push({ type: 'highlight', value: color.value, label: color.label })
   return items
 })
 

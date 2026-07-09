@@ -17,7 +17,11 @@
         <component :is="highlight.Icon" class="tiptap-button-icon" />
       </Button>
     </template>
-    <ColorHighlightPopoverContent :colors="colors" :use-color-value="useColorValue" @applied="onApplied" />
+    <ColorHighlightPopoverContent
+      :colors="colors"
+      :use-color-value="useColorValue"
+      @applied="onApplied"
+    />
   </Popover>
 </template>
 
@@ -45,13 +49,15 @@ const props = withDefaults(
   { hideWhenUnavailable: false, useColorValue: false },
 )
 
-const emit = defineEmits<{ applied: [payload: { color: string; label: string; mode: HighlightMode }] }>()
+const emit = defineEmits<{
+  applied: [payload: { color: string; label: string; mode: HighlightMode }]
+}>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
 const highlight = useColorHighlight({
   editor,
   hideWhenUnavailable: props.hideWhenUnavailable,
-  onApplied: payload => emit('applied', payload),
+  onApplied: (payload) => emit('applied', payload),
 })
 
 const colors = computed(() => props.colors)

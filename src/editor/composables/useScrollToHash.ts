@@ -12,9 +12,11 @@ import { selectNodeAndHideFloating } from '../utils/toc-utils'
 /** Расширение редактора по имени (с предупреждением, как в оригинале). */
 export function getEditorExtension(editor: Editor | null, name: string) {
   if (!editor) return null
-  const extension = editor.extensionManager.extensions.find(item => item.name === name)
+  const extension = editor.extensionManager.extensions.find((item) => item.name === name)
   if (!extension) {
-    console.warn(`Extension "${name}" not found in the editor schema. Ensure it is included in the editor configuration.`)
+    console.warn(
+      `Extension "${name}" not found in the editor schema. Ensure it is included in the editor configuration.`,
+    )
     return null
   }
   return extension
@@ -25,14 +27,18 @@ export interface UseScrollToHashOptions {
   onTargetNotFound?: (id: string) => void
 }
 
-export function useScrollToHash(editor: ComputedRef<Editor | null>, options: UseScrollToHashOptions = {}) {
+export function useScrollToHash(
+  editor: ComputedRef<Editor | null>,
+  options: UseScrollToHashOptions = {},
+) {
   const { onTargetFound = () => {}, onTargetNotFound = () => {} } = options
   let lastScrolledHash: string | null = null
 
   function scrollToHash(id: string): boolean {
     const instance = editor.value
     if (!instance) return false
-    const attributeName = getEditorExtension(instance, 'uniqueID')?.options?.attributeName ?? 'data-id'
+    const attributeName =
+      getEditorExtension(instance, 'uniqueID')?.options?.attributeName ?? 'data-id'
     let foundPos: number | null = null
     instance.state.doc.descendants((node, pos) => {
       if (node.attrs?.[attributeName] !== id) return true
@@ -67,8 +73,9 @@ export function useScrollToHash(editor: ComputedRef<Editor | null>, options: Use
     editor,
     (instance, _prev, onCleanup) => {
       if (!instance) return
-      const provider = instance.extensionManager.extensions.find(item => item.name === 'collaborationCaret')?.options
-        ?.provider
+      const provider = instance.extensionManager.extensions.find(
+        (item) => item.name === 'collaborationCaret',
+      )?.options?.provider
       if (provider?.on) {
         const handler = () => handleHash(500)
         provider.on('synced', handler)

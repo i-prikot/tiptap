@@ -14,7 +14,13 @@ export interface WindowSizeState {
 }
 
 export function useWindowSize() {
-  const size = reactive<WindowSizeState>({ width: 0, height: 0, offsetTop: 0, offsetLeft: 0, scale: 0 })
+  const size = reactive<WindowSizeState>({
+    width: 0,
+    height: 0,
+    offsetTop: 0,
+    offsetLeft: 0,
+    scale: 0,
+  })
 
   const update = throttle(() => {
     const viewport = window.visualViewport

@@ -192,7 +192,7 @@ interface SlashMenuItemBehavior {
 function buildBehaviors(): Record<SlashMenuItemKey, SlashMenuItemBehavior> {
   return {
     continue_writing: {
-      check: editor => {
+      check: (editor) => {
         const { hasContent } = hasContentAbove(editor)
         return isExtensionAvailable(editor, ['ai', 'aiAdvanced']) && hasContent
       },
@@ -208,12 +208,14 @@ function buildBehaviors(): Record<SlashMenuItemKey, SlashMenuItemBehavior> {
           const prompt = hasContent
             ? `Context: ${context}\n\nContinue writing from where the text above ends. Write ONLY ONE SENTENCE. DONT REPEAT THE TEXT.`
             : 'Start writing a new paragraph. Write ONLY ONE SENTENCE.'
-          ;(editor.chain().focus() as any).aiTextPrompt({ stream: true, format: 'rich-text', text: prompt }).run()
+          ;(editor.chain().focus() as any)
+            .aiTextPrompt({ stream: true, format: 'rich-text', text: prompt })
+            .run()
         })
       },
     },
     ai_ask_button: {
-      check: editor => isExtensionAvailable(editor, ['ai', 'aiAdvanced']),
+      check: (editor) => isExtensionAvailable(editor, ['ai', 'aiAdvanced']),
       action: ({ editor }) => {
         const chain = editor.chain().focus()
         const pos = findSelectionPosition({ editor })
@@ -223,87 +225,89 @@ function buildBehaviors(): Record<SlashMenuItemKey, SlashMenuItemBehavior> {
       },
     },
     text: {
-      check: editor => isNodeInSchema('paragraph', editor),
+      check: (editor) => isNodeInSchema('paragraph', editor),
       action: ({ editor }) => {
         editor.chain().focus().setParagraph().run()
       },
     },
     heading_1: {
-      check: editor => isNodeInSchema('heading', editor),
+      check: (editor) => isNodeInSchema('heading', editor),
       action: ({ editor }) => {
         editor.chain().focus().toggleHeading({ level: 1 }).run()
       },
     },
     heading_2: {
-      check: editor => isNodeInSchema('heading', editor),
+      check: (editor) => isNodeInSchema('heading', editor),
       action: ({ editor }) => {
         editor.chain().focus().toggleHeading({ level: 2 }).run()
       },
     },
     heading_3: {
-      check: editor => isNodeInSchema('heading', editor),
+      check: (editor) => isNodeInSchema('heading', editor),
       action: ({ editor }) => {
         editor.chain().focus().toggleHeading({ level: 3 }).run()
       },
     },
     bullet_list: {
-      check: editor => isNodeInSchema('bulletList', editor),
+      check: (editor) => isNodeInSchema('bulletList', editor),
       action: ({ editor }) => {
         editor.chain().focus().toggleBulletList().run()
       },
     },
     ordered_list: {
-      check: editor => isNodeInSchema('orderedList', editor),
+      check: (editor) => isNodeInSchema('orderedList', editor),
       action: ({ editor }) => {
         editor.chain().focus().toggleOrderedList().run()
       },
     },
     task_list: {
-      check: editor => isNodeInSchema('taskList', editor),
+      check: (editor) => isNodeInSchema('taskList', editor),
       action: ({ editor }) => {
         editor.chain().focus().toggleTaskList().run()
       },
     },
     quote: {
-      check: editor => isNodeInSchema('blockquote', editor),
+      check: (editor) => isNodeInSchema('blockquote', editor),
       action: ({ editor }) => {
         editor.chain().focus().toggleBlockquote().run()
       },
     },
     code_block: {
-      check: editor => isNodeInSchema('codeBlock', editor),
+      check: (editor) => isNodeInSchema('codeBlock', editor),
       action: ({ editor }) => {
         editor.chain().focus().toggleNode('codeBlock', 'paragraph').run()
       },
     },
     mention: {
-      check: editor => isExtensionAvailable(editor, ['mention', 'mentionAdvanced']),
+      check: (editor) => isExtensionAvailable(editor, ['mention', 'mentionAdvanced']),
       action: ({ editor }) => addMentionTrigger(editor),
     },
     emoji: {
-      check: editor => isExtensionAvailable(editor, ['emoji', 'emojiPicker']),
+      check: (editor) => isExtensionAvailable(editor, ['emoji', 'emojiPicker']),
       action: ({ editor }) => addEmojiTrigger(editor),
     },
     divider: {
-      check: editor => isNodeInSchema('horizontalRule', editor),
+      check: (editor) => isNodeInSchema('horizontalRule', editor),
       action: ({ editor }) => {
         editor.chain().focus().setHorizontalRule().run()
       },
     },
     toc: {
-      check: editor => isNodeInSchema('tocNode', editor),
+      check: (editor) => isNodeInSchema('tocNode', editor),
       action: ({ editor }) => {
         editor.chain().focus().insertTocNode().run()
       },
     },
     table: {
-      check: editor => isNodeInSchema('table', editor),
+      check: (editor) => isNodeInSchema('table', editor),
       action: ({ editor }) => {
-        ;(editor.chain().focus() as any).insertTable({ rows: 3, cols: 3, withHeaderRow: false }).run()
+        ;(editor.chain().focus() as any)
+          .insertTable({ rows: 3, cols: 3, withHeaderRow: false })
+          .run()
       },
     },
     image: {
-      check: editor => isNodeInSchema('image', editor),
+      check: (editor) => isNodeInSchema('image', editor),
       action: ({ editor }) => {
         editor.chain().focus().insertContent({ type: 'imageUpload' }).run()
       },
@@ -318,12 +322,13 @@ export function getSlashMenuItems(editor: Editor, config?: SlashMenuConfig): Sug
   const showGroups = config?.showGroups !== false
   const behaviors = buildBehaviors()
 
-  enabledKeys.forEach(key => {
+  enabledKeys.forEach((key) => {
     const behavior = behaviors[key]
     const metadata = ITEM_METADATA[key]
     if (behavior && metadata && behavior.check(editor)) {
       const item: SuggestionItem = {
-        onSelect: ({ editor: selectedEditor }) => behavior.action({ editor: selectedEditor as Editor }),
+        onSelect: ({ editor: selectedEditor }) =>
+          behavior.action({ editor: selectedEditor as Editor }),
         ...metadata,
       }
       if (config?.itemGroups?.[key]) item.group = config.itemGroups[key]
@@ -333,16 +338,16 @@ export function getSlashMenuItems(editor: Editor, config?: SlashMenuConfig): Sug
   })
 
   if (config?.customItems) items.push(...config.customItems)
-  if (!showGroups) return items.map(item => ({ ...item, group: '' }))
+  if (!showGroups) return items.map((item) => ({ ...item, group: '' }))
 
   // стабильная сортировка по группам с сохранением порядка внутри группы
   const grouped = new Map<string, SuggestionItem[]>()
-  items.forEach(item => {
+  items.forEach((item) => {
     const group = item.group || ''
     if (!grouped.has(group)) grouped.set(group, [])
     grouped.get(group)!.push(item)
   })
   const result: SuggestionItem[] = []
-  grouped.forEach(groupItems => result.push(...groupItems))
+  grouped.forEach((groupItems) => result.push(...groupItems))
   return result
 }

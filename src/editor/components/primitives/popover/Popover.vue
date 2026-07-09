@@ -24,7 +24,14 @@
  * контент, закрытие по Escape/клику снаружи.
  */
 import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
-import { autoUpdate, flip, offset as offsetMiddleware, shift, size, useFloating } from '@floating-ui/vue'
+import {
+  autoUpdate,
+  flip,
+  offset as offsetMiddleware,
+  shift,
+  size,
+  useFloating,
+} from '@floating-ui/vue'
 import type { Placement } from '@floating-ui/vue'
 
 const props = withDefaults(
@@ -43,7 +50,7 @@ const emit = defineEmits<{ 'update:open': [value: boolean] }>()
 const open = ref(props.open ?? false)
 watch(
   () => props.open,
-  value => {
+  (value) => {
     if (value !== undefined) open.value = value
   },
 )
@@ -80,8 +87,14 @@ const { floatingStyles, placement: resolvedPlacement } = useFloating(reference, 
       padding: 8,
       apply({ elements, availableHeight, availableWidth }) {
         const wrapper = elements.floating
-        wrapper.style.setProperty('--radix-popover-content-available-height', `${Math.floor(availableHeight)}px`)
-        wrapper.style.setProperty('--radix-popover-content-available-width', `${Math.floor(availableWidth)}px`)
+        wrapper.style.setProperty(
+          '--radix-popover-content-available-height',
+          `${Math.floor(availableHeight)}px`,
+        )
+        wrapper.style.setProperty(
+          '--radix-popover-content-available-width',
+          `${Math.floor(availableWidth)}px`,
+        )
       },
     }),
   ],

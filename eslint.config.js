@@ -3,6 +3,7 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 import vue from 'eslint-plugin-vue'
 import vueParser from 'vue-eslint-parser'
+import eslintConfigPrettier from 'eslint-config-prettier/flat'
 
 const ignoredVariablePattern = '^_'
 
@@ -110,4 +111,6 @@ export default [
       '@typescript-eslint/no-empty-object-type': 'off',
     },
   },
+
+  eslintConfigPrettier,
 ]

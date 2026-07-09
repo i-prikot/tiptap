@@ -145,7 +145,7 @@
   --dot-size-large: 16px;
   --dot-offset-small: 3px;
   --dot-offset-large: 0;
-  --icon-scale-small: .9;
+  --icon-scale-small: 0.9;
   --icon-scale-large: 1;
   position: absolute;
   top: 50%;
@@ -171,9 +171,13 @@
   height: var(--dot-size-small);
   border-radius: 9999px;
   background: var(--tt-brand-color-600);
-  content: "";
+  content: '';
   transform: translateY(-50%);
-  transition: width .05s ease, height .05s ease, right .05s ease, background .05s ease;
+  transition:
+    width 0.05s ease,
+    height 0.05s ease,
+    right 0.05s ease,
+    background 0.05s ease;
 }
 
 .expandable-menu-button svg {
@@ -185,7 +189,9 @@
   opacity: 0;
   pointer-events: none;
   transform: scale(var(--icon-scale-small));
-  transition: opacity .05s ease, transform .05s ease;
+  transition:
+    opacity 0.05s ease,
+    transform 0.05s ease;
 }
 
 .expandable-menu-button:hover::before,

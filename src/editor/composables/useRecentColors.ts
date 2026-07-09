@@ -28,7 +28,9 @@ export function useRecentColors(maxColors = 3) {
   })
 
   const addRecentColor = (color: RecentColor) => {
-    const rest = recentColors.value.filter(item => item.type !== color.type || item.value !== color.value)
+    const rest = recentColors.value.filter(
+      (item) => item.type !== color.type || item.value !== color.value,
+    )
     const next = [color, ...rest].slice(0, maxColors)
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
@@ -46,5 +48,5 @@ export function getColorByValue(
   value: string,
   palette: ReadonlyArray<{ value: string; label: string }>,
 ): { value: string; label: string } {
-  return palette.find(color => color.value === value) ?? { value, label: value }
+  return palette.find((color) => color.value === value) ?? { value, label: value }
 }

@@ -81,7 +81,9 @@ const open = ref(false)
 
 const mergeAvailable = computed(() => (signal.value, canMergeCells(editor.value)))
 const splitAvailable = computed(() => (signal.value, canSplitCell(editor.value)))
-const clearAvailable = computed(() => (signal.value, canClearRowColumnContent({ editor: editor.value })))
+const clearAvailable = computed(
+  () => (signal.value, canClearRowColumnContent({ editor: editor.value })),
+)
 
 function onOpenChange(value: boolean) {
   if (open.value === value) return

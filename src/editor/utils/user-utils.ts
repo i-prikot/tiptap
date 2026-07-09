@@ -3,7 +3,20 @@
  * Порт из чанков 1-1gopd-oz05f (имена/цвета) и 3qxxh2m8wjeqx (getAvatar).
  */
 
-const FIRST_NAMES = ['John', 'Jane', 'Alice', 'Bob', 'Eve', 'Charlie', 'David', 'Frank', 'Grace', 'Helen', 'Rob Lowe', 'Rob']
+const FIRST_NAMES = [
+  'John',
+  'Jane',
+  'Alice',
+  'Bob',
+  'Eve',
+  'Charlie',
+  'David',
+  'Frank',
+  'Grace',
+  'Helen',
+  'Rob Lowe',
+  'Rob',
+]
 
 const LAST_NAMES = [
   'Smith',
@@ -51,7 +64,7 @@ export function randomUserColor(): string {
 }
 
 export function randomUserId(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, char => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
     const random = (16 * Math.random()) | 0
     return (char === 'x' ? random : (3 & random) | 8).toString(16)
   })

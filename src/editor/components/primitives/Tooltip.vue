@@ -11,7 +11,13 @@
     <slot />
   </span>
   <Teleport to="body">
-    <div v-if="open" ref="floatingRef" class="tiptap-tooltip" role="tooltip" :style="floatingStyles">
+    <div
+      v-if="open"
+      ref="floatingRef"
+      class="tiptap-tooltip"
+      role="tooltip"
+      :style="floatingStyles"
+    >
       <slot name="content" />
     </div>
   </Teleport>
@@ -42,7 +48,11 @@ const floatingRef = ref<HTMLElement | null>(null)
 const { floatingStyles } = useFloating(referenceRef, floatingRef, {
   placement: props.placement,
   whileElementsMounted: autoUpdate,
-  middleware: [offset(4), flip({ fallbackAxisSideDirection: 'start', padding: 4 }), shift({ padding: 4 })],
+  middleware: [
+    offset(4),
+    flip({ fallbackAxisSideDirection: 'start', padding: 4 }),
+    shift({ padding: 4 }),
+  ],
 })
 
 let openTimer: number | undefined

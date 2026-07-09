@@ -34,7 +34,10 @@ import { IndentDecreaseIcon, IndentIncreaseIcon } from '../../icons'
 type IndentAction = 'indent' | 'outdent'
 
 const SHORTCUTS: Record<IndentAction, string> = { indent: 'Tab', outdent: 'Shift-Tab' }
-const LABELS: Record<IndentAction, string> = { indent: 'Increase indent', outdent: 'Decrease indent' }
+const LABELS: Record<IndentAction, string> = {
+  indent: 'Increase indent',
+  outdent: 'Decrease indent',
+}
 const ICONS = { indent: IndentIncreaseIcon, outdent: IndentDecreaseIcon }
 
 const props = withDefaults(
@@ -64,19 +67,25 @@ const isVisible = computed(() => {
   const instance = editor.value
   if (!instance) return false
   if (!props.hideWhenUnavailable) return true
-  return !!instance.isEditable && !!isExtensionAvailable(instance, 'indent') && canIndentAction(instance)
+  return (
+    !!instance.isEditable && !!isExtensionAvailable(instance, 'indent') && canIndentAction(instance)
+  )
 })
 
 const label = computed(() => LABELS[props.action])
 const shortcutKeys = computed(() => SHORTCUTS[props.action])
 const icon = computed(() => ICONS[props.action])
-const shortcutText = computed(() => parseShortcutKeys({ shortcutKeys: shortcutKeys.value }).join(''))
+const shortcutText = computed(() =>
+  parseShortcutKeys({ shortcutKeys: shortcutKeys.value }).join(''),
+)
 
 function handleClick() {
   const instance = editor.value
   if (!instance || !instance.isEditable || !canIndentAction(instance)) return
   const done =
-    props.action === 'indent' ? instance.chain().focus().indent().run() : instance.chain().focus().outdent().run()
+    props.action === 'indent'
+      ? instance.chain().focus().indent().run()
+      : instance.chain().focus().outdent().run()
   if (done) emit('indented')
 }
 </script>

@@ -61,7 +61,11 @@ export function isInTableCell(editor: Editor | null): boolean {
   }
 }
 
-function canAlignRowOrColumn(editor: Editor | null, index?: number, orientation?: Orientation): boolean {
+function canAlignRowOrColumn(
+  editor: Editor | null,
+  index?: number,
+  orientation?: Orientation,
+): boolean {
   if (!editor || !editor.isEditable || !isExtensionAvailable(editor, TABLE_EXTENSIONS)) return false
   try {
     if (!getTable(editor)) return false
@@ -82,7 +86,15 @@ export interface UseTableAlignCellOptions {
 }
 
 export function useTableAlignCell(options: UseTableAlignCellOptions) {
-  const { editor, alignmentType, alignment, index, orientation, hideWhenUnavailable = false, onAligned } = options
+  const {
+    editor,
+    alignmentType,
+    alignment,
+    index,
+    orientation,
+    hideWhenUnavailable = false,
+    onAligned,
+  } = options
   const signal = useEditorSelectionSignal(editor)
   const attrName = alignmentType === 'text' ? 'nodeTextAlign' : 'nodeVerticalAlign'
   const defaultValue = alignmentType === 'text' ? 'left' : 'top'
@@ -123,7 +135,8 @@ export function useTableAlignCell(options: UseTableAlignCellOptions) {
   const isVisible = computed(() => {
     void signal.value
     const instance = editor.value
-    if (!instance || !instance.isEditable || !isExtensionAvailable(instance, TABLE_EXTENSIONS)) return false
+    if (!instance || !instance.isEditable || !isExtensionAvailable(instance, TABLE_EXTENSIONS))
+      return false
     return !hideWhenUnavailable || canAlign()
   })
   const isActive = computed(() => (signal.value, currentAlignment() === alignment))
@@ -155,14 +168,18 @@ export function useTableAlignCell(options: UseTableAlignCellOptions) {
       const { cells } = getRowOrColumnCells(instance, index, orientation)
       if (cells.length === 0) return false
       const byPos = new Map<number, (typeof cells)[number]>()
-      cells.forEach(cell => {
+      cells.forEach((cell) => {
         if (cell.node && cell.pos !== undefined) byPos.set(cell.pos, cell)
       })
       if (byPos.size === 0) return false
       const sorted = Array.from(byPos.values()).sort((a, b) => b.pos - a.pos)
-      sorted.forEach(cell => {
+      sorted.forEach((cell) => {
         if (cell.node && cell.pos !== undefined) {
-          const updated = cell.node.type.create({ ...cell.node.attrs, [attrName]: alignment }, cell.node.content, cell.node.marks)
+          const updated = cell.node.type.create(
+            { ...cell.node.attrs, [attrName]: alignment },
+            cell.node.content,
+            cell.node.marks,
+          )
           tr.replaceWith(cell.pos, cell.pos + cell.node.nodeSize, updated)
         }
       })

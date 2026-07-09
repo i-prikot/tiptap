@@ -1,5 +1,9 @@
 <template>
-  <SetupError v-if="collabSetupError || aiSetupError" :collab-setup-error="collabSetupError" :ai-setup-error="aiSetupError" />
+  <SetupError
+    v-if="collabSetupError || aiSetupError"
+    :collab-setup-error="collabSetupError"
+    :ai-setup-error="aiSetupError"
+  />
   <EditorProvider
     v-else-if="ready"
     :provider="provider"

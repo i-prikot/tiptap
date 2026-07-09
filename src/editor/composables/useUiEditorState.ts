@@ -28,7 +28,7 @@ export function useUiEditorState(editor: ComputedRef<Editor | null>): UiEditorSt
 
   watch(
     editor,
-    instance => {
+    (instance) => {
       unsubscribe?.()
       unsubscribe = null
       if (!instance) {

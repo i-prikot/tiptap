@@ -19,7 +19,11 @@ function insertTriggerAsParagraph(
   nodePos?: number | null,
 ): boolean {
   if (node != null || isValidPosition(nodePos)) {
-    const found = findNodePosition({ editor, node: node || undefined, nodePos: nodePos ?? undefined })
+    const found = findNodePosition({
+      editor,
+      node: node || undefined,
+      nodePos: nodePos ?? undefined,
+    })
     if (!found) return false
     const isEmptyParagraph = found.node.type.name === 'paragraph' && found.node.content.size === 0
     const insertPos = found.pos + found.node.nodeSize
@@ -35,7 +39,10 @@ function insertTriggerAsParagraph(
   const { $from } = editor.state.selection
   return editor
     .chain()
-    .insertContentAt($from.after(), { type: 'paragraph', content: [{ type: 'text', text: trigger }] })
+    .insertContentAt($from.after(), {
+      type: 'paragraph',
+      content: [{ type: 'text', text: trigger }],
+    })
     .focus()
     .run()
 }
@@ -48,14 +55,22 @@ function insertTriggerInline(
   nodePos?: number | null,
 ): boolean {
   if (node != null || isValidPosition(nodePos)) {
-    const found = findNodePosition({ editor, node: node || undefined, nodePos: nodePos ?? undefined })
+    const found = findNodePosition({
+      editor,
+      node: node || undefined,
+      nodePos: nodePos ?? undefined,
+    })
     if (!found) return false
     const isEmptyParagraph = found.node.type.name === 'paragraph' && found.node.content.size === 0
     const insertPos = found.pos + found.node.nodeSize
     editor.view.dispatch(
       editor.view.state.tr
         .scrollIntoView()
-        .insertText(trigger, isEmptyParagraph ? found.pos : insertPos, isEmptyParagraph ? found.pos : insertPos),
+        .insertText(
+          trigger,
+          isEmptyParagraph ? found.pos : insertPos,
+          isEmptyParagraph ? found.pos : insertPos,
+        ),
     )
     editor.commands.focus(isEmptyParagraph ? found.pos + 2 : insertPos + trigger.length + 1)
     return true
@@ -80,7 +95,8 @@ function addTrigger(
   try {
     const { $from } = editor.state.selection
     const block = $from.node()
-    if (block.isBlock && !block.isTextblock) return insertTriggerAsParagraph(editor, trigger, node, nodePos)
+    if (block.isBlock && !block.isTextblock)
+      return insertTriggerAsParagraph(editor, trigger, node, nodePos)
     return insertTriggerInline(editor, trigger, node, nodePos)
   } catch {
     return false

@@ -28,7 +28,7 @@ const buttonRef = ref<ComponentPublicInstance | null>(null)
 
 watch(
   () => props.isSelected,
-  selected => {
+  (selected) => {
     if (!selected) return
     const container = document.querySelector('[data-selector="tiptap-slash-dropdown-menu"]')
     const element = buttonRef.value?.$el as HTMLElement | undefined

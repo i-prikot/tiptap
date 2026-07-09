@@ -66,7 +66,9 @@ interface TurnIntoItem {
 }
 
 const items = computed<TurnIntoItem[]>(() =>
-  TURN_INTO_BLOCKS.filter(block => !props.blockTypes || props.blockTypes.includes(block.type)).map(block => {
+  TURN_INTO_BLOCKS.filter(
+    (block) => !props.blockTypes || props.blockTypes.includes(block.type),
+  ).map((block) => {
     const key = block.type === 'heading' ? (`heading-${block.level}` as const) : block.type
     const conversion = conversions[key as keyof typeof conversions]
     return {

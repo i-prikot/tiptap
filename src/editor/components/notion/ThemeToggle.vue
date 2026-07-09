@@ -1,5 +1,9 @@
 <template>
-  <Button variant="ghost" :aria-label="`Switch to ${isDarkMode ? 'light' : 'dark'} mode`" @click="toggleDarkMode">
+  <Button
+    variant="ghost"
+    :aria-label="`Switch to ${isDarkMode ? 'light' : 'dark'} mode`"
+    @click="toggleDarkMode"
+  >
     <MoonStarIcon v-if="isDarkMode" class="tiptap-button-icon" />
     <SunIcon v-else class="tiptap-button-icon" />
   </Button>
@@ -33,9 +37,13 @@ onBeforeUnmount(() => {
   mediaQuery.removeEventListener('change', handleMediaChange)
 })
 
-watch(isDarkMode, value => {
-  document.documentElement.classList.toggle('dark', value)
-}, { immediate: true })
+watch(
+  isDarkMode,
+  (value) => {
+    document.documentElement.classList.toggle('dark', value)
+  },
+  { immediate: true },
+)
 
 function toggleDarkMode() {
   isDarkMode.value = !isDarkMode.value

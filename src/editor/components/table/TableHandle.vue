@@ -2,11 +2,20 @@
   <Teleport v-if="state && state.widgetContainer" :to="state.widgetContainer">
     <!-- Ручка строки -->
     <div v-if="showRowHandle" :ref="rowPosition.floatingRef" :style="rowPosition.style.value">
-      <Menu :open="openHandle === 'row'" placement="top-start" @update:open="value => onMenuToggle('row', value)">
+      <Menu
+        :open="openHandle === 'row'"
+        placement="top-start"
+        @update:open="(value) => onMenuToggle('row', value)"
+      >
         <template #trigger>
           <button
             type="button"
-            :class="['tiptap-table-handle-menu', 'row', openHandle === 'row' && 'menu-opened', draggingRow && 'is-dragging']"
+            :class="[
+              'tiptap-table-handle-menu',
+              'row',
+              openHandle === 'row' && 'menu-opened',
+              draggingRow && 'is-dragging',
+            ]"
             draggable="true"
             aria-label="Row actions"
             aria-haspopup="menu"
@@ -30,11 +39,20 @@
 
     <!-- Ручка столбца -->
     <div v-if="showColHandle" :ref="colPosition.floatingRef" :style="colPosition.style.value">
-      <Menu :open="openHandle === 'column'" placement="bottom-start" @update:open="value => onMenuToggle('column', value)">
+      <Menu
+        :open="openHandle === 'column'"
+        placement="bottom-start"
+        @update:open="(value) => onMenuToggle('column', value)"
+      >
         <template #trigger>
           <button
             type="button"
-            :class="['tiptap-table-handle-menu', 'column', openHandle === 'column' && 'menu-opened', draggingCol && 'is-dragging']"
+            :class="[
+              'tiptap-table-handle-menu',
+              'column',
+              openHandle === 'column' && 'menu-opened',
+              draggingCol && 'is-dragging',
+            ]"
             draggable="true"
             aria-label="Column actions"
             aria-haspopup="menu"
@@ -93,10 +111,14 @@ const rowPosition = useTableHandlePosition('row', show, cellRect, tableRect, dra
 const colPosition = useTableHandlePosition('col', show, cellRect, tableRect, draggingState)
 
 const showRowHandle = computed(
-  () => (show.value && typeof state.value?.rowIndex === 'number' && openHandle.value !== 'column') || openHandle.value === 'row',
+  () =>
+    (show.value && typeof state.value?.rowIndex === 'number' && openHandle.value !== 'column') ||
+    openHandle.value === 'row',
 )
 const showColHandle = computed(
-  () => (show.value && typeof state.value?.colIndex === 'number' && openHandle.value !== 'row') || openHandle.value === 'column',
+  () =>
+    (show.value && typeof state.value?.colIndex === 'number' && openHandle.value !== 'row') ||
+    openHandle.value === 'column',
 )
 
 /** Открытие меню: заморозить ручки и выделить строку/столбец целиком. */
@@ -109,7 +131,8 @@ function selectLine(orientation: 'row' | 'column') {
   try {
     const { width, height } = TableMap.get(current.block)
     const from = orientation === 'row' ? { row: index!, col: 0 } : { row: 0, col: index! }
-    const to = orientation === 'row' ? { row: index!, col: width - 1 } : { row: height - 1, col: index! }
+    const to =
+      orientation === 'row' ? { row: index!, col: width - 1 } : { row: height - 1, col: index! }
     selectCellsByCoords(instance, current.blockPos, [from, to], {
       mode: 'dispatch',
       dispatch: instance.view.dispatch.bind(instance.view),
@@ -149,7 +172,7 @@ function onDragEnd() {
 }
 
 // пропали ручки (state.show=false при закрытом меню) — сбросить драг-флаги
-watch(show, visible => {
+watch(show, (visible) => {
   if (!visible) {
     draggingRow.value = false
     draggingCol.value = false

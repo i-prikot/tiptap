@@ -9,5 +9,7 @@
 
 <script setup lang="ts">
 // Визуальный разделитель (порт Separator из чанка примитивов).
-withDefaults(defineProps<{ orientation?: 'horizontal' | 'vertical' }>(), { orientation: 'vertical' })
+withDefaults(defineProps<{ orientation?: 'horizontal' | 'vertical' }>(), {
+  orientation: 'vertical',
+})
 </script>

@@ -5,7 +5,11 @@
 import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import { isMarkInSchema, isNodeTypeSelected, selectCurrentBlockContent } from '../utils/tiptap-utils'
+import {
+  isMarkInSchema,
+  isNodeTypeSelected,
+  selectCurrentBlockContent,
+} from '../utils/tiptap-utils'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
 import { TextColorSmallIcon } from '../icons'
 
@@ -19,19 +23,60 @@ export const COLOR_TEXT_SHORTCUT_KEY = 'mod+shift+t'
 
 export const TEXT_COLORS: TextColor[] = [
   { label: 'Default text', value: 'var(--tt-color-text)', border: 'var(--tt-color-text-contrast)' },
-  { label: 'Gray text', value: 'var(--tt-color-text-gray)', border: 'var(--tt-color-text-gray-contrast)' },
-  { label: 'Brown text', value: 'var(--tt-color-text-brown)', border: 'var(--tt-color-text-brown-contrast)' },
-  { label: 'Orange text', value: 'var(--tt-color-text-orange)', border: 'var(--tt-color-text-orange-contrast)' },
-  { label: 'Yellow text', value: 'var(--tt-color-text-yellow)', border: 'var(--tt-color-text-yellow-contrast)' },
-  { label: 'Green text', value: 'var(--tt-color-text-green)', border: 'var(--tt-color-text-green-contrast)' },
-  { label: 'Blue text', value: 'var(--tt-color-text-blue)', border: 'var(--tt-color-text-blue-contrast)' },
-  { label: 'Purple text', value: 'var(--tt-color-text-purple)', border: 'var(--tt-color-text-purple-contrast)' },
-  { label: 'Pink text', value: 'var(--tt-color-text-pink)', border: 'var(--tt-color-text-pink-contrast)' },
-  { label: 'Red text', value: 'var(--tt-color-text-red)', border: 'var(--tt-color-text-red-contrast)' },
+  {
+    label: 'Gray text',
+    value: 'var(--tt-color-text-gray)',
+    border: 'var(--tt-color-text-gray-contrast)',
+  },
+  {
+    label: 'Brown text',
+    value: 'var(--tt-color-text-brown)',
+    border: 'var(--tt-color-text-brown-contrast)',
+  },
+  {
+    label: 'Orange text',
+    value: 'var(--tt-color-text-orange)',
+    border: 'var(--tt-color-text-orange-contrast)',
+  },
+  {
+    label: 'Yellow text',
+    value: 'var(--tt-color-text-yellow)',
+    border: 'var(--tt-color-text-yellow-contrast)',
+  },
+  {
+    label: 'Green text',
+    value: 'var(--tt-color-text-green)',
+    border: 'var(--tt-color-text-green-contrast)',
+  },
+  {
+    label: 'Blue text',
+    value: 'var(--tt-color-text-blue)',
+    border: 'var(--tt-color-text-blue-contrast)',
+  },
+  {
+    label: 'Purple text',
+    value: 'var(--tt-color-text-purple)',
+    border: 'var(--tt-color-text-purple-contrast)',
+  },
+  {
+    label: 'Pink text',
+    value: 'var(--tt-color-text-pink)',
+    border: 'var(--tt-color-text-pink-contrast)',
+  },
+  {
+    label: 'Red text',
+    value: 'var(--tt-color-text-red)',
+    border: 'var(--tt-color-text-red-contrast)',
+  },
 ]
 
 export function canColorText(editor: Editor | null): boolean {
-  if (!editor || !editor.isEditable || !isMarkInSchema('textStyle', editor) || isNodeTypeSelected(editor, ['image'])) {
+  if (
+    !editor ||
+    !editor.isEditable ||
+    !isMarkInSchema('textStyle', editor) ||
+    isNodeTypeSelected(editor, ['image'])
+  ) {
     return false
   }
   try {
@@ -55,7 +100,12 @@ export function useColorText(options: UseColorTextOptions) {
 
   const canColor = computed(() => (signal.value, canColorText(editor.value)))
   const isActive = computed(
-    () => (signal.value, !!editor.value && !!editor.value.isEditable && editor.value.isActive('textStyle', { color: textColor })),
+    () => (
+      signal.value,
+      !!editor.value &&
+        !!editor.value.isEditable &&
+        editor.value.isActive('textStyle', { color: textColor })
+    ),
   )
   const isVisible = computed(() => {
     void signal.value

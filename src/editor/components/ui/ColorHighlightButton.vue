@@ -49,7 +49,9 @@ const props = withDefaults(
   { mode: 'mark', useColorValue: false, hideWhenUnavailable: false, showShortcut: false },
 )
 
-const emit = defineEmits<{ applied: [payload: { color: string; label: string; mode: HighlightMode }] }>()
+const emit = defineEmits<{
+  applied: [payload: { color: string; label: string; mode: HighlightMode }]
+}>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
 const highlight = useColorHighlight({
@@ -59,10 +61,12 @@ const highlight = useColorHighlight({
   hideWhenUnavailable: props.hideWhenUnavailable,
   mode: props.mode,
   useColorValue: props.useColorValue,
-  onApplied: payload => emit('applied', payload),
+  onApplied: (payload) => emit('applied', payload),
 })
 
-const shortcutText = computed(() => parseShortcutKeys({ shortcutKeys: highlight.shortcutKeys }).join(''))
+const shortcutText = computed(() =>
+  parseShortcutKeys({ shortcutKeys: highlight.shortcutKeys }).join(''),
+)
 
 function handleClick() {
   highlight.handleColorHighlight()

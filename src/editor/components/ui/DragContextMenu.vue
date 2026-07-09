@@ -33,14 +33,20 @@
               <MenuGroup>
                 <!-- Show title (только для tocNode) -->
                 <MenuItem v-if="tocShowTitle.canToggle.value" @select="tocShowTitle.handleToggle">
-                  <Button variant="ghost" :data-active-state="tocShowTitle.isActive.value ? 'on' : 'off'">
+                  <Button
+                    variant="ghost"
+                    :data-active-state="tocShowTitle.isActive.value ? 'on' : 'off'"
+                  >
                     <component :is="tocShowTitle.Icon" class="tiptap-button-icon" />
                     <span class="tiptap-button-text">{{ tocShowTitle.label }}</span>
                   </Button>
                 </MenuItem>
 
                 <!-- Таблица: fit to width -->
-                <MenuItem v-if="tableFitToWidth.canFitToWidth.value" @select="tableFitToWidth.handleFitToWidth">
+                <MenuItem
+                  v-if="tableFitToWidth.canFitToWidth.value"
+                  @select="tableFitToWidth.handleFitToWidth"
+                >
                   <Button variant="ghost" data-active-state="off">
                     <component :is="tableFitToWidth.Icon" class="tiptap-button-icon" />
                     <span class="tiptap-button-text">{{ tableFitToWidth.label }}</span>
@@ -48,7 +54,10 @@
                 </MenuItem>
 
                 <!-- Таблица: очистить всё содержимое -->
-                <MenuItem v-if="tableClearAllContents.canClearAll.value" @select="tableClearAllContents.handleClearAll">
+                <MenuItem
+                  v-if="tableClearAllContents.canClearAll.value"
+                  @select="tableClearAllContents.handleClearAll"
+                >
                   <Button variant="ghost" data-active-state="off">
                     <component :is="tableClearAllContents.Icon" class="tiptap-button-icon" />
                     <span class="tiptap-button-text">{{ tableClearAllContents.label }}</span>
@@ -97,7 +106,10 @@
                 <TableAlignMenu />
 
                 <!-- Reset formatting -->
-                <MenuItem v-if="resetFormatting.canReset.value" @select="resetFormatting.handleResetFormatting">
+                <MenuItem
+                  v-if="resetFormatting.canReset.value"
+                  @select="resetFormatting.handleResetFormatting"
+                >
                   <Button variant="ghost" data-active-state="off">
                     <component :is="resetFormatting.Icon" class="tiptap-button-icon" />
                     <span class="tiptap-button-text">{{ resetFormatting.label }}</span>
@@ -105,7 +117,10 @@
                 </MenuItem>
 
                 <!-- Download image (только для image) -->
-                <MenuItem v-if="imageDownload.canDownload.value" @select="imageDownload.handleDownload">
+                <MenuItem
+                  v-if="imageDownload.canDownload.value"
+                  @select="imageDownload.handleDownload"
+                >
                   <Button variant="ghost" data-active-state="off">
                     <component :is="imageDownload.Icon" class="tiptap-button-icon" />
                     <span class="tiptap-button-text">{{ imageDownload.label }}</span>
@@ -115,7 +130,10 @@
 
               <Separator orientation="horizontal" />
               <MenuGroup>
-                <MenuItem :disabled="!duplicate.canDuplicate.value" @select="duplicate.handleDuplicate">
+                <MenuItem
+                  :disabled="!duplicate.canDuplicate.value"
+                  @select="duplicate.handleDuplicate"
+                >
                   <Button variant="ghost" :disabled="!duplicate.canDuplicate.value">
                     <component :is="duplicate.Icon" class="tiptap-button-icon" />
                     <span class="tiptap-button-text">{{ duplicate.label }}</span>
@@ -123,7 +141,10 @@
                     <Badge>{{ formatShortcut(duplicate.shortcutKeys) }}</Badge>
                   </Button>
                 </MenuItem>
-                <MenuItem :disabled="!copyToClipboard.canCopyToClipboard.value" @select="copyToClipboard.handleCopyToClipboard">
+                <MenuItem
+                  :disabled="!copyToClipboard.canCopyToClipboard.value"
+                  @select="copyToClipboard.handleCopyToClipboard"
+                >
                   <Button variant="ghost" :disabled="!copyToClipboard.canCopyToClipboard.value">
                     <component :is="copyToClipboard.Icon" class="tiptap-button-icon" />
                     <span class="tiptap-button-text">{{ copyToClipboard.label }}</span>
@@ -131,7 +152,10 @@
                     <Badge>{{ formatShortcut(copyToClipboard.shortcutKeys) }}</Badge>
                   </Button>
                 </MenuItem>
-                <MenuItem :disabled="!copyAnchorLink.canCopyAnchorLink.value" @select="copyAnchorLink.handleCopyAnchorLink">
+                <MenuItem
+                  :disabled="!copyAnchorLink.canCopyAnchorLink.value"
+                  @select="copyAnchorLink.handleCopyAnchorLink"
+                >
                   <Button variant="ghost" :disabled="!copyAnchorLink.canCopyAnchorLink.value">
                     <component :is="copyAnchorLink.Icon" class="tiptap-button-icon" />
                     <span class="tiptap-button-text">{{ copyAnchorLink.label }}</span>
@@ -143,7 +167,10 @@
               <Separator orientation="horizontal" />
 
               <MenuGroup>
-                <MenuItem :disabled="!deleteNode.canDeleteNode.value" @select="deleteNode.handleDeleteNode">
+                <MenuItem
+                  :disabled="!deleteNode.canDeleteNode.value"
+                  @select="deleteNode.handleDeleteNode"
+                >
                   <Button variant="ghost" :disabled="!deleteNode.canDeleteNode.value">
                     <component :is="deleteNode.Icon" class="tiptap-button-icon" />
                     <span class="tiptap-button-text">{{ deleteNode.label }}</span>
@@ -214,10 +241,13 @@ import SlashCommandTriggerButton from './SlashCommandTriggerButton.vue'
 import ColorMenu from './ColorMenu.vue'
 import TableAlignMenu from './TableAlignMenu.vue'
 
-const props = withDefaults(defineProps<{ withSlashCommandTrigger?: boolean; mobileBreakpoint?: number }>(), {
-  withSlashCommandTrigger: true,
-  mobileBreakpoint: 768,
-})
+const props = withDefaults(
+  defineProps<{ withSlashCommandTrigger?: boolean; mobileBreakpoint?: number }>(),
+  {
+    withSlashCommandTrigger: true,
+    mobileBreakpoint: 768,
+  },
+)
 
 const editor = useTiptapEditor()
 const uiState = useUiEditorState(editor)
@@ -229,7 +259,7 @@ const currentNode = shallowRef<ProseMirrorNode | null>(null)
 const currentNodePos = ref(-1)
 
 // пока меню открыто — ручка заморожена
-watch(menuOpen, isOpen => {
+watch(menuOpen, (isOpen) => {
   const instance = editor.value
   if (!instance) return
   instance.commands.setLockDragHandle(isOpen)
@@ -246,7 +276,10 @@ const computePositionConfig = {
     offset(({ rects }) => {
       const referenceHeight = rects.reference.height
       const floatingHeight = rects.floating.height
-      return { mainAxis: 16, crossAxis: referenceHeight > 40 ? 0 : referenceHeight / 2 - floatingHeight / 2 }
+      return {
+        mainAxis: 16,
+        crossAxis: referenceHeight > 40 ? 0 : referenceHeight / 2 - floatingHeight / 2,
+      }
     }),
   ],
 }
@@ -277,7 +310,8 @@ function handleGripMouseDown() {
 const handleVisibilityStyle = computed<CSSProperties>(() => {
   void selectionSignal.value
   const instance = editor.value
-  const hidden = uiState.aiGenerationActive || isMobile.value || (instance && isTextSelectionValid(instance))
+  const hidden =
+    uiState.aiGenerationActive || isMobile.value || (instance && isTextSelectionValid(instance))
   return {
     ...(hidden ? { opacity: 0, pointerEvents: 'none' } : {}),
     ...(uiState.isDragging ? { opacity: 0 } : {}),
@@ -306,15 +340,25 @@ interface TurnIntoItem {
 }
 
 const turnIntoItems = computed<TurnIntoItem[]>(() => {
-  const conversions = [textBlock, heading1, heading2, heading3, bulletList, orderedList, taskList, blockquote, codeBlock]
-  const items = conversions.map(conversion => ({
+  const conversions = [
+    textBlock,
+    heading1,
+    heading2,
+    heading3,
+    bulletList,
+    orderedList,
+    taskList,
+    blockquote,
+    codeBlock,
+  ]
+  const items = conversions.map((conversion) => ({
     icon: conversion.Icon,
     label: conversion.label,
     onClick: conversion.handleToggle,
     disabled: !conversion.canToggle.value,
     isActive: conversion.isActive.value,
   }))
-  return items.every(item => item.disabled) ? [] : items
+  return items.every((item) => item.disabled) ? [] : items
 })
 
 const tocShowTitle = useTocShowTitle(editor)

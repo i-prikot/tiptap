@@ -18,14 +18,14 @@ const reference = ref<HTMLElement | null>(null)
 
 watch(
   () => props.open,
-  value => {
+  (value) => {
     if (value !== undefined) open.value = value
   },
 )
 
 provide(dropdownMenuInjectionKey, {
   open,
-  setOpen: value => {
+  setOpen: (value) => {
     open.value = value
     emit('update:open', value)
   },

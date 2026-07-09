@@ -37,7 +37,9 @@ function numberAttribute(dataName: string) {
       return Number.isFinite(parsed) ? parsed : null
     },
     renderHTML: (attributes: Record<string, unknown>) => {
-      const camelName = dataName.replace(/^data-/, '').replace(/-([a-z])/g, (_, char) => char.toUpperCase())
+      const camelName = dataName
+        .replace(/^data-/, '')
+        .replace(/-([a-z])/g, (_, char) => char.toUpperCase())
       const value = attributes[camelName]
       return value == null ? {} : { [dataName]: value }
     },
@@ -81,7 +83,10 @@ export const TocNode = Node.create<TocNodeOptions>({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, { 'data-type': 'toc-node' })]
+    return [
+      'div',
+      mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, { 'data-type': 'toc-node' }),
+    ]
   },
 
   addNodeView() {

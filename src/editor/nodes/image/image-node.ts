@@ -54,8 +54,9 @@ export const Image = BaseImage.extend({
       'data-align': { default: null },
       showCaption: {
         default: false,
-        parseHTML: element => element.tagName === 'FIGURE' || element.getAttribute('data-show-caption') === 'true',
-        renderHTML: attributes => (attributes.showCaption ? { 'data-show-caption': 'true' } : {}),
+        parseHTML: (element) =>
+          element.tagName === 'FIGURE' || element.getAttribute('data-show-caption') === 'true',
+        renderHTML: (attributes) => (attributes.showCaption ? { 'data-show-caption': 'true' } : {}),
       },
     }
   },
@@ -67,7 +68,11 @@ export const Image = BaseImage.extend({
         getAttrs: (element: HTMLElement) => {
           const img = element.querySelector('img')
           if (!img) return false
-          return { ...imgAttributes(img), 'data-align': element.getAttribute('data-align'), showCaption: true }
+          return {
+            ...imgAttributes(img),
+            'data-align': element.getAttribute('data-align'),
+            showCaption: true,
+          }
         },
         contentElement: 'figcaption',
       },
@@ -123,7 +128,12 @@ export const Image = BaseImage.extend({
             break
           }
         }
-        if (!imageNode || imagePos == null || imageNode.content.size === 0 || imageNode.textContent.length === 0) {
+        if (
+          !imageNode ||
+          imagePos == null ||
+          imageNode.content.size === 0 ||
+          imageNode.textContent.length === 0
+        ) {
           return false
         }
 

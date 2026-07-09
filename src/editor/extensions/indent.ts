@@ -65,7 +65,12 @@ function shouldAutoOutdent(
   return options.onlyIfEmpty ? parent.content.size === 0 : $from.parentOffset === 0
 }
 
-function parseIndentFromElement(element: HTMLElement, min: number, max: number, indentUnit: number): number {
+function parseIndentFromElement(
+  element: HTMLElement,
+  min: number,
+  max: number,
+  indentUnit: number,
+): number {
   const dataIndent = element.getAttribute('data-indent')
   if (dataIndent) {
     const parsed = parseInt(dataIndent, 10)
@@ -107,9 +112,14 @@ export const Indent = Extension.create<IndentOptions>({
         attributes: {
           indent: {
             default: 0,
-            parseHTML: element =>
-              parseIndentFromElement(element, this.options.minLevel, this.options.maxLevel, this.options.indentUnit),
-            renderHTML: attributes => {
+            parseHTML: (element) =>
+              parseIndentFromElement(
+                element,
+                this.options.minLevel,
+                this.options.maxLevel,
+                this.options.indentUnit,
+              ),
+            renderHTML: (attributes) => {
               const level = Number(attributes.indent) || 0
               if (level === 0) return {}
               const attrs: Record<string, string> = {
@@ -135,28 +145,28 @@ export const Indent = Extension.create<IndentOptions>({
     ) => {
       const nodes = getSelectedNodesOfType(state.selection, this.options.types)
       if (nodes.length === 0) return false
-      return updateNodesAttr(tr, nodes, 'indent', current =>
+      return updateNodesAttr(tr, nodes, 'indent', (current) =>
         clamp(change(Number(current) || 0), this.options.minLevel, this.options.maxLevel),
       )
     }
 
     return {
-      indent: () => context => {
+      indent: () => (context) => {
         const listItemType = findListItemAncestor(context.state, listItemTypes)
         if (listItemType && 'sinkListItem' in context.commands) {
           return context.commands.sinkListItem(listItemType)
         }
-        return applyIndent(context, current => current + 1)
+        return applyIndent(context, (current) => current + 1)
       },
-      outdent: () => context => {
+      outdent: () => (context) => {
         const listItemType = findListItemAncestor(context.state, listItemTypes)
         if (listItemType && 'liftListItem' in context.commands) {
           return context.commands.liftListItem(listItemType)
         }
-        return applyIndent(context, current => current - 1)
+        return applyIndent(context, (current) => current - 1)
       },
-      setIndent: (level: number) => context => applyIndent(context, () => level),
-      unsetIndent: () => context => applyIndent(context, () => 0),
+      setIndent: (level: number) => (context) => applyIndent(context, () => level),
+      unsetIndent: () => (context) => applyIndent(context, () => 0),
     }
   },
 
@@ -167,7 +177,7 @@ export const Indent = Extension.create<IndentOptions>({
         key: indentPluginKey,
         // после drop выравнивает indent перемещённых блоков по соседнему блоку
         appendTransaction(transactions, _oldState, newState) {
-          if (!transactions.some(tr => tr.getMeta('uiEvent') === 'drop')) return null
+          if (!transactions.some((tr) => tr.getMeta('uiEvent') === 'drop')) return null
 
           const { doc, selection } = newState
           const { $from, $to } = selection
@@ -242,8 +252,9 @@ export const Indent = Extension.create<IndentOptions>({
         shouldAutoOutdent(editor.state, this.options.types, listItemTypes, { onlyIfEmpty: true }) &&
         editor.commands.outdent(),
       Backspace: ({ editor }) =>
-        shouldAutoOutdent(editor.state, this.options.types, listItemTypes, { onlyIfEmpty: false }) &&
-        editor.commands.outdent(),
+        shouldAutoOutdent(editor.state, this.options.types, listItemTypes, {
+          onlyIfEmpty: false,
+        }) && editor.commands.outdent(),
     }
   },
 })

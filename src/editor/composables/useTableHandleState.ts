@@ -18,7 +18,7 @@ export function useTableHandleState(
 
   watch(
     () => editor.value,
-    instance => {
+    (instance) => {
       unsubscribe?.()
       unsubscribe = null
       if (!instance) {

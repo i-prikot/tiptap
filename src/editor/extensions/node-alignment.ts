@@ -58,27 +58,34 @@ export const NodeAlignment = Extension.create<NodeAlignmentOptions>({
         attributes: {
           nodeTextAlign: {
             default: null,
-            parseHTML: element => {
+            parseHTML: (element) => {
               const styleValue = element.style?.textAlign
               if (styleValue && this.options.textAlignValues.includes(styleValue)) return styleValue
               const dataValue = element.getAttribute('data-node-text-align')
-              return dataValue && this.options.textAlignValues.includes(dataValue) ? dataValue : null
+              return dataValue && this.options.textAlignValues.includes(dataValue)
+                ? dataValue
+                : null
             },
-            renderHTML: attributes => {
+            renderHTML: (attributes) => {
               const align = attributes.nodeTextAlign
               if (!align || !this.options.textAlignValues.includes(align)) return {}
-              return this.options.useStyle ? { style: `text-align: ${align}` } : { 'data-node-text-align': align }
+              return this.options.useStyle
+                ? { style: `text-align: ${align}` }
+                : { 'data-node-text-align': align }
             },
           },
           nodeVerticalAlign: {
             default: null,
-            parseHTML: element => {
+            parseHTML: (element) => {
               const styleValue = element.style?.verticalAlign
-              if (styleValue && this.options.verticalAlignValues.includes(styleValue)) return styleValue
+              if (styleValue && this.options.verticalAlignValues.includes(styleValue))
+                return styleValue
               const dataValue = element.getAttribute('data-node-vertical-align')
-              return dataValue && this.options.verticalAlignValues.includes(dataValue) ? dataValue : null
+              return dataValue && this.options.verticalAlignValues.includes(dataValue)
+                ? dataValue
+                : null
             },
-            renderHTML: attributes => {
+            renderHTML: (attributes) => {
               const align = attributes.nodeVerticalAlign
               if (!align || !this.options.verticalAlignValues.includes(align)) return {}
               return this.options.useStyle
@@ -108,7 +115,9 @@ export const NodeAlignment = Extension.create<NodeAlignmentOptions>({
       ),
       unsetNodeTextAlign: () => applyAttr('nodeTextAlign', () => null)(undefined),
       toggleNodeTextAlign: applyAttr('nodeTextAlign', (nodes, value) =>
-        value && this.options.textAlignValues.includes(value) ? toggleAttrValue(nodes, 'nodeTextAlign', value) : null,
+        value && this.options.textAlignValues.includes(value)
+          ? toggleAttrValue(nodes, 'nodeTextAlign', value)
+          : null,
       ),
       setNodeVAlign: applyAttr('nodeVerticalAlign', (_nodes, value) =>
         value && this.options.verticalAlignValues.includes(value) ? value : null,
@@ -149,7 +158,11 @@ export const NodeAlignment = Extension.create<NodeAlignmentOptions>({
             const textAlign = node.attrs?.nodeTextAlign ?? null
             const verticalAlign = node.attrs?.nodeVerticalAlign ?? null
             if (textAlign || verticalAlign) {
-              tr.setNodeMarkup(pos, undefined, { ...node.attrs, nodeTextAlign: null, nodeVerticalAlign: null })
+              tr.setNodeMarkup(pos, undefined, {
+                ...node.attrs,
+                nodeTextAlign: null,
+                nodeVerticalAlign: null,
+              })
               changed = true
             }
           }

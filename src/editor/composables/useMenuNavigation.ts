@@ -40,7 +40,9 @@ export function useMenuNavigation<Item>(options: UseMenuNavigationOptions<Item>)
     }
     const movePrev = () => {
       selectedIndex.value =
-        selectedIndex.value === -1 ? list.length - 1 : (selectedIndex.value - 1 + list.length) % list.length
+        selectedIndex.value === -1
+          ? list.length - 1
+          : (selectedIndex.value - 1 + list.length) % list.length
     }
 
     switch (event.key) {
@@ -106,7 +108,7 @@ export function useMenuNavigation<Item>(options: UseMenuNavigationOptions<Item>)
     { immediate: true },
   )
 
-  watch(query, value => {
+  watch(query, (value) => {
     if (value !== undefined) selectedIndex.value = autoSelectFirstItem ? 0 : -1
   })
 

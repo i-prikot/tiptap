@@ -19,13 +19,15 @@ import { provide, ref } from 'vue'
 import { avatarInjectionKey } from './avatar-context'
 import type { AvatarImageLoadingStatus } from './avatar-context'
 
-withDefaults(defineProps<{ size?: 'default' | 'sm' | 'lg' | 'xl'; userColor?: string }>(), { size: 'default' })
+withDefaults(defineProps<{ size?: 'default' | 'sm' | 'lg' | 'xl'; userColor?: string }>(), {
+  size: 'default',
+})
 
 const imageLoadingStatus = ref<AvatarImageLoadingStatus>('idle')
 
 provide(avatarInjectionKey, {
   imageLoadingStatus,
-  onImageLoadingStatusChange: status => {
+  onImageLoadingStatusChange: (status) => {
     imageLoadingStatus.value = status
   },
 })

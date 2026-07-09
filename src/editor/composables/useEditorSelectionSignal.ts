@@ -14,7 +14,7 @@ export function useEditorSelectionSignal(editor: ComputedRef<Editor | null>): Re
 
   watch(
     editor,
-    instance => {
+    (instance) => {
       unsubscribe?.()
       unsubscribe = null
       if (!instance) return

@@ -83,9 +83,17 @@ function safeColumnIsHeader(map: TableMap, node: ProseMirrorNode, index: number)
 
 // ------------------------------------------------------------- duplicate
 
-export const DUPLICATE_LABELS: Record<Orientation, string> = { row: 'Duplicate row', column: 'Duplicate column' }
+export const DUPLICATE_LABELS: Record<Orientation, string> = {
+  row: 'Duplicate row',
+  column: 'Duplicate column',
+}
 
-export function canDuplicateRowColumn({ editor, index, orientation, tablePos }: RowColumnArgs): boolean {
+export function canDuplicateRowColumn({
+  editor,
+  index,
+  orientation,
+  tablePos,
+}: RowColumnArgs): boolean {
   if (!editor || !editor.isEditable || !isExtensionAvailable(editor, HANDLE_EXTENSION)) return false
   try {
     if (!getTable(editor, tablePos)) return false
@@ -97,14 +105,21 @@ export function canDuplicateRowColumn({ editor, index, orientation, tablePos }: 
   }
 }
 
-function duplicateLine(editor: Editor, index: number, orientation: Orientation, tablePos?: number): boolean {
+function duplicateLine(
+  editor: Editor,
+  index: number,
+  orientation: Orientation,
+  tablePos?: number,
+): boolean {
   try {
     const source = getRowOrColumnCells(editor, index, orientation, tablePos)
     if (source.cells.length === 0) return false
     const isRow = orientation === 'row'
     let added = false
     if (editor.state.selection instanceof CellSelection) {
-      added = isRow ? editor.chain().focus().addRowAfter().run() : editor.chain().focus().addColumnAfter().run()
+      added = isRow
+        ? editor.chain().focus().addRowAfter().run()
+        : editor.chain().focus().addColumnAfter().run()
     } else {
       if (typeof tablePos !== 'number') return false
       const coords = getIndexCoordinates({ editor, index, orientation, tablePos })
@@ -123,7 +138,11 @@ function duplicateLine(editor: Editor, index: number, orientation: Orientation, 
     targetReversed.forEach((cell, i) => {
       const from = sourceReversed[i]
       if (cell.node && from?.node) {
-        const copy = cell.node.type.create({ ...from.node.attrs }, from.node.content, from.node.marks)
+        const copy = cell.node.type.create(
+          { ...from.node.attrs },
+          from.node.content,
+          from.node.marks,
+        )
         tr.replaceWith(cell.pos, cell.pos + cell.node.nodeSize, copy)
       }
     })
@@ -139,8 +158,17 @@ function duplicateLine(editor: Editor, index: number, orientation: Orientation, 
   }
 }
 
-export function duplicateRowColumn({ editor, index, orientation, tablePos }: RowColumnArgs): boolean {
-  if (!canDuplicateRowColumn({ editor, index, orientation, tablePos }) || !editor || !getTable(editor, tablePos)) {
+export function duplicateRowColumn({
+  editor,
+  index,
+  orientation,
+  tablePos,
+}: RowColumnArgs): boolean {
+  if (
+    !canDuplicateRowColumn({ editor, index, orientation, tablePos }) ||
+    !editor ||
+    !getTable(editor, tablePos)
+  ) {
     return false
   }
   const selectionType = getTableSelectionType(editor, index, orientation)
@@ -152,7 +180,12 @@ export function duplicateRowColumn({ editor, index, orientation, tablePos }: Row
 
 export const MOVE_LABELS: Record<Orientation, Record<MoveDirection, string>> = {
   row: { up: 'Move row up', down: 'Move row down', left: 'Move row left', right: 'Move row right' },
-  column: { up: 'Move column up', down: 'Move column down', left: 'Move column left', right: 'Move column right' },
+  column: {
+    up: 'Move column up',
+    down: 'Move column down',
+    left: 'Move column left',
+    right: 'Move column right',
+  },
 }
 
 export function isMoveDirectionValid(orientation: Orientation, direction: MoveDirection): boolean {
@@ -170,8 +203,13 @@ export function canMoveRowColumn(args: RowColumnArgs & { direction: MoveDirectio
     if (!selectionType) return false
     const { orientation: resolvedOrientation, index: resolvedIndex } = selectionType
     if (!isMoveDirectionValid(resolvedOrientation, direction)) return false
-    if (resolvedOrientation === 'row' && safeRowIsHeader(table.map, table.node, resolvedIndex)) return false
-    if (resolvedOrientation === 'column' && safeColumnIsHeader(table.map, table.node, resolvedIndex)) return false
+    if (resolvedOrientation === 'row' && safeRowIsHeader(table.map, table.node, resolvedIndex))
+      return false
+    if (
+      resolvedOrientation === 'column' &&
+      safeColumnIsHeader(table.map, table.node, resolvedIndex)
+    )
+      return false
     const { width, height } = table.map
     const targetIndex =
       resolvedOrientation === 'row'
@@ -183,8 +221,18 @@ export function canMoveRowColumn(args: RowColumnArgs & { direction: MoveDirectio
           : resolvedIndex + 1
     const limit = resolvedOrientation === 'row' ? height : width
     if (targetIndex < 0 || targetIndex >= limit) return false
-    const fromCoords = getIndexCoordinates({ editor, index: resolvedIndex, orientation: resolvedOrientation, tablePos })
-    const toCoords = getIndexCoordinates({ editor, index: targetIndex, orientation: resolvedOrientation, tablePos })
+    const fromCoords = getIndexCoordinates({
+      editor,
+      index: resolvedIndex,
+      orientation: resolvedOrientation,
+      tablePos,
+    })
+    const toCoords = getIndexCoordinates({
+      editor,
+      index: targetIndex,
+      orientation: resolvedOrientation,
+      tablePos,
+    })
     if (!fromCoords || !toCoords) return false
     const fromState = selectCellsByCoords(editor, table.pos, fromCoords, { mode: 'state' })
     if (!fromState) return false
@@ -192,7 +240,8 @@ export function canMoveRowColumn(args: RowColumnArgs & { direction: MoveDirectio
     const toState = selectCellsByCoords(editor, table.pos, toCoords, { mode: 'state' })
     if (!toState) return false
     const toRect = selectedRect(toState as EditorState)
-    if (cellsOverlapRectangle(table.map, fromRect) && cellsOverlapRectangle(table.map, toRect)) return false
+    if (cellsOverlapRectangle(table.map, fromRect) && cellsOverlapRectangle(table.map, toRect))
+      return false
     return resolvedOrientation === 'row'
       ? direction === 'up'
         ? resolvedIndex > 0
@@ -219,9 +268,17 @@ export function moveRowColumn(args: RowColumnArgs & { direction: MoveDirection }
     const command = resolvedOrientation === 'row' ? moveTableRow : moveTableColumn
     const dispatch = dispatchOf(editor)
     if (editor.state.selection instanceof CellSelection) {
-      return command({ from: resolvedIndex, to: targetIndex, select: true, pos: table.start })(editor.state, dispatch)
+      return command({ from: resolvedIndex, to: targetIndex, select: true, pos: table.start })(
+        editor.state,
+        dispatch,
+      )
     }
-    const coords = getIndexCoordinates({ editor, index: resolvedIndex, orientation: resolvedOrientation, tablePos })
+    const coords = getIndexCoordinates({
+      editor,
+      index: resolvedIndex,
+      orientation: resolvedOrientation,
+      tablePos,
+    })
     if (!coords) return false
     const state = selectCellsByCoords(editor, table.pos, coords, { mode: 'state' })
     if (!state) return false
@@ -237,17 +294,31 @@ export function moveRowColumn(args: RowColumnArgs & { direction: MoveDirection }
 
 // ---------------------------------------------------------------- header
 
-export const HEADER_LABELS: Record<Orientation, string> = { row: 'Header row', column: 'Header column' }
+export const HEADER_LABELS: Record<Orientation, string> = {
+  row: 'Header row',
+  column: 'Header column',
+}
 
-export function canToggleHeaderRowColumn({ editor, index, orientation, tablePos }: RowColumnArgs): boolean {
+export function canToggleHeaderRowColumn({
+  editor,
+  index,
+  orientation,
+  tablePos,
+}: RowColumnArgs): boolean {
   if (!editor || !editor.isEditable || !isExtensionAvailable(editor, TABLE_EXTENSION)) return false
   const selectionType = getTableSelectionType(editor, index, orientation, tablePos)
   return !!selectionType && selectionType.index === 0
 }
 
-export function isHeaderRowColumnActive({ editor, index, orientation, tablePos }: RowColumnArgs): boolean {
+export function isHeaderRowColumnActive({
+  editor,
+  index,
+  orientation,
+  tablePos,
+}: RowColumnArgs): boolean {
   if (!editor) return false
-  if (editor.state.selection instanceof CellSelection) return editor.isActive('tableHeader') || false
+  if (editor.state.selection instanceof CellSelection)
+    return editor.isActive('tableHeader') || false
   const selectionType = getTableSelectionType(editor, index, orientation)
   const cells = getRowOrColumnCells(editor, index, selectionType?.orientation, tablePos)
   if (!cells) return false
@@ -255,7 +326,12 @@ export function isHeaderRowColumnActive({ editor, index, orientation, tablePos }
   return cells.cells[checkIndex]?.node?.type.name === 'tableHeader'
 }
 
-export function toggleHeaderRowColumn({ editor, index, orientation, tablePos }: RowColumnArgs): boolean {
+export function toggleHeaderRowColumn({
+  editor,
+  index,
+  orientation,
+  tablePos,
+}: RowColumnArgs): boolean {
   if (!editor || !canToggleHeaderRowColumn({ editor, index, orientation, tablePos })) return false
   try {
     const selectionType = getTableSelectionType(editor, index, orientation, tablePos)
@@ -309,7 +385,9 @@ export function canAddRowColumn(args: RowColumnArgs & { side: AddSide }): boolea
     resolvedIndex < 0 ||
     (resolvedOrientation === 'column' && resolvedIndex >= map.width) ||
     (resolvedOrientation === 'row' && resolvedIndex >= map.height) ||
-    (side === 'left' && resolvedOrientation === 'column' && safeColumnIsHeader(map, node, resolvedIndex)) ||
+    (side === 'left' &&
+      resolvedOrientation === 'column' &&
+      safeColumnIsHeader(map, node, resolvedIndex)) ||
     (side === 'above' && resolvedOrientation === 'row' && safeRowIsHeader(map, node, resolvedIndex))
   )
 }
@@ -339,7 +417,11 @@ export function addRowColumn(args: RowColumnArgs & { side: AddSide }): boolean {
       const state = selectCellsByCoords(
         editor,
         table.pos,
-        [resolvedOrientation === 'row' ? { row: resolvedIndex, col: 0 } : { row: 0, col: resolvedIndex }],
+        [
+          resolvedOrientation === 'row'
+            ? { row: resolvedIndex, col: 0 }
+            : { row: 0, col: resolvedIndex },
+        ],
         { mode: 'state' },
       )
       if (!state) return false
@@ -365,9 +447,17 @@ export function addRowColumn(args: RowColumnArgs & { side: AddSide }): boolean {
 
 // ---------------------------------------------------------------- delete
 
-export const DELETE_LABELS: Record<Orientation, string> = { row: 'Delete row', column: 'Delete column' }
+export const DELETE_LABELS: Record<Orientation, string> = {
+  row: 'Delete row',
+  column: 'Delete column',
+}
 
-export function canDeleteRowColumn({ editor, index, orientation, tablePos }: RowColumnArgs): boolean {
+export function canDeleteRowColumn({
+  editor,
+  index,
+  orientation,
+  tablePos,
+}: RowColumnArgs): boolean {
   if (!editor || !editor.isEditable || !isExtensionAvailable(editor, TABLE_EXTENSION)) return false
   try {
     return !!getTable(editor, tablePos) && !!getTableSelectionType(editor, index, orientation)
@@ -410,13 +500,18 @@ export const SORT_LABELS: Record<Orientation, Record<SortDirection, string>> = {
 }
 
 function isHeaderCell(node: ProseMirrorNode | null | undefined): boolean {
-  return !!node && (node.type.name === 'tableHeader' || node.type.name === 'table_header' || node.attrs?.header === true)
+  return (
+    !!node &&
+    (node.type.name === 'tableHeader' ||
+      node.type.name === 'table_header' ||
+      node.attrs?.header === true)
+  )
 }
 
 function cellSortText(node: ProseMirrorNode | null | undefined): string {
   if (!node) return ''
   let text = ''
-  node.descendants(child => {
+  node.descendants((child) => {
     if (child.isText) text += child.text || ''
     return true
   })
@@ -434,7 +529,7 @@ export function canSortRowColumn({ editor, index, orientation, tablePos }: RowCo
     } else if (table.map.height < 2) return false
     if (
       cells.mergedCells.length > 0 ||
-      !cells.cells.some(cell => cell.node && !isHeaderCell(cell.node) && !isCellEmpty(cell.node))
+      !cells.cells.some((cell) => cell.node && !isHeaderCell(cell.node) && !isCellEmpty(cell.node))
     ) {
       return false
     }
@@ -464,7 +559,7 @@ export function sortRowColumn(args: RowColumnArgs & { direction: SortDirection }
       isHeader: isHeaderCell(cell.node),
       isEmpty: !cell.node || isCellEmpty(cell.node),
     }))
-    const sortable = entries.filter(entry => !entry.isHeader)
+    const sortable = entries.filter((entry) => !entry.isHeader)
     if (sortable.length < 2) return false
     sortable.sort((a, b) => {
       if (a.isEmpty && !b.isEmpty) return 1
@@ -510,22 +605,35 @@ export function sortRowColumn(args: RowColumnArgs & { direction: SortDirection }
 
 // ----------------------------------------------------------------- clear
 
-export const CLEAR_LABELS: Record<Orientation, string> = { row: 'Clear row contents', column: 'Clear column contents' }
+export const CLEAR_LABELS: Record<Orientation, string> = {
+  row: 'Clear row contents',
+  column: 'Clear column contents',
+}
 
-export function canClearRowColumnContent({ editor, index, orientation, tablePos }: RowColumnArgs): boolean {
+export function canClearRowColumnContent({
+  editor,
+  index,
+  orientation,
+  tablePos,
+}: RowColumnArgs): boolean {
   if (!editor || !editor.isEditable || !isExtensionAvailable(editor, TABLE_EXTENSION)) return false
   try {
     if (!getTable(editor, tablePos)) return false
     const selectionType = getTableSelectionType(editor, index, orientation, tablePos)
     if (selectionType) {
-      const cells = getRowOrColumnCells(editor, selectionType.index, selectionType.orientation, tablePos)
+      const cells = getRowOrColumnCells(
+        editor,
+        selectionType.index,
+        selectionType.orientation,
+        tablePos,
+      )
       if (cells.cells.length === 0) return false
-      return cells.cells.some(cell => cell.node && !isCellEmpty(cell.node))
+      return cells.cells.some((cell) => cell.node && !isCellEmpty(cell.node))
     }
     const { selection } = editor.state
     if (selection instanceof CellSelection) {
       let hasContent = false
-      selection.forEachCell(node => {
+      selection.forEachCell((node) => {
         if (!isCellEmpty(node)) hasContent = true
       })
       return hasContent
@@ -540,8 +648,18 @@ export function canClearRowColumnContent({ editor, index, orientation, tablePos 
 }
 
 /** Видимость пункта Clear: есть строка/столбец либо курсор в ячейке. */
-export function isClearRowColumnVisible({ editor, index, orientation, tablePos }: RowColumnArgs): boolean {
-  if (!editor || !editor.isEditable || !isExtensionAvailable(editor, TABLE_EXTENSION) || !getTable(editor, tablePos)) {
+export function isClearRowColumnVisible({
+  editor,
+  index,
+  orientation,
+  tablePos,
+}: RowColumnArgs): boolean {
+  if (
+    !editor ||
+    !editor.isEditable ||
+    !isExtensionAvailable(editor, TABLE_EXTENSION) ||
+    !getTable(editor, tablePos)
+  ) {
     return false
   }
   const selectionType = getTableSelectionType(editor, index, orientation, tablePos)
@@ -568,14 +686,20 @@ export function clearRowColumnContent(args: RowColumnArgs & { resetAttrs?: boole
       try {
         const { state, view } = editor
         const tr = state.tr
-        const cells = getRowOrColumnCells(editor, selectionType.index, selectionType.orientation, tablePos)
+        const cells = getRowOrColumnCells(
+          editor,
+          selectionType.index,
+          selectionType.orientation,
+          tablePos,
+        )
         if (cells.cells.length === 0) return false
-        ;[...cells.cells].reverse().forEach(cell => {
+        ;[...cells.cells].reverse().forEach((cell) => {
           if (cell.node && !isCellEmpty(cell.node)) {
             const from = cell.pos + 1
             const to = cell.pos + cell.node.nodeSize - 1
             if (from < to) tr.delete(from, to)
-            if (resetAttrs) tr.setNodeMarkup(cell.pos, null, { ...cell.node.attrs, ...RESET_CELL_ATTRS })
+            if (resetAttrs)
+              tr.setNodeMarkup(cell.pos, null, { ...cell.node.attrs, ...RESET_CELL_ATTRS })
           }
         })
         if (tr.docChanged) {
@@ -652,7 +776,7 @@ export function canClearAllTableContent({ editor, tablePos }: RowColumnArgs): bo
   try {
     const table = getSelectedTable(editor, tablePos)
     if (!table) return false
-    return collectAllTableCells(table).some(cell => cell.node && !isCellEmpty(cell.node))
+    return collectAllTableCells(table).some((cell) => cell.node && !isCellEmpty(cell.node))
   } catch {
     return false
   }
@@ -688,7 +812,10 @@ export function clearAllTableContent(args: RowColumnArgs & { resetAttrs?: boolea
 
 // ----------------------------------------------------------- merge/split
 
-export const MERGE_SPLIT_LABELS: Record<MergeSplitAction, string> = { merge: 'Merge cells', split: 'Split cell' }
+export const MERGE_SPLIT_LABELS: Record<MergeSplitAction, string> = {
+  merge: 'Merge cells',
+  split: 'Split cell',
+}
 
 export function canMergeCells(editor: Editor | null): boolean {
   if (!editor || !editor.isEditable || !isExtensionAvailable(editor, TABLE_EXTENSION)) return false

@@ -63,15 +63,15 @@ If collaboration or AI is configured but token retrieval fails, the correspondin
 
 All runtime variables use Vite's `VITE_` prefix and are read from `import.meta.env`.
 
-| Variable | Purpose | Default / fallback | Notes |
-|---|---|---|---|
-| `VITE_TIPTAP_COLLAB_APP_ID` | Enables Tiptap Cloud collaboration when set. | Empty string; collaboration is disabled. | Required for collaboration. Keep production app configuration outside the frontend when possible. |
-| `VITE_TIPTAP_COLLAB_TOKEN_URL` | Endpoint used to request a collaboration JWT. | `/api/collaboration` | Used with `POST` when no static collaboration token is provided. |
-| `VITE_TIPTAP_COLLAB_TOKEN` | Static collaboration JWT. | Empty string; fetch from token URL instead. | Suitable only for local development. Do not ship long-lived secrets in frontend builds. |
-| `VITE_TIPTAP_COLLAB_DOC_PREFIX` | Prefix added before the URL-derived room id. | Empty string | Useful for separating Tinyfy environments or tenants. |
-| `VITE_TIPTAP_AI_APP_ID` | Marks the AI flow as configured when set. | Empty string; AI flow is disabled. | The paid Tiptap AI extension is not included in this port, so AI UI remains hidden unless the extension is added later. |
-| `VITE_TIPTAP_AI_TOKEN_URL` | Endpoint used to request an AI JWT. | `/api/ai` | Used with `POST` when no static AI token is provided. |
-| `VITE_TIPTAP_AI_TOKEN` | Static AI JWT. | Empty string; fetch from token URL instead. | Suitable only for local development. Do not expose production AI secrets in frontend code. |
+| Variable                        | Purpose                                       | Default / fallback                          | Notes                                                                                                                   |
+| ------------------------------- | --------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `VITE_TIPTAP_COLLAB_APP_ID`     | Enables Tiptap Cloud collaboration when set.  | Empty string; collaboration is disabled.    | Required for collaboration. Keep production app configuration outside the frontend when possible.                       |
+| `VITE_TIPTAP_COLLAB_TOKEN_URL`  | Endpoint used to request a collaboration JWT. | `/api/collaboration`                        | Used with `POST` when no static collaboration token is provided.                                                        |
+| `VITE_TIPTAP_COLLAB_TOKEN`      | Static collaboration JWT.                     | Empty string; fetch from token URL instead. | Suitable only for local development. Do not ship long-lived secrets in frontend builds.                                 |
+| `VITE_TIPTAP_COLLAB_DOC_PREFIX` | Prefix added before the URL-derived room id.  | Empty string                                | Useful for separating Tinyfy environments or tenants.                                                                   |
+| `VITE_TIPTAP_AI_APP_ID`         | Marks the AI flow as configured when set.     | Empty string; AI flow is disabled.          | The paid Tiptap AI extension is not included in this port, so AI UI remains hidden unless the extension is added later. |
+| `VITE_TIPTAP_AI_TOKEN_URL`      | Endpoint used to request an AI JWT.           | `/api/ai`                                   | Used with `POST` when no static AI token is provided.                                                                   |
+| `VITE_TIPTAP_AI_TOKEN`          | Static AI JWT.                                | Empty string; fetch from token URL instead. | Suitable only for local development. Do not expose production AI secrets in frontend code.                              |
 
 Example local `.env` shape:
 
@@ -87,23 +87,23 @@ Leave `APP_ID` values empty to run fully locally.
 
 ## Project Structure
 
-| Path | Purpose |
-|---|---|
-| `package.json` | npm package metadata and scripts for dev, type checking, and build. |
-| `vite.config.ts` | Vite configuration with the Vue plugin. |
-| `src/main.ts` | Browser entrypoint; imports global editor styles and mounts `App.vue`. |
-| `src/App.vue` | Demo app shell; derives the document room from the URL and renders `NotionEditor`. |
-| `src/editor/components/notion/` | Main editor shell, provider wiring, header, content area, setup/error states, theme toggle, and TOC sidebar. |
-| `src/editor/components/ui/` | Editor-specific UI widgets such as toolbars, slash/mention/emoji menus, link popovers, color controls, image controls, and block actions. |
-| `src/editor/components/table/` | Table handles, overlays, context menus, and row/column extension controls. |
-| `src/editor/components/primitives/` | Reusable UI primitives: buttons, menus, popovers, cards, avatars, inputs, toolbars, separators, and tooltips. |
-| `src/editor/composables/` | Vue composables for editor state, collaboration, AI token flow, TOC, selection, floating menus, colors, links, table handles, node movement, and user identity. |
-| `src/editor/extensions/` | Tiptap/ProseMirror behavior extensions including indentation, node alignment/background, table handles, list normalization, UI state, and block selection. |
-| `src/editor/nodes/` | Custom Vue NodeViews and Tiptap nodes for images, image uploads, and table of contents blocks. |
-| `src/editor/content/` | Default document content used by the demo/editor initialization. |
-| `src/editor/utils/` | Shared helpers for document ids, suggestions, table operations, throttling, node actions, TOC utilities, trigger handling, and user persistence. |
-| `src/editor/icons/` | Icon exports used by editor UI components. |
-| `src/editor/styles/` | Global editor CSS, node styles, UI primitive styles, table styles, and design tokens. |
+| Path                                | Purpose                                                                                                                                                         |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `package.json`                      | npm package metadata and scripts for dev, type checking, and build.                                                                                             |
+| `vite.config.ts`                    | Vite configuration with the Vue plugin.                                                                                                                         |
+| `src/main.ts`                       | Browser entrypoint; imports global editor styles and mounts `App.vue`.                                                                                          |
+| `src/App.vue`                       | Demo app shell; derives the document room from the URL and renders `NotionEditor`.                                                                              |
+| `src/editor/components/notion/`     | Main editor shell, provider wiring, header, content area, setup/error states, theme toggle, and TOC sidebar.                                                    |
+| `src/editor/components/ui/`         | Editor-specific UI widgets such as toolbars, slash/mention/emoji menus, link popovers, color controls, image controls, and block actions.                       |
+| `src/editor/components/table/`      | Table handles, overlays, context menus, and row/column extension controls.                                                                                      |
+| `src/editor/components/primitives/` | Reusable UI primitives: buttons, menus, popovers, cards, avatars, inputs, toolbars, separators, and tooltips.                                                   |
+| `src/editor/composables/`           | Vue composables for editor state, collaboration, AI token flow, TOC, selection, floating menus, colors, links, table handles, node movement, and user identity. |
+| `src/editor/extensions/`            | Tiptap/ProseMirror behavior extensions including indentation, node alignment/background, table handles, list normalization, UI state, and block selection.      |
+| `src/editor/nodes/`                 | Custom Vue NodeViews and Tiptap nodes for images, image uploads, and table of contents blocks.                                                                  |
+| `src/editor/content/`               | Default document content used by the demo/editor initialization.                                                                                                |
+| `src/editor/utils/`                 | Shared helpers for document ids, suggestions, table operations, throttling, node actions, TOC utilities, trigger handling, and user persistence.                |
+| `src/editor/icons/`                 | Icon exports used by editor UI components.                                                                                                                      |
+| `src/editor/styles/`                | Global editor CSS, node styles, UI primitive styles, table styles, and design tokens.                                                                           |
 
 ## Tinyfy Embedding Notes
 

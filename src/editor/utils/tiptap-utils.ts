@@ -6,7 +6,12 @@
 import { findParentNodeClosestToPos } from '@tiptap/core'
 import type { Editor } from '@tiptap/core'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
-import { AllSelection, NodeSelection, Selection as PMSelection, TextSelection } from '@tiptap/pm/state'
+import {
+  AllSelection,
+  NodeSelection,
+  Selection as PMSelection,
+  TextSelection,
+} from '@tiptap/pm/state'
 import type { Selection, Transaction } from '@tiptap/pm/state'
 import { CellSelection, cellAround } from '@tiptap/pm/tables'
 
@@ -161,17 +166,20 @@ export function getSelectedNodesOfType(selection: Selection, types: string[]): N
     }
   }
 
-  const parent = findParentNodeClosestToPos($anchor, node => wanted.has(node.type.name))
+  const parent = findParentNodeClosestToPos($anchor, (node) => wanted.has(node.type.name))
   if (parent) result.push({ node: parent.node, pos: parent.pos })
   return result
 }
 
 /** Проверяет, что хотя бы одно из расширений зарегистрировано в редакторе. */
-export function isExtensionAvailable(editor: Editor | null, extensionNames: string | string[]): boolean {
+export function isExtensionAvailable(
+  editor: Editor | null,
+  extensionNames: string | string[],
+): boolean {
   if (!editor) return false
   const names = Array.isArray(extensionNames) ? extensionNames : [extensionNames]
-  const available = names.some(name =>
-    editor.extensionManager.extensions.some(extension => extension.name === name),
+  const available = names.some((name) =>
+    editor.extensionManager.extensions.some((extension) => extension.name === name),
   )
   if (!available) {
     console.warn(
@@ -195,7 +203,11 @@ export function isNodeInSchema(nodeName: string, editor: Editor | null): boolean
  * Выделен ли сейчас узел одного из указанных типов
  * (NodeSelection или, опционально, предок текстового выделения).
  */
-export function isNodeTypeSelected(editor: Editor | null, types: string[] = [], checkAncestors = false): boolean {
+export function isNodeTypeSelected(
+  editor: Editor | null,
+  types: string[] = [],
+  checkAncestors = false,
+): boolean {
   if (!editor || !editor.state.selection) return false
   const { selection } = editor.state
   if (selection.empty) return false
@@ -247,8 +259,8 @@ export function parseShortcutKeys(args: {
   const isMac = typeof navigator !== 'undefined' && navigator.platform.toLowerCase().includes('mac')
   return shortcutKeys
     .split(delimiter)
-    .map(key => key.trim())
-    .map(key => formatShortcutKey(key, isMac, capitalize))
+    .map((key) => key.trim())
+    .map((key) => formatShortcutKey(key, isMac, capitalize))
 }
 
 const ATTR_WHITESPACE = /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205F\u3000]/g
@@ -262,9 +274,20 @@ export function sanitizeUrl(
   try {
     const url = new URL(inputUrl, baseUrl)
     const href = url.href
-    const allowed = ['http', 'https', 'ftp', 'ftps', 'mailto', 'tel', 'callto', 'sms', 'cid', 'xmpp']
+    const allowed = [
+      'http',
+      'https',
+      'ftp',
+      'ftps',
+      'mailto',
+      'tel',
+      'callto',
+      'sms',
+      'cid',
+      'xmpp',
+    ]
     if (protocols) {
-      protocols.forEach(protocol => {
+      protocols.forEach((protocol) => {
         const scheme = typeof protocol === 'string' ? protocol : protocol.scheme
         if (scheme) allowed.push(scheme)
       })
@@ -273,7 +296,9 @@ export function sanitizeUrl(
       !href ||
       href
         .replace(ATTR_WHITESPACE, '')
-        .match(new RegExp(`^(?:(?:${allowed.join('|')}):|[^a-z]|[a-z0-9+.-]+(?:[^a-z+.-:]|$))`, 'i'))
+        .match(
+          new RegExp(`^(?:(?:${allowed.join('|')}):|[^a-z]|[a-z0-9+.-]+(?:[^a-z+.-:]|$))`, 'i'),
+        )
     ) {
       return url.href
     }
@@ -315,7 +340,10 @@ export function selectCurrentBlockContent(editor: Editor) {
 }
 
 /** Все текстовые блоки выделения принадлежат перечисленным типам. */
-export function selectionWithinConvertibleTypes(editor: Editor | null, types: string[] = []): boolean {
+export function selectionWithinConvertibleTypes(
+  editor: Editor | null,
+  types: string[] = [],
+): boolean {
   if (!editor || types.length === 0) return false
   const { state } = editor
   const { selection } = state
@@ -328,7 +356,7 @@ export function selectionWithinConvertibleTypes(editor: Editor | null, types: st
 
   if (selection instanceof TextSelection || selection instanceof AllSelection) {
     let valid = true
-    state.doc.nodesBetween(selection.from, selection.to, node => {
+    state.doc.nodesBetween(selection.from, selection.to, (node) => {
       if (node.isTextblock && !allowed.has(node.type.name)) {
         valid = false
         return false
@@ -357,7 +385,8 @@ export function updateNodesAttr(
     const node = tr.doc.nodeAt(pos)
     if (!node) continue
     const current = node.attrs[attrName]
-    const next = typeof value === 'function' ? (value as (current: unknown) => unknown)(current) : value
+    const next =
+      typeof value === 'function' ? (value as (current: unknown) => unknown)(current) : value
     if (current === next) continue
     const attrs: Record<string, unknown> = { ...node.attrs }
     if (next === undefined) delete attrs[attrName]
@@ -384,7 +413,7 @@ export async function handleImageUpload(
 
   for (let progress = 0; progress <= 100; progress += 10) {
     if (abortSignal?.aborted) throw new Error('Upload cancelled')
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 500))
     onProgress?.({ progress })
   }
 
@@ -399,17 +428,20 @@ export function chunkArray<T>(items: T[], size: number): T[][] {
 }
 
 /** Атрибуты активной марки в выделении (чанк 2mux2p9tadf0h, getActiveMarkAttrs). */
-export function getActiveMarkAttrs(editor: Editor | null, markName: string): Record<string, any> | null {
+export function getActiveMarkAttrs(
+  editor: Editor | null,
+  markName: string,
+): Record<string, any> | null {
   if (!editor) return null
   const { state } = editor
   const { from, to, empty, $from } = state.selection
   if (empty) {
-    const mark = $from.marks().find(m => m.type.name === markName)
+    const mark = $from.marks().find((m) => m.type.name === markName)
     return mark?.attrs ?? null
   }
   const seen = new Set<string>()
   let attrs: Record<string, any> | null = null
-  state.doc.nodesBetween(from, to, node => {
+  state.doc.nodesBetween(from, to, (node) => {
     if (node.isText) {
       for (const mark of node.marks) {
         if (mark.type.name === markName && !seen.has(mark.type.name)) {

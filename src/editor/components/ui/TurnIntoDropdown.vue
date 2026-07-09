@@ -55,15 +55,20 @@ const activeEditor = computed(() => editorRef.value)
 const signal = useEditorSelectionSignal(editorRef)
 
 const open = ref(false)
-watch(open, value => emit('openChange', value))
+watch(open, (value) => emit('openChange', value))
 
 const canToggle = computed(() => (signal.value, canTurnInto(editorRef.value, props.blockTypes)))
-const activeBlock = computed(() => (signal.value, getActiveTurnIntoBlock(editorRef.value, props.blockTypes)))
+const activeBlock = computed(
+  () => (signal.value, getActiveTurnIntoBlock(editorRef.value, props.blockTypes)),
+)
 const isVisible = computed(() => {
   void signal.value
   const instance = editorRef.value
   if (!instance) return false
   if (!props.hideWhenUnavailable) return true
-  return !!instance.isEditable && (!!instance.isActive('code') || canTurnInto(instance, props.blockTypes))
+  return (
+    !!instance.isEditable &&
+    (!!instance.isActive('code') || canTurnInto(instance, props.blockTypes))
+  )
 })
 </script>

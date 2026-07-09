@@ -1,5 +1,11 @@
 <template>
-  <div ref="toolbarRef" role="toolbar" aria-label="toolbar" :data-variant="variant" class="tiptap-toolbar">
+  <div
+    ref="toolbarRef"
+    role="toolbar"
+    aria-label="toolbar"
+    :data-variant="variant"
+    class="tiptap-toolbar"
+  >
     <slot />
   </div>
 </template>
@@ -36,7 +42,7 @@ const { selectedIndex } = useMenuNavigation<HTMLElement>({
   query,
   items: focusableItems,
   orientation: 'horizontal',
-  onSelect: item => item.click(),
+  onSelect: (item) => item.click(),
   autoSelectFirstItem: false,
 })
 
@@ -68,7 +74,7 @@ onBeforeUnmount(() => {
 
 // фокус на выбранном стрелками элементе
 import { watch } from 'vue'
-watch(selectedIndex, index => {
+watch(selectedIndex, (index) => {
   const item = focusableItems.value[index]
   if (item) item.focus()
 })

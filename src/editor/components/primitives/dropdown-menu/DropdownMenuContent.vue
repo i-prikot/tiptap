@@ -65,23 +65,33 @@ function transformOrigin(resolved: string): string {
   return `${resolvedSide === 'left' ? 'right' : 'left'} ${y}`
 }
 
-const { floatingStyles, placement: resolvedPlacement } = useFloating(context.reference, floatingRef, {
-  placement,
-  whileElementsMounted: autoUpdate,
-  middleware: [
-    offset(props.sideOffset),
-    flip({ padding: 8 }),
-    shift({ padding: 8 }),
-    size({
-      padding: 8,
-      apply({ elements, availableHeight, availableWidth }) {
-        const wrapper = elements.floating
-        wrapper.style.setProperty('--radix-dropdown-menu-content-available-height', `${Math.floor(availableHeight)}px`)
-        wrapper.style.setProperty('--radix-dropdown-menu-content-available-width', `${Math.floor(availableWidth)}px`)
-      },
-    }),
-  ],
-})
+const { floatingStyles, placement: resolvedPlacement } = useFloating(
+  context.reference,
+  floatingRef,
+  {
+    placement,
+    whileElementsMounted: autoUpdate,
+    middleware: [
+      offset(props.sideOffset),
+      flip({ padding: 8 }),
+      shift({ padding: 8 }),
+      size({
+        padding: 8,
+        apply({ elements, availableHeight, availableWidth }) {
+          const wrapper = elements.floating
+          wrapper.style.setProperty(
+            '--radix-dropdown-menu-content-available-height',
+            `${Math.floor(availableHeight)}px`,
+          )
+          wrapper.style.setProperty(
+            '--radix-dropdown-menu-content-available-width',
+            `${Math.floor(availableWidth)}px`,
+          )
+        },
+      }),
+    ],
+  },
+)
 
 const resolvedSide = computed(() => resolvedPlacement.value.split('-')[0])
 

@@ -86,8 +86,10 @@ export const HIGHLIGHT_COLORS: HighlightColor[] = [
 
 /** Подмножество палитры по значениям var(...) с сохранением порядка аргументов. */
 export function pickHighlightColorsByValue(values: string[]): HighlightColor[] {
-  const byValue = new Map(HIGHLIGHT_COLORS.map(color => [color.value, color]))
-  return values.map(value => byValue.get(value)).filter((color): color is HighlightColor => !!color)
+  const byValue = new Map(HIGHLIGHT_COLORS.map((color) => [color.value, color]))
+  return values
+    .map((value) => byValue.get(value))
+    .filter((color): color is HighlightColor => !!color)
 }
 
 export function canColorHighlight(editor: Editor | null, mode: HighlightMode = 'mark'): boolean {
@@ -107,13 +109,18 @@ export function canColorHighlight(editor: Editor | null, mode: HighlightMode = '
 /** value → colorValue (для рендера вне var(--...) контекста). */
 function resolveHighlightColor(color: string, useColorValue: boolean): string {
   if (!useColorValue) return color
-  const found = HIGHLIGHT_COLORS.find(item => item.value === color || item.colorValue === color)
+  const found = HIGHLIGHT_COLORS.find((item) => item.value === color || item.colorValue === color)
   return found?.colorValue || color
 }
 
-function isHighlightActive(editor: Editor | null, color: string | undefined, mode: HighlightMode): boolean {
+function isHighlightActive(
+  editor: Editor | null,
+  color: string | undefined,
+  mode: HighlightMode,
+): boolean {
   if (!editor || !editor.isEditable) return false
-  if (mode === 'mark') return color ? editor.isActive('highlight', { color }) : editor.isActive('highlight')
+  if (mode === 'mark')
+    return color ? editor.isActive('highlight', { color }) : editor.isActive('highlight')
   if (!color) return false
   try {
     const { $anchor } = editor.state.selection
@@ -149,10 +156,14 @@ export function useColorHighlight(options: UseColorHighlightOptions) {
   } = options
   const signal = useEditorSelectionSignal(editor)
 
-  const resolvedColor = highlightColor ? resolveHighlightColor(highlightColor, useColorValue) : highlightColor
+  const resolvedColor = highlightColor
+    ? resolveHighlightColor(highlightColor, useColorValue)
+    : highlightColor
 
   const canColor = computed(() => (signal.value, canColorHighlight(editor.value, mode)))
-  const isActive = computed(() => (signal.value, isHighlightActive(editor.value, resolvedColor, mode)))
+  const isActive = computed(
+    () => (signal.value, isHighlightActive(editor.value, resolvedColor, mode)),
+  )
   const isVisible = computed(() => {
     void signal.value
     const instance = editor.value

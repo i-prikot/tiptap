@@ -60,9 +60,11 @@ export const NodeBackground = Extension.create<NodeBackgroundOptions>({
         attributes: {
           backgroundColor: {
             default: null,
-            parseHTML: element =>
-              element.style?.backgroundColor || element.getAttribute('data-background-color') || null,
-            renderHTML: attributes => {
+            parseHTML: (element) =>
+              element.style?.backgroundColor ||
+              element.getAttribute('data-background-color') ||
+              null,
+            renderHTML: (attributes) => {
               const color = attributes.backgroundColor
               if (!color) return {}
               return this.options.useStyle

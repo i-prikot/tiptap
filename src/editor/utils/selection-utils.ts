@@ -14,8 +14,8 @@ export function getSelectionBoundingRect(editor: Editor): DOMRect | null {
   const { state } = editor.view
   const { selection } = state
   const { ranges } = selection
-  const from = Math.min(...ranges.map(range => range.$from.pos))
-  const to = Math.max(...ranges.map(range => range.$to.pos))
+  const from = Math.min(...ranges.map((range) => range.$from.pos))
+  const to = Math.max(...ranges.map((range) => range.$to.pos))
 
   if (isNodeSelection(selection)) {
     const node = editor.view.nodeDOM(from) as HTMLElement | null
@@ -38,8 +38,10 @@ export function isSelectionValid(
 
   const isEmptyTextBlock = !doc.textBetween(from, to).length && isTextSelection(selection)
   const isCodeBlock =
-    selection.$from.parent.type.spec.code || (isNodeSelection(selection) && selection.node.type.spec.code)
-  const isExcludedNode = isNodeSelection(selection) && excludedNodeTypes.includes(selection.node.type.name)
+    selection.$from.parent.type.spec.code ||
+    (isNodeSelection(selection) && selection.node.type.spec.code)
+  const isExcludedNode =
+    isNodeSelection(selection) && excludedNodeTypes.includes(selection.node.type.name)
   const isCellSelection = selection instanceof CellSelection
 
   return !empty && !isEmptyTextBlock && !isCodeBlock && !isExcludedNode && !isCellSelection
@@ -49,24 +51,34 @@ export function isTextSelectionValid(editor: Editor | null): boolean {
   if (!editor) return false
   const { selection } = editor.state
   return (
-    isTextSelection(selection) && !selection.empty && !selection.$from.parent.type.spec.code && !isNodeSelection(selection)
+    isTextSelection(selection) &&
+    !selection.empty &&
+    !selection.$from.parent.type.spec.code &&
+    !isNodeSelection(selection)
   )
 }
 
 /** Убирает пустые параграфы из JSON-контента. */
-export function removeEmptyParagraphs<T extends { content?: Array<Record<string, any>> }>(doc: T): T {
+export function removeEmptyParagraphs<T extends { content?: Array<Record<string, any>> }>(
+  doc: T,
+): T {
   return {
     ...doc,
     content: doc.content?.filter(
-      node =>
+      (node) =>
         node.type !== 'paragraph' ||
-        node.content?.some((child: Record<string, any>) => child.text?.trim() || child.type !== 'text'),
+        node.content?.some(
+          (child: Record<string, any>) => child.text?.trim() || child.type !== 'text',
+        ),
     ),
   }
 }
 
 /** Положение элемента относительно контейнера: top/bottom/both/none. */
-export function getElementOverflowPosition(element: Element, container: Element): 'top' | 'bottom' | 'both' | 'none' {
+export function getElementOverflowPosition(
+  element: Element,
+  container: Element,
+): 'top' | 'bottom' | 'both' | 'none' {
   const elementRect = element.getBoundingClientRect()
   const containerRect = container.getBoundingClientRect()
   const overflowsTop = elementRect.top < containerRect.top
@@ -115,7 +127,9 @@ export function hasContentAbove(editor: Editor | null): { hasContent: boolean; c
 export function selectionHasText(editor: Editor | null): boolean {
   if (!editor) return false
   const { selection, doc } = editor.state
-  return !selection.empty && doc.textBetween(selection.from, selection.to, '\n', '\0').trim().length > 0
+  return (
+    !selection.empty && doc.textBetween(selection.from, selection.to, '\n', '\0').trim().length > 0
+  )
 }
 
 /** Позиция для NodeSelection: явная, по узлу, либо блок вокруг пустого курсора. */

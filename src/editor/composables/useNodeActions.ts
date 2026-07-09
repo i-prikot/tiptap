@@ -15,7 +15,11 @@ import { isExtensionAvailable, isNodeTypeSelected, isValidPosition } from '../ut
 import { getEditorExtension } from './useScrollToHash'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
 import { getTable, RESIZE_MIN_WIDTH } from '../utils/table-utils'
-import { CLEAR_ALL_LABEL, canClearAllTableContent, clearAllTableContent } from '../utils/table-actions'
+import {
+  CLEAR_ALL_LABEL,
+  canClearAllTableContent,
+  clearAllTableContent,
+} from '../utils/table-actions'
 import {
   ArrowDownToLineIcon,
   ClipboardIcon,
@@ -131,7 +135,10 @@ async function writeToClipboard(text: string, html?: string) {
 export function useCopyToClipboard(editor: ComputedRef<Editor | null>, copyWithFormatting = true) {
   const signal = useEditorSelectionSignal(editor)
   const canCopyToClipboard = computed(
-    () => (signal.value, !!editor.value && !!editor.value.isEditable && !editor.value.state.selection.empty),
+    () => (
+      signal.value,
+      !!editor.value && !!editor.value.isEditable && !editor.value.state.selection.empty
+    ),
   )
 
   const handleCopyToClipboard = async (): Promise<boolean> => {
@@ -147,8 +154,11 @@ export function useCopyToClipboard(editor: ComputedRef<Editor | null>, copyWithF
       }
       const textContent = slice.content.textBetween(0, slice.content.size, '\n')
       const htmlContent = copyWithFormatting
-        ? ((instance.view as unknown as { serializeForClipboard: (slice: Slice) => { dom: HTMLElement } })
-            .serializeForClipboard(slice).dom.innerHTML as string)
+        ? ((
+            instance.view as unknown as {
+              serializeForClipboard: (slice: Slice) => { dom: HTMLElement }
+            }
+          ).serializeForClipboard(slice).dom.innerHTML as string)
         : undefined
       await writeToClipboard(textContent, htmlContent)
       return true
@@ -179,7 +189,9 @@ function getNodeIdInfo(editor: Editor | null) {
 
 export function useCopyAnchorLink(editor: ComputedRef<Editor | null>) {
   const signal = useEditorSelectionSignal(editor)
-  const canCopyAnchorLink = computed(() => (signal.value, getNodeIdInfo(editor.value)?.hasNodeId ?? false))
+  const canCopyAnchorLink = computed(
+    () => (signal.value, getNodeIdInfo(editor.value)?.hasNodeId ?? false),
+  )
 
   const handleCopyAnchorLink = async (): Promise<boolean> => {
     const info = getNodeIdInfo(editor.value)
@@ -212,7 +224,7 @@ function selectionHasRemovableMarks(tr: Transaction, preserveMarks: string[]): b
   if (selection.empty) return false
   for (const range of selection.ranges) {
     let found = false
-    tr.doc.nodesBetween(range.$from.pos, range.$to.pos, node => {
+    tr.doc.nodesBetween(range.$from.pos, range.$to.pos, (node) => {
       if (!node.isInline) return true
       for (const mark of node.marks) {
         if (!preserveMarks.includes(mark.type.name)) {
@@ -233,9 +245,12 @@ export function useResetAllFormatting(
 ) {
   const signal = useEditorSelectionSignal(editor)
   const canReset = computed(
-    () =>
-      (signal.value,
-      !!editor.value && !!editor.value.isEditable && selectionHasRemovableMarks(editor.value.state.tr, preserveMarks)),
+    () => (
+      signal.value,
+      !!editor.value &&
+        !!editor.value.isEditable &&
+        selectionHasRemovableMarks(editor.value.state.tr, preserveMarks)
+    ),
   )
 
   const handleResetFormatting = (): boolean => {
@@ -246,11 +261,12 @@ export function useResetAllFormatting(
       const { tr } = state
       const { selection } = tr
       if (!selection.empty) {
-        selection.ranges.forEach(range => {
+        selection.ranges.forEach((range) => {
           tr.doc.nodesBetween(range.$from.pos, range.$to.pos, (node, pos) => {
             if (!node.isInline) return true
-            node.marks.forEach(mark => {
-              if (!preserveMarks.includes(mark.type.name)) tr.removeMark(pos, pos + node.nodeSize, mark.type)
+            node.marks.forEach((mark) => {
+              if (!preserveMarks.includes(mark.type.name))
+                tr.removeMark(pos, pos + node.nodeSize, mark.type)
             })
             return true
           })
@@ -291,7 +307,10 @@ function canDeleteCurrentNode(editor: Editor | null): boolean {
 
 function deleteNodeRange(editor: Editor, from: number, size: number): boolean {
   const chain = editor.chain().focus()
-  return !!chain.deleteRange({ from, to: from + size }).run() || chain.setNodeSelection(from).deleteSelection().run()
+  return (
+    !!chain.deleteRange({ from, to: from + size }).run() ||
+    chain.setNodeSelection(from).deleteSelection().run()
+  )
 }
 
 export function useDeleteNode(editor: ComputedRef<Editor | null>) {
@@ -360,11 +379,16 @@ function fileExtensionFor(url: string, mimeType?: string): string {
 
 function canDownloadImage(editor: Editor | null): boolean {
   return (
-    !!editor && !!editor.isEditable && !!isExtensionAvailable(editor, ['image']) && isNodeTypeSelected(editor, ['image'])
+    !!editor &&
+    !!editor.isEditable &&
+    !!isExtensionAvailable(editor, ['image']) &&
+    isNodeTypeSelected(editor, ['image'])
   )
 }
 
-function getSelectedImageAttrs(editor: Editor | null): { src: string; alt?: string; title?: string } | null {
+function getSelectedImageAttrs(
+  editor: Editor | null,
+): { src: string; alt?: string; title?: string } | null {
   if (!editor || !canDownloadImage(editor)) return null
   const { selection } = editor.state
   if (selection instanceof NodeSelection && selection.node.type.name === 'image') {
@@ -475,7 +499,8 @@ export function useTocShowTitle(editor: ComputedRef<Editor | null>) {
     if (!instance?.isEditable || !canToggleTocTitle(instance)) return false
     try {
       const { selection } = instance.state
-      if (!(selection instanceof NodeSelection && selection.node.type.name === 'tocNode')) return false
+      if (!(selection instanceof NodeSelection && selection.node.type.name === 'tocNode'))
+        return false
       const showTitle = selection.node.attrs.showTitle === true
       return instance.chain().focus().updateAttributes('tocNode', { showTitle: !showTitle }).run()
     } catch {
@@ -489,9 +514,16 @@ export function useTocShowTitle(editor: ComputedRef<Editor | null>) {
 // -------------------------------------------------------- table fit to width
 
 function canFitTableToWidth(editor: Editor | null): boolean {
-  if (!editor || !editor.isEditable || !isExtensionAvailable(editor, ['table', 'tableHandleExtension'])) return false
+  if (
+    !editor ||
+    !editor.isEditable ||
+    !isExtensionAvailable(editor, ['table', 'tableHandleExtension'])
+  )
+    return false
   try {
-    return editor.isActive('table') || editor.isActive('tableCell') || editor.isActive('tableHeader')
+    return (
+      editor.isActive('table') || editor.isActive('tableCell') || editor.isActive('tableHeader')
+    )
   } catch {
     return false
   }
@@ -521,7 +553,10 @@ export function useTableFitToWidth(editor: ComputedRef<Editor | null>) {
         if (node.type.name === 'tableCell' || node.type.name === 'tableHeader') {
           const cellPos = table.start + pos
           const colspan = node.attrs.colspan || 1
-          tr.setNodeMarkup(cellPos, undefined, { ...node.attrs, colwidth: Array(colspan).fill(columnWidth) })
+          tr.setNodeMarkup(cellPos, undefined, {
+            ...node.attrs,
+            colwidth: Array(colspan).fill(columnWidth),
+          })
         }
       })
       if (tr.docChanged) instance.view.dispatch(tr)
@@ -539,7 +574,9 @@ export function useTableFitToWidth(editor: ComputedRef<Editor | null>) {
 
 export function useTableClearAllContents(editor: ComputedRef<Editor | null>) {
   const signal = useEditorSelectionSignal(editor)
-  const canClearAll = computed(() => (signal.value, canClearAllTableContent({ editor: editor.value })))
+  const canClearAll = computed(
+    () => (signal.value, canClearAllTableContent({ editor: editor.value })),
+  )
 
   const handleClearAll = (): boolean => {
     const instance = editor.value

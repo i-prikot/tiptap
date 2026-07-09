@@ -71,7 +71,11 @@ const isVisible = computed(() => {
   const instance = editor.value
   if (!instance) return false
   if (!props.hideWhenUnavailable) return true
-  return !!instance.isEditable && !!isExtensionAvailable(instance, ['image']) && canToggleCaption(instance)
+  return (
+    !!instance.isEditable &&
+    !!isExtensionAvailable(instance, ['image']) &&
+    canToggleCaption(instance)
+  )
 })
 
 function handleClick() {

@@ -45,12 +45,12 @@ function getFilteredEmojis(args: { query: string; emojis: EmojiItem[] }): EmojiI
   const trimmed = query.trim()
   const matched = trimmed
     ? emojis
-        .filter(emoji => {
+        .filter((emoji) => {
           const normalized = trimmed.toLowerCase().trim()
           return (
             emoji.name.toLowerCase().includes(normalized) ||
-            emoji.shortcodes.some(code => code.toLowerCase().includes(normalized)) ||
-            emoji.tags.some(tag => tag.toLowerCase().includes(normalized))
+            emoji.shortcodes.some((code) => code.toLowerCase().includes(normalized)) ||
+            emoji.tags.some((tag) => tag.toLowerCase().includes(normalized))
           )
         })
         .slice(0, 100)
@@ -60,7 +60,7 @@ function getFilteredEmojis(args: { query: string; emojis: EmojiItem[] }): EmojiI
 
 function getEmojiItems({ query, editor }: { query: string; editor: Editor }): SuggestionItem[] {
   const emojis: EmojiItem[] = editor.extensionStorage.emoji?.emojis || []
-  return getFilteredEmojis({ query, emojis }).map(emoji => ({
+  return getFilteredEmojis({ query, emojis }).map((emoji) => ({
     title: emoji.name,
     subtext: emoji.shortcodes.join(', '),
     context: emoji,

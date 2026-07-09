@@ -1,9 +1,5 @@
 <template>
-  <Card
-    ref="cardRef"
-    :tabindex="0"
-    :style="isMobile ? { boxShadow: 'none', border: 0 } : {}"
-  >
+  <Card ref="cardRef" :tabindex="0" :style="isMobile ? { boxShadow: 'none', border: 0 } : {}">
     <CardBody :style="isMobile ? { padding: 0 } : {}">
       <CardItemGroup orientation="horizontal">
         <ButtonGroup orientation="horizontal">
@@ -81,7 +77,9 @@ const props = withDefaults(
   },
 )
 
-const emit = defineEmits<{ applied: [payload: { color: string; label: string; mode: HighlightMode }] }>()
+const emit = defineEmits<{
+  applied: [payload: { color: string; label: string; mode: HighlightMode }]
+}>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
 const highlight = useColorHighlight({ editor })
@@ -99,7 +97,7 @@ const { selectedIndex } = useMenuNavigation({
   items: navItems,
   orientation: 'both',
   autoSelectFirstItem: false,
-  onSelect: item => {
+  onSelect: (item) => {
     const highlighted = containerRef.value?.querySelector<HTMLElement>('[data-highlighted="true"]')
     highlighted?.click()
     if (item.value === 'none') highlight.handleRemoveHighlight()

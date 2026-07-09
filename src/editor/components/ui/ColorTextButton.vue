@@ -16,7 +16,11 @@
   >
     <slot>
       <span class="tiptap-button-color-text" :style="{ color: textColor }">
-        <component :is="color.Icon" class="tiptap-button-icon" :style="{ color: textColor, flexGrow: 1 }" />
+        <component
+          :is="color.Icon"
+          class="tiptap-button-icon"
+          :style="{ color: textColor, flexGrow: 1 }"
+        />
       </span>
       <span v-if="text" class="tiptap-button-text">{{ text }}</span>
       <Badge v-if="showShortcut">{{ shortcutText }}</Badge>
@@ -56,10 +60,12 @@ const color = useColorText({
   textColor: props.textColor,
   label: props.label || props.text,
   hideWhenUnavailable: props.hideWhenUnavailable,
-  onApplied: payload => emit('applied', payload),
+  onApplied: (payload) => emit('applied', payload),
 })
 
-const shortcutText = computed(() => parseShortcutKeys({ shortcutKeys: color.shortcutKeys }).join(''))
+const shortcutText = computed(() =>
+  parseShortcutKeys({ shortcutKeys: color.shortcutKeys }).join(''),
+)
 
 function handleClick() {
   color.handleColorText()

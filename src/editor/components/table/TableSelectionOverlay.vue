@@ -26,7 +26,10 @@
           }"
         >
           <span style="pointer-events: auto" @mousedown.stop>
-            <TableCellHandleMenu @open-change="onMenuOpenChange" @resize-start="startResize('br', $event)" />
+            <TableCellHandleMenu
+              @open-change="onMenuOpenChange"
+              @resize-start="startResize('br', $event)"
+            />
           </span>
           <template v-if="showResizeHandles">
             <div
@@ -60,7 +63,9 @@ import { domCellAround, getTable, rectEq } from '../../utils/table-utils'
 
 type Corner = 'tl' | 'tr' | 'bl' | 'br'
 
-const props = withDefaults(defineProps<{ showResizeHandles?: boolean }>(), { showResizeHandles: true })
+const props = withDefaults(defineProps<{ showResizeHandles?: boolean }>(), {
+  showResizeHandles: true,
+})
 
 const emit = defineEmits<{ menuOpenChange: [value: boolean] }>()
 
@@ -80,7 +85,9 @@ const overlayContainer = computed(
 )
 
 const floatingRef = ref<HTMLElement | null>(null)
-const reference = ref<VirtualElement>({ getBoundingClientRect: () => selectionRect.value ?? new DOMRect() })
+const reference = ref<VirtualElement>({
+  getBoundingClientRect: () => selectionRect.value ?? new DOMRect(),
+})
 const { floatingStyles, update } = useFloating(reference, floatingRef, { placement: 'top-start' })
 
 watch([selectionRect, floatingRef], () => update())
@@ -102,14 +109,19 @@ function computeSelectionRect() {
       return
     }
     const bounds = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity }
-    domNodes.forEach(dom => {
+    domNodes.forEach((dom) => {
       const rect = dom.getBoundingClientRect()
       bounds.left = Math.min(bounds.left, rect.left)
       bounds.top = Math.min(bounds.top, rect.top)
       bounds.right = Math.max(bounds.right, rect.right)
       bounds.bottom = Math.max(bounds.bottom, rect.bottom)
     })
-    const rect = new DOMRect(bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top)
+    const rect = new DOMRect(
+      bounds.left,
+      bounds.top,
+      bounds.right - bounds.left,
+      bounds.bottom - bounds.top,
+    )
     if (!rectEq(selectionRect.value, rect)) selectionRect.value = rect
     visible.value = true
     return
@@ -170,8 +182,8 @@ function trackColumnResize() {
 let cleanups: Array<() => void> = []
 watch(
   editor,
-  instance => {
-    cleanups.forEach(fn => fn())
+  (instance) => {
+    cleanups.forEach((fn) => fn())
     cleanups = []
     if (!instance) return
     const onSelectionUpdate = () => {
@@ -182,7 +194,8 @@ watch(
       computeSelectionRect()
       const meta = transaction.getMeta(columnResizingPluginKey)
       if (meta) {
-        if (Object.prototype.hasOwnProperty.call(meta, 'setDragging') && meta.setDragging) trackColumnResize()
+        if (Object.prototype.hasOwnProperty.call(meta, 'setDragging') && meta.setDragging)
+          trackColumnResize()
         if (Object.prototype.hasOwnProperty.call(meta, 'setDragging') && meta.setDragging == null) {
           stopResizeTracking()
           computeSelectionRect()
@@ -203,7 +216,7 @@ watch(
   { immediate: true },
 )
 
-onBeforeUnmount(() => cleanups.forEach(fn => fn()))
+onBeforeUnmount(() => cleanups.forEach((fn) => fn()))
 
 // -------- угловые точки: ресайз выделения перетаскиванием
 function cornerStyle(corner: Corner): CSSProperties {
@@ -265,11 +278,19 @@ function findAnchorCell(corner: Corner): number | null {
     if (!dom) return
     const cellRect = dom.getBoundingClientRect()
     if (near(cellRect.left, rect.left) && near(cellRect.top, rect.top)) cornersFound.topLeft = pos
-    if (near(cellRect.right, rect.right) && near(cellRect.top, rect.top)) cornersFound.topRight = pos
-    if (near(cellRect.left, rect.left) && near(cellRect.bottom, rect.bottom)) cornersFound.bottomLeft = pos
-    if (near(cellRect.right, rect.right) && near(cellRect.bottom, rect.bottom)) cornersFound.bottomRight = pos
+    if (near(cellRect.right, rect.right) && near(cellRect.top, rect.top))
+      cornersFound.topRight = pos
+    if (near(cellRect.left, rect.left) && near(cellRect.bottom, rect.bottom))
+      cornersFound.bottomLeft = pos
+    if (near(cellRect.right, rect.right) && near(cellRect.bottom, rect.bottom))
+      cornersFound.bottomRight = pos
   })
-  const opposite: Record<Corner, string> = { tl: 'bottomRight', tr: 'bottomLeft', bl: 'topRight', br: 'topLeft' }
+  const opposite: Record<Corner, string> = {
+    tl: 'bottomRight',
+    tr: 'bottomLeft',
+    bl: 'topRight',
+    br: 'topLeft',
+  }
   return cornersFound[opposite[corner]]
 }
 

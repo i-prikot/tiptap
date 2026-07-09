@@ -23,11 +23,14 @@ export function provideToc(): TocContext {
 
   const context: TocContext = {
     tocContent,
-    setTocContent: content => {
+    setTocContent: (content) => {
       tocContent.value = content
     },
     navigateToHeading: (item, options) => {
-      navigateToHeading(item, { topOffset: options?.topOffset ?? 0, behavior: options?.behavior ?? 'smooth' })
+      navigateToHeading(item, {
+        topOffset: options?.topOffset ?? 0,
+        behavior: options?.behavior ?? 'smooth',
+      })
     },
     normalizeHeadingDepths,
   }

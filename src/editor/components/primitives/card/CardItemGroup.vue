@@ -4,5 +4,7 @@
 
 <script setup lang="ts">
 // Группа пунктов внутри карточки.
-withDefaults(defineProps<{ orientation?: 'vertical' | 'horizontal' }>(), { orientation: 'vertical' })
+withDefaults(defineProps<{ orientation?: 'vertical' | 'horizontal' }>(), {
+  orientation: 'vertical',
+})
 </script>

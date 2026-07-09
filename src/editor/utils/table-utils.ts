@@ -58,7 +58,10 @@ export function isHTMLElement(value: unknown): value is HTMLElement {
   return value instanceof HTMLElement
 }
 
-export function safeClosest(element: HTMLElement | null | undefined, selector: string): HTMLElement | null {
+export function safeClosest(
+  element: HTMLElement | null | undefined,
+  selector: string,
+): HTMLElement | null {
   return (element?.closest?.(selector) as HTMLElement | null) ?? null
 }
 
@@ -84,7 +87,12 @@ export function getTable(editor: Editor | null | undefined, tablePos?: number): 
   if (typeof tablePos === 'number') {
     const node = editor.state.doc.nodeAt(tablePos)
     if (node?.type.name === 'table') {
-      found = { node, pos: tablePos, start: tablePos + 1, depth: editor.state.doc.resolve(tablePos).depth }
+      found = {
+        node,
+        pos: tablePos,
+        start: tablePos + 1,
+        depth: editor.state.doc.resolve(tablePos).depth,
+      }
     }
   }
   if (!found) {
@@ -163,11 +171,19 @@ function collectCells(
   return { cells, mergedCells }
 }
 
-export function getRowCells(editor: Editor | null, index?: number, tablePos?: number): IndexedCells {
+export function getRowCells(
+  editor: Editor | null,
+  index?: number,
+  tablePos?: number,
+): IndexedCells {
   return collectCells(editor, 'row', index, tablePos)
 }
 
-export function getColumnCells(editor: Editor | null, index?: number, tablePos?: number): IndexedCells {
+export function getColumnCells(
+  editor: Editor | null,
+  index?: number,
+  tablePos?: number,
+): IndexedCells {
   return collectCells(editor, 'column', index, tablePos)
 }
 
@@ -184,10 +200,15 @@ export function getRowOrColumnCells(
     orientation: undefined,
     tablePos: undefined,
   }
-  if (!editor || (typeof index !== 'number' && !(editor.state.selection instanceof CellSelection))) return empty
+  if (!editor || (typeof index !== 'number' && !(editor.state.selection instanceof CellSelection)))
+    return empty
   let resolvedIndex = index
   let resolvedOrientation = orientation
-  if (typeof resolvedIndex !== 'number' || !resolvedOrientation || !['row', 'column'].includes(resolvedOrientation)) {
+  if (
+    typeof resolvedIndex !== 'number' ||
+    !resolvedOrientation ||
+    !['row', 'column'].includes(resolvedOrientation)
+  ) {
     const selectionType = getTableSelectionType(editor)
     if (!selectionType) return empty
     resolvedIndex = selectionType.index
@@ -201,7 +222,11 @@ export function getRowOrColumnCells(
 }
 
 /** Пустые строки/столбцы в конце таблицы (для drag-расширения). */
-function countEmptyFromEnd(editor: Editor | null, tablePos: number, orientation: Orientation): number {
+function countEmptyFromEnd(
+  editor: Editor | null,
+  tablePos: number,
+  orientation: Orientation,
+): number {
   const table = getTable(editor, tablePos)
   if (!table || !editor) return 0
   const { doc } = editor.state
@@ -316,7 +341,11 @@ export function getIndexCoordinates(args: {
   const table = getTable(editor, tablePos)
   if (!table) return null
   const { width, height } = table.map
-  if (index < 0 || (orientation === 'row' && index >= height) || (orientation === 'column' && index >= width)) {
+  if (
+    index < 0 ||
+    (orientation === 'row' && index >= height) ||
+    (orientation === 'column' && index >= width)
+  ) {
     return null
   }
   return orientation === 'row'
@@ -348,7 +377,7 @@ export function getTableSelectionType(
 export function isCellEmpty(node: ProseMirrorNode): boolean {
   if (node.childCount === 0) return true
   let empty = true
-  node.descendants(child => {
+  node.descendants((child) => {
     if ((child.isText && child.text?.trim()) || (child.isLeaf && !child.isText)) {
       empty = false
       return false
@@ -374,7 +403,12 @@ export function marginRound(value: number, margin = 0.3): number {
 export function rectEq(a?: DOMRect | null, b?: DOMRect | null): boolean {
   return (
     (!a && !b) ||
-    (!!a && !!b && a.left === b.left && a.top === b.top && a.width === b.width && a.height === b.height)
+    (!!a &&
+      !!b &&
+      a.left === b.left &&
+      a.top === b.top &&
+      a.width === b.width &&
+      a.height === b.height)
   )
 }
 
@@ -456,14 +490,17 @@ export function selectCellsByCoords(
   const { state } = editor
   const map = table.map
   const clamped = coords
-    .map(coord => ({ row: clamp(coord.row, 0, map.height - 1), col: clamp(coord.col, 0, map.width - 1) }))
-    .filter(coord => isWithinMap(coord.row, coord.col, map))
+    .map((coord) => ({
+      row: clamp(coord.row, 0, map.height - 1),
+      col: clamp(coord.col, 0, map.width - 1),
+    }))
+    .filter((coord) => isWithinMap(coord.row, coord.col, map))
   if (clamped.length === 0) return undefined
 
-  const rows = clamped.map(coord => coord.row)
+  const rows = clamped.map((coord) => coord.row)
   const minRow = Math.min(...rows)
   const maxRow = Math.max(...rows)
-  const cols = clamped.map(coord => coord.col)
+  const cols = clamped.map((coord) => coord.col)
   const minCol = Math.min(...cols)
   const maxCol = Math.max(...cols)
 
@@ -525,7 +562,12 @@ export function selectLastCell(
   const mapIndex = row * map.width + col
   const relative = map.map[mapIndex]
   if (!relative && relative !== 0) {
-    console.warn('selectLastCell: cell position not found in map', { index: mapIndex, row, col, map })
+    console.warn('selectLastCell: cell position not found in map', {
+      index: mapIndex,
+      row,
+      col,
+      map,
+    })
     return false
   }
   const firstIndex = map.map.indexOf(relative)
@@ -584,14 +626,22 @@ export function updateSelectionAfterAction(
         const lastCol = map.width - 1
         const from = table.start + map.positionAt(index, 0, table.node)
         const to = table.start + map.positionAt(index, lastCol, table.node)
-        const selection = CellSelection.create(state.doc, state.doc.resolve(from).pos, state.doc.resolve(to).pos)
+        const selection = CellSelection.create(
+          state.doc,
+          state.doc.resolve(from).pos,
+          state.doc.resolve(to).pos,
+        )
         editor.view.dispatch(state.tr.setSelection(selection))
       }
     } else if (orientation === 'column' && index >= 0 && index < map.width) {
       const lastRow = map.height - 1
       const from = table.start + map.positionAt(0, index, table.node)
       const to = table.start + map.positionAt(lastRow, index, table.node)
-      const selection = CellSelection.create(state.doc, state.doc.resolve(from).pos, state.doc.resolve(to).pos)
+      const selection = CellSelection.create(
+        state.doc,
+        state.doc.resolve(from).pos,
+        state.doc.resolve(to).pos,
+      )
       editor.view.dispatch(state.tr.setSelection(selection))
     }
   } catch (error) {

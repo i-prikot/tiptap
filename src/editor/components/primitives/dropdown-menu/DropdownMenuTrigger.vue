@@ -17,7 +17,8 @@ const triggerRef = ref<HTMLElement | null>(null)
 
 onMounted(() => {
   // реальный DOM-элемент триггера — первый ребёнок обёртки display:contents
-  context.reference.value = (triggerRef.value?.firstElementChild as HTMLElement | null) ?? triggerRef.value
+  context.reference.value =
+    (triggerRef.value?.firstElementChild as HTMLElement | null) ?? triggerRef.value
 })
 
 function toggle() {

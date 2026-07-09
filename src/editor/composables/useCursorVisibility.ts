@@ -20,7 +20,16 @@ export interface ElementRectState {
   left: number
 }
 
-const EMPTY_RECT: ElementRectState = { x: 0, y: 0, width: 0, height: 0, top: 0, right: 0, bottom: 0, left: 0 }
+const EMPTY_RECT: ElementRectState = {
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0,
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0,
+}
 
 export function useCursorVisibility(options: {
   editor: ComputedRef<Editor | null>
@@ -66,29 +75,30 @@ export function useCursorVisibility(options: {
     })
   })
   onBeforeUnmount(() => {
-    cleanups.forEach(fn => fn())
+    cleanups.forEach((fn) => fn())
     cleanups = []
     updateRect.cancel()
   })
 
   // Если курсор оказался под оверлеем — плавно скроллим к нему.
-  watch(
-    [editor, overlayHeight, () => windowSize.height, () => rect.height],
-    () => {
-      const instance = editor.value
-      if (!instance) return
-      const { state, view } = instance
-      if (!view.hasFocus()) return
-      const { from } = state.selection
-      const cursorCoords = view.coordsAtPos(from)
-      const windowHeight = windowSize.height
-      if (windowHeight < rect.height && cursorCoords && windowHeight - cursorCoords.top < overlayHeight.value) {
-        const target = Math.max(windowHeight / 2, overlayHeight.value)
-        const cursorAbsoluteTop = cursorCoords.top + window.scrollY
-        window.scrollTo({ top: Math.max(0, cursorAbsoluteTop - target), behavior: 'smooth' })
-      }
-    },
-  )
+  watch([editor, overlayHeight, () => windowSize.height, () => rect.height], () => {
+    const instance = editor.value
+    if (!instance) return
+    const { state, view } = instance
+    if (!view.hasFocus()) return
+    const { from } = state.selection
+    const cursorCoords = view.coordsAtPos(from)
+    const windowHeight = windowSize.height
+    if (
+      windowHeight < rect.height &&
+      cursorCoords &&
+      windowHeight - cursorCoords.top < overlayHeight.value
+    ) {
+      const target = Math.max(windowHeight / 2, overlayHeight.value)
+      const cursorAbsoluteTop = cursorCoords.top + window.scrollY
+      window.scrollTo({ top: Math.max(0, cursorAbsoluteTop - target), behavior: 'smooth' })
+    }
+  })
 
   return rect
 }

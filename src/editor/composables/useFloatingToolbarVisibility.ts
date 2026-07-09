@@ -26,12 +26,16 @@ export function useFloatingToolbarVisibility(options: {
 
   watch(
     editor,
-    instance => {
-      cleanups.forEach(fn => fn())
+    (instance) => {
+      cleanups.forEach((fn) => fn())
       cleanups = []
       if (!instance) return
 
-      const onTransaction = ({ transaction }: { transaction: { getMeta(key: string): unknown; selectionSet: boolean } }) => {
+      const onTransaction = ({
+        transaction,
+      }: {
+        transaction: { getMeta(key: string): unknown; selectionSet: boolean }
+      }) => {
         if (transaction.getMeta(HIDE_FLOATING_META)) hiddenByMeta = true
         else if (transaction.selectionSet) hiddenByMeta = false
       }
@@ -54,7 +58,8 @@ export function useFloatingToolbarVisibility(options: {
       const onSelectionUpdate = () => {
         const { selection } = instance.state
         const valid = isSelectionValid(instance, selection)
-        if (extraHideWhen?.value || (isNodeSelection(selection) && hiddenByMeta)) shouldShow.value = false
+        if (extraHideWhen?.value || (isNodeSelection(selection) && hiddenByMeta))
+          shouldShow.value = false
         else shouldShow.value = valid
       }
       onSelectionUpdate()
@@ -65,7 +70,7 @@ export function useFloatingToolbarVisibility(options: {
   )
 
   if (extraHideWhen) {
-    watch(extraHideWhen, hide => {
+    watch(extraHideWhen, (hide) => {
       if (hide) shouldShow.value = false
       else {
         const instance = editor.value
@@ -74,6 +79,6 @@ export function useFloatingToolbarVisibility(options: {
     })
   }
 
-  onBeforeUnmount(() => cleanups.forEach(fn => fn()))
+  onBeforeUnmount(() => cleanups.forEach((fn) => fn()))
   return { shouldShow }
 }
