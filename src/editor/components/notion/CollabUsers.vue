@@ -35,6 +35,7 @@
 import { onBeforeUnmount, ref, watch } from 'vue'
 import { useTiptapEditor } from '../../composables/useTiptapEditor'
 import { getAvatar } from '../../utils/user-utils'
+import type { CaretUser } from '../../types/user'
 import Button from '../primitives/Button.vue'
 import Avatar from '../primitives/avatar/Avatar.vue'
 import AvatarFallback from '../primitives/avatar/AvatarFallback.vue'
@@ -45,13 +46,6 @@ import DropdownMenuContent from '../primitives/dropdown-menu/DropdownMenuContent
 import DropdownMenuGroup from '../primitives/dropdown-menu/DropdownMenuGroup.vue'
 import DropdownMenuItem from '../primitives/dropdown-menu/DropdownMenuItem.vue'
 import DropdownMenuTrigger from '../primitives/dropdown-menu/DropdownMenuTrigger.vue'
-
-interface CaretUser {
-  clientId: number
-  id: string
-  name: string
-  color: string
-}
 
 const editor = useTiptapEditor()
 const users = ref<CaretUser[]>([])

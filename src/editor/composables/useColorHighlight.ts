@@ -9,15 +9,9 @@ import type { Editor } from '@tiptap/vue-3'
 import { isExtensionAvailable, isMarkInSchema, isNodeTypeSelected } from '../utils/tiptap-utils'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
 import { HighlighterIcon } from '../icons'
+import type { HighlightColor } from '../types/color'
 
 export type HighlightMode = 'mark' | 'node'
-
-export interface HighlightColor {
-  label: string
-  value: string
-  colorValue?: string
-  border?: string
-}
 
 export const COLOR_HIGHLIGHT_SHORTCUT_KEY = 'mod+shift+h'
 

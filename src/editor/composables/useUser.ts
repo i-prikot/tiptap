@@ -5,6 +5,7 @@
  */
 import { inject, provide } from 'vue'
 import type { InjectionKey } from 'vue'
+import type { CollabUser } from '../types/user'
 import {
   getAvatar,
   getStoredOrCreate,
@@ -12,13 +13,6 @@ import {
   randomUserId,
   randomUserName,
 } from '../utils/user-utils'
-
-export interface CollabUser {
-  color: string
-  id: string
-  name: string
-  avatar: string
-}
 
 interface UserContext {
   user: CollabUser

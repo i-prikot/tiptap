@@ -23,8 +23,8 @@ import Avatar from '../primitives/avatar/Avatar.vue'
 import AvatarFallback from '../primitives/avatar/AvatarFallback.vue'
 import AvatarImage from '../primitives/avatar/AvatarImage.vue'
 import { getElementOverflowPosition } from '../../utils/selection-utils'
-import type { SuggestionItem } from '../../utils/suggestion/suggestion'
-import type { MentionUser } from './MentionDropdownMenu.vue'
+import type { SuggestionItem } from '../../types/suggestion'
+import type { MentionUser } from '../../types/user'
 
 const props = defineProps<{ item: SuggestionItem; isSelected: boolean }>()
 const emit = defineEmits<{ select: [] }>()

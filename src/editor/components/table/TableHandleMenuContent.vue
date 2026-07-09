@@ -147,6 +147,7 @@ import {
   toggleHeaderRowColumn,
 } from '../../utils/table-actions'
 import type { AddSide, MoveDirection, SortDirection } from '../../utils/table-actions'
+import type { EditorMenuActionItem } from '../../types/menu'
 import { getTableSelectionType } from '../../utils/table-utils'
 import {
   AddColLeftIcon,
@@ -165,13 +166,6 @@ import {
   TableHeaderRowIcon,
   TrashIcon,
 } from '../../icons'
-
-interface MenuActionItem {
-  icon: FunctionalComponent
-  label: string
-  disabled: boolean
-  onClick: () => unknown
-}
 
 const props = defineProps<{
   editor?: Editor | null
@@ -215,12 +209,12 @@ const MOVE_ICONS: Record<MoveDirection, FunctionalComponent> = {
   right: ArrowRightIcon,
 }
 
-const moveItems = computed<MenuActionItem[]>(() => {
+const moveItems = computed<EditorMenuActionItem[]>(() => {
   const base = args.value
   const directions: MoveDirection[] =
     props.orientation === 'row' ? ['up', 'down'] : ['left', 'right']
   return directions
-    .map((direction): MenuActionItem | null => {
+    .map((direction): EditorMenuActionItem | null => {
       const can = canMoveRowColumn({ ...base, direction })
       return can
         ? {
@@ -231,15 +225,15 @@ const moveItems = computed<MenuActionItem[]>(() => {
           }
         : null
     })
-    .filter((item): item is MenuActionItem => !!item)
+    .filter((item): item is EditorMenuActionItem => !!item)
 })
 
 // -------- add
-const addItems = computed<MenuActionItem[]>(() => {
+const addItems = computed<EditorMenuActionItem[]>(() => {
   const base = args.value
   const sides: AddSide[] = props.orientation === 'row' ? ['above', 'below'] : ['left', 'right']
   return sides
-    .map((side): MenuActionItem | null => {
+    .map((side): EditorMenuActionItem | null => {
       const can = canAddRowColumn({ ...base, side })
       if (!can) return null
       const label =
@@ -256,11 +250,11 @@ const addItems = computed<MenuActionItem[]>(() => {
             : AddColRightIcon
       return { icon, label, disabled: !can, onClick: () => addRowColumn({ ...base, side }) }
     })
-    .filter((item): item is MenuActionItem => !!item)
+    .filter((item): item is EditorMenuActionItem => !!item)
 })
 
 // -------- sort
-const sortItems = computed<MenuActionItem[]>(() => {
+const sortItems = computed<EditorMenuActionItem[]>(() => {
   const base = args.value
   const canSort = canSortRowColumn(base)
   if (!canSort) return []

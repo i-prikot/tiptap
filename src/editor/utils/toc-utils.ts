@@ -5,12 +5,12 @@
  */
 import type { Editor } from '@tiptap/core'
 import { NodeSelection } from '@tiptap/pm/state'
-import type { TableOfContentDataItem } from '@tiptap/extension-table-of-contents'
+import type { TocItem } from '../types/toc'
 
 /** Мета-флаг транзакции: выделение установлено программно (скрыть floating toolbar). */
 export const HIDE_FLOATING_META = 'hideFloatingToolbar'
 
-export type TocItem = TableOfContentDataItem
+export type { TocItem } from '../types/toc'
 
 /**
  * Приводит уровни заголовков к последовательным глубинам без «дыр»:

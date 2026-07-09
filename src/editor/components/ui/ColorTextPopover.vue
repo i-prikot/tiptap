@@ -44,7 +44,7 @@ import { useTiptapEditor } from '../../composables/useTiptapEditor'
 import { useEditorSelectionSignal } from '../../composables/useEditorSelectionSignal'
 import { canColorText } from '../../composables/useColorText'
 import { canColorHighlight } from '../../composables/useColorHighlight'
-import type { RecentColor } from '../../composables/useRecentColors'
+import type { RecentColor } from '../../types/color'
 import { getActiveMarkAttrs } from '../../utils/tiptap-utils'
 import { ChevronDownIcon, TextColorSmallIcon } from '../../icons'
 

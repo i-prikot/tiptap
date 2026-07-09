@@ -1,0 +1,5 @@
+export type { CollabUser, CaretUser, MentionUser } from './user'
+export type { TocItem } from './toc'
+export type { HighlightColor, RecentColor, RecentColorType, TextColor } from './color'
+export type { EditorMenuActionItem, TurnIntoMenuItem } from './menu'
+export type { SuggestionItem } from './suggestion'

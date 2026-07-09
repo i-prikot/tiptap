@@ -35,14 +35,8 @@ import MentionMenuItem from './MentionMenuItem.vue'
 import Card from '../primitives/card/Card.vue'
 import CardBody from '../primitives/card/CardBody.vue'
 import CardItemGroup from '../primitives/card/CardItemGroup.vue'
-import type { SuggestionItem } from '../../utils/suggestion/suggestion'
-
-export interface MentionUser {
-  id: number
-  name: string
-  position: string
-  avatarUrl: string
-}
+import type { SuggestionItem } from '../../types/suggestion'
+import type { MentionUser } from '../../types/user'
 
 const USER_DIRECTORY: MentionUser[] = (
   [

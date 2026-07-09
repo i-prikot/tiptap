@@ -93,7 +93,7 @@ import ColorHighlightButton from './ColorHighlightButton.vue'
 import { TEXT_COLORS } from '../../composables/useColorText'
 import { HIGHLIGHT_COLORS } from '../../composables/useColorHighlight'
 import { useRecentColors, getColorByValue } from '../../composables/useRecentColors'
-import type { RecentColor } from '../../composables/useRecentColors'
+import type { RecentColor } from '../../types/color'
 import { useMenuNavigation } from '../../composables/useMenuNavigation'
 import { chunkArray } from '../../utils/tiptap-utils'
 
@@ -130,10 +130,8 @@ function recentLabel(recent: RecentColor): string {
   return found.label === found.value ? recent.label : found.label
 }
 
-interface NavItem extends RecentColor {}
-
-const navItems = computed<NavItem[]>(() => {
-  const items: NavItem[] = []
+const navItems = computed<RecentColor[]>(() => {
+  const items: RecentColor[] = []
   if (isInitialized.value) {
     for (const recent of recentColors.value) {
       items.push({ type: recent.type, value: recent.value, label: recentLabel(recent) })
@@ -146,7 +144,7 @@ const navItems = computed<NavItem[]>(() => {
   return items
 })
 
-const { selectedIndex } = useMenuNavigation<NavItem>({
+const { selectedIndex } = useMenuNavigation<RecentColor>({
   editor: ref(null),
   containerRef: containerRef as never,
   query: ref(''),

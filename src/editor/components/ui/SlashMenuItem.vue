@@ -19,7 +19,7 @@ import { ref, watch } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import Button from '../primitives/Button.vue'
 import { getElementOverflowPosition } from '../../utils/selection-utils'
-import type { SuggestionItem } from '../../utils/suggestion/suggestion'
+import type { SuggestionItem } from '../../types/suggestion'
 
 const props = defineProps<{ item: SuggestionItem; isSelected: boolean }>()
 const emit = defineEmits<{ select: [] }>()

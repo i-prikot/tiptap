@@ -198,7 +198,8 @@
  * (как в оригинале через useAiAsk → canAiAsk=false).
  */
 import { computed, ref, shallowRef, watch } from 'vue'
-import type { CSSProperties, FunctionalComponent } from 'vue'
+import type { CSSProperties } from 'vue'
+import type { TurnIntoMenuItem } from '../../types/menu'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import { offset } from '@floating-ui/dom'
 import { DragHandle } from '@tiptap/extension-drag-handle-vue-3'
@@ -331,15 +332,7 @@ const taskList = useListBlock(editor, 'taskList')
 const blockquote = useBlockquoteBlock(editor)
 const codeBlock = useCodeBlockBlock(editor)
 
-interface TurnIntoItem {
-  icon: FunctionalComponent
-  label: string
-  onClick: () => void
-  disabled: boolean
-  isActive: boolean
-}
-
-const turnIntoItems = computed<TurnIntoItem[]>(() => {
+const turnIntoItems = computed<TurnIntoMenuItem[]>(() => {
   const conversions = [
     textBlock,
     heading1,

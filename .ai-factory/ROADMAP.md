@@ -35,7 +35,7 @@
 - [x] Устранить все использования `any` в `slash-menu-items.ts` (4 шт.)
 - [ ] Устранить `any` в `TableSelectionOverlay.vue`, `EditorContentArea.vue`, `EmojiDropdownMenu.vue`
 - [ ] Включить дополнительные строгие флаги: `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`
-- [ ] Создать `src/editor/types/` и вынести туда общие интерфейсы (пользователь, TOC-элемент, цвет, пункт меню, suggestion-item)
+- [x] Создать `src/editor/types/` и вынести туда общие интерфейсы (пользователь, TOC-элемент, цвет, пункт меню, suggestion-item)
 - [ ] Типизировать `import.meta.env`: добавить `env.d.ts` с описанием всех `VITE_TIPTAP_*` переменных (для playground)
 - [ ] Заменить каст `provideTiptapEditor(editor as never)` в `EditorProvider.vue` на корректную типизацию
 - [ ] Проверить и типизировать все `provide/inject` контексты через `InjectionKey<T>`
@@ -46,6 +46,7 @@
 
 | Date | Milestone | Work |
 | --- | --- | --- |
+| 2026-07-09 | Этап 1. TypeScript: строгость и типы | Создан `src/editor/types/`; общие типы пользователя, TOC, цветов, пунктов меню и suggestion-item вынесены в shared modules; импорты нормализованы. |
 | 2026-07-09 | Этап 1. TypeScript: строгость и типы | Устранены четыре использования `any` в `slash-menu-items.ts`; добавлены точные типы slash-menu items и Tiptap command augmentation. |
 | 2026-07-09 | Этап 0. Инфраструктура качества | Настроен pre-commit хук Husky с lint-staged для lint/format изменённых файлов и проектным typecheck перед коммитом. |
 | 2026-07-08 | Этап 0. Инфраструктура качества | Подключен Prettier, согласован с ESLint, добавлены npm-скрипты format/format:check. |

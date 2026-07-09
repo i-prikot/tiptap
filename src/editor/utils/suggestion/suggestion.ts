@@ -13,6 +13,8 @@ import type { EditorView } from '@tiptap/pm/view'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom'
 import type { ComputePositionConfig, Middleware, Placement, Strategy } from '@floating-ui/dom'
+import type { SuggestionItem } from '../../types/suggestion'
+export type { SuggestionItem } from '../../types/suggestion'
 
 export interface SuggestionMatch {
   range: { from: number; to: number }
@@ -666,20 +668,6 @@ export function calculateStartPosition(
   const text = nodeBefore.text
   const index = text.lastIndexOf(char)
   return index === -1 ? pos : pos - text.substring(index).length
-}
-
-export interface SuggestionItem<Context = unknown> {
-  title: string
-  subtext?: string
-  badge?: unknown
-  group?: string
-  keywords?: string[]
-  context?: Context
-  onSelect: (props: {
-    editor: Editor
-    range?: { from: number; to: number }
-    context?: Context
-  }) => void
 }
 
 /** Фильтрация + сортировка пунктов по запросу (точное совпадение, префикс). */

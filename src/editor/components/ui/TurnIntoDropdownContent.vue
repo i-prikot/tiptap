@@ -25,7 +25,7 @@
  */
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import type { FunctionalComponent } from 'vue'
+import type { TurnIntoMenuItem } from '../../types/menu'
 import DropdownMenuGroup from '../primitives/dropdown-menu/DropdownMenuGroup.vue'
 import DropdownMenuLabel from '../primitives/dropdown-menu/DropdownMenuLabel.vue'
 import DropdownMenuItem from '../primitives/dropdown-menu/DropdownMenuItem.vue'
@@ -57,15 +57,7 @@ const conversions = {
   codeBlock: useCodeBlockBlock(editor),
 }
 
-interface TurnIntoItem {
-  icon: FunctionalComponent
-  label: string
-  onClick: () => void
-  disabled: boolean
-  isActive: boolean
-}
-
-const items = computed<TurnIntoItem[]>(() =>
+const items = computed<TurnIntoMenuItem[]>(() =>
   TURN_INTO_BLOCKS.filter(
     (block) => !props.blockTypes || props.blockTypes.includes(block.type),
   ).map((block) => {

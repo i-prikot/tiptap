@@ -187,7 +187,8 @@
  * AI-пункты (ImproveDropdown, Ask AI) не переносятся (Tiptap Pro).
  */
 import { computed, ref, watch } from 'vue'
-import type { ComponentPublicInstance, FunctionalComponent } from 'vue'
+import type { ComponentPublicInstance } from 'vue'
+import type { TurnIntoMenuItem } from '../../types/menu'
 import Toolbar from '../primitives/toolbar/Toolbar.vue'
 import ToolbarGroup from '../primitives/toolbar/ToolbarGroup.vue'
 import ToolbarSeparator from '../primitives/toolbar/ToolbarSeparator.vue'
@@ -286,15 +287,7 @@ const taskList = useListBlock(editor, 'taskList')
 const blockquote = useBlockquoteBlock(editor)
 const codeBlock = useCodeBlockBlock(editor)
 
-interface TurnIntoItem {
-  icon: FunctionalComponent
-  label: string
-  onClick: () => void
-  disabled: boolean
-  isActive: boolean
-}
-
-const turnIntoItems = computed<TurnIntoItem[]>(() => {
+const turnIntoItems = computed<TurnIntoMenuItem[]>(() => {
   const conversions = [
     textBlock,
     heading1,

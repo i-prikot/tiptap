@@ -49,7 +49,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useToc } from '../../composables/useToc'
 import { getScrollableAncestor } from '../../utils/toc-utils'
-import type { TocItem } from '../../utils/toc-utils'
+import type { TocItem } from '../../types/toc'
 
 const props = withDefaults(defineProps<{ maxShowCount?: number; topOffset?: number }>(), {
   maxShowCount: 20,

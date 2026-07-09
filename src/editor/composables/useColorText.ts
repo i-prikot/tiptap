@@ -12,12 +12,7 @@ import {
 } from '../utils/tiptap-utils'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
 import { TextColorSmallIcon } from '../icons'
-
-export interface TextColor {
-  label: string
-  value: string
-  border: string
-}
+import type { TextColor } from '../types/color'
 
 export const COLOR_TEXT_SHORTCUT_KEY = 'mod+shift+t'
 

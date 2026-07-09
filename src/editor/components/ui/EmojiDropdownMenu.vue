@@ -38,7 +38,7 @@ import EmojiMenuItem from './EmojiMenuItem.vue'
 import Card from '../primitives/card/Card.vue'
 import CardBody from '../primitives/card/CardBody.vue'
 import CardItemGroup from '../primitives/card/CardItemGroup.vue'
-import type { SuggestionItem } from '../../utils/suggestion/suggestion'
+import type { SuggestionItem } from '../../types/suggestion'
 import type { EditorEmojiItem, EditorEmojiStorage } from '../../extensions/tiptap-command-types'
 
 type SuggestionRange = { from: number; to: number }

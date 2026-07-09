@@ -31,7 +31,7 @@
 import { computed } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import { useToc } from '../../composables/useToc'
-import type { TocItem } from '../../utils/toc-utils'
+import type { TocItem } from '../../types/toc'
 
 const props = defineProps(nodeViewProps)
 

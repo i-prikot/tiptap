@@ -3,12 +3,7 @@
  * Порт useRecentColors из чанка 2mux2p9tadf0h (модуль 959411).
  */
 import { onMounted, ref } from 'vue'
-
-export interface RecentColor {
-  type: 'text' | 'highlight'
-  label: string
-  value: string
-}
+import type { RecentColor } from '../types/color'
 
 const STORAGE_KEY = 'tiptapRecentlyUsedColors'
 

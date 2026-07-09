@@ -37,7 +37,8 @@ import type { Editor } from '@tiptap/vue-3'
 import { useTiptapEditor } from '../../composables/useTiptapEditor'
 import { useMenuNavigation } from '../../composables/useMenuNavigation'
 import { Suggestion, calculateStartPosition } from '../../utils/suggestion/suggestion'
-import type { SuggestionItem, SuggestionProps } from '../../utils/suggestion/suggestion'
+import type { SuggestionItem } from '../../types/suggestion'
+import type { SuggestionProps } from '../../utils/suggestion/suggestion'
 
 const props = withDefaults(
   defineProps<{

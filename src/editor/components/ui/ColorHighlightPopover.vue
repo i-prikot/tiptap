@@ -37,7 +37,8 @@ import Button from '../primitives/Button.vue'
 import ColorHighlightPopoverContent from './ColorHighlightPopoverContent.vue'
 import { useTiptapEditor } from '../../composables/useTiptapEditor'
 import { useColorHighlight } from '../../composables/useColorHighlight'
-import type { HighlightColor, HighlightMode } from '../../composables/useColorHighlight'
+import type { HighlightColor } from '../../types/color'
+import type { HighlightMode } from '../../composables/useColorHighlight'
 
 const props = withDefaults(
   defineProps<{

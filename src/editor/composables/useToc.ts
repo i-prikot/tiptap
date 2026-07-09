@@ -6,7 +6,8 @@
 import { inject, provide, shallowRef } from 'vue'
 import type { InjectionKey, ShallowRef } from 'vue'
 import { navigateToHeading, normalizeHeadingDepths } from '../utils/toc-utils'
-import type { NavigateToHeadingOptions, TocItem } from '../utils/toc-utils'
+import type { NavigateToHeadingOptions } from '../utils/toc-utils'
+import type { TocItem } from '../types/toc'
 
 export interface TocContext {
   tocContent: ShallowRef<TocItem[] | null>
