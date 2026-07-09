@@ -33,9 +33,15 @@
 - [ ] Добавить `README.md` в корень проекта — установка, запуск, переменные окружения, структура, назначение (библиотека для Tinyfy)
 - [ ] Создать `.env.example` со всеми переменными `VITE_TIPTAP_*` и комментариями (актуально для playground; библиотека env не читает — см. Этап 3)
 - [ ] Подключить ESLint (flat config) с `eslint-plugin-vue` и `typescript-eslint`
-- [ ] Подключить Prettier и согласовать его правила с ESLint
-- [ ] Добавить npm-скрипты `lint`, `lint:fix`, `format` в `package.json`
+- [x] Подключить Prettier и согласовать его правила с ESLint
+- [x] Добавить npm-скрипты `lint`, `lint:fix`, `format` в `package.json`
 - [ ] Прогнать `lint:fix` по всему `src/` и устранить оставшиеся замечания линтера
 - [ ] Настроить pre-commit хук (husky + lint-staged) на lint/format/typecheck
 - [ ] Настроить CI-пайплайн (GitHub Actions): typecheck → lint → test → build на каждый PR
 
+
+## Completed
+
+| Date | Milestone | Work |
+| --- | --- | --- |
+| 2026-07-08 | Этап 0. Инфраструктура качества | Подключен Prettier, согласован с ESLint, добавлены npm-скрипты format/format:check. |
