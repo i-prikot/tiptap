@@ -25,27 +25,6 @@ export const defaultUiState: UiEditorState = {
   isDragging: false,
 }
 
-declare module '@tiptap/core' {
-  interface Commands<ReturnType> {
-    uiState: {
-      aiGenerationSetIsSelection: (value: boolean) => ReturnType
-      aiGenerationSetIsLoading: (value: boolean) => ReturnType
-      aiGenerationHasMessage: (value: boolean) => ReturnType
-      aiGenerationShow: () => ReturnType
-      aiGenerationHide: () => ReturnType
-      commentInputShow: () => ReturnType
-      commentInputHide: () => ReturnType
-      setLockDragHandle: (value: boolean) => ReturnType
-      setIsDragging: (value: boolean) => ReturnType
-      resetUiState: () => ReturnType
-    }
-  }
-
-  interface Storage {
-    uiState: UiEditorState
-  }
-}
-
 export const UiState = Extension.create<Record<string, never>, UiEditorState>({
   name: 'uiState',
 

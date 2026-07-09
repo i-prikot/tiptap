@@ -15,7 +15,7 @@
   </Teleport>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="Item extends SuggestionItem = SuggestionItem">
 /**
  * Универсальное suggestion-меню: регистрирует suggestion-плагин
  * по символу-триггеру, позиционирует контент floating-ui, ведёт
@@ -48,7 +48,7 @@ const props = withDefaults(
     decorationContent?: string
     selector?: string
     maxHeight?: number
-    items: (args: { query: string; editor: Editor }) => SuggestionItem[] | Promise<SuggestionItem[]>
+    items: (args: { query: string; editor: Editor }) => Item[] | Promise<Item[]>
   }>(),
   {
     editor: undefined,
@@ -65,8 +65,8 @@ const editor = useTiptapEditor(computed(() => props.editor))
 
 const open = ref(false)
 const referenceRect = shallowRef<(() => DOMRect | null) | null>(null)
-const commandFn = shallowRef<((item: SuggestionItem) => void) | null>(null)
-const suggestionItems = shallowRef<SuggestionItem[]>([])
+const commandFn = shallowRef<((item: Item) => void) | null>(null)
+const suggestionItems = shallowRef<Item[]>([])
 const query = ref('')
 
 const menuRef = ref<HTMLElement | null>(null)
@@ -104,12 +104,12 @@ function close() {
   open.value = false
 }
 
-function handleSelect(item: SuggestionItem) {
+function handleSelect(item: Item) {
   close()
   commandFn.value?.(item)
 }
 
-const { selectedIndex } = useMenuNavigation<SuggestionItem>({
+const { selectedIndex } = useMenuNavigation<Item>({
   editor,
   query,
   items: suggestionItems,
@@ -141,7 +141,7 @@ watch(
         return ((extension.options as Record<string, any>)?.suggestion?.char ?? '@') === triggerChar
       })
 
-    const plugin = Suggestion<SuggestionItem, SuggestionItem>({
+    const plugin = Suggestion<Item, Item>({
       pluginKey: key,
       editor: instance,
       char: triggerChar,
@@ -200,7 +200,7 @@ watch(
       }),
     })
 
-    function applyState(state: SuggestionProps<SuggestionItem, SuggestionItem>) {
+    function applyState(state: SuggestionProps<Item, Item>) {
       referenceRect.value = state.clientRect
       commandFn.value = state.command
       suggestionItems.value = state.items

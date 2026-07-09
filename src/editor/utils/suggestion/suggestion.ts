@@ -683,7 +683,10 @@ export interface SuggestionItem<Context = unknown> {
 }
 
 /** Фильтрация + сортировка пунктов по запросу (точное совпадение, префикс). */
-export function filterSuggestionItems<T extends SuggestionItem>(items: T[], query: string): T[] {
+export function filterSuggestionItems<Context, T extends SuggestionItem<Context>>(
+  items: T[],
+  query: string,
+): T[] {
   const normalized = query.trim().toLowerCase()
   if (!normalized) return items
   return items

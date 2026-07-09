@@ -3,12 +3,13 @@
  * иконка, группа) + проверки доступности и действия.
  * Порт из чанка 1_-l0xapy_wlh (модуль 204748).
  */
-import type { Editor } from '@tiptap/vue-3'
+import type { Editor } from '@tiptap/core'
 import type { FunctionalComponent } from 'vue'
 import { isExtensionAvailable, isNodeInSchema } from '../../utils/tiptap-utils'
 import { findSelectionPosition, hasContentAbove } from '../../utils/selection-utils'
 import { addEmojiTrigger, addMentionTrigger } from '../../utils/trigger-utils'
 import type { SuggestionItem } from '../../utils/suggestion/suggestion'
+import type { AiTextPromptOptions } from '../../extensions/tiptap-command-types'
 import {
   AiSparklesIcon,
   AtSignIcon,
@@ -32,7 +33,7 @@ export interface SlashMenuConfig {
   enabledItems?: SlashMenuItemKey[]
   showGroups?: boolean
   itemGroups?: Partial<Record<SlashMenuItemKey, string>>
-  customItems?: SuggestionItem[]
+  customItems?: SlashMenuItem[]
 }
 
 export type SlashMenuItemKey =
@@ -60,6 +61,38 @@ interface SlashMenuItemMeta {
   keywords: string[]
   badge: FunctionalComponent
   group: string
+}
+
+export interface SlashMenuItemContext extends Record<string, unknown> {
+  key?: SlashMenuItemKey
+}
+
+export interface SlashMenuSelectProps {
+  editor: Editor
+  range?: { from: number; to: number }
+  context?: unknown
+}
+
+export interface SlashMenuActionArgs {
+  editor: Editor
+}
+
+export type SlashMenuSelectHandler = {
+  select(props: SlashMenuSelectProps): void
+}['select']
+
+export interface SlashMenuItem extends Omit<
+  SuggestionItem<SlashMenuItemContext>,
+  'badge' | 'onSelect'
+> {
+  badge?: FunctionalComponent
+  onSelect: SlashMenuSelectHandler
+}
+
+interface SlashMenuTableInsertOptions {
+  rows: number
+  cols: number
+  withHeaderRow: boolean
 }
 
 const ITEM_METADATA: Record<SlashMenuItemKey, SlashMenuItemMeta> = {
@@ -186,7 +219,7 @@ const ITEM_METADATA: Record<SlashMenuItemKey, SlashMenuItemMeta> = {
 
 interface SlashMenuItemBehavior {
   check: (editor: Editor) => boolean
-  action: (args: { editor: Editor }) => void
+  action: (args: SlashMenuActionArgs) => void
 }
 
 function buildBehaviors(): Record<SlashMenuItemKey, SlashMenuItemBehavior> {
@@ -201,16 +234,19 @@ function buildBehaviors(): Record<SlashMenuItemKey, SlashMenuItemBehavior> {
         const pos = findSelectionPosition({ editor })
         if (pos !== null) chain.setNodeSelection(pos)
         chain.run()
-        ;(editor.chain().focus() as any).aiGenerationShow().run()
+        editor.chain().focus().aiGenerationShow().run()
         requestAnimationFrame(() => {
           const { hasContent, content } = hasContentAbove(editor)
           const context = content.length > 500 ? `...${content.slice(-500)}` : content
           const prompt = hasContent
             ? `Context: ${context}\n\nContinue writing from where the text above ends. Write ONLY ONE SENTENCE. DONT REPEAT THE TEXT.`
             : 'Start writing a new paragraph. Write ONLY ONE SENTENCE.'
-          ;(editor.chain().focus() as any)
-            .aiTextPrompt({ stream: true, format: 'rich-text', text: prompt })
-            .run()
+          const promptOptions: AiTextPromptOptions = {
+            stream: true,
+            format: 'rich-text',
+            text: prompt,
+          }
+          editor.chain().focus().aiTextPrompt(promptOptions).run()
         })
       },
     },
@@ -221,7 +257,7 @@ function buildBehaviors(): Record<SlashMenuItemKey, SlashMenuItemBehavior> {
         const pos = findSelectionPosition({ editor })
         if (pos !== null) chain.setNodeSelection(pos)
         chain.run()
-        ;(editor.chain().focus() as any).aiGenerationShow().run()
+        editor.chain().focus().aiGenerationShow().run()
       },
     },
     text: {
@@ -301,9 +337,12 @@ function buildBehaviors(): Record<SlashMenuItemKey, SlashMenuItemBehavior> {
     table: {
       check: (editor) => isNodeInSchema('table', editor),
       action: ({ editor }) => {
-        ;(editor.chain().focus() as any)
-          .insertTable({ rows: 3, cols: 3, withHeaderRow: false })
-          .run()
+        const tableOptions: SlashMenuTableInsertOptions = {
+          rows: 3,
+          cols: 3,
+          withHeaderRow: false,
+        }
+        editor.chain().focus().insertTable(tableOptions).run()
       },
     },
     image: {
@@ -316,8 +355,8 @@ function buildBehaviors(): Record<SlashMenuItemKey, SlashMenuItemBehavior> {
 }
 
 /** Собирает доступные пункты слэш-меню для текущего редактора. */
-export function getSlashMenuItems(editor: Editor, config?: SlashMenuConfig): SuggestionItem[] {
-  const items: SuggestionItem[] = []
+export function getSlashMenuItems(editor: Editor, config?: SlashMenuConfig): SlashMenuItem[] {
+  const items: SlashMenuItem[] = []
   const enabledKeys = config?.enabledItems || (Object.keys(ITEM_METADATA) as SlashMenuItemKey[])
   const showGroups = config?.showGroups !== false
   const behaviors = buildBehaviors()
@@ -326,9 +365,8 @@ export function getSlashMenuItems(editor: Editor, config?: SlashMenuConfig): Sug
     const behavior = behaviors[key]
     const metadata = ITEM_METADATA[key]
     if (behavior && metadata && behavior.check(editor)) {
-      const item: SuggestionItem = {
-        onSelect: ({ editor: selectedEditor }) =>
-          behavior.action({ editor: selectedEditor as Editor }),
+      const item: SlashMenuItem = {
+        onSelect: ({ editor: selectedEditor }) => behavior.action({ editor: selectedEditor }),
         ...metadata,
       }
       if (config?.itemGroups?.[key]) item.group = config.itemGroups[key]
@@ -341,13 +379,13 @@ export function getSlashMenuItems(editor: Editor, config?: SlashMenuConfig): Sug
   if (!showGroups) return items.map((item) => ({ ...item, group: '' }))
 
   // стабильная сортировка по группам с сохранением порядка внутри группы
-  const grouped = new Map<string, SuggestionItem[]>()
+  const grouped = new Map<string, SlashMenuItem[]>()
   items.forEach((item) => {
     const group = item.group || ''
     if (!grouped.has(group)) grouped.set(group, [])
     grouped.get(group)!.push(item)
   })
-  const result: SuggestionItem[] = []
+  const result: SlashMenuItem[] = []
   grouped.forEach((groupItems) => result.push(...groupItems))
   return result
 }

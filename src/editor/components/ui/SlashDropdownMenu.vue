@@ -62,7 +62,7 @@
  * категориям AI/Style/Insert/Upload. Порт SlashDropdownMenu из чанка
  * 1_-l0xapy_wlh (модуль 204748).
  */
-import type { Editor } from '@tiptap/vue-3'
+import type { Editor } from '@tiptap/core'
 import SuggestionMenu from './SuggestionMenu.vue'
 import SlashMenuItem from './SlashMenuItem.vue'
 import Card from '../primitives/card/Card.vue'
@@ -71,25 +71,24 @@ import CardItemGroup from '../primitives/card/CardItemGroup.vue'
 import CardGroupLabel from '../primitives/card/CardGroupLabel.vue'
 import Separator from '../primitives/Separator.vue'
 import { filterSuggestionItems } from '../../utils/suggestion/suggestion'
-import type { SuggestionItem } from '../../utils/suggestion/suggestion'
 import { getSlashMenuItems } from './slash-menu-items'
-import type { SlashMenuConfig } from './slash-menu-items'
+import type { SlashMenuConfig, SlashMenuItem as SlashMenuEntry } from './slash-menu-items'
 
 const props = defineProps<{ config?: SlashMenuConfig }>()
 
 const showGroups = props.config?.showGroups !== false
 
-function getFilteredItems({ query, editor }: { query: string; editor: Editor }): SuggestionItem[] {
+function getFilteredItems({ query, editor }: { query: string; editor: Editor }): SlashMenuEntry[] {
   return filterSuggestionItems(getSlashMenuItems(editor, props.config), query)
 }
 
 interface GroupedEntries {
   label: string
-  entries: Array<{ item: SuggestionItem; index: number }>
+  entries: Array<{ item: SlashMenuEntry; index: number }>
 }
 
 /** Группировка пунктов с сохранением исходных индексов для подсветки. */
-function groupItems(items: SuggestionItem[]): GroupedEntries[] {
+function groupItems(items: SlashMenuEntry[]): GroupedEntries[] {
   const groups = new Map<string, GroupedEntries>()
   items.forEach((item, index) => {
     const label = item.group || ''
