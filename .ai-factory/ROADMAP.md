@@ -28,16 +28,18 @@
 
 ## Milestones
 
-### Этап 0. Инфраструктура качества (фундамент)
+### Этап 1. TypeScript: строгость и типы
 
-- [ ] Добавить `README.md` в корень проекта — установка, запуск, переменные окружения, структура, назначение (библиотека для Tinyfy)
-- [ ] Создать `.env.example` со всеми переменными `VITE_TIPTAP_*` и комментариями (актуально для playground; библиотека env не читает — см. Этап 3)
-- [ ] Подключить ESLint (flat config) с `eslint-plugin-vue` и `typescript-eslint`
-- [x] Подключить Prettier и согласовать его правила с ESLint
-- [x] Добавить npm-скрипты `lint`, `lint:fix`, `format` в `package.json`
-- [ ] Прогнать `lint:fix` по всему `src/` и устранить оставшиеся замечания линтера
-- [x] Настроить pre-commit хук (husky + lint-staged) на lint/format/typecheck
-- [ ] Настроить CI-пайплайн (GitHub Actions): typecheck → lint → test → build на каждый PR
+- [ ] Включить полный Strict Mode: убрать `"noImplicitAny": false` из `tsconfig.json`
+- [ ] Устранить ошибки компиляции, появившиеся после включения `noImplicitAny`
+- [ ] Устранить все использования `any` в `slash-menu-items.ts` (4 шт.)
+- [ ] Устранить `any` в `TableSelectionOverlay.vue`, `EditorContentArea.vue`, `EmojiDropdownMenu.vue`
+- [ ] Включить дополнительные строгие флаги: `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`
+- [ ] Создать `src/editor/types/` и вынести туда общие интерфейсы (пользователь, TOC-элемент, цвет, пункт меню, suggestion-item)
+- [ ] Типизировать `import.meta.env`: добавить `env.d.ts` с описанием всех `VITE_TIPTAP_*` переменных (для playground)
+- [ ] Заменить каст `provideTiptapEditor(editor as never)` в `EditorProvider.vue` на корректную типизацию
+- [ ] Проверить и типизировать все `provide/inject` контексты через `InjectionKey<T>`
+- [ ] Ревизия `tiptap-command-types.d.ts` и augmentation-деклараций — свести в одно место
 
 
 ## Completed
