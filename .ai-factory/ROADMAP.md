@@ -36,7 +36,7 @@
 - [x] Подключить Prettier и согласовать его правила с ESLint
 - [x] Добавить npm-скрипты `lint`, `lint:fix`, `format` в `package.json`
 - [ ] Прогнать `lint:fix` по всему `src/` и устранить оставшиеся замечания линтера
-- [ ] Настроить pre-commit хук (husky + lint-staged) на lint/format/typecheck
+- [x] Настроить pre-commit хук (husky + lint-staged) на lint/format/typecheck
 - [ ] Настроить CI-пайплайн (GitHub Actions): typecheck → lint → test → build на каждый PR
 
 
@@ -44,4 +44,5 @@
 
 | Date | Milestone | Work |
 | --- | --- | --- |
+| 2026-07-09 | Этап 0. Инфраструктура качества | Настроен pre-commit хук Husky с lint-staged для lint/format изменённых файлов и проектным typecheck перед коммитом. |
 | 2026-07-08 | Этап 0. Инфраструктура качества | Подключен Prettier, согласован с ESLint, добавлены npm-скрипты format/format:check. |
