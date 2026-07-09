@@ -145,7 +145,7 @@ export const Indent = Extension.create<IndentOptions>({
     ) => {
       const nodes = getSelectedNodesOfType(state.selection, this.options.types)
       if (nodes.length === 0) return false
-      return updateNodesAttr(tr, nodes, 'indent', (current) =>
+      return updateNodesAttr(tr, nodes, 'indent', (current: unknown) =>
         clamp(change(Number(current) || 0), this.options.minLevel, this.options.maxLevel),
       )
     }

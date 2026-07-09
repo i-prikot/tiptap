@@ -8,7 +8,6 @@
       "@/*": ["src/*"]
     },
     "strict": true,
-    "noImplicitAny": false,
     "types": ["vite/client"]
   },
   "include": ["src/**/*.ts", "src/**/*.vue"]
