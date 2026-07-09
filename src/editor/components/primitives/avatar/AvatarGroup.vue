@@ -1,7 +1,7 @@
 <template>
   <div class="tiptap-avatar-group" :data-max-user-visible="maxVisible">
-    <template v-for="(child, index) in visibleChildren" :key="index">
-      <component :is="child" />
+    <template v-for="item in keyedVisibleChildren" :key="item.key">
+      <component :is="item.child" />
     </template>
     <Avatar v-if="hiddenCount > 0">
       <AvatarFallback>+{{ hiddenCount }}</AvatarFallback>
@@ -35,4 +35,11 @@ const visibleChildren = computed(() =>
   props.maxVisible ? allChildren.value.slice(0, props.maxVisible) : allChildren.value,
 )
 const hiddenCount = computed(() => allChildren.value.length - visibleChildren.value.length)
+
+const keyedVisibleChildren = computed(() =>
+  visibleChildren.value.map((child, index) => ({
+    child,
+    key: child.key ?? index,
+  })),
+)
 </script>
