@@ -33,7 +33,7 @@ export default [
 
   {
     name: 'project/source-options',
-    files: ['src/**/*.{ts,vue}', 'vite.config.ts'],
+    files: ['src/**/*.{ts,vue}', 'vite.config.ts', 'vitest.config.ts'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
