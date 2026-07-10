@@ -215,7 +215,7 @@ const editor = useEditor({
   ],
 })
 
-provideTiptapEditor(editor as never)
+provideTiptapEditor(editor)
 
 // сбрасываем TOC при уничтожении редактора
 watch(editor, (instance) => {

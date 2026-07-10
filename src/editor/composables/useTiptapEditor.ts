@@ -4,15 +4,16 @@
  * возвращает переданный редактор либо редактор из контекста.
  */
 import { computed, inject, provide, shallowRef } from 'vue'
-import type { ComputedRef, InjectionKey, ShallowRef } from 'vue'
+import type { ComputedRef, InjectionKey, Ref, ShallowRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 
 export type MaybeEditor = Editor | null | undefined
+type ProvidedTiptapEditor = Readonly<Ref<MaybeEditor>>
 
-const editorInjectionKey: InjectionKey<ShallowRef<Editor | null>> = Symbol('tiptap-editor')
+const editorInjectionKey: InjectionKey<ProvidedTiptapEditor> = Symbol('tiptap-editor')
 
 /** Предоставляет редактор потомкам (аналог EditorContext.Provider). */
-export function provideTiptapEditor(editor: ShallowRef<Editor | null>) {
+export function provideTiptapEditor(editor: ProvidedTiptapEditor) {
   provide(editorInjectionKey, editor)
 }
 
