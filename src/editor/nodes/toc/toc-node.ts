@@ -20,14 +20,6 @@ export interface TocNodeAttributes {
   showTitle?: boolean | null
 }
 
-declare module '@tiptap/core' {
-  interface Commands<ReturnType> {
-    tocNode: {
-      insertTocNode: (attrs?: TocNodeAttributes) => ReturnType
-    }
-  }
-}
-
 function numberAttribute(dataName: string) {
   return {
     default: null as number | null,

@@ -25,17 +25,6 @@ export interface IndentOptions {
   indentUnit: number
 }
 
-declare module '@tiptap/core' {
-  interface Commands<ReturnType> {
-    indent: {
-      indent: () => ReturnType
-      outdent: () => ReturnType
-      setIndent: (level: number) => ReturnType
-      unsetIndent: () => ReturnType
-    }
-  }
-}
-
 /** Имя типа ближайшего предка-списка из набора, либо null. */
 function findListItemAncestor(state: EditorState, listItemTypes: Set<string>): string | null {
   const { $from } = state.selection

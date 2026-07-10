@@ -26,14 +26,6 @@ export interface ImageUploadNodeOptions {
   HTMLAttributes: Record<string, unknown>
 }
 
-declare module '@tiptap/core' {
-  interface Commands<ReturnType> {
-    imageUpload: {
-      setImageUploadNode: (attrs?: Record<string, unknown>) => ReturnType
-    }
-  }
-}
-
 export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
   name: 'imageUpload',
   group: 'block',

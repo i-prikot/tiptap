@@ -1,6 +1,8 @@
 import '@tiptap/core'
 import type { EmojiItem, EmojiStorage } from '@tiptap/extension-emoji'
-import type { UiEditorState } from './ui-state'
+import type { UiEditorState } from '../extensions/ui-state'
+import type { TableHandleState } from '../extensions/table-handle'
+import type { TocNodeAttributes } from '../nodes/toc/toc-node'
 
 export type AiTextPromptFormat = 'rich-text'
 
@@ -40,10 +42,41 @@ declare module '@tiptap/core' {
     emoji: {
       setEmoji: (name: string) => ReturnType
     }
+    indent: {
+      indent: () => ReturnType
+      outdent: () => ReturnType
+      setIndent: (level: number) => ReturnType
+      unsetIndent: () => ReturnType
+    }
+    nodeAlignment: {
+      setNodeTextAlign: (align: string) => ReturnType
+      unsetNodeTextAlign: () => ReturnType
+      toggleNodeTextAlign: (align: string) => ReturnType
+      setNodeVAlign: (align: string) => ReturnType
+      unsetNodeVAlign: () => ReturnType
+      toggleNodeVAlign: (align: string) => ReturnType
+      setNodeAlignment: (textAlign?: string, verticalAlign?: string) => ReturnType
+      unsetNodeAlignment: () => ReturnType
+    }
+    nodeBackground: {
+      setNodeBackgroundColor: (color: string) => ReturnType
+      unsetNodeBackgroundColor: () => ReturnType
+      toggleNodeBackgroundColor: (color: string) => ReturnType
+    }
+    imageUpload: {
+      setImageUploadNode: (attrs?: Record<string, unknown>) => ReturnType
+    }
+    tocNode: {
+      insertTocNode: (attrs?: TocNodeAttributes) => ReturnType
+    }
   }
 
   interface Storage {
     uiState: UiEditorState
     emoji: EditorEmojiStorage
+  }
+
+  interface EditorEvents {
+    tableHandleState: TableHandleState
   }
 }

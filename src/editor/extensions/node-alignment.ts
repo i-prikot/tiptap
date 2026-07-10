@@ -15,21 +15,6 @@ export interface NodeAlignmentOptions {
   verticalAlignValues: string[]
 }
 
-declare module '@tiptap/core' {
-  interface Commands<ReturnType> {
-    nodeAlignment: {
-      setNodeTextAlign: (align: string) => ReturnType
-      unsetNodeTextAlign: () => ReturnType
-      toggleNodeTextAlign: (align: string) => ReturnType
-      setNodeVAlign: (align: string) => ReturnType
-      unsetNodeVAlign: () => ReturnType
-      toggleNodeVAlign: (align: string) => ReturnType
-      setNodeAlignment: (textAlign?: string, verticalAlign?: string) => ReturnType
-      unsetNodeAlignment: () => ReturnType
-    }
-  }
-}
-
 /** Если хотя бы у одного узла значение отличается — применяем, иначе снимаем. */
 function toggleAttrValue(nodes: NodeWithPos[], attrName: string, value: string): string | null {
   if (nodes.length === 0) return null

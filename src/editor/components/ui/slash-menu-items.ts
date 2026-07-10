@@ -9,7 +9,7 @@ import { isExtensionAvailable, isNodeInSchema } from '../../utils/tiptap-utils'
 import { findSelectionPosition, hasContentAbove } from '../../utils/selection-utils'
 import { addEmojiTrigger, addMentionTrigger } from '../../utils/trigger-utils'
 import type { SuggestionItem } from '../../types/suggestion'
-import type { AiTextPromptOptions } from '../../extensions/tiptap-command-types'
+import type { AiTextPromptOptions } from '../../types/tiptap-augmentations'
 import {
   AiSparklesIcon,
   AtSignIcon,

@@ -50,12 +50,6 @@ export interface TableHandleState {
   draggingState?: TableDraggingState
 }
 
-declare module '@tiptap/core' {
-  interface EditorEvents {
-    tableHandleState: TableHandleState
-  }
-}
-
 export const tableHandlePluginKey = new PluginKey<boolean>('tableHandlePlugin')
 
 class TableHandleView {

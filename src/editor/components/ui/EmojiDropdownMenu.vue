@@ -39,7 +39,7 @@ import Card from '../primitives/card/Card.vue'
 import CardBody from '../primitives/card/CardBody.vue'
 import CardItemGroup from '../primitives/card/CardItemGroup.vue'
 import type { SuggestionItem } from '../../types/suggestion'
-import type { EditorEmojiItem, EditorEmojiStorage } from '../../extensions/tiptap-command-types'
+import type { EditorEmojiItem, EditorEmojiStorage } from '../../types/tiptap-augmentations'
 
 type SuggestionRange = { from: number; to: number }
 

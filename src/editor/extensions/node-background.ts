@@ -15,16 +15,6 @@ export interface NodeBackgroundOptions {
   useStyle: boolean
 }
 
-declare module '@tiptap/core' {
-  interface Commands<ReturnType> {
-    nodeBackground: {
-      setNodeBackgroundColor: (color: string) => ReturnType
-      unsetNodeBackgroundColor: () => ReturnType
-      toggleNodeBackgroundColor: (color: string) => ReturnType
-    }
-  }
-}
-
 /** Если хотя бы у одного узла цвет отличается — применяем, иначе снимаем. */
 function toggleValue(nodes: NodeWithPos[], color: string): string | null {
   if (nodes.length === 0) return null
