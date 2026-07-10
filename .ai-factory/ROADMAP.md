@@ -38,7 +38,7 @@
 - [x] Создать `src/editor/types/` и вынести туда общие интерфейсы (пользователь, TOC-элемент, цвет, пункт меню, suggestion-item)
 - [ ] Типизировать `import.meta.env`: добавить `env.d.ts` с описанием всех `VITE_TIPTAP_*` переменных (для playground)
 - [x] Заменить каст `provideTiptapEditor(editor as never)` в `EditorProvider.vue` на корректную типизацию
-- [ ] Проверить и типизировать все `provide/inject` контексты через `InjectionKey<T>`
+- [x] Проверить и типизировать все `provide/inject` контексты через `InjectionKey<T>`
 - [ ] Ревизия `tiptap-command-types.d.ts` и augmentation-деклараций — свести в одно место
 
 
@@ -46,6 +46,7 @@
 
 | Date | Milestone | Work |
 | --- | --- | --- |
+| 2026-07-10 | Этап 1. TypeScript: строгость и типы | Проверены и типизированы Vue `provide/inject` контексты через `InjectionKey<T>`; убраны DI-касты в меню и редакторском контексте. |
 | 2026-07-09 | Этап 1. TypeScript: строгость и типы | Создан `src/editor/types/`; общие типы пользователя, TOC, цветов, пунктов меню и suggestion-item вынесены в shared modules; импорты нормализованы. |
 | 2026-07-09 | Этап 1. TypeScript: строгость и типы | Устранены четыре использования `any` в `slash-menu-items.ts`; добавлены точные типы slash-menu items и Tiptap command augmentation. |
 | 2026-07-10 | Этап 1. TypeScript: строгость и типы | Заменён каст `provideTiptapEditor(editor as never)` в `EditorProvider.vue` на корректно типизированный provide/inject контракт редактора. |

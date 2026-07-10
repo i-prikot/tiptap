@@ -12,6 +12,12 @@ type ProvidedTiptapEditor = Readonly<Ref<MaybeEditor>>
 
 const editorInjectionKey: InjectionKey<ProvidedTiptapEditor> = Symbol('tiptap-editor')
 
+function isProvidedEditorRef(
+  editor: MaybeEditor | ShallowRef<MaybeEditor> | ComputedRef<MaybeEditor>,
+): editor is ShallowRef<MaybeEditor> | ComputedRef<MaybeEditor> {
+  return typeof editor === 'object' && editor !== null && 'value' in editor
+}
+
 /** Предоставляет редактор потомкам (аналог EditorContext.Provider). */
 export function provideTiptapEditor(editor: ProvidedTiptapEditor) {
   provide(editorInjectionKey, editor)
@@ -25,10 +31,7 @@ export function useTiptapEditor(
 ): ComputedRef<Editor | null> {
   const contextEditor = inject(editorInjectionKey, shallowRef(null))
   return computed(() => {
-    const explicit =
-      providedEditor && typeof providedEditor === 'object' && 'value' in providedEditor
-        ? providedEditor.value
-        : providedEditor
-    return (explicit as Editor | null | undefined) ?? contextEditor.value ?? null
+    const explicit = isProvidedEditorRef(providedEditor) ? providedEditor.value : providedEditor
+    return explicit ?? contextEditor.value ?? null
   })
 }

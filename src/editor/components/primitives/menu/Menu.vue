@@ -13,11 +13,12 @@
  */
 import { inject, onBeforeUnmount, onMounted, provide, ref, watch } from 'vue'
 import { menuInjectionKey } from './menu-context'
+import type { Placement } from '@floating-ui/vue'
 
 const props = withDefaults(
   defineProps<{
     open?: boolean
-    placement?: string
+    placement?: Placement
   }>(),
   { open: undefined, placement: 'bottom-start' },
 )

@@ -27,7 +27,6 @@
  */
 import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { autoUpdate, flip, offset, shift, size, useFloating } from '@floating-ui/vue'
-import type { Placement } from '@floating-ui/vue'
 import { menuInjectionKey } from './menu-context'
 
 const props = withDefaults(defineProps<{ closeOnSelect?: boolean }>(), { closeOnSelect: true })
@@ -44,7 +43,7 @@ const { floatingStyles, placement: resolvedPlacement } = useFloating(
   context.reference,
   floatingRef,
   {
-    placement: context.placement as Placement,
+    placement: context.placement,
     whileElementsMounted: autoUpdate,
     middleware: [
       offset(4),
