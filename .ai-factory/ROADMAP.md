@@ -32,7 +32,7 @@
 
 - [ ] Установить и настроить Vitest (`vitest.config.ts`, environment `jsdom`/`happy-dom`)
 - [ ] Установить и настроить Vue Test Utils + `@vitest/coverage-v8`
-- [ ] Добавить npm-скрипты `test`, `test:watch`, `test:coverage`
+- [x] Добавить npm-скрипты `test`, `test:watch`, `test:coverage`
 - [ ] Принять TDD-регламент: новые фичи и рефакторинг начинаются с падающего теста (зафиксировать в `.ai-factory/RULES.md`)
 - [ ] Написать unit-тесты на чистые утилиты: `document-id.ts`, `user-utils.ts`, `throttle.ts`, `toc-utils.ts`
 - [ ] Написать unit-тесты на `tiptap-utils.ts` (sanitizeUrl, clamp, parseShortcutKeys, handleImageUpload)
@@ -56,6 +56,7 @@
 
 | Date | Milestone | Work |
 | --- | --- | --- |
+| 2026-07-10 | Этап 2. Тестирование: фундамент (до рефакторинга и пакетизации) | Проверены npm-скрипты `test`, `test:watch`, `test:coverage`; coverage запускается через `@vitest/coverage-v8`. |
 | 2026-07-10 | Этап 1. TypeScript: строгость и типы | Проверены и типизированы Vue `provide/inject` контексты через `InjectionKey<T>`; убраны DI-касты в меню и редакторском контексте. |
 | 2026-07-09 | Этап 1. TypeScript: строгость и типы | Создан `src/editor/types/`; общие типы пользователя, TOC, цветов, пунктов меню и suggestion-item вынесены в shared modules; импорты нормализованы. |
 | 2026-07-09 | Этап 1. TypeScript: строгость и типы | Устранены четыре использования `any` в `slash-menu-items.ts`; добавлены точные типы slash-menu items и Tiptap command augmentation. |
