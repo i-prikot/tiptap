@@ -28,18 +28,28 @@
 
 ## Milestones
 
-### Этап 1. TypeScript: строгость и типы
+### Этап 2. Тестирование: фундамент (до рефакторинга и пакетизации)
 
-- [ ] Включить полный Strict Mode: убрать `"noImplicitAny": false` из `tsconfig.json`
-- [ ] Устранить ошибки компиляции, появившиеся после включения `noImplicitAny`
-- [x] Устранить все использования `any` в `slash-menu-items.ts` (4 шт.)
-- [ ] Устранить `any` в `TableSelectionOverlay.vue`, `EditorContentArea.vue`, `EmojiDropdownMenu.vue`
-- [ ] Включить дополнительные строгие флаги: `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`
-- [x] Создать `src/editor/types/` и вынести туда общие интерфейсы (пользователь, TOC-элемент, цвет, пункт меню, suggestion-item)
-- [ ] Типизировать `import.meta.env`: добавить `env.d.ts` с описанием всех `VITE_TIPTAP_*` переменных (для playground)
-- [x] Заменить каст `provideTiptapEditor(editor as never)` в `EditorProvider.vue` на корректную типизацию
-- [x] Проверить и типизировать все `provide/inject` контексты через `InjectionKey<T>`
-- [ ] Ревизия `tiptap-command-types.d.ts` и augmentation-деклараций — свести в одно место
+- [ ] Установить и настроить Vitest (`vitest.config.ts`, environment `jsdom`/`happy-dom`)
+- [ ] Установить и настроить Vue Test Utils + `@vitest/coverage-v8`
+- [ ] Добавить npm-скрипты `test`, `test:watch`, `test:coverage`
+- [ ] Принять TDD-регламент: новые фичи и рефакторинг начинаются с падающего теста (зафиксировать в `.ai-factory/RULES.md`)
+- [ ] Написать unit-тесты на чистые утилиты: `document-id.ts`, `user-utils.ts`, `throttle.ts`, `toc-utils.ts`
+- [ ] Написать unit-тесты на `tiptap-utils.ts` (sanitizeUrl, clamp, parseShortcutKeys, handleImageUpload)
+- [ ] Написать unit-тесты на `table-utils.ts` (getTable, cellsOverlapRectangle, countEmpty*, selectCellsByCoords)
+- [ ] Написать unit-тесты на `table-actions.ts` (can/do: move, duplicate, sort, merge/split, header toggle)
+- [ ] Написать unit-тесты на `selection-utils.ts` и `trigger-utils.ts`
+- [ ] Написать unit-тесты на suggestion-движок (`utils/suggestion/suggestion.ts`): dismissedRange, debounce, minQueryLength
+- [ ] Написать unit-тесты на конверсию блоков (`blocks/block-conversion.ts`, `useBlockConversions.ts`)
+- [ ] Написать unit-тесты на кастомные расширения: `indent.ts`, `list-normalization.ts`, `node-background.ts`, `node-alignment.ts`
+- [ ] Написать component-тесты примитивов: `Button`, `Popover`, `DropdownMenu`, `Menu`, `Tooltip`, `Avatar`
+- [ ] Написать integration-тесты создания редактора: `EditorProvider` монтируется, расширения регистрируются, seed-контент вставляется по правилам `hasInteracted`
+- [ ] Написать integration-тесты критических сценариев: ввод `/` открывает slash-меню, Enter вставляет блок
+- [ ] Написать integration-тесты таблиц: вставка 3×3, добавление/удаление строки, merge/split, запрет удаления последней строки
+- [ ] Написать integration-тесты форматирования: bold/italic/highlight, установка и снятие ссылки
+- [ ] Написать integration-тест graceful degradation: без конфигурации collab редактор работает локально, с неполной конфигурацией — показывается `SetupError`
+- [ ] Перенести смоук-сценарий из `scratchpad/smoke-test.mjs` в воспроизводимый e2e (Playwright) и включить в CI
+- [ ] Довести покрытие тестами до 70%+ и включить порог coverage в CI
 
 
 ## Completed
