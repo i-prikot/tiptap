@@ -78,14 +78,15 @@ export function navigateToHeading(item: TocItem, options: NavigateToHeadingOptio
 
   if (!alreadyVisible) {
     const scrollParent = getScrollableAncestor(item.dom)
-    if (scrollParent instanceof Window) {
+    if (scrollParent === window) {
       const top = item.dom.getBoundingClientRect().top + window.scrollY - topOffset
       window.scrollTo({ top, behavior })
     } else {
+      const scrollElement = scrollParent as HTMLElement
       const itemRect = item.dom.getBoundingClientRect()
-      const parentRect = scrollParent.getBoundingClientRect()
-      const top = itemRect.top - parentRect.top + scrollParent.scrollTop - topOffset
-      scrollParent.scrollTo({ top, behavior })
+      const parentRect = scrollElement.getBoundingClientRect()
+      const top = itemRect.top - parentRect.top + scrollElement.scrollTop - topOffset
+      scrollElement.scrollTo({ top, behavior })
     }
   }
 

@@ -3,7 +3,12 @@ import { afterEach, vi } from 'vitest'
 
 config.global.renderStubDefaultSlot = true
 
-enableAutoUnmount(afterEach)
+const autoUnmountEnabled = Symbol.for('vitest.vue-test-utils.auto-unmount-enabled')
+
+if (!Reflect.get(globalThis, autoUnmountEnabled)) {
+  enableAutoUnmount(afterEach)
+  Reflect.set(globalThis, autoUnmountEnabled, true)
+}
 
 afterEach(() => {
   vi.restoreAllMocks()

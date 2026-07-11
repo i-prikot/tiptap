@@ -4,7 +4,11 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   plugins: [vue()],
   test: {
-    environment: 'jsdom',
+    environment: 'happy-dom',
+    pool: 'threads',
+    maxWorkers: 1,
+    fileParallelism: false,
+    isolate: false,
     setupFiles: ['./test/setup.ts'],
     passWithNoTests: true,
     coverage: {
@@ -16,7 +20,6 @@ export default defineConfig({
         'src/main.ts',
         'src/vite-env.d.ts',
         'src/**/*.d.ts',
-        'src/**/__tests__/**',
         'src/**/*.test.{ts,vue}',
         'src/**/*.spec.{ts,vue}',
         'test/**',

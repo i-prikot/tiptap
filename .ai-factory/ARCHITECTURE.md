@@ -312,7 +312,6 @@ flowchart TD
     Floating["@floating-ui/*"]
     YjsLib["yjs + @hocuspocus/provider"]
     Katex["katex"]
-    Lucide["lucide-vue-next"]
   end
 
   Shell --> Composables
@@ -328,7 +327,6 @@ flowchart TD
   UtilsMod --> Floating
   Shell --> YjsLib
   Extensions --> Katex
-  UI --> Lucide
 ```
 
 Ключевые внешние зависимости (`package.json`):
@@ -342,7 +340,7 @@ flowchart TD
   `@tiptap/extension-mention`, `@tiptap/extension-table*`,
   `@tiptap/extension-*` (highlight, image, math, text-align/style, typography,
   unique-id, sub/superscript, list, toc).
-- **Иконки** — `lucide-vue-next` (реэкспорт в `icons/index.ts`).
+- **Иконки** — локальные SVG-функциональные компоненты из `src/editor/icons`.
 - **Сборка** — Vite + `@vitejs/plugin-vue`, TypeScript, `vue-tsc`.
 
 ## 12. Известные допущения и ограничения архитектуры

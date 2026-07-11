@@ -117,7 +117,7 @@ editor»**, изначально написанного на Next.js + React, и
   `@hocuspocus/provider` (вебсокет-провайдер Tiptap Cloud).
 - **Позиционирование UI:** Floating UI (`@floating-ui/dom`, `@floating-ui/vue`).
 - **Формулы:** KaTeX.
-- **Иконки:** `lucide-vue-next`.
+- **Иконки:** локальные SVG-компоненты из `src/editor/icons`.
 
 Полный перечень версий — в `package.json`.
 

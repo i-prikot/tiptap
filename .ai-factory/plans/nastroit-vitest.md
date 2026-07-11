@@ -110,3 +110,9 @@
 
 - [ ] **Commit 1:** `test: configure vitest baseline`
   - [ ] Include dependency installation, npm test script wiring, `vitest.config.ts`, and related lint/typecheck compatibility changes.
+
+## Rework — 2026-07-11
+
+- [x] Move the editor utility tests out of `src/editor/utils/__tests__`.
+  - [x] Deliverable: place the files under `test/editor/utils/`, mirroring the tested source module.
+  - [x] Expected behavior: Vitest discovers the relocated files and their imports resolve to `src/editor/utils`.
