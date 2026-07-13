@@ -6,8 +6,11 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     pool: 'threads',
-    maxWorkers: 1,
-    fileParallelism: false,
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
     isolate: false,
     setupFiles: ['./test/setup.ts'],
     passWithNoTests: true,
