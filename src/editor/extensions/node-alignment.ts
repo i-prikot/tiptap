@@ -85,33 +85,37 @@ export const NodeAlignment = Extension.create<NodeAlignmentOptions>({
 
   addCommands() {
     const applyAttr =
-      (attrName: string, resolve: (nodes: NodeWithPos[], value?: string) => string | null) =>
+      (
+        attrName: string,
+        resolve: (nodes: NodeWithPos[], value?: string) => string | null | undefined,
+      ) =>
       (value?: string) =>
       ({ state, tr }: { state: EditorState; tr: Transaction }) => {
         const nodes = getSelectedNodesOfType(state.selection, this.options.types)
         if (nodes.length === 0) return false
         const resolved = resolve(nodes, value)
+        if (resolved === undefined) return false
         return updateNodesAttr(tr, nodes, attrName, resolved)
       }
 
     return {
       setNodeTextAlign: applyAttr('nodeTextAlign', (_nodes, value) =>
-        value && this.options.textAlignValues.includes(value) ? value : null,
+        value && this.options.textAlignValues.includes(value) ? value : undefined,
       ),
       unsetNodeTextAlign: () => applyAttr('nodeTextAlign', () => null)(undefined),
       toggleNodeTextAlign: applyAttr('nodeTextAlign', (nodes, value) =>
         value && this.options.textAlignValues.includes(value)
           ? toggleAttrValue(nodes, 'nodeTextAlign', value)
-          : null,
+          : undefined,
       ),
       setNodeVAlign: applyAttr('nodeVerticalAlign', (_nodes, value) =>
-        value && this.options.verticalAlignValues.includes(value) ? value : null,
+        value && this.options.verticalAlignValues.includes(value) ? value : undefined,
       ),
       unsetNodeVAlign: () => applyAttr('nodeVerticalAlign', () => null)(undefined),
       toggleNodeVAlign: applyAttr('nodeVerticalAlign', (nodes, value) =>
         value && this.options.verticalAlignValues.includes(value)
           ? toggleAttrValue(nodes, 'nodeVerticalAlign', value)
-          : null,
+          : undefined,
       ),
       setNodeAlignment:
         (textAlign?: string, verticalAlign?: string) =>

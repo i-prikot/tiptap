@@ -292,7 +292,11 @@ export function useCodeBlockBlock(editor: ComputedRef<Editor | null>): BlockConv
   const handleToggle = () => {
     const instance = editor.value
     if (!instance || !instance.isEditable || !canToggleCodeBlock(instance)) return false
-    return convertSelectedBlock(instance, (chain) => chain.toggleNode('codeBlock', 'paragraph'))
+    return convertSelectedBlock(instance, (chain) =>
+      instance.isActive('codeBlock')
+        ? chain.setNode('paragraph')
+        : chain.toggleNode('codeBlock', 'paragraph'),
+    )
   }
 
   return {
