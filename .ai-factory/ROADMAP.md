@@ -28,28 +28,39 @@
 
 ## Milestones
 
-### Этап 2. Тестирование: фундамент (до рефакторинга и пакетизации)
+### Этап 3. Границы библиотеки и архитектура
 
-- [ ] Установить и настроить Vitest (`vitest.config.ts`, environment `jsdom`/`happy-dom`)
-- [ ] Установить и настроить Vue Test Utils + `@vitest/coverage-v8`
-- [x] Добавить npm-скрипты `test`, `test:watch`, `test:coverage`
-- [ ] Принять TDD-регламент: новые фичи и рефакторинг начинаются с падающего теста (зафиксировать в `.ai-factory/RULES.md`)
-- [ ] Написать unit-тесты на чистые утилиты: `document-id.ts`, `user-utils.ts`, `throttle.ts`, `toc-utils.ts`
-- [ ] Написать unit-тесты на `tiptap-utils.ts` (sanitizeUrl, clamp, parseShortcutKeys, handleImageUpload)
-- [ ] Написать unit-тесты на `table-utils.ts` (getTable, cellsOverlapRectangle, countEmpty*, selectCellsByCoords)
-- [ ] Написать unit-тесты на `table-actions.ts` (can/do: move, duplicate, sort, merge/split, header toggle)
-- [ ] Написать unit-тесты на `selection-utils.ts` и `trigger-utils.ts`
-- [ ] Написать unit-тесты на suggestion-движок (`utils/suggestion/suggestion.ts`): dismissedRange, debounce, minQueryLength
-- [ ] Написать unit-тесты на конверсию блоков (`blocks/block-conversion.ts`, `useBlockConversions.ts`)
-- [ ] Написать unit-тесты на кастомные расширения: `indent.ts`, `list-normalization.ts`, `node-background.ts`, `node-alignment.ts`
-- [ ] Написать component-тесты примитивов: `Button`, `Popover`, `DropdownMenu`, `Menu`, `Tooltip`, `Avatar`
-- [ ] Написать integration-тесты создания редактора: `EditorProvider` монтируется, расширения регистрируются, seed-контент вставляется по правилам `hasInteracted`
-- [ ] Написать integration-тесты критических сценариев: ввод `/` открывает slash-меню, Enter вставляет блок
-- [ ] Написать integration-тесты таблиц: вставка 3×3, добавление/удаление строки, merge/split, запрет удаления последней строки
-- [ ] Написать integration-тесты форматирования: bold/italic/highlight, установка и снятие ссылки
-- [ ] Написать integration-тест graceful degradation: без конфигурации collab редактор работает локально, с неполной конфигурацией — показывается `SetupError`
-- [ ] Перенести смоук-сценарий из `scratchpad/smoke-test.mjs` в воспроизводимый e2e (Playwright) и включить в CI
-- [ ] Довести покрытие тестами до 70%+ и включить порог coverage в CI
+> Цель этапа — провести чёткую границу «библиотека ↔ хост-приложение»,
+> без которой пакетизация (Этап 4) невозможна. Библиотека не читает env,
+> URL и не лезет в `localStorage` без префикса; всё внешнее приходит через
+> props/конфиг.
+
+#### Граница «библиотека ↔ хост»
+
+- [ ] Спроектировать и зафиксировать публичный API компонента: props (`content` — Tiptap JSON, `placeholder`, `features` — флаги collab/ai/tables/…, `uploadImage` — адаптер загрузки), events (`update` c debounce, `ready` с экземпляром редактора), expose (`editor`, `getJSON`, `getHTML`, `focus`, `setContent`)
+- [ ] Убрать шапку из библиотеки: `NotionEditorHeader` и `CtaPopup` переезжают в playground; компонент библиотеки рендерит только контент + плавающие тулбары + табличный UI; TOC-сайдбар — опциональный проп. Undo/redo в шапке хоста — через экземпляр редактора (`editor.chain().undo()`, `editor.can().undo()` по `transaction`)
+- [ ] Экспортировать переиспользуемые кнопки-команды (`UndoRedoButton` и др., все принимают проп `editor`) как публичные компоненты пакета — для хостов, не желающих писать свои
+- [ ] Удалить `ThemeToggle` из библиотеки: тему задаёт хост; стили редактора реагируют на класс/токены на корне `.tinyfy-editor` (не на `html.dark`); в playground — собственный переключатель
+- [ ] Вынести чтение `import.meta.env` из `useCollab`/`useAi` в конфиг-объект, передаваемый снаружи через props/options; чтение env остаётся только в playground
+- [ ] Убрать чтение URL из библиотечного слоя (`getDocumentId`, `?noCollab=1`, формирование якорных ссылок с `location`) — идентификатор документа и базовый URL передаёт хост
+- [ ] Загрузка изображений — только через инжектируемый адаптер `uploadImage(file, callbacks) => Promise<url>`; убрать зашитое поведение из `handleImageUpload`
+- [ ] Seed демо-контента и флаг `hasInteracted-<docId>` перенести из библиотеки в playground (в Tinyfy новый документ создаётся сервером)
+- [ ] Префиксовать все `localStorage`-ключи библиотеки (`_tiptap_user_*`, недавние цвета) и дать хосту возможность отключить/заместить хранение идентичности
+- [ ] Зафиксировать слоистость линтером: запретить импорт Vue-компонентов из `extensions/` и `utils/` (правило `import/no-restricted-paths`)
+
+#### Внутренняя архитектура
+
+- [ ] Вынести конфигурацию списка расширений из `EditorProvider.vue` в фабрику `extension-kit.ts` (параметры: provider, placeholder, user, features) — прямой задел под пакет схемы (Этап 4)
+- [ ] Разбить `utils/table-actions.ts` (~28 КБ) на модули по операциям: move, add/delete, sort, merge/split, header, clear
+- [ ] Разбить `utils/table-utils.ts` (~20 КБ) на модули: навигация по TableMap, выделение ячеек, подсчёты/предикаты
+- [ ] Разбить `extensions/table-handle.ts` (~26 КБ): отделить ProseMirror-плагин, drag&drop-логику и декорации в отдельные файлы
+- [ ] Разбить `utils/suggestion/suggestion.ts` (~23 КБ) на модули: плагин, состояние, декорации, mount/positioning
+- [ ] Разбить `composables/useNodeActions.ts` (~19 КБ) на отдельные composables-файлы (useDuplicate, useCopyToClipboard, useCopyAnchorLink, useResetAllFormatting, useDeleteNode, useImageDownload и т.д.)
+- [ ] Устранить дублирование Color/Highlight-логики: объединить общие части `useColorText`/`useColorHighlight` и попарных Popover/Content-компонентов (DRY)
+- [ ] Устранить дублирование floating-позиционеров: общая обёртка-позиционер для `Menu`/`DropdownMenu`/`Popover` (сейчас три копии схемы «wrapper несёт transform»)
+- [ ] Ревизия примитивов `Menu` vs `DropdownMenu`: описать границы применимости или объединить в один примитив (KISS)
+- [ ] Изолировать AI-функциональность за одним feature-флагом: `useAi`, AI-ветки UI и AI-пункты меню не удалять, а спрятать за единой точкой включения — задел под собственное AI-расширение (Этап 11)
+- [ ] Добавить barrel-экспорты (`index.ts`) для `composables/`, `primitives/` и `ui/` и унифицировать пути импортов через алиас `@/`
 
 
 ## Completed
