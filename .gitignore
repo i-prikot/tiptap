@@ -10,3 +10,6 @@ node_modules
 .env.production.local
 .npm-cache
 coverage
+playwright-report/
+test-results/
+dist/

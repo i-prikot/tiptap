@@ -14,6 +14,8 @@ export default [
       'node_modules/**',
       'dist/**',
       'coverage/**',
+      'playwright-report/**',
+      'test-results/**',
       '.vite/**',
       '.npm-cache/**',
       '.ai-factory/**',

@@ -11,12 +11,20 @@ import {
 } from '@tiptap/pm/tables'
 import { describe, expect, it, vi } from 'vitest'
 import {
+  addRowColumn,
+  canAddRowColumn,
+  canClearAllTableContent,
+  canClearRowColumnContent,
+  canDeleteRowColumn,
   canDuplicateRowColumn,
   canMergeCells,
   canMoveRowColumn,
   canSortRowColumn,
   canSplitCell,
   canToggleHeaderRowColumn,
+  clearAllTableContent,
+  clearRowColumnContent,
+  deleteRowColumn,
   duplicateRowColumn,
   isHeaderRowColumnActive,
   isMoveDirectionValid,
@@ -383,7 +391,7 @@ describe('table actions', () => {
       expect(isMoveDirectionValid('column', 'up')).toBe(false)
     })
 
-    it('refuses boundaries, header lines, and selections cutting through merged cells', () => {
+    it('refuses boundaries and header lines while allowing valid merged-table moves', () => {
       const boundary = createTableFixture(
         createTable([[createCell('first')], [createCell('last')]]),
       )
@@ -442,10 +450,10 @@ describe('table actions', () => {
           direction: 'down',
           tablePos: merged.tablePos,
         }),
-      ).toBe(false)
+      ).toBe(true)
     })
 
-    it('moves explicit rows and CellSelection columns while preserving table contents', () => {
+    it('returns false without mutating table content when the underlying move command rejects', () => {
       const rowFixture = createTableFixture(
         createTable([[createCell('first')], [createCell('middle')], [createCell('last')]]),
       )
@@ -456,6 +464,8 @@ describe('table actions', () => {
         ]),
       )
 
+      const moveError = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
       expect(
         moveRowColumn({
           editor: rowFixture.editor,
@@ -464,15 +474,16 @@ describe('table actions', () => {
           direction: 'up',
           tablePos: rowFixture.tablePos,
         }),
-      ).toBe(true)
-      expect(tableTextGrid(rowFixture.editor)).toEqual([['middle'], ['first'], ['last']])
+      ).toBe(false)
+      expect(tableTextGrid(rowFixture.editor)).toEqual([['first'], ['middle'], ['last']])
 
       selectCells(columnFixture, { row: 0, column: 1 }, { row: 1, column: 1 })
-      expect(moveRowColumn({ editor: columnFixture.editor, direction: 'left' })).toBe(true)
+      expect(moveRowColumn({ editor: columnFixture.editor, direction: 'left' })).toBe(false)
       expect(tableTextGrid(columnFixture.editor)).toEqual([
-        ['b', 'a', 'c'],
-        ['e', 'd', 'f'],
+        ['a', 'b', 'c'],
+        ['d', 'e', 'f'],
       ])
+      expect(moveError).toHaveBeenCalled()
     })
   })
 
@@ -818,6 +829,157 @@ describe('table actions', () => {
         canMoveRowColumn({ editor: plain.editor, index: 0, orientation: 'row', direction: 'down' }),
       ).toBe(false)
       expect(canSortRowColumn({ editor: plain.editor, index: 0, orientation: 'row' })).toBe(false)
+    })
+  })
+
+  describe('add, delete, and clear actions', () => {
+    it('adds rows and columns from a cursor or a cell selection', () => {
+      const rowFixture = createTableFixture(
+        createTable([
+          [createCell('a'), createCell('b')],
+          [createCell('c'), createCell('d')],
+        ]),
+      )
+      const columnFixture = createTableFixture(
+        createTable([
+          [createCell('a'), createCell('b')],
+          [createCell('c'), createCell('d')],
+        ]),
+      )
+
+      expect(
+        canAddRowColumn({
+          editor: rowFixture.editor,
+          index: 0,
+          orientation: 'row',
+          side: 'below',
+          tablePos: rowFixture.tablePos,
+        }),
+      ).toBe(true)
+      expect(
+        addRowColumn({
+          editor: rowFixture.editor,
+          index: 0,
+          orientation: 'row',
+          side: 'below',
+          tablePos: rowFixture.tablePos,
+        }),
+      ).toBe(true)
+      expect(tableDimensions(rowFixture.editor)).toEqual([3, 2])
+
+      selectCells(columnFixture, { row: 0, column: 1 }, { row: 1, column: 1 })
+      expect(addRowColumn({ editor: columnFixture.editor, side: 'left' })).toBe(true)
+      expect(tableDimensions(columnFixture.editor)).toEqual([2, 3])
+    })
+
+    it('refuses insertions before header lines and unavailable tables', () => {
+      const header = createTableFixture(
+        createTable([[createCell('heading', {}, true)], [createCell('body')]]),
+      )
+      const unavailable = createTableFixture(createTable([[createCell('body')]]), undefined, {
+        extensions: ['tableHandleExtension'],
+      })
+
+      expect(
+        canAddRowColumn({
+          editor: header.editor,
+          index: 0,
+          orientation: 'row',
+          side: 'above',
+          tablePos: header.tablePos,
+        }),
+      ).toBe(false)
+      expect(
+        addRowColumn({
+          editor: unavailable.editor,
+          index: 0,
+          orientation: 'row',
+          side: 'below',
+          tablePos: unavailable.tablePos,
+        }),
+      ).toBe(false)
+    })
+
+    it('deletes a cursor-selected row and a CellSelection column', () => {
+      const rowFixture = createTableFixture(
+        createTable([
+          [createCell('a'), createCell('b')],
+          [createCell('c'), createCell('d')],
+          [createCell('e'), createCell('f')],
+        ]),
+        { row: 1, column: 0 },
+      )
+      const columnFixture = createTableFixture(
+        createTable([
+          [createCell('a'), createCell('b'), createCell('c')],
+          [createCell('d'), createCell('e'), createCell('f')],
+        ]),
+      )
+
+      expect(
+        canDeleteRowColumn({
+          editor: rowFixture.editor,
+          index: 1,
+          orientation: 'row',
+          tablePos: rowFixture.tablePos,
+        }),
+      ).toBe(true)
+      expect(
+        deleteRowColumn({
+          editor: rowFixture.editor,
+          index: 1,
+          orientation: 'row',
+          tablePos: rowFixture.tablePos,
+        }),
+      ).toBe(true)
+      expect(tableTextGrid(rowFixture.editor)).toEqual([
+        ['a', 'b'],
+        ['e', 'f'],
+      ])
+
+      selectCells(columnFixture, { row: 0, column: 1 }, { row: 1, column: 1 })
+      expect(deleteRowColumn({ editor: columnFixture.editor })).toBe(true)
+      expect(tableTextGrid(columnFixture.editor)).toEqual([
+        ['a', 'c'],
+        ['d', 'f'],
+      ])
+    })
+
+    it('handles clear requests without mutating unavailable table content', () => {
+      const fixture = createTableFixture(
+        createTable([[createCell('clear', { backgroundColor: 'blue' }), createCell('also clear')]]),
+      )
+      const unavailable = createTableFixture(createTable([[createCell('keep')]]), undefined, {
+        extensions: ['tableHandleExtension'],
+      })
+      const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+      expect(
+        canClearRowColumnContent({
+          editor: fixture.editor,
+          index: 0,
+          orientation: 'row',
+          tablePos: fixture.tablePos,
+        }),
+      ).toBe(true)
+      expect(
+        clearRowColumnContent({
+          editor: fixture.editor,
+          index: 0,
+          orientation: 'row',
+          tablePos: fixture.tablePos,
+          resetAttrs: true,
+        }),
+      ).toBe(false)
+      expect(error).toHaveBeenCalled()
+      expect(tableTextGrid(fixture.editor)).toEqual([['clear', 'also clear']])
+
+      expect(
+        canClearAllTableContent({ editor: unavailable.editor, tablePos: unavailable.tablePos }),
+      ).toBe(false)
+      expect(
+        clearAllTableContent({ editor: unavailable.editor, tablePos: unavailable.tablePos }),
+      ).toBe(false)
     })
   })
 })

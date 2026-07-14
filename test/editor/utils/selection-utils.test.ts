@@ -1,5 +1,4 @@
 import type { Editor } from '@tiptap/core'
-import { posToDOMRect } from '@tiptap/core'
 import { Schema, type NodeSpec } from '@tiptap/pm/model'
 import { AllSelection, EditorState, NodeSelection, TextSelection } from '@tiptap/pm/state'
 import { CellSelection, tableNodes } from '@tiptap/pm/tables'
@@ -15,15 +14,6 @@ import {
   removeEmptyParagraphs,
   selectionHasText,
 } from '../../../src/editor/utils/selection-utils'
-
-vi.mock('@tiptap/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@tiptap/core')>()
-
-  return {
-    ...actual,
-    posToDOMRect: vi.fn(),
-  }
-})
 
 const schema = new Schema({
   nodes: {
@@ -41,10 +31,20 @@ function paragraph(text = '') {
   return schema.nodes.paragraph.create(null, text ? schema.text(text) : undefined)
 }
 
-function createEditor(state: EditorState, nodeDOM = vi.fn()): Editor {
+function createEditor(
+  state: EditorState,
+  nodeDOM = vi.fn(),
+  coordsAtPos = vi.fn((position: number) => ({
+    bottom: position + 20,
+    left: position + 4,
+    right: position + 14,
+    top: position + 10,
+  })),
+): Editor {
   return {
     state,
     view: {
+      coordsAtPos,
       state,
       nodeDOM,
     },
@@ -77,18 +77,28 @@ describe('selection utilities', () => {
       const editor = createEditor(state, vi.fn().mockReturnValue(element))
 
       expect(getSelectionBoundingRect(editor)).toBe(rect)
-      expect(posToDOMRect).not.toHaveBeenCalled()
     })
 
-    it('delegates non-node selections to posToDOMRect using the range boundaries', () => {
+    it('derives a DOM rectangle for non-node selections from range boundaries', () => {
       const doc = schema.nodes.doc.create(null, paragraph('text'))
       const state = EditorState.create({ schema, doc, selection: TextSelection.create(doc, 1, 3) })
-      const editor = createEditor(state)
-      const rect = { top: 4, left: 5, bottom: 20, right: 30 } as DOMRect
-      vi.mocked(posToDOMRect).mockReturnValue(rect)
+      const coordsAtPos = vi.fn((position: number) =>
+        position === 1
+          ? { bottom: 20, left: 5, right: 15, top: 4 }
+          : { bottom: 30, left: 10, right: 30, top: 12 },
+      )
+      const editor = createEditor(state, vi.fn(), coordsAtPos)
 
-      expect(getSelectionBoundingRect(editor)).toBe(rect)
-      expect(posToDOMRect).toHaveBeenCalledWith(editor.view, 1, 3)
+      expect(getSelectionBoundingRect(editor)).toMatchObject({
+        bottom: 30,
+        height: 26,
+        left: 5,
+        right: 30,
+        top: 4,
+        width: 25,
+      })
+      expect(coordsAtPos).toHaveBeenNthCalledWith(1, 1)
+      expect(coordsAtPos).toHaveBeenNthCalledWith(2, 3, -1)
     })
   })
 

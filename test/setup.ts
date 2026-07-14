@@ -12,4 +12,5 @@ if (!Reflect.get(globalThis, autoUnmountEnabled)) {
 
 afterEach(() => {
   vi.restoreAllMocks()
+  document.body.replaceChildren()
 })

@@ -6,8 +6,17 @@ const mountedHosts = new Set<HTMLElement>()
 const mountedWrappers = new Set<{ unmount: () => void }>()
 const imageRestores = new Set<() => void>()
 
-beforeEach(() => {
+function cleanupMountedTestElements() {
+  for (const wrapper of mountedWrappers) wrapper.unmount()
+  mountedWrappers.clear()
+  for (const restore of imageRestores) restore()
+  for (const host of mountedHosts) host.remove()
+  mountedHosts.clear()
   document.body.replaceChildren()
+}
+
+beforeEach(() => {
+  cleanupMountedTestElements()
 })
 
 export function mountInDocument(component: Component, options: Parameters<typeof mount>[1] = {}) {
@@ -78,10 +87,5 @@ export function mockWindowImage() {
 }
 
 afterEach(() => {
-  for (const wrapper of mountedWrappers) wrapper.unmount()
-  mountedWrappers.clear()
-  for (const restore of imageRestores) restore()
-  for (const host of mountedHosts) host.remove()
-  mountedHosts.clear()
-  document.body.replaceChildren()
+  cleanupMountedTestElements()
 })
