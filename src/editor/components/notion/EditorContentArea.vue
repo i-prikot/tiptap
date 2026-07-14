@@ -7,12 +7,14 @@
       :style="{ cursor: uiState.isDragging ? 'grabbing' : 'auto' }"
     />
     <!-- выпадающие меню телепортируются в body, здесь только их setup -->
-    <DragContextMenu />
-    <EmojiDropdownMenu />
-    <MentionDropdownMenu />
-    <SlashDropdownMenu />
-    <NotionToolbarFloating />
-    <MobileToolbar />
+    <template v-if="props.features.floatingMenus">
+      <DragContextMenu />
+      <EmojiDropdownMenu />
+      <MentionDropdownMenu />
+      <SlashDropdownMenu />
+      <NotionToolbarFloating />
+    </template>
+    <MobileToolbar v-if="props.features.mobileToolbar" />
   </template>
 </template>
 
@@ -35,6 +37,11 @@ import MentionDropdownMenu from '../ui/MentionDropdownMenu.vue'
 import SlashDropdownMenu from '../ui/SlashDropdownMenu.vue'
 import NotionToolbarFloating from '../ui/NotionToolbarFloating.vue'
 import MobileToolbar from '../ui/MobileToolbar.vue'
+import { defaultEditorFeatureFlags, type EditorFeatureFlags } from './public-api'
+
+const props = withDefaults(defineProps<{ features?: EditorFeatureFlags }>(), {
+  features: () => ({ ...defaultEditorFeatureFlags }),
+})
 
 const editor = useTiptapEditor()
 const uiState = useUiEditorState(editor)

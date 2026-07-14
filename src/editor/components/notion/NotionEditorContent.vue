@@ -8,8 +8,13 @@
     v-else-if="ready"
     :provider="provider"
     :ydoc="ydoc"
-    :placeholder="placeholder"
+    :content="props.content"
+    :placeholder="props.placeholder"
+    :features="props.features"
+    :image-upload="props.imageUpload"
     :ai-token="aiToken"
+    @ready="emit('ready', $event)"
+    @update="emit('update', $event)"
   />
   <LoadingSpinner v-else />
 </template>
@@ -25,11 +30,31 @@
 import { computed } from 'vue'
 import { useCollab } from '../../composables/useCollab'
 import { useAi } from '../../composables/useAi'
+import type { JSONContent } from '@tiptap/core'
 import EditorProvider from './EditorProvider.vue'
 import LoadingSpinner from './LoadingSpinner.vue'
 import SetupError from './SetupError.vue'
+import type {
+  EditorFeatureFlags,
+  ImageUploadAdapter,
+  NotionEditorReadyPayload,
+  NotionEditorUpdatePayload,
+} from './public-api'
 
-withDefaults(defineProps<{ placeholder?: string }>(), { placeholder: 'Start writing...' })
+const props = withDefaults(
+  defineProps<{
+    content?: JSONContent
+    placeholder?: string
+    features: EditorFeatureFlags
+    imageUpload?: ImageUploadAdapter
+  }>(),
+  { placeholder: 'Start writing...' },
+)
+
+const emit = defineEmits<{
+  ready: [editor: NotionEditorReadyPayload]
+  update: [payload: NotionEditorUpdatePayload]
+}>()
 
 const { hasCollab, provider: providerRef, ydoc, setupError: collabError } = useCollab()
 const { hasAi, aiToken: aiTokenRef, setupError: aiError } = useAi()
