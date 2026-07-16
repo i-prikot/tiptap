@@ -7,6 +7,7 @@ import type { ComputedRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { isMarkInSchema, isNodeTypeSelected, sanitizeUrl } from '../utils/tiptap-utils'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
+import { useAnchorNavigation } from './useAnchorNavigation'
 import { LinkIcon } from '../icons'
 
 export function canSetLink(editor: Editor | null): boolean {
@@ -30,6 +31,7 @@ export interface UseLinkPopoverOptions {
 
 export function useLinkPopover(options: UseLinkPopoverOptions) {
   const { editor, hideWhenUnavailable = false, onSetLink } = options
+  const { baseUrl } = useAnchorNavigation()
   const signal = useEditorSelectionSignal(editor)
 
   const canSet = computed(() => (signal.value, canSetLink(editor.value)))
@@ -83,7 +85,7 @@ export function useLinkPopover(options: UseLinkPopoverOptions) {
 
   const openLink = (target = '_blank', features = 'noopener,noreferrer') => {
     if (!url.value) return
-    const safeUrl = sanitizeUrl(url.value, window.location.href)
+    const safeUrl = sanitizeUrl(url.value, baseUrl.value)
     if (safeUrl !== '#') window.open(safeUrl, target, features)
   }
 

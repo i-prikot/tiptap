@@ -51,16 +51,19 @@
  * Порт TableCellHandleMenu из чанка 34p294mqk5mqb (модуль 9148).
  */
 import { computed, ref } from 'vue'
-import Menu from '../primitives/menu/Menu.vue'
-import MenuContent from '../primitives/menu/MenuContent.vue'
-import MenuGroup from '../primitives/menu/MenuGroup.vue'
-import MenuItem from '../primitives/menu/MenuItem.vue'
-import Button from '../primitives/Button.vue'
-import Separator from '../primitives/Separator.vue'
-import ColorMenu from '../ui/ColorMenu.vue'
-import TableAlignMenu from '../ui/TableAlignMenu.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useEditorSelectionSignal } from '../../composables/useEditorSelectionSignal'
+import {
+  Menu,
+  MenuContent,
+  MenuGroup,
+  MenuItem,
+  Button,
+  Separator,
+} from '@/editor/components/primitives'
+
+import { ColorMenu, TableAlignMenu } from '@/editor/components/ui'
+
+import { useTiptapEditor, useEditorSelectionSignal } from '@/editor/composables'
+
 import {
   MERGE_SPLIT_LABELS,
   canClearRowColumnContent,

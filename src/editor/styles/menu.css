@@ -4,7 +4,7 @@
   --tt-combobox-text-color: var(--tt-gray-light-a-600);
 }
 
-.dark .tiptap-menu-content {
+.tinyfy-editor.dark .tiptap-menu-content {
   --tt-combobox-border-color: var(--tt-gray-dark-a-50);
   --tt-combobox-bg-color: var(--tt-gray-dark-50);
   --tt-combobox-text-color: var(--tt-gray-dark-a-600);
@@ -74,7 +74,7 @@
   --tt-label-color: var(--tt-gray-light-a-800);
 }
 
-.dark .tiptap-menu-group-label {
+.tinyfy-editor.dark .tiptap-menu-group-label {
   --tt-label-color: var(--tt-gray-dark-a-800);
 }
 
@@ -90,7 +90,7 @@
   --tt-link-border-color: var(--tt-gray-light-a-200);
 }
 
-.dark .tiptap-separator {
+.tinyfy-editor.dark .tiptap-separator {
   --tt-link-border-color: var(--tt-gray-dark-a-200);
 }
 

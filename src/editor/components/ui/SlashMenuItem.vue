@@ -17,7 +17,7 @@
  */
 import { ref, watch } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
-import Button from '../primitives/Button.vue'
+import { Button } from '@/editor/components/primitives'
 import { getElementOverflowPosition } from '../../utils/selection-utils'
 import type { SuggestionItem } from '../../types/suggestion'
 

@@ -7,9 +7,12 @@
 
 <script setup lang="ts">
 /**
- * Меню (порт ariakit Menu из чанка 26xd4sczpcaxm): элемент-триггер +
- * позиционируемый контент; вложенные меню открываются вправо и закрывают
- * всю цепочку по выбору пункта.
+ * Примитив для контекстных действий редактора: block/table/color/mobile меню.
+ * Выбирайте Menu, когда нужны вложенные подменю с placement, которое задаёт
+ * владеющий Menu, hover-открытием, задержкой закрытия и closeAll по всей родительской цепочке.
+ * Для одноуровневого селектора с явным DropdownMenuTrigger и настройками
+ * side/align/sideOffset используйте DropdownMenu; не подменяйте примитивы
+ * только потому, что оба рендерят позиционируемое меню.
  */
 import { inject, onBeforeUnmount, onMounted, provide, ref, watch } from 'vue'
 import { menuInjectionKey } from './menu-context'

@@ -1,31 +1,45 @@
 import type { Editor, JSONContent } from '@tiptap/core'
+import type { ImageUploadAdapter } from '../../types/image-upload'
+
+export type { ImageUploadAdapter, ImageUploadCallbacks } from '../../types/image-upload'
 
 /** Optional presentation surfaces for the Notion-like editor UI. */
 export interface EditorFeatureFlags {
-  header: boolean
   tocSidebar: boolean
   floatingMenus: boolean
   mobileToolbar: boolean
   tableControls: boolean
-  ctaPopup: boolean
+  /** Enables AI only when host-supplied AiOptions are also configured. */
+  ai: boolean
 }
 
-/** Default presentation configuration, preserving the existing editor UI. */
+/** Default presentation configuration for reusable editor UI. */
 export const defaultEditorFeatureFlags: EditorFeatureFlags = {
-  header: true,
-  tocSidebar: true,
+  tocSidebar: false,
   floatingMenus: true,
   mobileToolbar: true,
   tableControls: true,
-  ctaPopup: true,
+  ai: false,
 }
 
-/** Receives image-upload progress and cancellation controls from the editor. */
-export type ImageUploadAdapter = (
-  file: File,
-  onProgress?: (event: { progress: number }) => void,
-  abortSignal?: AbortSignal,
-) => Promise<string>
+/** Host-supplied Tiptap Cloud collaboration configuration. */
+export interface CollaborationOptions {
+  appId: string
+  tokenUrl?: string
+  token?: string
+  documentNamePrefix?: string
+}
+
+/** Host-supplied Tiptap Cloud AI configuration. */
+import type { IdentityStorage } from '../../utils/storage'
+
+export type { IdentityStorage } from '../../utils/storage'
+
+export interface AiOptions {
+  appId: string
+  tokenUrl?: string
+  token?: string
+}
 
 /** Editor instance emitted when the provider has completed initialization. */
 export type NotionEditorReadyPayload = Editor
@@ -41,13 +55,37 @@ export interface NotionEditorUpdatePayload {
   html: string
 }
 
+/** Decoded unique-node identifier supplied by or emitted to the host. */
+export type NotionEditorAnchorId = string
+
 /** Public props accepted by the stable Notion editor facade. */
 export interface NotionEditorProps {
-  room?: string
+  /** Stable host-defined identifier for document-scoped editor behavior. */
+  documentId: string
+  /** Absolute host URL used to resolve relative and copied anchor links. */
+  baseUrl: string
+  /** Decoded active unique-node identifier controlled by the host. */
+  currentAnchor?: NotionEditorAnchorId
   content?: JSONContent
   placeholder?: string
   features?: Partial<EditorFeatureFlags>
+  /** Sticky top offset for the optional table-of-contents sidebar, in pixels. */
+  tocSidebarStickyTopOffset?: number
   imageUpload?: ImageUploadAdapter
+  /**
+   * Persistence for collaboration identity. Defaults to namespaced browser
+   * localStorage; set to `false` to generate an in-memory identity per mount.
+   */
+  identityStorage?: IdentityStorage | false
+  /** Enables redacted editor lifecycle diagnostics for development. */
+  developmentDiagnostics?: boolean
+  /** Enables Tiptap Cloud collaboration; omitted configuration keeps the editor local. */
+  collaboration?: CollaborationOptions
+  /**
+   * Configures Tiptap Cloud AI when `features.ai` is explicitly enabled.
+   * Configuration alone does not enable AI.
+   */
+  ai?: AiOptions
 }
 
 /** Controls whether imperative content changes notify update listeners. */

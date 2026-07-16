@@ -70,8 +70,7 @@ All runtime variables use Vite's `VITE_` prefix and are read from `import.meta.e
 | `VITE_TIPTAP_COLLAB_TOKEN`      | Static collaboration JWT.                     | Empty string; fetch from token URL instead. | Suitable only for local development. Do not ship long-lived secrets in frontend builds.                                 |
 | `VITE_TIPTAP_COLLAB_DOC_PREFIX` | Prefix added before the URL-derived room id.  | Empty string                                | Useful for separating Tinyfy environments or tenants.                                                                   |
 | `VITE_TIPTAP_AI_APP_ID`         | Marks the AI flow as configured when set.     | Empty string; AI flow is disabled.          | The paid Tiptap AI extension is not included in this port, so AI UI remains hidden unless the extension is added later. |
-| `VITE_TIPTAP_AI_TOKEN_URL`      | Endpoint used to request an AI JWT.           | `/api/ai`                                   | Used with `POST` when no static AI token is provided.                                                                   |
-| `VITE_TIPTAP_AI_TOKEN`          | Static AI JWT.                                | Empty string; fetch from token URL instead. | Suitable only for local development. Do not expose production AI secrets in frontend code.                              |
+| `VITE_TIPTAP_AI_TOKEN_URL`      | Endpoint used to request an AI JWT.           | `/api/ai`                                   | Used with `POST` to obtain a short-lived AI JWT; do not expose AI tokens through Vite environment variables.            |
 
 Example local `.env` shape:
 

@@ -4,29 +4,26 @@
  * Отличие от оригинала: расширение Ai распространяется только через
  * платный registry Tiptap Pro и не может быть включено в порт. Контекст
  * повторяет исходный интерфейс (aiToken/hasAi/setupError): при заданных
- * VITE_TIPTAP_AI_TOKEN_URL/VITE_TIPTAP_AI_TOKEN токен запрашивается как в
- * оригинале, иначе hasAi=false — и все AI-элементы UI скрываются той же
+ * tokenUrl/token токен запрашивается как в оригинале, иначе hasAi=false —
+ * и все AI-элементы UI скрываются той же
  * логикой isExtensionAvailable(editor, 'ai'), что и в оригинале.
  */
-import { inject, provide, shallowRef } from 'vue'
-import type { InjectionKey, ShallowRef } from 'vue'
-
-export const TIPTAP_AI_APP_ID = import.meta.env.VITE_TIPTAP_AI_APP_ID || ''
-const AI_TOKEN_URL = import.meta.env.VITE_TIPTAP_AI_TOKEN_URL || '/api/ai'
-const STATIC_AI_TOKEN = import.meta.env.VITE_TIPTAP_AI_TOKEN || ''
+import { inject, provide, shallowRef, toValue, watch } from 'vue'
+import type { InjectionKey, MaybeRefOrGetter, ShallowRef } from 'vue'
+import type { AiOptions } from '../components/notion/public-api'
 
 /** Получает JWT для AI с бэкенда (оригинал: POST /api/ai). */
-export async function fetchAiToken(): Promise<string | null> {
-  if (STATIC_AI_TOKEN) return STATIC_AI_TOKEN
+export async function fetchAiToken(config: AiOptions): Promise<string | null> {
+  if (config.token) return config.token
   try {
-    const response = await fetch(AI_TOKEN_URL, {
+    const response = await fetch(config.tokenUrl || '/api/ai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     })
     if (!response.ok) throw new Error(`Failed to fetch token: ${response.status}`)
     return (await response.json()).token
-  } catch (error) {
-    console.error('Failed to fetch AI token:', error)
+  } catch {
+    console.error('[useAi] AI token retrieval failed')
     return null
   }
 }
@@ -39,18 +36,37 @@ export interface AiContext {
 
 const aiInjectionKey: InjectionKey<AiContext> = Symbol('ai')
 
-export function provideAi(): AiContext {
-  const aiConfigured = !!TIPTAP_AI_APP_ID
-  const hasAi = shallowRef(aiConfigured)
+export function provideAi(
+  config?: AiOptions,
+  enabled: MaybeRefOrGetter<boolean> = false,
+): AiContext {
+  const hasAi = shallowRef(false)
   const aiToken = shallowRef<string | null>(null)
   const setupError = shallowRef(false)
+  let tokenRequestVersion = 0
 
-  if (aiConfigured) {
-    fetchAiToken().then((token) => {
-      aiToken.value = token
-      if (!token) setupError.value = true
-    })
-  }
+  watch(
+    () => toValue(enabled),
+    (aiEnabled) => {
+      tokenRequestVersion += 1
+      const aiConfigured = aiEnabled && !!config?.appId
+
+      hasAi.value = aiConfigured
+      aiToken.value = null
+      setupError.value = false
+
+      if (!aiConfigured || !config) return
+
+      const requestVersion = tokenRequestVersion
+      fetchAiToken(config).then((token) => {
+        if (requestVersion !== tokenRequestVersion) return
+
+        aiToken.value = token
+        setupError.value = !token
+      })
+    },
+    { immediate: true },
+  )
 
   const context: AiContext = { hasAi, aiToken, setupError }
   provide(aiInjectionKey, context)

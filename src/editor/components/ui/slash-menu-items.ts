@@ -55,6 +55,8 @@ export type SlashMenuItemKey =
   | 'toc'
   | 'image'
 
+const AI_SLASH_MENU_ITEM_KEYS = new Set<SlashMenuItemKey>(['continue_writing', 'ai_ask_button'])
+
 interface SlashMenuItemMeta {
   title: string
   subtext: string
@@ -355,9 +357,16 @@ function buildBehaviors(): Record<SlashMenuItemKey, SlashMenuItemBehavior> {
 }
 
 /** Собирает доступные пункты слэш-меню для текущего редактора. */
-export function getSlashMenuItems(editor: Editor, config?: SlashMenuConfig): SlashMenuItem[] {
+export function getSlashMenuItems(
+  editor: Editor,
+  config?: SlashMenuConfig,
+  aiEnabled = false,
+): SlashMenuItem[] {
   const items: SlashMenuItem[] = []
-  const enabledKeys = config?.enabledItems || (Object.keys(ITEM_METADATA) as SlashMenuItemKey[])
+  const requestedKeys = config?.enabledItems || (Object.keys(ITEM_METADATA) as SlashMenuItemKey[])
+  const enabledKeys = aiEnabled
+    ? requestedKeys
+    : requestedKeys.filter((key) => !AI_SLASH_MENU_ITEM_KEYS.has(key))
   const showGroups = config?.showGroups !== false
   const behaviors = buildBehaviors()
 

@@ -3,6 +3,9 @@
  * Порт из чанков 1-1gopd-oz05f (имена/цвета) и 3qxxh2m8wjeqx (getAvatar).
  */
 
+import type { IdentityStorage } from './storage'
+import { getNamespacedStorageKey } from './storage'
+
 const FIRST_NAMES = [
   'John',
   'Jane',
@@ -82,9 +85,33 @@ export function getAvatar(name: string | null | undefined): string {
   return `/avatars/memoji_${index}.png`
 }
 
-/** Читает значение из localStorage либо создаёт новое. */
-export function getStoredOrCreate(key: string, create: () => string, forceNew = false): string {
-  if (forceNew) return create()
-  const stored = window.localStorage.getItem(key)
-  return stored !== null ? stored : create()
+export function getStoredOrCreate(
+  storage: IdentityStorage | false,
+  key: string,
+  create: () => string,
+): string
+export function getStoredOrCreate(key: string, create: () => string, forceNew?: boolean): string
+export function getStoredOrCreate(
+  storageOrKey: IdentityStorage | false | string,
+  keyOrCreate: string | (() => string),
+  createOrForceNew?: (() => string) | boolean,
+): string {
+  if (typeof storageOrKey === 'string') {
+    const create = keyOrCreate as () => string
+    if (createOrForceNew === true) return create()
+
+    return getStoredOrCreate(window.localStorage, storageOrKey, create)
+  }
+
+  const create = createOrForceNew as () => string
+  if (storageOrKey === false) return create()
+
+  const stored = storageOrKey.getItem(getNamespacedStorageKey(keyOrCreate as string))
+  return stored ?? create()
+}
+
+export function setStoredValue(storage: IdentityStorage | false, key: string, value: string): void {
+  if (storage === false) return
+
+  storage.setItem(getNamespacedStorageKey(key), value)
 }

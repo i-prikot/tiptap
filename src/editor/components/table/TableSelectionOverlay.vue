@@ -58,7 +58,7 @@ import { CellSelection, cellAround, columnResizingPluginKey } from '@tiptap/pm/t
 import { useFloating } from '@floating-ui/vue'
 import type { VirtualElement } from '@floating-ui/vue'
 import TableCellHandleMenu from './TableCellHandleMenu.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
+import { useTiptapEditor } from '@/editor/composables'
 import { domCellAround, getTable, rectEq } from '../../utils/table-utils'
 
 type Corner = 'tl' | 'tr' | 'bl' | 'br'

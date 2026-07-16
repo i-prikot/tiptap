@@ -26,20 +26,23 @@
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import type { TurnIntoMenuItem } from '../../types/menu'
-import DropdownMenuGroup from '../primitives/dropdown-menu/DropdownMenuGroup.vue'
-import DropdownMenuLabel from '../primitives/dropdown-menu/DropdownMenuLabel.vue'
-import DropdownMenuItem from '../primitives/dropdown-menu/DropdownMenuItem.vue'
-import Button from '../primitives/Button.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
 import {
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuItem,
+  Button,
+} from '@/editor/components/primitives'
+
+import {
+  useTiptapEditor,
   useBlockquoteBlock,
   useCodeBlockBlock,
   useHeadingBlock,
   useListBlock,
   useTextBlock,
-} from '../../composables/blocks/useBlockConversions'
-import { TURN_INTO_BLOCKS } from '../../composables/useTurnInto'
-import type { TurnIntoBlockType } from '../../composables/useTurnInto'
+  TURN_INTO_BLOCKS,
+  type TurnIntoBlockType,
+} from '@/editor/composables'
 
 const props = defineProps<{ editor?: Editor | null; blockTypes?: TurnIntoBlockType[] }>()
 

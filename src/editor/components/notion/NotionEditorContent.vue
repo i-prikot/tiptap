@@ -9,10 +9,13 @@
     :provider="provider"
     :ydoc="ydoc"
     :content="props.content"
+    :document-id="props.documentId"
     :placeholder="props.placeholder"
     :features="props.features"
+    :toc-sidebar-sticky-top-offset="props.tocSidebarStickyTopOffset"
     :image-upload="props.imageUpload"
     :ai-token="aiToken"
+    :development-diagnostics="props.developmentDiagnostics"
     @ready="emit('ready', $event)"
     @update="emit('update', $event)"
   />
@@ -28,8 +31,8 @@
  * = false) редактор запускается сразу в локальном режиме.
  */
 import { computed } from 'vue'
-import { useCollab } from '../../composables/useCollab'
-import { useAi } from '../../composables/useAi'
+import { useCollab, useAi } from '@/editor/composables'
+
 import type { JSONContent } from '@tiptap/core'
 import EditorProvider from './EditorProvider.vue'
 import LoadingSpinner from './LoadingSpinner.vue'
@@ -43,10 +46,13 @@ import type {
 
 const props = withDefaults(
   defineProps<{
+    documentId: string
     content?: JSONContent
     placeholder?: string
     features: EditorFeatureFlags
+    tocSidebarStickyTopOffset?: number
     imageUpload?: ImageUploadAdapter
+    developmentDiagnostics?: boolean
   }>(),
   { placeholder: 'Start writing...' },
 )

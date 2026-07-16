@@ -6,7 +6,7 @@
   --thread-bg-color: var(--tt-color-yellow-inc-2);
   --tiptap-ai-insertion-color: var(--tt-brand-color-600);
 }
-.dark .tiptap.ProseMirror {
+.tinyfy-editor.dark .tiptap.ProseMirror {
   --tt-collaboration-carets-label: var(--tt-gray-dark-100);
   --link-text-color: var(--tt-brand-color-400);
   --thread-text: var(--tt-gray-dark-900);

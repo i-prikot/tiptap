@@ -18,7 +18,7 @@
   --tt-toc-node-underline-hover-color: var(--tt-gray-light-a-400);
   margin: 1.5rem 0;
 }
-.dark .tiptap-table-of-contents-node {
+.tinyfy-editor.dark .tiptap-table-of-contents-node {
   --tt-toc-node-text-color: var(--tt-gray-dark-a-600);
   --tt-toc-node-text-hover-color: var(--tt-gray-dark-a-800);
   --tt-toc-node-bg-hover-color: var(--tt-gray-dark-a-100);
@@ -100,7 +100,7 @@
   --toc-progress-width-base: 1rem;
   --toc-progress-width-min: 0.25rem;
 }
-.dark .toc-sidebar {
+.tinyfy-editor.dark .toc-sidebar {
   --tt-toc-sidebar-line-bg: var(--tt-gray-dark-200);
   --tt-toc-sidebar-line-bg-active: var(--tt-gray-dark-900);
   --tt-toc-sidebar-bg: var(--tt-gray-dark-200);
@@ -131,7 +131,7 @@
   transition: opacity 0.2s;
   display: flex;
   position: sticky;
-  top: 130px;
+  top: var(--toc-sidebar-sticky-top, 0px);
 }
 .toc-sidebar-inner {
   z-index: 10;

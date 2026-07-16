@@ -2,8 +2,9 @@ import { Extension } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import { Editor } from '@tiptap/vue-3'
 import { mount } from '@vue/test-utils'
-import { computed, defineComponent, h, nextTick } from 'vue'
+import { computed, defineComponent, h, nextTick, ref } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { provideAnchorNavigation } from '../../../src/editor/composables/useAnchorNavigation'
 import { useScrollToHash } from '../../../src/editor/composables/useScrollToHash'
 import { useWindowSize } from '../../../src/editor/composables/useWindowSize'
 
@@ -105,7 +106,7 @@ describe('scroll and viewport branch behavior', () => {
     expect(viewport.removeEventListener).not.toHaveBeenCalled()
   })
 
-  it('selects matching hash nodes, scrolls DOM targets, and reports missing targets', async () => {
+  it('reacts to host anchors while ignoring TOC-originated anchor echoes', async () => {
     vi.useFakeTimers()
     const editor = createScrollEditor()
     const scrollIntoView = vi.fn()
@@ -114,14 +115,29 @@ describe('scroll and viewport branch behavior', () => {
     Object.assign(editor.view, { nodeDOM: () => target })
     const found = vi.fn()
     const missing = vi.fn()
+    const currentAnchor = ref<string>()
     let api: ReturnType<typeof useScrollToHash> | undefined
-    const Host = defineComponent({
+    let requestAnchorChange: ((anchor: string) => void) | undefined
+    const ScrollTarget = defineComponent({
       setup() {
         api = useScrollToHash(
           computed(() => editor),
           { onTargetFound: found, onTargetNotFound: missing },
         )
         return () => h('div')
+      },
+    })
+    const Host = defineComponent({
+      setup() {
+        const anchorNavigation = provideAnchorNavigation(
+          computed(() => 'https://example.test/document'),
+          computed(() => currentAnchor.value),
+          (anchor) => {
+            currentAnchor.value = anchor
+          },
+        )
+        requestAnchorChange = anchorNavigation.requestAnchorChange
+        return () => h(ScrollTarget)
       },
     })
     wrappers.push(mount(Host))
@@ -132,13 +148,63 @@ describe('scroll and viewport branch behavior', () => {
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' })
     expect(api.scrollToHash('missing')).toBe(false)
 
-    window.history.replaceState({}, '', '/#target')
-    window.dispatchEvent(new Event('hashchange'))
+    requestAnchorChange?.('target')
+    await nextTick()
     vi.runAllTimers()
-    expect(found).toHaveBeenCalledWith('target')
-    window.history.replaceState({}, '', '/#missing')
-    window.dispatchEvent(new Event('hashchange'))
+    expect(found).not.toHaveBeenCalled()
+    expect(scrollIntoView).toHaveBeenCalledOnce()
+
+    currentAnchor.value = 'missing'
+    await nextTick()
     vi.runAllTimers()
     expect(missing).toHaveBeenCalledWith('missing')
+
+    currentAnchor.value = 'target'
+    await nextTick()
+    vi.runAllTimers()
+    expect(found).toHaveBeenCalledWith('target')
+  })
+
+  it('scrolls to a later matching host anchor after a declined TOC request', async () => {
+    vi.useFakeTimers()
+    const editor = createScrollEditor()
+    const scrollIntoView = vi.fn()
+    const target = document.createElement('p')
+    Object.assign(target, { scrollIntoView })
+    Object.assign(editor.view, { nodeDOM: () => target })
+    const found = vi.fn()
+    const currentAnchor = ref<string>()
+    let requestAnchorChange: ((anchor: string) => void) | undefined
+    const ScrollTarget = defineComponent({
+      setup() {
+        useScrollToHash(
+          computed(() => editor),
+          { onTargetFound: found },
+        )
+        return () => h('div')
+      },
+    })
+    const Host = defineComponent({
+      setup() {
+        const anchorNavigation = provideAnchorNavigation(
+          computed(() => 'https://example.test/document'),
+          computed(() => currentAnchor.value),
+          () => {},
+        )
+        requestAnchorChange = anchorNavigation.requestAnchorChange
+        return () => h(ScrollTarget)
+      },
+    })
+    wrappers.push(mount(Host))
+
+    requestAnchorChange?.('target')
+    await nextTick()
+
+    currentAnchor.value = 'target'
+    await nextTick()
+    vi.runAllTimers()
+
+    expect(found).toHaveBeenCalledWith('target')
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' })
   })
 })

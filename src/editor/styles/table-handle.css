@@ -1,8 +1,8 @@
-:root {
+.tinyfy-editor {
   --tt-table-handle-bg-color: var(--tt-gray-light-a-100);
 }
 
-.dark {
+.tinyfy-editor.dark {
   --tt-table-handle-bg-color: var(--tt-gray-dark-a-100);
 }
 

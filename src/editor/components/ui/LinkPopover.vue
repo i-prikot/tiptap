@@ -21,11 +21,10 @@
  */
 import { computed, ref, watch } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import Popover from '../primitives/popover/Popover.vue'
+import { Popover } from '@/editor/components/primitives'
 import LinkButton from './LinkButton.vue'
 import LinkContent from './LinkContent.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useLinkPopover } from '../../composables/useLinkPopover'
+import { useTiptapEditor, useLinkPopover } from '@/editor/composables'
 
 const props = withDefaults(
   defineProps<{

@@ -1,15 +1,15 @@
 <template>
   <template v-if="isImageSelected">
-    <ImageAlignButton align="left" />
-    <ImageAlignButton align="center" />
-    <ImageAlignButton align="right" />
+    <ImageAlignButton :editor="editor" align="left" />
+    <ImageAlignButton :editor="editor" align="center" />
+    <ImageAlignButton :editor="editor" align="right" />
     <Separator />
-    <ImageCaptionButton />
+    <ImageCaptionButton :editor="editor" />
     <Separator />
-    <ImageDownloadButton />
-    <ImageUploadButton :icon="RefreshCcwIcon" tooltip="Replace" />
+    <ImageDownloadButton :editor="editor" />
+    <ImageUploadButton :editor="editor" :icon="RefreshCcwIcon" tooltip="Replace" />
     <Separator />
-    <DeleteNodeButton />
+    <DeleteNodeButton :editor="editor" />
   </template>
 </template>
 
@@ -18,14 +18,14 @@
 // (порт ImageNodeFloating из чанка 34p294mqk5mqb, модуль 590748).
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import Separator from '../primitives/Separator.vue'
+import { Separator } from '@/editor/components/primitives'
 import ImageAlignButton from './ImageAlignButton.vue'
 import ImageCaptionButton from './ImageCaptionButton.vue'
 import ImageDownloadButton from './ImageDownloadButton.vue'
 import ImageUploadButton from './ImageUploadButton.vue'
 import DeleteNodeButton from './DeleteNodeButton.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useEditorSelectionSignal } from '../../composables/useEditorSelectionSignal'
+import { useTiptapEditor, useEditorSelectionSignal } from '@/editor/composables'
+
 import { isNodeTypeSelected } from '../../utils/tiptap-utils'
 import { RefreshCcwIcon } from '../../icons'
 

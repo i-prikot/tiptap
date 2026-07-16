@@ -4,8 +4,13 @@
 
 <script setup lang="ts">
 /**
- * Корень выпадающего меню (Radix DropdownMenu → Vue provide/inject +
- * floating-ui). Порт по чанку 1vm78zqnxija2.
+ * Примитив для компактного одноуровневого селектора, принадлежащего явному
+ * DropdownMenuTrigger: например, TurnIntoDropdown и список участников.
+ * DropdownMenuContent настраивает side/align/sideOffset. Для контекстных
+ * действий и вложенных подменю с placement, задаваемым владеющим Menu,
+ * hover-таймингом и
+ * closeAll по родительской цепочке используйте Menu; не подменяйте примитивы
+ * только потому, что оба рендерят позиционируемое меню.
  */
 import { provide, ref, watch } from 'vue'
 import { dropdownMenuInjectionKey } from './dropdown-menu-context'

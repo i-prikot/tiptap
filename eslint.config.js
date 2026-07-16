@@ -1,6 +1,7 @@
 import js from '@eslint/js'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
+import importPlugin from 'eslint-plugin-import'
 import vue from 'eslint-plugin-vue'
 import vueParser from 'vue-eslint-parser'
 import eslintConfigPrettier from 'eslint-config-prettier/flat'
@@ -111,6 +112,42 @@ export default [
       'vue/require-default-prop': 'off',
       'vue/html-self-closing': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
+    },
+  },
+
+  {
+    name: 'project/editor-layer-boundaries',
+    files: ['src/editor/{extensions,utils}/**/*.{ts,vue}'],
+    plugins: {
+      import: importPlugin,
+    },
+    settings: {
+      'import/resolver': {
+        typescript: {
+          project: './tsconfig.json',
+        },
+      },
+    },
+    rules: {
+      'import/no-restricted-paths': [
+        'error',
+        {
+          zones: [
+            {
+              target: './src/editor/extensions',
+              from: './src/editor/components',
+              message:
+                'Extensions must not depend on Vue components. Use a pure utility, extension API, or dependency inversion instead.',
+            },
+            {
+              target: './src/editor/utils',
+              from: './src/editor/components',
+              message:
+                'Utilities must not depend on Vue components. Use a pure utility, extension API, or dependency inversion instead.',
+            },
+          ],
+        },
+      ],
     },
   },
 

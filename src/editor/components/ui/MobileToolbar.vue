@@ -1,5 +1,5 @@
 <template>
-  <Teleport to="body">
+  <Teleport :to="teleportTarget">
     <Toolbar
       v-if="isMobile && editor && editor.isEditable"
       ref="toolbarRef"
@@ -8,7 +8,7 @@
       <!-- Главный вид -->
       <template v-if="viewId === 'main'">
         <ToolbarGroup>
-          <SlashCommandTriggerButton />
+          <SlashCommandTriggerButton :editor="editor" />
           <!-- «Ещё»: меню действий узла -->
           <Menu v-model:open="menuOpen">
             <template #trigger>
@@ -20,7 +20,7 @@
               <div class="tiptap-combobox-list" :style="{ minWidth: '15rem' }">
                 <MenuGroupLabel>{{ nodeDisplayName }}</MenuGroupLabel>
                 <MenuGroup>
-                  <ColorMenu />
+                  <ColorMenu :editor="editor" />
                   <Menu v-if="turnIntoItems.length" placement="right">
                     <template #trigger>
                       <MenuItem submenu-trigger>
@@ -114,10 +114,10 @@
         <template v-if="hasSelectionOrText">
           <!-- Марки -->
           <ToolbarGroup>
-            <MarkButton type="bold" hide-when-unavailable />
-            <MarkButton type="italic" hide-when-unavailable />
-            <MarkButton type="strike" hide-when-unavailable />
-            <MarkButton type="code" hide-when-unavailable />
+            <MarkButton :editor="editor" type="bold" hide-when-unavailable />
+            <MarkButton :editor="editor" type="italic" hide-when-unavailable />
+            <MarkButton :editor="editor" type="strike" hide-when-unavailable />
+            <MarkButton :editor="editor" type="code" hide-when-unavailable />
           </ToolbarGroup>
           <ToolbarSeparator />
 
@@ -128,37 +128,37 @@
             <ToolbarSeparator />
           </template>
 
-          <ImageNodeFloating />
+          <ImageNodeFloating :editor="editor" />
 
           <ToolbarGroup>
-            <MarkButton type="superscript" hide-when-unavailable />
-            <MarkButton type="subscript" hide-when-unavailable />
+            <MarkButton :editor="editor" type="superscript" hide-when-unavailable />
+            <MarkButton :editor="editor" type="subscript" hide-when-unavailable />
           </ToolbarGroup>
           <ToolbarSeparator />
 
           <ToolbarGroup>
-            <TextAlignButton align="left" hide-when-unavailable />
-            <TextAlignButton align="center" hide-when-unavailable />
-            <TextAlignButton align="right" hide-when-unavailable />
-            <TextAlignButton align="justify" hide-when-unavailable />
+            <TextAlignButton :editor="editor" align="left" hide-when-unavailable />
+            <TextAlignButton :editor="editor" align="center" hide-when-unavailable />
+            <TextAlignButton :editor="editor" align="right" hide-when-unavailable />
+            <TextAlignButton :editor="editor" align="justify" hide-when-unavailable />
           </ToolbarGroup>
           <ToolbarSeparator />
 
           <ToolbarGroup>
-            <IndentButton action="outdent" hide-when-unavailable />
-            <IndentButton action="indent" hide-when-unavailable />
+            <IndentButton :editor="editor" action="outdent" hide-when-unavailable />
+            <IndentButton :editor="editor" action="indent" hide-when-unavailable />
           </ToolbarGroup>
           <ToolbarSeparator />
 
           <ToolbarGroup>
-            <ImageUploadButton text="Add" />
+            <ImageUploadButton :editor="editor" text="Add" />
             <ToolbarSeparator />
           </ToolbarGroup>
         </template>
 
         <ToolbarGroup>
-          <MoveNodeButton direction="down" />
-          <MoveNodeButton direction="up" />
+          <MoveNodeButton :editor="editor" direction="down" />
+          <MoveNodeButton :editor="editor" direction="up" />
         </ToolbarGroup>
       </template>
 
@@ -172,8 +172,8 @@
           </Button>
         </ToolbarGroup>
         <ToolbarSeparator />
-        <ColorHighlightPopoverContent v-if="viewId === 'highlighter'" />
-        <LinkContent v-else @set-link="viewId = 'main'" />
+        <ColorHighlightPopoverContent v-if="viewId === 'highlighter'" :editor="editor" />
+        <LinkContent v-else :editor="editor" @set-link="viewId = 'main'" />
       </template>
     </Toolbar>
   </Teleport>
@@ -188,18 +188,22 @@
  */
 import { computed, ref, watch } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
+import type { Editor } from '@tiptap/vue-3'
 import type { TurnIntoMenuItem } from '../../types/menu'
-import Toolbar from '../primitives/toolbar/Toolbar.vue'
-import ToolbarGroup from '../primitives/toolbar/ToolbarGroup.vue'
-import ToolbarSeparator from '../primitives/toolbar/ToolbarSeparator.vue'
-import Button from '../primitives/Button.vue'
-import Spacer from '../primitives/Spacer.vue'
-import Separator from '../primitives/Separator.vue'
-import Menu from '../primitives/menu/Menu.vue'
-import MenuContent from '../primitives/menu/MenuContent.vue'
-import MenuGroup from '../primitives/menu/MenuGroup.vue'
-import MenuGroupLabel from '../primitives/menu/MenuGroupLabel.vue'
-import MenuItem from '../primitives/menu/MenuItem.vue'
+import {
+  Toolbar,
+  ToolbarGroup,
+  ToolbarSeparator,
+  Button,
+  Spacer,
+  Separator,
+  Menu,
+  MenuContent,
+  MenuGroup,
+  MenuGroupLabel,
+  MenuItem,
+} from '@/editor/components/primitives'
+
 import SlashCommandTriggerButton from './SlashCommandTriggerButton.vue'
 import MarkButton from './MarkButton.vue'
 import TextAlignButton from './TextAlignButton.vue'
@@ -212,27 +216,27 @@ import ColorHighlightPopoverButton from './ColorHighlightPopoverButton.vue'
 import ColorHighlightPopoverContent from './ColorHighlightPopoverContent.vue'
 import LinkButton from './LinkButton.vue'
 import LinkContent from './LinkContent.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useIsBreakpoint } from '../../composables/useIsBreakpoint'
-import { useEditorSelectionSignal } from '../../composables/useEditorSelectionSignal'
-import { useWindowSize } from '../../composables/useWindowSize'
-import { useCursorVisibility } from '../../composables/useCursorVisibility'
-import { canColorHighlight } from '../../composables/useColorHighlight'
-import { canSetLink } from '../../composables/useLinkPopover'
 import {
+  useTiptapEditor,
+  useEditorOverlayTarget,
+  useIsBreakpoint,
+  useEditorSelectionSignal,
+  useWindowSize,
+  useCursorVisibility,
+  canColorHighlight,
+  canSetLink,
   useBlockquoteBlock,
   useCodeBlockBlock,
   useHeadingBlock,
   useListBlock,
   useTextBlock,
-} from '../../composables/blocks/useBlockConversions'
-import {
   useCopyAnchorLink,
   useCopyToClipboard,
   useDeleteNode,
   useDuplicate,
   useResetAllFormatting,
-} from '../../composables/useNodeActions'
+} from '@/editor/composables'
+
 import { getNodeDisplayName } from '../../utils/selection-utils'
 import {
   ArrowLeftIcon,
@@ -245,7 +249,11 @@ import {
 
 type MobileToolbarView = 'main' | 'highlighter' | 'link'
 
-const editor = useTiptapEditor()
+const props = defineProps<{ editor?: Editor | null }>()
+
+const editor = useTiptapEditor(computed(() => props.editor))
+const overlayTarget = useEditorOverlayTarget()
+const teleportTarget = computed(() => overlayTarget?.value ?? 'body')
 const isMobile = useIsBreakpoint('max', 480)
 const signal = useEditorSelectionSignal(editor)
 

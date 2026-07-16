@@ -22,7 +22,7 @@
 import { ref, watch } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import type { EmojiItem } from '@tiptap/extension-emoji'
-import Button from '../primitives/Button.vue'
+import { Button } from '@/editor/components/primitives'
 import { getElementOverflowPosition } from '../../utils/selection-utils'
 
 const props = defineProps<{ emoji: EmojiItem; isSelected: boolean; selector: string }>()

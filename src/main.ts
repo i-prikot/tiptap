@@ -6,6 +6,8 @@ import './editor/styles/design-tokens.css'
 // оболочка Notion-like редактора (2kp4kan5tau8p) и экраны ошибок (0azch_pgoau8y)
 import './editor/styles/notion-editor.css'
 import './editor/styles/setup-error.css'
+import './playground/styles/notion-editor-header.css'
+import './playground/styles/cta-popup.css'
 // базовые состояния ProseMirror: selection, placeholder, carets, threads (2pxhxhddvbrwu)
 import './editor/styles/prosemirror-base.css'
 // стили узлов редактора

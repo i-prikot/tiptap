@@ -1,5 +1,5 @@
 <template>
-  <Popover v-if="isVisible" ref="popoverRef">
+  <ColorPopoverShell :visible="isVisible">
     <template #trigger>
       <Button
         type="button"
@@ -25,8 +25,8 @@
         <ChevronDownIcon class="tiptap-button-dropdown-small" />
       </Button>
     </template>
-    <ColorTextPopoverContent @color-changed="onColorChanged" />
-  </Popover>
+    <ColorTextPopoverContent :editor="editor" @color-changed="onColorChanged" />
+  </ColorPopoverShell>
 </template>
 
 <script setup lang="ts">
@@ -35,15 +35,18 @@
  * Порт ColorTextPopover + useColorTextPopover из чанка 2mux2p9tadf0h
  * (модуль 681239/959411).
  */
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import Popover from '../primitives/popover/Popover.vue'
-import Button from '../primitives/Button.vue'
+import { Button } from '@/editor/components/primitives'
+import ColorPopoverShell from './ColorPopoverShell.vue'
 import ColorTextPopoverContent from './ColorTextPopoverContent.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useEditorSelectionSignal } from '../../composables/useEditorSelectionSignal'
-import { canColorText } from '../../composables/useColorText'
-import { canColorHighlight } from '../../composables/useColorHighlight'
+import {
+  useTiptapEditor,
+  useEditorSelectionSignal,
+  canColorText,
+  canColorHighlight,
+} from '@/editor/composables'
+
 import type { RecentColor } from '../../types/color'
 import { getActiveMarkAttrs } from '../../utils/tiptap-utils'
 import { ChevronDownIcon, TextColorSmallIcon } from '../../icons'
@@ -60,7 +63,6 @@ const emit = defineEmits<{ colorChanged: [payload: RecentColor] }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
 const signal = useEditorSelectionSignal(editor)
-const popoverRef = ref<InstanceType<typeof Popover> | null>(null)
 
 const label = 'Text color'
 

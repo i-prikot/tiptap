@@ -24,9 +24,9 @@
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { NodeSelection } from '@tiptap/pm/state'
-import Button from '../primitives/Button.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useEditorSelectionSignal } from '../../composables/useEditorSelectionSignal'
+import { Button } from '@/editor/components/primitives'
+import { useTiptapEditor, useEditorSelectionSignal } from '@/editor/composables'
+
 import { isExtensionAvailable, isNodeTypeSelected } from '../../utils/tiptap-utils'
 import { ImageCaptionIcon } from '../../icons'
 

@@ -22,11 +22,10 @@
 // Кнопка перемещения блока вверх/вниз (порт MoveNodeButton из чанка 34p294mqk5mqb).
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import Button from '../primitives/Button.vue'
-import Badge from '../primitives/Badge.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useMoveNode } from '../../composables/useMoveNode'
-import type { MoveDirection } from '../../composables/useMoveNode'
+import { Button, Badge } from '@/editor/components/primitives'
+
+import { useTiptapEditor, useMoveNode, type MoveDirection } from '@/editor/composables'
+
 import { parseShortcutKeys } from '../../utils/tiptap-utils'
 
 const props = withDefaults(

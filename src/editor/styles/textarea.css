@@ -1,9 +1,9 @@
-:root {
+.tinyfy-editor {
   --tt-textarea-placeholder: var(--tt-gray-light-a-400);
   --tt-textarea-border: var(--tt-gray-light-a-200);
   --tt-textarea-border-focus: var(--tt-gray-light-a-300);
 }
-.dark {
+.tinyfy-editor.dark {
   --tt-textarea-placeholder: var(--tt-gray-dark-a-400);
   --tt-textarea-border: var(--tt-gray-dark-a-200);
   --tt-textarea-border-focus: var(--tt-gray-dark-a-300);
@@ -35,13 +35,13 @@
     font-size: 0.875rem;
   }
 }
-:root {
+.tinyfy-editor {
   --tt-ig-placeholder: var(--tt-gray-light-a-400);
   --tt-ig-border: var(--tt-gray-light-a-200);
   --tt-ig-border-focus: var(--tt-gray-light-a-300);
   --tt-ig-addon-color: var(--tt-gray-light-a-400);
 }
-.dark {
+.tinyfy-editor.dark {
   --tt-ig-placeholder: var(--tt-gray-dark-a-400);
   --tt-ig-border: var(--tt-gray-dark-a-200);
   --tt-ig-border-focus: var(--tt-gray-dark-a-300);
@@ -214,12 +214,7 @@
   box-shadow: none;
   background: 0 0;
 }
-@media (prefers-color-scheme: dark) {
-  .tiptap-input-group-control,
-  .tiptap-input-group-control:disabled {
-    background: 0 0;
-  }
-}
+
 .tiptap-input-group-control--textarea {
   resize: none;
   padding-block: 0.5rem;

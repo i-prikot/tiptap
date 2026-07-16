@@ -1,11 +1,12 @@
 /**
- * Недавние цвета (localStorage `tiptapRecentlyUsedColors`).
+ * Недавние цвета, сохраняемые в namespaced localStorage.
  * Порт useRecentColors из чанка 2mux2p9tadf0h (модуль 959411).
  */
 import { onMounted, ref } from 'vue'
 import type { RecentColor } from '../types/color'
+import { getNamespacedStorageKey } from '../utils/storage'
 
-const STORAGE_KEY = 'tiptapRecentlyUsedColors'
+const STORAGE_KEY = getNamespacedStorageKey('tiptapRecentlyUsedColors')
 
 export function useRecentColors(maxColors = 3) {
   const recentColors = ref<RecentColor[]>([])

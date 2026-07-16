@@ -3,7 +3,7 @@
   --tt-combobox-border-color: var(--tt-gray-light-a-100);
   --tt-combobox-text-color: var(--tt-gray-light-a-600);
 }
-.dark .tiptap-combobox-popover {
+.tinyfy-editor.dark .tiptap-combobox-popover {
   --tt-combobox-border-color: var(--tt-gray-dark-a-50);
   --tt-combobox-bg-color: var(--tt-gray-dark-50);
   --tt-combobox-text-color: var(--tt-gray-dark-a-600);
@@ -70,7 +70,7 @@ input:disabled ~ .tiptap-combobox-label {
 .tiptap-combobox-group-label {
   --tt-label-color: var(--tt-gray-light-a-800);
 }
-.dark .tiptap-combobox-group-label {
+.tinyfy-editor.dark .tiptap-combobox-group-label {
   --tt-label-color: var(--tt-gray-dark-a-800);
 }
 .tiptap-combobox-group-label {

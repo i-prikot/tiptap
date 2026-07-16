@@ -2,9 +2,9 @@
   <div class="tiptap-setup-error" role="alert" aria-live="assertive">
     <div class="tiptap-setup-error__container">
       <div class="tiptap-setup-error__content">
-        <h2 class="tiptap-setup-error__title">Environment Variables Required</h2>
+        <h2 class="tiptap-setup-error__title">Cloud Configuration Required</h2>
         <p class="tiptap-setup-error__message">
-          Set up your environment variables to connect to Tiptap Cloud.
+          Provide valid cloud configuration to the NotionEditor component.
         </p>
         <div class="tiptap-setup-error__variables">
           <ul class="tiptap-setup-error__variables-list">
@@ -49,12 +49,12 @@
 
 <script setup lang="ts">
 /**
- * Экран «нужны переменные окружения Tiptap Cloud».
- * Порт SetupError из чанка 3xpmbr0kqzhen; имена переменных заменены
- * на VITE_* эквиваленты порта.
+ * Экран ошибки настройки Tiptap Cloud.
+ * Порт SetupError из чанка 3xpmbr0kqzhen; подсказки отражают публичные
+ * поля конфигурации редактора.
  */
 import { computed } from 'vue'
-import Button from '../primitives/Button.vue'
+import { Button } from '@/editor/components/primitives'
 
 const props = defineProps<{
   collabSetupError?: boolean
@@ -66,22 +66,21 @@ const variables = computed(() => {
   if (props.collabSetupError) {
     list.push(
       {
-        name: 'VITE_TIPTAP_COLLAB_DOC_PREFIX',
-        description: 'Prefix for identifying collaborative documents',
+        name: 'collaboration.appId',
+        description: 'Your Document Server App ID',
       },
-      { name: 'VITE_TIPTAP_COLLAB_APP_ID', description: 'Your Document Server App ID' },
       {
-        name: 'VITE_TIPTAP_COLLAB_TOKEN',
-        description: 'JWT token for accessing Collaboration services (do not use in production)',
+        name: 'collaboration.token or collaboration.tokenUrl',
+        description: 'A static development token or endpoint for short-lived collaboration tokens',
       },
     )
   }
   if (props.aiSetupError) {
     list.push(
-      { name: 'VITE_TIPTAP_AI_APP_ID', description: 'Your AI App ID' },
+      { name: 'ai.appId', description: 'Your AI App ID' },
       {
-        name: 'VITE_TIPTAP_AI_TOKEN',
-        description: 'JWT token for accessing AI services (do not use in production)',
+        name: 'ai.token or ai.tokenUrl',
+        description: 'A static development token or endpoint for short-lived AI tokens',
       },
     )
   }

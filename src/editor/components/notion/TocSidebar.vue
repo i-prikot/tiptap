@@ -1,5 +1,9 @@
 <template>
-  <div ref="rootRef" class="toc-sidebar">
+  <div
+    ref="rootRef"
+    class="toc-sidebar"
+    :style="{ '--toc-sidebar-sticky-top': `${props.stickyTopOffset}px` }"
+  >
     <div class="toc-sidebar-wrapper">
       <div class="toc-sidebar-inner">
         <div class="toc-sidebar-progress">
@@ -47,21 +51,28 @@
  * Порт TocSidebar из чанка 094r3nrv45pwr (модуль 305472).
  */
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useToc } from '../../composables/useToc'
+import { useToc, useAnchorNavigation } from '@/editor/composables'
+
 import { getScrollableAncestor } from '../../utils/toc-utils'
 import type { TocItem } from '../../types/toc'
 
-const props = withDefaults(defineProps<{ maxShowCount?: number; topOffset?: number }>(), {
-  maxShowCount: 20,
-  topOffset: 0,
-})
+const props = withDefaults(
+  defineProps<{ maxShowCount?: number; topOffset?: number; stickyTopOffset?: number }>(),
+  {
+    maxShowCount: 20,
+    topOffset: 0,
+    stickyTopOffset: 0,
+  },
+)
 
 const { tocContent, navigateToHeading, normalizeHeadingDepths } = useToc()
+const { currentAnchor } = useAnchorNavigation()
 
 const rootRef = ref<HTMLElement | null>(null)
 const manualActiveId = ref<string | null>(null)
-const initializedFromHash = ref(false)
 let lastClickTime: number | null = null
+let lastObservedAnchor: string | undefined
+let lastAppliedAnchor: string | undefined
 
 const items = computed<TocItem[]>(() => tocContent.value ?? [])
 const visibleItems = computed(() => items.value.slice(0, props.maxShowCount))
@@ -91,18 +102,18 @@ function handleItemClick(event: MouseEvent, item: TocItem) {
   navigateToHeading(item, { topOffset: props.topOffset })
 }
 
-// первичная подсветка по hash из URL
 watch(
-  items,
-  (list) => {
-    if (initializedFromHash.value || !list.length) return
-    const hash = window.location.hash.replace(/^#/, '')
-    if (!hash) return
-    const match = list.find((item) => item.id === hash)
-    if (match) {
-      manualActiveId.value = match.id
-      initializedFromHash.value = true
-    }
+  [items, currentAnchor],
+  ([list, anchor]) => {
+    const anchorChanged = anchor !== lastObservedAnchor
+    lastObservedAnchor = anchor
+
+    if (!anchor || !list.length) return
+    const match = list.find((item) => item.id === anchor)
+    if (!match || (!anchorChanged && lastAppliedAnchor === anchor)) return
+
+    manualActiveId.value = match.id
+    lastAppliedAnchor = anchor
   },
   { immediate: true },
 )

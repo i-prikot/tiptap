@@ -6,6 +6,8 @@
 import { inject, provide, shallowRef } from 'vue'
 import type { InjectionKey, ShallowRef } from 'vue'
 import { navigateToHeading, normalizeHeadingDepths } from '../utils/toc-utils'
+import { useAnchorNavigation } from './useAnchorNavigation'
+import type { AnchorNavigationContext } from './useAnchorNavigation'
 import type { NavigateToHeadingOptions } from '../utils/toc-utils'
 import type { TocItem } from '../types/toc'
 
@@ -19,7 +21,8 @@ export interface TocContext {
 const tocInjectionKey: InjectionKey<TocContext> = Symbol('toc')
 
 /** Создаёт контекст TOC и предоставляет его потомкам. */
-export function provideToc(): TocContext {
+export function provideToc(anchorNavigation?: AnchorNavigationContext): TocContext {
+  const { requestAnchorChange } = anchorNavigation ?? useAnchorNavigation()
   const tocContent = shallowRef<TocItem[] | null>(null)
 
   const context: TocContext = {
@@ -32,6 +35,7 @@ export function provideToc(): TocContext {
         topOffset: options?.topOffset ?? 0,
         behavior: options?.behavior ?? 'smooth',
       })
+      if (item.id) requestAnchorChange(item.id)
     },
     normalizeHeadingDepths,
   }

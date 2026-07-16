@@ -26,11 +26,10 @@
 // Кнопка марки (порт MarkButton из чанка 1mpndbcfk3lik).
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import Button from '../primitives/Button.vue'
-import Badge from '../primitives/Badge.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useMark } from '../../composables/useMark'
-import type { MarkType } from '../../composables/useMark'
+import { Button, Badge } from '@/editor/components/primitives'
+
+import { useTiptapEditor, useMark, type MarkType } from '@/editor/composables'
+
 import { parseShortcutKeys } from '../../utils/tiptap-utils'
 
 const props = withDefaults(

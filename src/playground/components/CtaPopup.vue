@@ -1,5 +1,5 @@
 <template>
-  <Teleport v-if="shouldRender && visible" to="body">
+  <Teleport v-if="shouldRender && visible" :to="teleportTarget">
     <div class="tiptap-cta" role="dialog" aria-modal="true" aria-label="Notion-like Template">
       <Button variant="ghost" class="tiptap-cta__close" aria-label="Close" @click="close">
         <svg
@@ -98,8 +98,12 @@
  * Промо-попап шаблона: показывается только при наличии query-параметра
  * ?cta. Порт CTA-попапа из чанка 3xpmbr0kqzhen.
  */
-import { ref } from 'vue'
-import Button from '../primitives/Button.vue'
+import { computed, ref } from 'vue'
+import { useEditorOverlayTarget } from '../../editor/composables/useEditorOverlayTarget'
+import Button from '../../editor/components/primitives/Button.vue'
+
+const overlayTarget = useEditorOverlayTarget()
+const teleportTarget = computed(() => overlayTarget?.value ?? 'body')
 
 const shouldRender =
   typeof document !== 'undefined' && new URLSearchParams(window.location.search).has('cta')

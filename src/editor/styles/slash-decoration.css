@@ -1,8 +1,8 @@
-:root {
+.tinyfy-editor {
   --tt-slash-decoration-bg-color: var(--tt-gray-light-a-100);
   --tt-slash-decoration-color: var(--tt-gray-light-a-400);
 }
-.dark {
+.tinyfy-editor.dark {
   --tt-slash-decoration-bg-color: var(--tt-gray-dark-a-100);
   --tt-slash-decoration-color: var(--tt-gray-dark-a-400);
 }

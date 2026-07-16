@@ -28,15 +28,22 @@
  */
 import { computed, ref, watch } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import DropdownMenu from '../primitives/dropdown-menu/DropdownMenu.vue'
-import DropdownMenuTrigger from '../primitives/dropdown-menu/DropdownMenuTrigger.vue'
-import DropdownMenuContent from '../primitives/dropdown-menu/DropdownMenuContent.vue'
-import Button from '../primitives/Button.vue'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  Button,
+} from '@/editor/components/primitives'
+
 import TurnIntoDropdownContent from './TurnIntoDropdownContent.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useEditorSelectionSignal } from '../../composables/useEditorSelectionSignal'
-import { canTurnInto, getActiveTurnIntoBlock } from '../../composables/useTurnInto'
-import type { TurnIntoBlockType } from '../../composables/useTurnInto'
+import {
+  useTiptapEditor,
+  useEditorSelectionSignal,
+  canTurnInto,
+  getActiveTurnIntoBlock,
+  type TurnIntoBlockType,
+} from '@/editor/composables'
+
 import { ChevronDownIcon } from '../../icons'
 
 const props = withDefaults(

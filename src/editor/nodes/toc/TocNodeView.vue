@@ -30,7 +30,7 @@
 // NodeView блока TOC. Порт React-компонента из чанка 094r3nrv45pwr.
 import { computed } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
-import { useToc } from '../../composables/useToc'
+import { useToc } from '@/editor/composables'
 import type { TocItem } from '../../types/toc'
 
 const props = defineProps(nodeViewProps)

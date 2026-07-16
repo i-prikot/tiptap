@@ -23,11 +23,11 @@
 
 <script setup lang="ts">
 /**
- * Контент выпадающего меню: floating-ui позиционирование, закрытие по
- * Escape/клику снаружи/выбору пункта. Порт Radix DropdownMenuContent:
- * позиционируется обёртка-поппер, а контенту через CSS-переменные
- * передаются available-height и transform-origin (их использует
- * dropdown-menu.css, перенесённый дословно).
+ * Контент одноуровневого trigger-owned DropdownMenu. side/align/sideOffset
+ * задают top-level placement, а клик по menuitem закрывает только это меню
+ * при closeOnSelect. Здесь нет submenu-цепочки, placement, задаваемого
+ * владеющим Menu, или closeAll: для таких контекстных действий используйте
+ * MenuContent.
  */
 import { computed, inject, onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
 import { autoUpdate, flip, offset, shift, size, useFloating } from '@floating-ui/vue'

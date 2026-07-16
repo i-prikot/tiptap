@@ -8,13 +8,13 @@
     />
     <!-- выпадающие меню телепортируются в body, здесь только их setup -->
     <template v-if="props.features.floatingMenus">
-      <DragContextMenu />
+      <DragContextMenu :ai-enabled="props.features.ai" />
       <EmojiDropdownMenu />
       <MentionDropdownMenu />
-      <SlashDropdownMenu />
-      <NotionToolbarFloating />
+      <SlashDropdownMenu :ai-enabled="props.features.ai" />
+      <NotionToolbarFloating :editor="editor" :ai-enabled="props.features.ai" />
     </template>
-    <MobileToolbar v-if="props.features.mobileToolbar" />
+    <MobileToolbar v-if="props.features.mobileToolbar" :editor="editor" />
   </template>
 </template>
 
@@ -28,15 +28,17 @@
  */
 import { watch } from 'vue'
 import { EditorContent } from '@tiptap/vue-3'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useUiEditorState } from '../../composables/useUiEditorState'
-import { useScrollToHash } from '../../composables/useScrollToHash'
-import DragContextMenu from '../ui/DragContextMenu.vue'
-import EmojiDropdownMenu from '../ui/EmojiDropdownMenu.vue'
-import MentionDropdownMenu from '../ui/MentionDropdownMenu.vue'
-import SlashDropdownMenu from '../ui/SlashDropdownMenu.vue'
-import NotionToolbarFloating from '../ui/NotionToolbarFloating.vue'
-import MobileToolbar from '../ui/MobileToolbar.vue'
+import { useTiptapEditor, useUiEditorState, useScrollToHash } from '@/editor/composables'
+
+import {
+  DragContextMenu,
+  EmojiDropdownMenu,
+  MentionDropdownMenu,
+  SlashDropdownMenu,
+  NotionToolbarFloating,
+  MobileToolbar,
+} from '@/editor/components/ui'
+
 import { defaultEditorFeatureFlags, type EditorFeatureFlags } from './public-api'
 
 const props = withDefaults(defineProps<{ features?: EditorFeatureFlags }>(), {
@@ -58,7 +60,7 @@ watch(
     ] as const,
   ([hasMessage, isLoading, isSelection]) => {
     const instance = editor.value
-    if (instance && !isLoading && isSelection && hasMessage) {
+    if (props.features.ai && instance && !isLoading && isSelection && hasMessage) {
       instance.chain().focus().aiAccept().run()
       instance.commands.resetUiState()
     }

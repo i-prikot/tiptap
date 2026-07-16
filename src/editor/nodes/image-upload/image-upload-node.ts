@@ -6,13 +6,8 @@
  */
 import { Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
+import type { ImageUploadAdapter } from '../../types/image-upload'
 import ImageUploadNodeView from './ImageUploadNodeView.vue'
-
-export type UploadFunction = (
-  file: File,
-  onProgress?: (event: { progress: number }) => void,
-  abortSignal?: AbortSignal,
-) => Promise<string>
 
 export interface ImageUploadNodeOptions {
   /** Тип узла, вставляемого после загрузки. */
@@ -20,7 +15,7 @@ export interface ImageUploadNodeOptions {
   accept: string
   limit: number
   maxSize: number
-  upload?: UploadFunction
+  upload?: ImageUploadAdapter
   onError?: (error: Error) => void
   onSuccess?: (url: string) => void
   HTMLAttributes: Record<string, unknown>

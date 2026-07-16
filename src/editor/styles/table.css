@@ -1,4 +1,4 @@
-:root {
+.tinyfy-editor {
   --default-cell-min-width: 120px;
   --tt-table-border-color: var(--tt-gray-light-a-300);
   --tt-table-selected-bg: #c3bdff66;
@@ -12,7 +12,7 @@
   --tt-table-pad-inline-end: 1.5rem;
 }
 
-.dark {
+.tinyfy-editor.dark {
   --tt-table-border-color: var(--tt-gray-dark-a-300);
   --tt-table-selected-bg: #c3bdff33;
   --tt-table-selected-stroke: var(--tt-brand-color-400);
@@ -72,7 +72,7 @@
   font-weight: 700;
 }
 
-.dark .tiptap table th {
+.tinyfy-editor.dark .tiptap table th {
   background-color: var(--tt-gray-dark-a-100);
 }
 

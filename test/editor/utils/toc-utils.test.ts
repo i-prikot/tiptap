@@ -144,7 +144,6 @@ describe('selectNodeAndHideFloating', () => {
 describe('navigateToHeading', () => {
   afterEach(() => {
     document.body.replaceChildren()
-    window.history.replaceState(null, '', '/')
     vi.unstubAllGlobals()
     vi.restoreAllMocks()
   })
@@ -155,19 +154,15 @@ describe('navigateToHeading', () => {
     navigateToHeading(tocItem({ id: 'missing' }))
 
     expect(scrollTo).not.toHaveBeenCalled()
-    expect(window.location.hash).toBe('')
   })
 
-  it('skips scrolling for a visible heading, selects it, and updates the URL hash', () => {
+  it('skips scrolling for a visible heading and selects it', () => {
     const heading = document.createElement('h2')
     document.body.append(heading)
     setRect(heading, 40, 80)
     vi.stubGlobal('innerHeight', 200)
     const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
-    const replaceState = vi.spyOn(window.history, 'replaceState')
     const { dispatch, editor, getDispatched } = createEditorFixture()
-    const expectedUrl = new URL(window.location.href)
-    expectedUrl.hash = 'visible-heading'
 
     navigateToHeading(tocItem({ dom: heading, editor, id: 'visible-heading', pos: 0 }), {
       topOffset: 20,
@@ -176,8 +171,6 @@ describe('navigateToHeading', () => {
     expect(scrollTo).not.toHaveBeenCalled()
     expect(dispatch).toHaveBeenCalledOnce()
     expect(getDispatched()?.getMeta(HIDE_FLOATING_META)).toBe(true)
-    expect(replaceState).toHaveBeenCalledWith(null, '', expectedUrl.toString())
-    expect(window.location.hash).toBe('#visible-heading')
   })
 
   it('scrolls the window to an off-screen heading with default behavior', () => {

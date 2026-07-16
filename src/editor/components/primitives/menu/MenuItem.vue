@@ -11,7 +11,14 @@
 </template>
 
 <script setup lang="ts">
-// Пункт меню-обёртка: содержимое — кнопка (asChild-паттерн ariakit).
+/**
+ * Пункт контекстного Menu. Обработчик @select запускает действие. Если у
+ * MenuContent включён closeOnSelect, выбор конечного пункта закрывает всю
+ * Menu-цепочку; при MenuContent.closeOnSelect=false @select срабатывает без
+ * closeAll. submenu-trigger её не закрывает.
+ * Для одноуровневого click-to-close без @select и без цепочки подменю
+ * используйте DropdownMenuItem.
+ */
 const props = defineProps<{ disabled?: boolean; submenuTrigger?: boolean }>()
 const emit = defineEmits<{ select: [] }>()
 

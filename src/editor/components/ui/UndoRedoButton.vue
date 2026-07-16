@@ -29,10 +29,9 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { isNodeTypeSelected, parseShortcutKeys } from '../../utils/tiptap-utils'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
+import { useTiptapEditor } from '@/editor/composables'
 import { Redo2Icon, Undo2Icon } from '../../icons'
-import Button from '../primitives/Button.vue'
-import Badge from '../primitives/Badge.vue'
+import { Button, Badge } from '@/editor/components/primitives'
 
 type UndoRedoAction = 'undo' | 'redo'
 

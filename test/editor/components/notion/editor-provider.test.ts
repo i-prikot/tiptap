@@ -3,7 +3,7 @@ import { shallowRef } from 'vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as Y from 'yjs'
 import EditorProvider from '../../../../src/editor/components/notion/EditorProvider.vue'
-import { defaultContent } from '../../../../src/editor/content/default-content'
+import type { ImageUploadAdapter } from '../../../../src/editor/types'
 
 interface ChainCall {
   method: 'setMeta' | 'setContent' | 'focus'
@@ -21,6 +21,7 @@ interface FakeEditor {
   isEmpty: boolean
   chain: () => FakeChain
   on: (event: string, callback: () => void) => void
+  off: (event: string, callback: () => void) => void
   destroy: () => void
 }
 
@@ -39,6 +40,7 @@ interface EditorHarness {
 interface FakeProvider {
   isSynced: boolean
   on: (event: string, callback: () => void) => void
+  off: (event: string, callback: () => void) => void
 }
 
 interface ProviderHarness {
@@ -72,10 +74,6 @@ vi.mock('../../../../src/editor/composables/useToc', () => ({
 
 vi.mock('../../../../src/editor/composables/useTiptapEditor', () => ({
   provideTiptapEditor: testState.provideTiptapEditor,
-}))
-
-vi.mock('../../../../src/editor/utils/document-id', () => ({
-  getDocumentId: () => testState.documentId,
 }))
 
 vi.mock('../../../../src/editor/components/notion/NotionEditorHeader.vue', () => ({
@@ -142,6 +140,11 @@ function createEditorHarness(isEmpty = true): EditorHarness {
     on: (event, callback) => {
       if (event === 'update') updateCallbacks.push(callback)
     },
+    off: (event, callback) => {
+      if (event !== 'update') return
+      const callbackIndex = updateCallbacks.indexOf(callback)
+      if (callbackIndex >= 0) updateCallbacks.splice(callbackIndex, 1)
+    },
     destroy: vi.fn(),
   }
 
@@ -160,6 +163,9 @@ function createProviderHarness(isSynced: boolean): ProviderHarness {
       isSynced,
       on: (event, callback) => {
         if (event === 'synced') syncedCallback = callback
+      },
+      off: (event, callback) => {
+        if (event === 'synced' && syncedCallback === callback) syncedCallback = undefined
       },
     },
     triggerSynced: () => {
@@ -188,6 +194,8 @@ function mountEditorProvider(
     editor?: EditorHarness
     provider?: FakeProvider | null
     placeholder?: string
+    imageUpload?: ImageUploadAdapter
+    onReady?: () => void
   } = {},
 ) {
   const editor = options.editor ?? createEditorHarness()
@@ -198,8 +206,11 @@ function mountEditorProvider(
   const wrapper = mount(EditorProvider, {
     props: {
       provider: (options.provider ?? null) as never,
+      documentId: testState.documentId,
       ydoc,
       placeholder: options.placeholder ?? 'Document-specific placeholder',
+      imageUpload: options.imageUpload,
+      onReady: options.onReady,
     },
     global: { stubs: visualStubs },
   })
@@ -209,18 +220,6 @@ function mountEditorProvider(
 
 function invokeCreation(editor: FakeEditor) {
   getEditorOptions().onCreate({ editor })
-}
-
-function expectSeededDefaultContent(chainCalls: ChainCall[][]) {
-  expect(chainCalls, 'empty, uninteracted documents should insert seed content then focus').toEqual(
-    [
-      [
-        { method: 'setMeta', args: ['addToHistory', false] },
-        { method: 'setContent', args: [defaultContent] },
-      ],
-      [{ method: 'focus', args: ['start', { scrollIntoView: true }] }],
-    ],
-  )
 }
 
 function extensionNames() {
@@ -303,8 +302,9 @@ describe('EditorProvider', () => {
       link: { openOnClick: false },
     })
     expect(getExtension('starterKit').options.undoRedo).toBeUndefined()
+    const placeholder = getExtension('placeholder').options.placeholder as () => string
+    expect(placeholder()).toBe('Write this document')
     expect(getExtension('placeholder').options).toMatchObject({
-      placeholder: 'Write this document',
       emptyNodeClass: 'is-empty with-slash',
     })
     expect(getExtension('tableKit').options).toMatchObject({
@@ -346,6 +346,23 @@ describe('EditorProvider', () => {
     ydoc.destroy()
   })
 
+  it('delegates image uploads to an adapter provided after mount', async () => {
+    const replacementUpload = vi.fn(async () => 'https://example.test/replacement.png')
+    const { wrapper, ydoc } = mountEditorProvider()
+    const upload = getExtension('imageUpload').options.upload as ImageUploadAdapter
+    const file = new File(['image'], 'replacement.png', { type: 'image/png' })
+    const callbacks = { onProgress: vi.fn(), abortSignal: new AbortController().signal }
+
+    await expect(upload(file, callbacks)).rejects.toThrow('image upload adapter is not configured')
+
+    await wrapper.setProps({ imageUpload: replacementUpload })
+
+    await expect(upload(file, callbacks)).resolves.toBe('https://example.test/replacement.png')
+    expect(replacementUpload).toHaveBeenCalledWith(file, callbacks)
+
+    ydoc.destroy()
+  })
+
   it('adds Yjs collaboration extensions and disables local history when a provider is supplied', () => {
     const providerHarness = createProviderHarness(true)
     const { ydoc } = mountEditorProvider({ provider: providerHarness.provider })
@@ -365,65 +382,49 @@ describe('EditorProvider', () => {
     ydoc.destroy()
   })
 
-  it('seeds an empty, uninteracted local document without adding history and focuses its start', () => {
+  it('leaves an empty local document untouched when the host supplies no content', () => {
     const { editor, ydoc } = mountEditorProvider()
 
     invokeCreation(editor.editor)
 
-    expectSeededDefaultContent(editor.chainCalls)
+    expect(editor.chainCalls).toEqual([])
 
     ydoc.destroy()
   })
 
-  it.each([
-    ['empty, hasInteracted=true, local provider', true, true],
-    ['non-empty, hasInteracted=false, local provider', false, false],
-  ])('does not seed or focus for (%s)', (state, isEmpty, hasInteracted) => {
-    if (hasInteracted) localStorage.setItem(`hasInteracted-${testState.documentId}`, 'true')
-    const editor = createEditorHarness(isEmpty)
-    const { ydoc } = mountEditorProvider({ editor })
-
-    invokeCreation(editor.editor)
-
-    expect(editor.chainCalls, `(${state}) should not write seed content or focus`).toEqual([])
-
-    ydoc.destroy()
-  })
-
-  it('stores the exact document interaction key after the first non-empty update', () => {
-    const { editor, ydoc } = mountEditorProvider()
-
-    invokeCreation(editor.editor)
-    editor.editor.isEmpty = false
-    editor.emitUpdate()
-
-    expect(localStorage.getItem(`hasInteracted-${testState.documentId}`)).toBe('true')
-
-    ydoc.destroy()
-  })
-
-  it('defers empty, uninteracted seed content until an unsynced provider fires synced', () => {
+  it('waits for collaboration sync before ready without mutating an empty document', () => {
     const providerHarness = createProviderHarness(false)
-    const { editor, ydoc } = mountEditorProvider({ provider: providerHarness.provider })
+    const onReady = vi.fn()
+    const { editor, ydoc } = mountEditorProvider({
+      provider: providerHarness.provider,
+      onReady,
+    })
 
     invokeCreation(editor.editor)
     expect(editor.chainCalls).toEqual([])
+    expect(onReady).not.toHaveBeenCalled()
 
     providerHarness.triggerSynced()
     vi.runOnlyPendingTimers()
 
-    expectSeededDefaultContent(editor.chainCalls)
+    expect(editor.chainCalls).toEqual([])
+    expect(onReady).toHaveBeenCalledTimes(1)
 
     ydoc.destroy()
   })
 
-  it('seeds immediately when the supplied provider is already synced', () => {
+  it('immediately marks an already-synced empty document ready without mutation', () => {
     const providerHarness = createProviderHarness(true)
-    const { editor, ydoc } = mountEditorProvider({ provider: providerHarness.provider })
+    const onReady = vi.fn()
+    const { editor, ydoc } = mountEditorProvider({
+      provider: providerHarness.provider,
+      onReady,
+    })
 
     invokeCreation(editor.editor)
 
-    expectSeededDefaultContent(editor.chainCalls)
+    expect(editor.chainCalls).toEqual([])
+    expect(onReady).toHaveBeenCalledTimes(1)
 
     ydoc.destroy()
   })

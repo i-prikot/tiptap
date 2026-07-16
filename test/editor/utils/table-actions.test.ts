@@ -981,5 +981,39 @@ describe('table actions', () => {
         clearAllTableContent({ editor: unavailable.editor, tablePos: unavailable.tablePos }),
       ).toBe(false)
     })
+
+    it('inserts a row above an explicit source row through the compatibility facade', () => {
+      const fixture = createTableFixture(
+        createTable([
+          [createCell('a'), createCell('b')],
+          [createCell('c'), createCell('d')],
+        ]),
+        { row: 1, column: 0 },
+      )
+
+      expect(
+        canAddRowColumn({
+          editor: fixture.editor,
+          index: 1,
+          orientation: 'row',
+          side: 'above',
+          tablePos: fixture.tablePos,
+        }),
+      ).toBe(true)
+      expect(
+        addRowColumn({
+          editor: fixture.editor,
+          index: 1,
+          orientation: 'row',
+          side: 'above',
+          tablePos: fixture.tablePos,
+        }),
+      ).toBe(true)
+      expect(tableTextGrid(fixture.editor)).toEqual([
+        ['a', 'b'],
+        ['', ''],
+        ['c', 'd'],
+      ])
+    })
   })
 })

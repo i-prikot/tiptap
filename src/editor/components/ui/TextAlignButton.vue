@@ -25,10 +25,8 @@
 // Кнопка выравнивания (порт TextAlignButton из чанка 1mpndbcfk3lik).
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import Button from '../primitives/Button.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useTextAlign } from '../../composables/useTextAlign'
-import type { TextAlign } from '../../composables/useTextAlign'
+import { Button } from '@/editor/components/primitives'
+import { useTiptapEditor, useTextAlign, type TextAlign } from '@/editor/composables'
 
 const props = withDefaults(
   defineProps<{

@@ -111,14 +111,12 @@
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import type { FunctionalComponent } from 'vue'
-import MenuGroup from '../primitives/menu/MenuGroup.vue'
-import MenuItem from '../primitives/menu/MenuItem.vue'
-import Button from '../primitives/Button.vue'
-import Separator from '../primitives/Separator.vue'
-import ColorMenu from '../ui/ColorMenu.vue'
-import TableAlignMenu from '../ui/TableAlignMenu.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useEditorSelectionSignal } from '../../composables/useEditorSelectionSignal'
+import { MenuGroup, MenuItem, Button, Separator } from '@/editor/components/primitives'
+
+import { ColorMenu, TableAlignMenu } from '@/editor/components/ui'
+
+import { useTiptapEditor, useEditorSelectionSignal } from '@/editor/composables'
+
 import type { Orientation } from '../../utils/table-utils'
 import {
   ADD_COLUMN_LABELS,

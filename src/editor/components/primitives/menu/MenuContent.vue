@@ -19,11 +19,14 @@
 
 <script setup lang="ts">
 /**
- * Контент меню: floating-ui позиционирование от триггера, Escape и клик
- * снаружи закрывают, выбор пункта закрывает всю цепочку.
- * Как в ariakit (чанк 1133ya1qj4hfr): позиционируется обёртка, а на неё
- * size() выставляет --popover-anchor-width/--popover-available-width/
- * --popover-available-height, которые использует CSS .tiptap-menu-content.
+ * Контент контекстного Menu: использует placement родительского Menu и
+ * поддерживает вложенную цепочку. При MenuContent.closeOnSelect=true выбор конечного
+ * MenuItem после @select вызывает closeAll по всем родителям. При
+ * MenuContent.closeOnSelect=false @select всё равно срабатывает, но closeAll
+ * не вызывается и цепочка остаётся открытой. submenu-trigger в обоих случаях
+ * её не закрывает.
+ * Для одноуровневого trigger-owned селектора с side/align/sideOffset и
+ * локальным click-to-close используйте DropdownMenuContent.
  */
 import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { autoUpdate, flip, offset, shift, size, useFloating } from '@floating-ui/vue'

@@ -2,20 +2,17 @@
   <span ref="triggerWrapperRef" style="display: contents" @click="toggle">
     <slot name="trigger" />
   </span>
-  <Teleport to="body">
-    <!-- Обёртка-позиционер (аналог [data-radix-popper-content-wrapper]):
-         transform floating-ui не конфликтует с CSS-анимацией контента -->
-    <div
-      v-if="open"
-      ref="floatingRef"
-      data-radix-popper-content-wrapper=""
-      :style="{ ...floatingStyles, minWidth: 'max-content', zIndex: 50 }"
-    >
-      <div class="tiptap-popover" data-state="open" :data-side="resolvedPlacement">
-        <slot />
-      </div>
+  <FloatingPositioningWrapper
+    v-model:floating-element="floatingRef"
+    :open="open"
+    :floating-styles="floatingStyles"
+    :wrapper-style="{ minWidth: 'max-content', zIndex: 50 }"
+    data-radix-popper-content-wrapper=""
+  >
+    <div class="tiptap-popover" data-state="open" :data-side="resolvedPlacement">
+      <slot />
     </div>
-  </Teleport>
+  </FloatingPositioningWrapper>
 </template>
 
 <script setup lang="ts">
@@ -33,6 +30,7 @@ import {
   useFloating,
 } from '@floating-ui/vue'
 import type { Placement } from '@floating-ui/vue'
+import FloatingPositioningWrapper from '../FloatingPositioningWrapper.vue'
 
 const props = withDefaults(
   defineProps<{

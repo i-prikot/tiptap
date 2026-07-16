@@ -1,15 +1,13 @@
 /**
- * Скролл к блоку по hash из URL (uniqueID-атрибут data-id):
- * срабатывает при загрузке (после синка коллаборации), hashchange,
- * pageshow и popstate.
- * Порт useScrollToHash из чанка 1_-l0xapy_wlh.
+ * Scrolls to a block when the host supplies a decoded unique-node identifier.
  */
-import { onBeforeUnmount, watch } from 'vue'
+import { watch } from 'vue'
 import type { ComputedRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { selectNodeAndHideFloating } from '../utils/toc-utils'
+import { useAnchorNavigation } from './useAnchorNavigation'
 
-/** Расширение редактора по имени (с предупреждением, как в оригинале). */
+/** Resolves an editor extension by name. */
 export function getEditorExtension(editor: Editor | null, name: string) {
   if (!editor) return null
   const extension = editor.extensionManager.extensions.find((item) => item.name === name)
@@ -32,7 +30,8 @@ export function useScrollToHash(
   options: UseScrollToHashOptions = {},
 ) {
   const { onTargetFound = () => {}, onTargetNotFound = () => {} } = options
-  let lastScrolledHash: string | null = null
+  const { consumeRequestedAnchorChange, currentAnchor } = useAnchorNavigation()
+  let lastScrolledAnchor: string | null = null
 
   function scrollToHash(id: string): boolean {
     const instance = editor.value
@@ -55,48 +54,38 @@ export function useScrollToHash(
     return true
   }
 
-  function handleHash(delay = 0) {
-    const hash = window.location.hash?.substring(1)
-    if (!hash || hash === lastScrolledHash) return
+  function handleAnchor(anchor: string | undefined, delay = 0) {
+    if (!anchor || anchor === lastScrolledAnchor) return
     setTimeout(() => {
-      if (scrollToHash(hash)) {
-        lastScrolledHash = hash
-        onTargetFound(hash)
+      if (scrollToHash(anchor)) {
+        lastScrolledAnchor = anchor
+        onTargetFound(anchor)
       } else {
-        onTargetNotFound(hash)
+        onTargetNotFound(anchor)
       }
     }, delay)
   }
 
-  // при коллаборации ждём synced, иначе пробуем сразу после создания редактора
   watch(
-    editor,
-    (instance, _prev, onCleanup) => {
-      if (!instance) return
+    [editor, currentAnchor],
+    ([instance, anchor], _previous, onCleanup) => {
+      if (!instance || !anchor) return
+      if (consumeRequestedAnchorChange(anchor)) return
       const provider = instance.extensionManager.extensions.find(
         (item) => item.name === 'collaborationCaret',
       )?.options?.provider
-      if (provider?.on) {
-        const handler = () => handleHash(500)
-        provider.on('synced', handler)
-        onCleanup(() => provider.off?.('synced', handler))
+
+      if (provider?.on && !provider.isSynced) {
+        const handleSynced = () => handleAnchor(anchor, 500)
+        provider.on('synced', handleSynced)
+        onCleanup(() => provider.off?.('synced', handleSynced))
         return
       }
-      handleHash(500)
+
+      handleAnchor(anchor, 500)
     },
     { immediate: true },
   )
-
-  const onHashChange = () => handleHash()
-  const onPageShow = () => handleHash(500)
-  window.addEventListener('hashchange', onHashChange)
-  window.addEventListener('pageshow', onPageShow)
-  window.addEventListener('popstate', onHashChange)
-  onBeforeUnmount(() => {
-    window.removeEventListener('hashchange', onHashChange)
-    window.removeEventListener('pageshow', onPageShow)
-    window.removeEventListener('popstate', onHashChange)
-  })
 
   return { scrollToHash }
 }

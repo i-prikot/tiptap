@@ -57,15 +57,18 @@
  */
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import Menu from '../primitives/menu/Menu.vue'
-import MenuContent from '../primitives/menu/MenuContent.vue'
-import MenuGroup from '../primitives/menu/MenuGroup.vue'
-import MenuItem from '../primitives/menu/MenuItem.vue'
-import Button from '../primitives/Button.vue'
-import Spacer from '../primitives/Spacer.vue'
-import Separator from '../primitives/Separator.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useTableAlignCell } from '../../composables/useTableAlignCell'
+import {
+  Menu,
+  MenuContent,
+  MenuGroup,
+  MenuItem,
+  Button,
+  Spacer,
+  Separator,
+} from '@/editor/components/primitives'
+
+import { useTiptapEditor, useTableAlignCell } from '@/editor/composables'
+
 import type { Orientation } from '../../utils/table-utils'
 import { AlignmentIcon, ChevronRightIcon } from '../../icons'
 

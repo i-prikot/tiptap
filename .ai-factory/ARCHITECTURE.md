@@ -215,13 +215,15 @@ composables.
 | Подсистема | Endpoint (по умолчанию) | Реализация | Переменные окружения |
 |---|---|---|---|
 | Совместное редактирование | `POST /api/collaboration` | `useCollab.fetchCollabToken()` | `VITE_TIPTAP_COLLAB_APP_ID`, `VITE_TIPTAP_COLLAB_TOKEN_URL`, `VITE_TIPTAP_COLLAB_TOKEN`, `VITE_TIPTAP_COLLAB_DOC_PREFIX` |
-| AI | `POST /api/ai` | `useAi.fetchAiToken()` | `VITE_TIPTAP_AI_APP_ID`, `VITE_TIPTAP_AI_TOKEN_URL`, `VITE_TIPTAP_AI_TOKEN` |
+| AI | `POST /api/ai` | `useAi.fetchAiToken()` | `VITE_TIPTAP_AI_APP_ID`, `VITE_TIPTAP_AI_TOKEN_URL` |
 
 Логика включения:
 
 - Подсистема считается сконфигурированной по наличию соответствующего
-  `APP_ID`. Если задан статический токен — он используется без запроса;
-  иначе выполняется `POST` к token-URL и берётся поле `token`.
+  `APP_ID`. Для совместного редактирования статический токен может использоваться
+  без запроса; иначе выполняется `POST` к token-URL и берётся поле `token`.
+  AI всегда получает краткоживущий токен через `tokenUrl`; токены не передаются
+  через Vite environment variables.
 - Отсутствие токена при сконфигурированной подсистеме → `setupError = true`
   → экран `SetupError`.
 - Прочая работа с сетью — загрузка изображений (`handleImageUpload` в

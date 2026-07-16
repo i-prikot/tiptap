@@ -47,10 +47,10 @@
   background: var(--tt-gray-light-a-100);
 }
 
-.dark .editor-toolbar button:hover,
-.dark .table-menu button:hover,
-.dark .slash-menu button:hover,
-.dark .mobile-table-menu button:hover {
+.tinyfy-editor.dark .editor-toolbar button:hover,
+.tinyfy-editor.dark .table-menu button:hover,
+.tinyfy-editor.dark .slash-menu button:hover,
+.tinyfy-editor.dark .mobile-table-menu button:hover {
   background: var(--tt-gray-dark-a-100);
 }
 

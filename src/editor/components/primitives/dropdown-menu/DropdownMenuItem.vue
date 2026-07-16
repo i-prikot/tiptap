@@ -5,5 +5,9 @@
 </template>
 
 <script setup lang="ts">
-// Пункт меню-обёртка (asChild-паттерн Radix: содержимое — сама кнопка).
+/**
+ * Пункт одноуровневого DropdownMenu: клик по menuitem закрывает собственный
+ * DropdownMenuContent при closeOnSelect. Компонент не эмитит @select и не
+ * управляет submenu-цепочкой; для этого контракта используйте MenuItem.
+ */
 </script>

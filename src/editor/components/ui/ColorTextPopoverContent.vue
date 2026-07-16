@@ -1,78 +1,84 @@
 <template>
-  <Card ref="cardRef" :tabindex="0" role="menu" class="tiptap-card-color-panel">
-    <CardBody>
-      <CardItemGroup v-if="isInitialized && recentColors.length">
-        <CardGroupLabel>Recently used</CardGroupLabel>
-        <ButtonGroup orientation="horizontal">
-          <template
-            v-for="(recent, index) in recentColors"
-            :key="`recent-${recent.type}-${recent.value}`"
+  <ColorPopoverPanel :items="navItems" role="menu" class="tiptap-card-color-panel">
+    <template #default="{ selectedIndex }">
+      <CardBody>
+        <CardItemGroup v-if="isInitialized && recentColors.length">
+          <CardGroupLabel>Recently used</CardGroupLabel>
+          <ButtonGroup orientation="horizontal">
+            <template
+              v-for="(recent, index) in recentColors"
+              :key="`recent-${recent.type}-${recent.value}`"
+            >
+              <ColorTextButton
+                v-if="recent.type === 'text'"
+                :editor="editor"
+                :text-color="recent.value"
+                :label="recentLabel(recent)"
+                :tooltip="recentLabel(recent)"
+                :tabindex="selectedIndex === index ? 0 : -1"
+                :data-highlighted="selectedIndex === index"
+                @applied="onColorApplied('text', $event)"
+              />
+              <ColorHighlightButton
+                v-else
+                :editor="editor"
+                :highlight-color="recent.value"
+                :label="recentLabel(recent)"
+                :tooltip="recentLabel(recent)"
+                :tabindex="selectedIndex === index ? 0 : -1"
+                :data-highlighted="selectedIndex === index"
+                @applied="onColorApplied('highlight', $event)"
+              />
+            </template>
+          </ButtonGroup>
+        </CardItemGroup>
+
+        <CardItemGroup>
+          <CardGroupLabel>Text color</CardGroupLabel>
+          <ButtonGroup
+            v-for="(row, rowIndex) in textColorRows"
+            :key="`text-row-${rowIndex}`"
+            orientation="horizontal"
           >
             <ColorTextButton
-              v-if="recent.type === 'text'"
-              :text-color="recent.value"
-              :label="recentLabel(recent)"
-              :tooltip="recentLabel(recent)"
-              :tabindex="selectedIndex === index ? 0 : -1"
-              :data-highlighted="selectedIndex === index"
+              v-for="(color, colIndex) in row"
+              :key="color.value"
+              :editor="editor"
+              :text-color="color.value"
+              :label="color.label"
+              :tooltip="color.label"
+              :aria-label="`${color.label} text color`"
+              :tabindex="textIndex(rowIndex, colIndex) === selectedIndex ? 0 : -1"
+              :data-highlighted="textIndex(rowIndex, colIndex) === selectedIndex"
               @applied="onColorApplied('text', $event)"
             />
+          </ButtonGroup>
+        </CardItemGroup>
+
+        <CardItemGroup>
+          <CardGroupLabel>Highlight color</CardGroupLabel>
+          <ButtonGroup
+            v-for="(row, rowIndex) in highlightColorRows"
+            :key="`highlight-row-${rowIndex}`"
+            orientation="horizontal"
+          >
             <ColorHighlightButton
-              v-else
-              :highlight-color="recent.value"
-              :label="recentLabel(recent)"
-              :tooltip="recentLabel(recent)"
-              :tabindex="selectedIndex === index ? 0 : -1"
-              :data-highlighted="selectedIndex === index"
+              v-for="(color, colIndex) in row"
+              :key="color.value"
+              :editor="editor"
+              :highlight-color="color.value"
+              :label="color.label"
+              :tooltip="color.label"
+              :aria-label="`${color.label} highlight color`"
+              :tabindex="highlightIndex(rowIndex, colIndex) === selectedIndex ? 0 : -1"
+              :data-highlighted="highlightIndex(rowIndex, colIndex) === selectedIndex"
               @applied="onColorApplied('highlight', $event)"
             />
-          </template>
-        </ButtonGroup>
-      </CardItemGroup>
-
-      <CardItemGroup>
-        <CardGroupLabel>Text color</CardGroupLabel>
-        <ButtonGroup
-          v-for="(row, rowIndex) in textColorRows"
-          :key="`text-row-${rowIndex}`"
-          orientation="horizontal"
-        >
-          <ColorTextButton
-            v-for="(color, colIndex) in row"
-            :key="color.value"
-            :text-color="color.value"
-            :label="color.label"
-            :tooltip="color.label"
-            :aria-label="`${color.label} text color`"
-            :tabindex="textIndex(rowIndex, colIndex) === selectedIndex ? 0 : -1"
-            :data-highlighted="textIndex(rowIndex, colIndex) === selectedIndex"
-            @applied="onColorApplied('text', $event)"
-          />
-        </ButtonGroup>
-      </CardItemGroup>
-
-      <CardItemGroup>
-        <CardGroupLabel>Highlight color</CardGroupLabel>
-        <ButtonGroup
-          v-for="(row, rowIndex) in highlightColorRows"
-          :key="`highlight-row-${rowIndex}`"
-          orientation="horizontal"
-        >
-          <ColorHighlightButton
-            v-for="(color, colIndex) in row"
-            :key="color.value"
-            :highlight-color="color.value"
-            :label="color.label"
-            :tooltip="color.label"
-            :aria-label="`${color.label} highlight color`"
-            :tabindex="highlightIndex(rowIndex, colIndex) === selectedIndex ? 0 : -1"
-            :data-highlighted="highlightIndex(rowIndex, colIndex) === selectedIndex"
-            @applied="onColorApplied('highlight', $event)"
-          />
-        </ButtonGroup>
-      </CardItemGroup>
-    </CardBody>
-  </Card>
+          </ButtonGroup>
+        </CardItemGroup>
+      </CardBody>
+    </template>
+  </ColorPopoverPanel>
 </template>
 
 <script setup lang="ts">
@@ -81,24 +87,35 @@
  * клавиатурной навигацией. Порт внутреннего компонента
  * ColorTextPopover (чанк 2mux2p9tadf0h, функция j).
  */
-import { computed, ref } from 'vue'
-import type { ComponentPublicInstance } from 'vue'
-import Card from '../primitives/card/Card.vue'
-import CardBody from '../primitives/card/CardBody.vue'
-import CardItemGroup from '../primitives/card/CardItemGroup.vue'
-import CardGroupLabel from '../primitives/card/CardGroupLabel.vue'
-import ButtonGroup from '../primitives/ButtonGroup.vue'
+import { computed } from 'vue'
+import type { Editor } from '@tiptap/vue-3'
+import {
+  CardBody,
+  CardItemGroup,
+  CardGroupLabel,
+  ButtonGroup,
+} from '@/editor/components/primitives'
+
+import ColorPopoverPanel from './ColorPopoverPanel.vue'
 import ColorTextButton from './ColorTextButton.vue'
 import ColorHighlightButton from './ColorHighlightButton.vue'
-import { TEXT_COLORS } from '../../composables/useColorText'
-import { HIGHLIGHT_COLORS } from '../../composables/useColorHighlight'
-import { useRecentColors, getColorByValue } from '../../composables/useRecentColors'
+import {
+  useTiptapEditor,
+  TEXT_COLORS,
+  HIGHLIGHT_COLORS,
+  useRecentColors,
+  getColorByValue,
+} from '@/editor/composables'
+
 import type { RecentColor } from '../../types/color'
-import { useMenuNavigation } from '../../composables/useMenuNavigation'
 import { chunkArray } from '../../utils/tiptap-utils'
 
 const props = withDefaults(
-  defineProps<{ maxColorsPerGroup?: number; maxRecentColors?: number }>(),
+  defineProps<{
+    editor?: Editor | null
+    maxColorsPerGroup?: number
+    maxRecentColors?: number
+  }>(),
   {
     maxColorsPerGroup: 5,
     maxRecentColors: 3,
@@ -107,13 +124,11 @@ const props = withDefaults(
 
 const emit = defineEmits<{ colorChanged: [payload: RecentColor] }>()
 
+const editor = useTiptapEditor(computed(() => props.editor))
 const { recentColors, addRecentColor, isInitialized } = useRecentColors(props.maxRecentColors)
 
-const cardRef = ref<ComponentPublicInstance | null>(null)
-const containerRef = computed(() => (cardRef.value?.$el as HTMLElement | null) ?? null)
-
-const textColorRows = chunkArray(TEXT_COLORS, props.maxColorsPerGroup)
-const highlightColorRows = chunkArray(HIGHLIGHT_COLORS, props.maxColorsPerGroup)
+const textColorRows = computed(() => chunkArray(TEXT_COLORS, props.maxColorsPerGroup))
+const highlightColorRows = computed(() => chunkArray(HIGHLIGHT_COLORS, props.maxColorsPerGroup))
 
 const recentCount = computed(() => (isInitialized.value ? recentColors.value.length : 0))
 
@@ -142,19 +157,6 @@ const navItems = computed<RecentColor[]>(() => {
   for (const color of HIGHLIGHT_COLORS)
     items.push({ type: 'highlight', value: color.value, label: color.label })
   return items
-})
-
-const { selectedIndex } = useMenuNavigation<RecentColor>({
-  editor: ref(null),
-  containerRef: containerRef as never,
-  query: ref(''),
-  items: navItems,
-  orientation: 'both',
-  autoSelectFirstItem: false,
-  onSelect: () => {
-    const highlighted = containerRef.value?.querySelector<HTMLElement>('[data-highlighted="true"]')
-    highlighted?.click()
-  },
 })
 
 function onColorApplied(type: 'text' | 'highlight', payload: { color: string; label: string }) {

@@ -65,21 +65,26 @@
 import type { Editor } from '@tiptap/core'
 import SuggestionMenu from './SuggestionMenu.vue'
 import SlashMenuItem from './SlashMenuItem.vue'
-import Card from '../primitives/card/Card.vue'
-import CardBody from '../primitives/card/CardBody.vue'
-import CardItemGroup from '../primitives/card/CardItemGroup.vue'
-import CardGroupLabel from '../primitives/card/CardGroupLabel.vue'
-import Separator from '../primitives/Separator.vue'
+import {
+  Card,
+  CardBody,
+  CardItemGroup,
+  CardGroupLabel,
+  Separator,
+} from '@/editor/components/primitives'
+
 import { filterSuggestionItems } from '../../utils/suggestion/suggestion'
 import { getSlashMenuItems } from './slash-menu-items'
 import type { SlashMenuConfig, SlashMenuItem as SlashMenuEntry } from './slash-menu-items'
 
-const props = defineProps<{ config?: SlashMenuConfig }>()
+const props = withDefaults(defineProps<{ config?: SlashMenuConfig; aiEnabled?: boolean }>(), {
+  aiEnabled: false,
+})
 
 const showGroups = props.config?.showGroups !== false
 
 function getFilteredItems({ query, editor }: { query: string; editor: Editor }): SlashMenuEntry[] {
-  return filterSuggestionItems(getSlashMenuItems(editor, props.config), query)
+  return filterSuggestionItems(getSlashMenuItems(editor, props.config, props.aiEnabled), query)
 }
 
 interface GroupedEntries {

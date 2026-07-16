@@ -2,7 +2,6 @@
  * Цвет текста (марка textStyle): палитра TEXT_COLORS и useColorText.
  * Порт из чанка 2mux2p9tadf0h (модули 118876/352859).
  */
-import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import {
@@ -10,7 +9,7 @@ import {
   isNodeTypeSelected,
   selectCurrentBlockContent,
 } from '../utils/tiptap-utils'
-import { useEditorSelectionSignal } from './useEditorSelectionSignal'
+import { useColorControl } from './useColorControl'
 import { TextColorSmallIcon } from '../icons'
 import type { TextColor } from '../types/color'
 
@@ -91,51 +90,36 @@ export interface UseColorTextOptions {
 
 export function useColorText(options: UseColorTextOptions) {
   const { editor, textColor, label, hideWhenUnavailable = false, onApplied } = options
-  const signal = useEditorSelectionSignal(editor)
-
-  const canColor = computed(() => (signal.value, canColorText(editor.value)))
-  const isActive = computed(
-    () => (
-      signal.value,
-      !!editor.value &&
-        !!editor.value.isEditable &&
-        editor.value.isActive('textStyle', { color: textColor })
-    ),
-  )
-  const isVisible = computed(() => {
-    void signal.value
-    const instance = editor.value
-    if (!instance) return false
-    if (!hideWhenUnavailable) return true
-    return (
+  const resolvedLabel = label || `Color text to ${textColor}`
+  const control = useColorControl({
+    editor,
+    color: textColor,
+    hideWhenUnavailable,
+    canApply: canColorText,
+    isActive: (instance) =>
+      !!instance.isEditable && instance.isActive('textStyle', { color: textColor }),
+    isVisibleWhenUnavailable: (instance) =>
       !!instance.isEditable &&
       !!isMarkInSchema('textStyle', instance) &&
-      (!!instance.isActive('code') || canColorText(instance))
-    )
-  })
-
-  const resolvedLabel = label || `Color text to ${textColor}`
-
-  const handleColorText = (): boolean => {
-    const instance = editor.value
-    if (!instance || !canColor.value) return false
-    if (instance.state.storedMarks) {
+      (!!instance.isActive('code') || canColorText(instance)),
+    clearStoredMarks: (instance) => {
+      if (!instance.state.storedMarks) return
       const markType = instance.schema.marks.textStyle
       if (markType) instance.view.dispatch(instance.state.tr.removeStoredMark(markType))
-    }
-    setTimeout(() => {
+    },
+    apply: (instance) => {
       selectCurrentBlockContent(instance)
-      const applied = instance.chain().focus().toggleMark('textStyle', { color: textColor }).run()
-      if (applied) onApplied?.({ color: textColor, label: resolvedLabel })
-    }, 0)
-    return true
-  }
+      return instance.chain().focus().toggleMark('textStyle', { color: textColor }).run()
+    },
+    deferApply: true,
+    onApplied: () => onApplied?.({ color: textColor, label: resolvedLabel }),
+  })
 
   return {
-    isVisible,
-    isActive,
-    canColorText: canColor,
-    handleColorText,
+    isVisible: control.isVisible,
+    isActive: control.isActive,
+    canColorText: control.canApplyColor,
+    handleColorText: control.handleApply,
     label: resolvedLabel,
     shortcutKeys: COLOR_TEXT_SHORTCUT_KEY,
     Icon: TextColorSmallIcon,

@@ -43,9 +43,8 @@
  */
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { TableMap } from '@tiptap/pm/tables'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useTableHandleState } from '../../composables/useTableHandleState'
-import { useTableExtendPosition } from '../../composables/useTableHandlePositioning'
+import { useTiptapEditor, useTableHandleState, useTableExtendPosition } from '@/editor/composables'
+
 import {
   EMPTY_CELL_HEIGHT,
   EMPTY_CELL_WIDTH,

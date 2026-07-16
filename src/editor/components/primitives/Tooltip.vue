@@ -10,7 +10,7 @@
   >
     <slot />
   </span>
-  <Teleport to="body">
+  <Teleport :to="teleportTarget">
     <div
       v-if="open"
       ref="floatingRef"
@@ -29,8 +29,9 @@
  * placement top c offset 4 / flip / shift — как в оригинальном примитиве
  * из чанка 3q2p49kc-ifgd.
  */
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { flip, offset, shift, useFloating, autoUpdate } from '@floating-ui/vue'
+import { useEditorOverlayTarget } from '@/editor/composables'
 
 const props = withDefaults(
   defineProps<{
@@ -41,6 +42,8 @@ const props = withDefaults(
   { delay: 200, closeDelay: 0, placement: 'top' },
 )
 
+const overlayTarget = useEditorOverlayTarget()
+const teleportTarget = computed(() => overlayTarget?.value ?? 'body')
 const open = ref(false)
 const referenceRef = ref<HTMLElement | null>(null)
 const floatingRef = ref<HTMLElement | null>(null)

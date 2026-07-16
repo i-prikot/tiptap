@@ -1,0 +1,26 @@
+.tinyfy-editor {
+  --tt-notion-like-editor-header-border: var(--tt-gray-light-a-200);
+  --tt-notion-like-editor-header-bg: var(--white);
+}
+.tinyfy-editor.dark {
+  --tt-notion-like-editor-header-border: var(--tt-gray-dark-a-200);
+  --tt-notion-like-editor-header-bg: var(--black);
+}
+.notion-like-editor-header {
+  z-index: 50;
+  background-color: var(--tt-notion-like-editor-header-bg);
+  border-bottom: 1px solid var(--tt-notion-like-editor-header-border);
+  align-items: center;
+  width: 100%;
+  height: 3rem;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  position: sticky;
+  top: 0;
+}
+.notion-like-editor-header-actions {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  display: flex;
+}

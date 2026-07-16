@@ -1,9 +1,12 @@
 <template>
   <NotionEditorContent
     :content="props.content"
+    :document-id="props.documentId"
     :placeholder="props.placeholder"
     :features="resolvedFeatures"
+    :toc-sidebar-sticky-top-offset="props.tocSidebarStickyTopOffset"
     :image-upload="props.imageUpload"
+    :development-diagnostics="props.developmentDiagnostics"
     @ready="handleReady"
     @update="emit('update', $event)"
   />
@@ -12,21 +15,26 @@
 <script setup lang="ts">
 /**
  * Корень Notion-like редактора: цепочка провайдеров
- * User → Collab(room) → Ai → Toc, затем контент.
+ * User → Collab(documentId) → Ai → Toc, затем контент.
  * Порт NotionEditor из чанка 3xpmbr0kqzhen (React-провайдеры заменены
  * на provide/inject через composables).
  */
-import { computed, onBeforeUnmount, shallowRef } from 'vue'
+import { computed, onBeforeUnmount, shallowRef, watch } from 'vue'
 import type { Editor, JSONContent } from '@tiptap/core'
-import { provideUser } from '../../composables/useUser'
-import { provideCollab } from '../../composables/useCollab'
-import { provideAi } from '../../composables/useAi'
-import { provideToc } from '../../composables/useToc'
+import {
+  provideUser,
+  provideCollab,
+  provideAi,
+  provideToc,
+  provideAnchorNavigation,
+} from '@/editor/composables'
+
 import NotionEditorContent from './NotionEditorContent.vue'
 import { cancelPendingUpdate } from './editor-lifecycle-signals'
 import {
   defaultEditorFeatureFlags,
   type EditorFeatureFlags,
+  type NotionEditorAnchorId,
   type NotionEditorExpose,
   type NotionEditorProps,
   type NotionEditorReadyPayload,
@@ -35,8 +43,8 @@ import {
 } from './public-api'
 
 const props = withDefaults(defineProps<NotionEditorProps>(), {
-  room: '',
   placeholder: 'Start writing...',
+  tocSidebarStickyTopOffset: 0,
 })
 
 const resolvedFeatures = computed<EditorFeatureFlags>(() => ({
@@ -47,12 +55,13 @@ const resolvedFeatures = computed<EditorFeatureFlags>(() => ({
 const emit = defineEmits<{
   ready: [editor: NotionEditorReadyPayload]
   update: [payload: NotionEditorUpdatePayload]
+  'anchor-change': [anchor: NotionEditorAnchorId]
 }>()
 
 const editorRef = shallowRef<Editor | null>(null)
 
 function debugEditor(event: string, details: Record<string, unknown> = {}) {
-  if (import.meta.env.DEV) {
+  if (props.developmentDiagnostics) {
     // eslint-disable-next-line no-console
     console.debug(`[NotionEditor] ${event}`, details)
   }
@@ -123,10 +132,29 @@ defineExpose<NotionEditorExpose>({
   setContent,
 })
 
-provideUser()
-provideCollab(props.room)
-provideAi()
-provideToc()
+const identityPersistenceMode =
+  props.identityStorage === false ? 'disabled' : props.identityStorage ? 'custom' : 'default'
+
+provideUser(props.identityStorage)
+debugEditor('identity-persistence', { mode: identityPersistenceMode })
+provideCollab(props.documentId, props.collaboration)
+watch(
+  () => resolvedFeatures.value.ai,
+  (enabled) => {
+    debugEditor('ai-configuration', {
+      enabled,
+      configured: Boolean(props.ai?.appId),
+    })
+  },
+  { immediate: true },
+)
+provideAi(props.ai, () => resolvedFeatures.value.ai)
+const anchorNavigation = provideAnchorNavigation(
+  computed(() => props.baseUrl),
+  computed(() => props.currentAnchor),
+  (anchor) => emit('anchor-change', anchor),
+)
+provideToc(anchorNavigation)
 
 onBeforeUnmount(() => {
   editorRef.value = null

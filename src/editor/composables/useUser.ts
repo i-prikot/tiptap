@@ -1,18 +1,24 @@
 /**
- * Пользователь коллаборации: случайные имя/цвет/id, сохраняемые
- * в localStorage (_tiptap_username / _tiptap_color / _tiptap_user_id).
+ * Пользователь коллаборации: случайные имя/цвет/id, сохраняемые через
+ * настроенное хранилище идентичности.
  * Vue-эквивалент UserProvider/useUser из чанка 1-1gopd-oz05f.
  */
 import { inject, provide } from 'vue'
 import type { InjectionKey } from 'vue'
 import type { CollabUser } from '../types/user'
+import type { IdentityStorage } from '../utils/storage'
 import {
   getAvatar,
   getStoredOrCreate,
   randomUserColor,
   randomUserId,
   randomUserName,
+  setStoredValue,
 } from '../utils/user-utils'
+
+const USER_NAME_STORAGE_KEY = '_tiptap_username'
+const USER_COLOR_STORAGE_KEY = '_tiptap_color'
+const USER_ID_STORAGE_KEY = '_tiptap_user_id'
 
 interface UserContext {
   user: CollabUser
@@ -20,18 +26,25 @@ interface UserContext {
 
 const userInjectionKey: InjectionKey<UserContext> = Symbol('user')
 
-export function provideUser(): UserContext {
-  const name = getStoredOrCreate('_tiptap_username', randomUserName)
+function resolveIdentityStorage(
+  identityStorage?: IdentityStorage | false,
+): IdentityStorage | false {
+  return identityStorage === false ? false : (identityStorage ?? window.localStorage)
+}
+
+export function provideUser(identityStorage?: IdentityStorage | false): UserContext {
+  const storage = resolveIdentityStorage(identityStorage)
+  const name = getStoredOrCreate(storage, USER_NAME_STORAGE_KEY, randomUserName)
   const user: CollabUser = {
-    color: getStoredOrCreate('_tiptap_color', randomUserColor),
+    color: getStoredOrCreate(storage, USER_COLOR_STORAGE_KEY, randomUserColor),
     name,
-    id: getStoredOrCreate('_tiptap_user_id', randomUserId),
+    id: getStoredOrCreate(storage, USER_ID_STORAGE_KEY, randomUserId),
     avatar: getAvatar(name),
   }
 
-  window.localStorage.setItem('_tiptap_username', user.name)
-  window.localStorage.setItem('_tiptap_color', user.color)
-  window.localStorage.setItem('_tiptap_user_id', user.id)
+  setStoredValue(storage, USER_NAME_STORAGE_KEY, user.name)
+  setStoredValue(storage, USER_COLOR_STORAGE_KEY, user.color)
+  setStoredValue(storage, USER_ID_STORAGE_KEY, user.id)
 
   const context: UserContext = { user }
   provide(userInjectionKey, context)

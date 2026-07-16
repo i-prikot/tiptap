@@ -35,9 +35,8 @@ import type { Editor as CoreEditor } from '@tiptap/core'
 import type { Editor } from '@tiptap/vue-3'
 import SuggestionMenu from './SuggestionMenu.vue'
 import EmojiMenuItem from './EmojiMenuItem.vue'
-import Card from '../primitives/card/Card.vue'
-import CardBody from '../primitives/card/CardBody.vue'
-import CardItemGroup from '../primitives/card/CardItemGroup.vue'
+import { Card, CardBody, CardItemGroup } from '@/editor/components/primitives'
+
 import type { SuggestionItem } from '../../types/suggestion'
 import type { EditorEmojiItem, EditorEmojiStorage } from '../../types/tiptap-augmentations'
 

@@ -15,6 +15,6 @@
 
 <script setup lang="ts">
 // Кнопка-триггер ссылки (порт LinkButton из чанка 1mpndbcfk3lik).
-import Button from '../primitives/Button.vue'
+import { Button } from '@/editor/components/primitives'
 import { LinkIcon } from '../../icons'
 </script>

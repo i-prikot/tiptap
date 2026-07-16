@@ -1,5 +1,5 @@
 <template>
-  <Popover v-if="highlight.isVisible.value">
+  <ColorPopoverShell :visible="highlight.isVisible.value">
     <template #trigger>
       <Button
         type="button"
@@ -18,11 +18,12 @@
       </Button>
     </template>
     <ColorHighlightPopoverContent
+      :editor="editor"
       :colors="colors"
       :use-color-value="useColorValue"
       @applied="onApplied"
     />
-  </Popover>
+  </ColorPopoverShell>
 </template>
 
 <script setup lang="ts">
@@ -32,13 +33,12 @@
  */
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import Popover from '../primitives/popover/Popover.vue'
-import Button from '../primitives/Button.vue'
+import { Button } from '@/editor/components/primitives'
+import ColorPopoverShell from './ColorPopoverShell.vue'
 import ColorHighlightPopoverContent from './ColorHighlightPopoverContent.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useColorHighlight } from '../../composables/useColorHighlight'
+import { useTiptapEditor, useColorHighlight, type HighlightMode } from '@/editor/composables'
+
 import type { HighlightColor } from '../../types/color'
-import type { HighlightMode } from '../../composables/useColorHighlight'
 
 const props = withDefaults(
   defineProps<{

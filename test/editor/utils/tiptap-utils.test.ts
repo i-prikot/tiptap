@@ -1,11 +1,5 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import {
-  clamp,
-  handleImageUpload,
-  MAX_FILE_SIZE,
-  parseShortcutKeys,
-  sanitizeUrl,
-} from '../../../src/editor/utils/tiptap-utils'
+import { afterEach, describe, expect, it } from 'vitest'
+import { clamp, parseShortcutKeys, sanitizeUrl } from '../../../src/editor/utils/tiptap-utils'
 
 const ownNavigatorPlatform = Object.getOwnPropertyDescriptor(navigator, 'platform')
 
@@ -16,14 +10,7 @@ function setNavigatorPlatform(platform: string) {
   })
 }
 
-function createImageFile(size: number) {
-  return new File([new Uint8Array(size)], 'image.png', { type: 'image/png' })
-}
-
 afterEach(() => {
-  vi.clearAllTimers()
-  vi.useRealTimers()
-
   if (ownNavigatorPlatform) {
     Object.defineProperty(navigator, 'platform', ownNavigatorPlatform)
   } else {
@@ -97,74 +84,6 @@ describe('tiptap utilities', () => {
       expect(sanitizeUrl('java\tscript:alert(1)')).toBe('#')
       expect(sanitizeUrl('da ta:text/html,unsafe')).toBe('#')
       expect(sanitizeUrl('http://%')).toBe('#')
-    })
-  })
-
-  describe('handleImageUpload', () => {
-    it('rejects when no file is provided', async () => {
-      await expect(handleImageUpload(undefined as unknown as File)).rejects.toThrow(
-        'No file provided',
-      )
-    })
-
-    it('rejects files larger than the maximum size without scheduling upload progress', async () => {
-      vi.useFakeTimers()
-
-      const onProgress = vi.fn()
-      const upload = handleImageUpload(createImageFile(MAX_FILE_SIZE + 1), onProgress)
-
-      await expect(upload).rejects.toThrow('File size exceeds maximum allowed (5MB)')
-      expect(onProgress).not.toHaveBeenCalled()
-      expect(vi.getTimerCount()).toBe(0)
-    })
-
-    it('accepts a file at the size limit, reports every progress step, and resolves the placeholder', async () => {
-      vi.useFakeTimers()
-
-      const onProgress = vi.fn()
-      const upload = handleImageUpload(createImageFile(MAX_FILE_SIZE), onProgress)
-
-      expect(vi.getTimerCount()).toBe(1)
-      await vi.advanceTimersByTimeAsync(5_500)
-
-      await expect(upload).resolves.toBe('/images/tiptap-ui-placeholder-image.jpg')
-      expect(onProgress).toHaveBeenCalledTimes(11)
-      expect(onProgress.mock.calls.map(([event]) => event.progress)).toEqual([
-        0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
-      ])
-      expect(vi.getTimerCount()).toBe(0)
-    })
-
-    it('rejects an already-aborted upload without scheduling progress', async () => {
-      vi.useFakeTimers()
-
-      const controller = new AbortController()
-      const onProgress = vi.fn()
-      controller.abort()
-
-      const upload = handleImageUpload(createImageFile(1), onProgress, controller.signal)
-
-      await expect(upload).rejects.toThrow('Upload cancelled')
-      expect(onProgress).not.toHaveBeenCalled()
-      expect(vi.getTimerCount()).toBe(0)
-    })
-
-    it('rejects after an emitted progress update when the upload is aborted', async () => {
-      vi.useFakeTimers()
-
-      const controller = new AbortController()
-      const onProgress = vi.fn(({ progress }: { progress: number }) => {
-        if (progress === 0) controller.abort()
-      })
-      const upload = handleImageUpload(createImageFile(1), onProgress, controller.signal)
-      const uploadRejection = expect(upload).rejects.toThrow('Upload cancelled')
-
-      await vi.advanceTimersByTimeAsync(500)
-      expect(onProgress).toHaveBeenCalledExactlyOnceWith({ progress: 0 })
-
-      await uploadRejection
-      expect(onProgress).toHaveBeenCalledExactlyOnceWith({ progress: 0 })
-      expect(vi.getTimerCount()).toBe(0)
     })
   })
 })

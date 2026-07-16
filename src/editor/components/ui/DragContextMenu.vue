@@ -203,18 +203,16 @@ import type { TurnIntoMenuItem } from '../../types/menu'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import { offset } from '@floating-ui/dom'
 import { DragHandle } from '@tiptap/extension-drag-handle-vue-3'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useUiEditorState } from '../../composables/useUiEditorState'
-import { useIsBreakpoint } from '../../composables/useIsBreakpoint'
-import { useEditorSelectionSignal } from '../../composables/useEditorSelectionSignal'
 import {
+  useTiptapEditor,
+  useUiEditorState,
+  useIsBreakpoint,
+  useEditorSelectionSignal,
   useBlockquoteBlock,
   useCodeBlockBlock,
   useHeadingBlock,
   useListBlock,
   useTextBlock,
-} from '../../composables/blocks/useBlockConversions'
-import {
   useCopyAnchorLink,
   useCopyToClipboard,
   useDeleteNode,
@@ -224,29 +222,38 @@ import {
   useTableClearAllContents,
   useTableFitToWidth,
   useTocShowTitle,
-} from '../../composables/useNodeActions'
+} from '@/editor/composables'
+
 import { getNodeDisplayName, isTextSelectionValid } from '../../utils/selection-utils'
 import { parseShortcutKeys } from '../../utils/tiptap-utils'
 import { selectNodeAndHideFloating } from '../../utils/toc-utils'
 import { ChevronRightIcon, GripVerticalIcon, Repeat2Icon } from '../../icons'
-import Button from '../primitives/Button.vue'
-import Badge from '../primitives/Badge.vue'
-import Separator from '../primitives/Separator.vue'
-import Spacer from '../primitives/Spacer.vue'
-import Menu from '../primitives/menu/Menu.vue'
-import MenuContent from '../primitives/menu/MenuContent.vue'
-import MenuGroup from '../primitives/menu/MenuGroup.vue'
-import MenuGroupLabel from '../primitives/menu/MenuGroupLabel.vue'
-import MenuItem from '../primitives/menu/MenuItem.vue'
+import {
+  Button,
+  Badge,
+  Separator,
+  Spacer,
+  Menu,
+  MenuContent,
+  MenuGroup,
+  MenuGroupLabel,
+  MenuItem,
+} from '@/editor/components/primitives'
+
 import SlashCommandTriggerButton from './SlashCommandTriggerButton.vue'
 import ColorMenu from './ColorMenu.vue'
 import TableAlignMenu from './TableAlignMenu.vue'
 
 const props = withDefaults(
-  defineProps<{ withSlashCommandTrigger?: boolean; mobileBreakpoint?: number }>(),
+  defineProps<{
+    withSlashCommandTrigger?: boolean
+    mobileBreakpoint?: number
+    aiEnabled?: boolean
+  }>(),
   {
     withSlashCommandTrigger: true,
     mobileBreakpoint: 768,
+    aiEnabled: false,
   },
 )
 
@@ -312,7 +319,9 @@ const handleVisibilityStyle = computed<CSSProperties>(() => {
   void selectionSignal.value
   const instance = editor.value
   const hidden =
-    uiState.aiGenerationActive || isMobile.value || (instance && isTextSelectionValid(instance))
+    (props.aiEnabled && uiState.aiGenerationActive) ||
+    isMobile.value ||
+    (instance && isTextSelectionValid(instance))
   return {
     ...(hidden ? { opacity: 0, pointerEvents: 'none' } : {}),
     ...(uiState.isDragging ? { opacity: 0 } : {}),

@@ -4,31 +4,20 @@
  *
  * Отличие от оригинала: оригинал всегда требует Tiptap Cloud
  * (жёстко зашитые appId + серверный /api/collaboration). Порт включает
- * коллаборацию только если заданы VITE_TIPTAP_COLLAB_APP_ID и
- * VITE_TIPTAP_COLLAB_TOKEN_URL (или VITE_TIPTAP_COLLAB_TOKEN);
+ * коллаборацию только если хост передал appId и tokenUrl (или token);
  * иначе hasCollab=false и редактор работает локально с обычной историей.
- * Параметр URL ?noCollab=1 отключает коллаборацию, как в оригинале.
  */
 import { onBeforeUnmount, provide, inject, shallowRef } from 'vue'
 import type { InjectionKey, ShallowRef } from 'vue'
 import * as Y from 'yjs'
 import { TiptapCollabProvider } from '@hocuspocus/provider'
-
-export const TIPTAP_COLLAB_APP_ID = import.meta.env.VITE_TIPTAP_COLLAB_APP_ID || ''
-export const TIPTAP_COLLAB_DOC_PREFIX = import.meta.env.VITE_TIPTAP_COLLAB_DOC_PREFIX || ''
-const COLLAB_TOKEN_URL = import.meta.env.VITE_TIPTAP_COLLAB_TOKEN_URL || '/api/collaboration'
-const STATIC_COLLAB_TOKEN = import.meta.env.VITE_TIPTAP_COLLAB_TOKEN || ''
-
-export function getUrlParam(name: string): string | null {
-  if (typeof window === 'undefined') return null
-  return new URLSearchParams(window.location.search).get(name)
-}
+import type { CollaborationOptions } from '../components/notion/public-api'
 
 /** Получает JWT коллаборации с бэкенда (оригинал: POST /api/collaboration). */
-export async function fetchCollabToken(): Promise<string | null> {
-  if (STATIC_COLLAB_TOKEN) return STATIC_COLLAB_TOKEN
+export async function fetchCollabToken(config: CollaborationOptions): Promise<string | null> {
+  if (config.token) return config.token
   try {
-    const response = await fetch(COLLAB_TOKEN_URL, {
+    const response = await fetch(config.tokenUrl || '/api/collaboration', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     })
@@ -49,25 +38,24 @@ export interface CollabContext {
 
 const collabInjectionKey: InjectionKey<CollabContext> = Symbol('collab')
 
-export function provideCollab(room: string): CollabContext {
-  const collabConfigured = !!TIPTAP_COLLAB_APP_ID
-  const noCollabParam = parseInt(getUrlParam('noCollab') || '0') === 1
-
-  const hasCollab = shallowRef(collabConfigured && !noCollabParam)
+export function provideCollab(documentId: string, config?: CollaborationOptions): CollabContext {
+  const collabConfigured = !!config?.appId
+  const hasCollab = shallowRef(collabConfigured)
   const provider = shallowRef<TiptapCollabProvider | null>(null)
   const setupError = shallowRef(false)
   const ydoc = new Y.Doc()
 
-  if (hasCollab.value) {
-    fetchCollabToken().then((token) => {
+  if (config && hasCollab.value) {
+    fetchCollabToken(config).then((token) => {
       if (!token) {
         setupError.value = true
         return
       }
-      const documentName = room ? `${TIPTAP_COLLAB_DOC_PREFIX}${room}` : TIPTAP_COLLAB_DOC_PREFIX
+      const documentNamePrefix = config.documentNamePrefix || ''
+      const documentName = `${documentNamePrefix}${documentId}`
       provider.value = new TiptapCollabProvider({
         name: documentName,
-        appId: TIPTAP_COLLAB_APP_ID,
+        appId: config.appId,
         token,
         document: ydoc,
       })

@@ -20,9 +20,8 @@
 // Кнопка скачивания изображения (порт ImageDownloadButton из чанка 34p294mqk5mqb).
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import Button from '../primitives/Button.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useImageDownload } from '../../composables/useNodeActions'
+import { Button } from '@/editor/components/primitives'
+import { useTiptapEditor, useImageDownload } from '@/editor/composables'
 
 const props = defineProps<{ editor?: Editor | null; text?: string }>()
 

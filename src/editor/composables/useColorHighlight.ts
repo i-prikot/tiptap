@@ -3,11 +3,10 @@
  * палитра HIGHLIGHT_COLORS и useColorHighlight.
  * Порт из чанка 2mux2p9tadf0h (модули 254877/173753).
  */
-import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { isExtensionAvailable, isMarkInSchema, isNodeTypeSelected } from '../utils/tiptap-utils'
-import { useEditorSelectionSignal } from './useEditorSelectionSignal'
+import { useColorControl } from './useColorControl'
 import { HighlighterIcon } from '../icons'
 import type { HighlightColor } from '../types/color'
 
@@ -148,66 +147,52 @@ export function useColorHighlight(options: UseColorHighlightOptions) {
     useColorValue = false,
     onApplied,
   } = options
-  const signal = useEditorSelectionSignal(editor)
-
   const resolvedColor = highlightColor
     ? resolveHighlightColor(highlightColor, useColorValue)
     : highlightColor
-
-  const canColor = computed(() => (signal.value, canColorHighlight(editor.value, mode)))
-  const isActive = computed(
-    () => (signal.value, isHighlightActive(editor.value, resolvedColor, mode)),
-  )
-  const isVisible = computed(() => {
-    void signal.value
-    const instance = editor.value
-    if (!instance) return false
-    if (!hideWhenUnavailable) return true
-    if (!instance.isEditable) return false
-    if (mode === 'mark') {
-      if (!isMarkInSchema('highlight', instance)) return false
-    } else if (!isExtensionAvailable(instance, ['nodeBackground'])) return false
-    return !!instance.isActive('code') || canColorHighlight(instance, mode)
-  })
-
   const resolvedLabel = label || 'Highlight'
-
-  const handleColorHighlight = (): boolean => {
-    const instance = editor.value
-    if (!instance || !canColor.value || !resolvedColor) return false
-    if (mode === 'mark') {
-      if (instance.state.storedMarks) {
-        const markType = instance.schema.marks.highlight
-        if (markType) instance.view.dispatch(instance.state.tr.removeStoredMark(markType))
-      }
-      setTimeout(() => {
-        const applied = instance.chain().focus().toggleHighlight({ color: resolvedColor }).run()
-        if (applied) onApplied?.({ color: resolvedColor, label: resolvedLabel, mode })
-      }, 0)
-      return true
-    }
-    const applied = instance.chain().focus().toggleNodeBackgroundColor(resolvedColor).run()
-    if (applied) onApplied?.({ color: resolvedColor, label: resolvedLabel, mode })
-    return applied
-  }
-
-  const handleRemoveHighlight = (): boolean => {
-    const instance = editor.value
-    if (!instance || !instance.isEditable || !canColorHighlight(instance, mode)) return false
-    const removed =
+  const control = useColorControl({
+    editor,
+    color: resolvedColor,
+    hideWhenUnavailable,
+    canApply: (instance) => canColorHighlight(instance, mode),
+    isActive: (instance) => isHighlightActive(instance, resolvedColor, mode),
+    isVisibleWhenUnavailable: (instance) => {
+      if (!instance.isEditable) return false
+      if (mode === 'mark') {
+        if (!isMarkInSchema('highlight', instance)) return false
+      } else if (!isExtensionAvailable(instance, ['nodeBackground'])) return false
+      return !!instance.isActive('code') || canColorHighlight(instance, mode)
+    },
+    clearStoredMarks:
+      mode === 'mark'
+        ? (instance) => {
+            if (!instance.state.storedMarks) return
+            const markType = instance.schema.marks.highlight
+            if (markType) instance.view.dispatch(instance.state.tr.removeStoredMark(markType))
+          }
+        : undefined,
+    apply: (instance) => {
+      if (!resolvedColor) return false
+      return mode === 'mark'
+        ? instance.chain().focus().toggleHighlight({ color: resolvedColor }).run()
+        : instance.chain().focus().toggleNodeBackgroundColor(resolvedColor).run()
+    },
+    remove: (instance) =>
       mode === 'mark'
         ? instance.chain().focus().unsetMark('highlight').run()
-        : instance.chain().focus().unsetNodeBackgroundColor().run()
-    if (removed) onApplied?.({ color: '', label: 'Remove highlight', mode })
-    return removed
-  }
+        : instance.chain().focus().unsetNodeBackgroundColor().run(),
+    deferApply: mode === 'mark',
+    onApplied: () => onApplied?.({ color: resolvedColor ?? '', label: resolvedLabel, mode }),
+    onRemoved: () => onApplied?.({ color: '', label: 'Remove highlight', mode }),
+  })
 
   return {
-    isVisible,
-    isActive,
-    canColorHighlight: canColor,
-    handleColorHighlight,
-    handleRemoveHighlight,
+    isVisible: control.isVisible,
+    isActive: control.isActive,
+    canColorHighlight: control.canApplyColor,
+    handleColorHighlight: control.handleApply,
+    handleRemoveHighlight: control.handleRemove,
     label: resolvedLabel,
     shortcutKeys: COLOR_HIGHLIGHT_SHORTCUT_KEY,
     Icon: HighlighterIcon,

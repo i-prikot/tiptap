@@ -1,16 +1,18 @@
 <template>
   <div v-if="editor" class="notion-like-editor-wrapper">
-    <NotionEditorHeader v-if="props.features.header" />
     <div class="notion-like-editor-layout">
       <EditorContentArea :features="props.features" />
-      <TocSidebar v-if="props.features.tocSidebar" :top-offset="48" />
+      <TocSidebar
+        v-if="props.features.tocSidebar"
+        :sticky-top-offset="props.tocSidebarStickyTopOffset"
+      />
     </div>
+    <div ref="overlayTarget" data-tiptap-overlay-root=""></div>
     <template v-if="props.features.tableControls">
       <TableExtendRowColumnButtons />
       <TableHandle />
       <TableSelectionOverlay :show-resize-handles="true" />
     </template>
-    <CtaPopup v-if="props.features.ctaPopup" />
   </div>
   <LoadingSpinner v-else />
 </template>
@@ -26,54 +28,25 @@
  * - расширение Ai (Tiptap Pro) недоступно в порте — AI-элементы UI
  *   скрываются штатной проверкой isExtensionAvailable.
  */
-import { onBeforeUnmount, watch } from 'vue'
+import { onBeforeUnmount, shallowRef, watch } from 'vue'
 import { useEditor } from '@tiptap/vue-3'
 import type { Editor, JSONContent } from '@tiptap/core'
 import type { Transaction } from '@tiptap/pm/state'
-import StarterKit from '@tiptap/starter-kit'
-import { Placeholder, Selection } from '@tiptap/extensions'
-import { TextAlign } from '@tiptap/extension-text-align'
-import Collaboration, { isChangeOrigin } from '@tiptap/extension-collaboration'
-import { CollaborationCaret } from '@tiptap/extension-collaboration-caret'
-import { Mention } from '@tiptap/extension-mention'
-import { Emoji, gitHubEmojis } from '@tiptap/extension-emoji'
-import { Color, TextStyle } from '@tiptap/extension-text-style'
-import { Mathematics } from '@tiptap/extension-mathematics'
-import { Superscript } from '@tiptap/extension-superscript'
-import { Subscript } from '@tiptap/extension-subscript'
-import { TaskItem, TaskList } from '@tiptap/extension-list'
-import { Highlight } from '@tiptap/extension-highlight'
-import { TableOfContents, getHierarchicalIndexes } from '@tiptap/extension-table-of-contents'
-import { UniqueID } from '@tiptap/extension-unique-id'
-import { Typography } from '@tiptap/extension-typography'
 import type { TiptapCollabProvider } from '@hocuspocus/provider'
 import type * as Y from 'yjs'
+import { createExtensionKit } from '../../extensions/extension-kit'
+import {
+  useUser,
+  useToc,
+  provideTiptapEditor,
+  provideEditorOverlayTarget,
+} from '@/editor/composables'
 
-import { HorizontalRule } from '../../extensions/horizontal-rule'
-import { Indent } from '../../extensions/indent'
-import { ListNormalization } from '../../extensions/list-normalization'
-import { TripleClickBlockSelection } from '../../extensions/triple-click-block-selection'
-import { NodeBackground } from '../../extensions/node-background'
-import { NodeAlignment } from '../../extensions/node-alignment'
-import { UiState } from '../../extensions/ui-state'
-import { TableKit } from '../../extensions/table-kit'
-import { TableHandleExtension } from '../../extensions/table-handle'
-import { Image } from '../../nodes/image/image-node'
-import { ImageUploadNode } from '../../nodes/image-upload/image-upload-node'
-import { TocNode } from '../../nodes/toc/toc-node'
-import { defaultContent } from '../../content/default-content'
-import { MAX_FILE_SIZE, handleImageUpload } from '../../utils/tiptap-utils'
-import { useUser } from '../../composables/useUser'
-import { useToc } from '../../composables/useToc'
-import { provideTiptapEditor } from '../../composables/useTiptapEditor'
-import { getDocumentId } from '../../utils/document-id'
 import { CANCEL_PENDING_UPDATE_META } from './editor-lifecycle-signals'
 
-import NotionEditorHeader from './NotionEditorHeader.vue'
 import EditorContentArea from './EditorContentArea.vue'
 import TocSidebar from './TocSidebar.vue'
 import LoadingSpinner from './LoadingSpinner.vue'
-import CtaPopup from './CtaPopup.vue'
 import TableHandle from '../table/TableHandle.vue'
 import TableSelectionOverlay from '../table/TableSelectionOverlay.vue'
 import TableExtendRowColumnButtons from '../table/TableExtendRowColumnButtons.vue'
@@ -89,12 +62,15 @@ import {
 const props = withDefaults(
   defineProps<{
     provider?: TiptapCollabProvider | null
+    documentId: string
     ydoc: Y.Doc
     content?: JSONContent
     placeholder?: string
     features?: EditorFeatureFlags
+    tocSidebarStickyTopOffset?: number
     imageUpload?: ImageUploadAdapter
     aiToken?: string | null
+    developmentDiagnostics?: boolean
   }>(),
   {
     provider: null,
@@ -109,19 +85,25 @@ const emit = defineEmits<{
   update: [payload: NotionEditorUpdatePayload]
 }>()
 
+const overlayTarget = shallowRef<HTMLElement | null>(null)
+provideEditorOverlayTarget(overlayTarget)
+
 const { user } = useUser()
 const { setTocContent } = useToc()
 
-/**
- * Первичное наполнение документа: если документ пуст и пользователь ещё
- * не взаимодействовал с ним (localStorage hasInteracted-<docId>) —
- * вставить дефолтный контент без записи в history.
- */
 function debugEditor(event: string, details: Record<string, unknown> = {}) {
-  if (import.meta.env.DEV) {
+  if (props.developmentDiagnostics) {
     // eslint-disable-next-line no-console
     console.debug(`[EditorProvider] ${event}`, details)
   }
+}
+
+const uploadImage: ImageUploadAdapter = (file, callbacks) => {
+  const imageUploadAdapter = props.imageUpload
+  if (!imageUploadAdapter) {
+    return Promise.reject(new Error('image upload adapter is not configured'))
+  }
+  return imageUploadAdapter(file, callbacks)
 }
 
 function hasEqualContent(left: JSONContent, right: JSONContent) {
@@ -135,7 +117,6 @@ let updateTimer: ReturnType<typeof setTimeout> | undefined
 let scheduledUpdateCount = 0
 let emittedUpdateCount = 0
 let lifecycleUpdateListener: (() => void) | undefined
-let interactionUpdateListener: (() => void) | undefined
 let pendingUpdateCancellationListener: ((payload: { transaction: Transaction }) => void) | undefined
 let collabSyncedListener: (() => void) | undefined
 
@@ -157,11 +138,6 @@ function applyExternalContent(editorInstance: Editor, content: JSONContent) {
   } finally {
     isApplyingExternalContent = false
   }
-}
-
-const uploadImage: ImageUploadAdapter = async (file, onProgress, abortSignal) => {
-  const imageUploadAdapter = props.imageUpload
-  return (imageUploadAdapter ?? handleImageUpload)(file, onProgress, abortSignal)
 }
 
 function cancelScheduledUpdate(
@@ -236,25 +212,10 @@ function emitReady(editorInstance: Editor) {
 }
 
 function initializeContent(editorInstance: Editor, onInitialized: () => void) {
-  const documentId = getDocumentId()
-  const storageKey = `hasInteracted-${documentId}`
-  const hasInteracted = localStorage.getItem(storageKey) === 'true'
-
-  const insertIfEmpty = () => {
+  const applyHostContent = () => {
     if (props.content !== undefined) {
       applyExternalContent(editorInstance, props.content)
-      debugEditor('initial-content', { source: 'consumer-content' })
-      return
     }
-
-    if (editorInstance.isEmpty && defaultContent && !hasInteracted) {
-      editorInstance.chain().setMeta('addToHistory', false).setContent(defaultContent).run()
-      editorInstance.chain().focus('start', { scrollIntoView: true }).run()
-      debugEditor('initial-content', { source: 'default-content' })
-      return
-    }
-
-    debugEditor('initial-content', { source: props.provider ? 'collaboration' : 'default-content' })
   }
 
   if (props.provider && !props.provider.isSynced) {
@@ -263,33 +224,18 @@ function initializeContent(editorInstance: Editor, onInitialized: () => void) {
       collabSyncedListener = undefined
       setTimeout(() => {
         if (isTearingDown) return
-        insertIfEmpty()
+        applyHostContent()
         onInitialized()
       }, 0)
     }
     props.provider.on('synced', collabSyncedListener)
   } else {
-    insertIfEmpty()
+    applyHostContent()
     onInitialized()
   }
-
-  interactionUpdateListener = () => {
-    if (!isApplyingExternalContent && !editorInstance.isEmpty && !hasInteracted) {
-      localStorage.setItem(storageKey, 'true')
-    }
-  }
-  editorInstance.on('update', interactionUpdateListener)
 }
 
-const collabExtensions = props.provider
-  ? [
-      Collaboration.configure({ document: props.ydoc }),
-      CollaborationCaret.configure({
-        provider: props.provider,
-        user: { id: user.id, name: user.name, color: user.color },
-      }),
-    ]
-  : []
+debugEditor('image-upload-config', { configured: Boolean(props.imageUpload) })
 
 const editor = useEditor({
   editorProps: {
@@ -300,86 +246,16 @@ const editor = useEditor({
       emitReady(editorInstance)
     })
   },
-  extensions: [
-    StarterKit.configure({
-      // при коллаборации история управляется yjs
-      undoRedo: props.provider ? false : undefined,
-      horizontalRule: false,
-      dropcursor: { width: 2 },
-      link: { openOnClick: false },
-    }),
-    HorizontalRule,
-    TextAlign.configure({ types: ['heading', 'paragraph'] }),
-    ...collabExtensions,
-    Placeholder.configure({
-      placeholder: () => props.placeholder,
-      emptyNodeClass: 'is-empty with-slash',
-    }),
-    Mention,
-    Emoji.configure({
-      emojis: gitHubEmojis.filter((emoji) => !emoji.name.includes('regional')),
-      forceFallbackImages: true,
-    }),
-    TableKit.configure({ table: { resizable: true, cellMinWidth: 120 } }),
-    NodeBackground.configure({
-      types: [
-        'paragraph',
-        'heading',
-        'blockquote',
-        'taskList',
-        'bulletList',
-        'orderedList',
-        'tableCell',
-        'tableHeader',
-        'tocNode',
-      ],
-    }),
-    NodeAlignment,
-    TextStyle,
-    Mathematics,
-    Superscript,
-    Subscript,
-    Indent,
-    Color,
-    TaskList,
-    TaskItem.configure({ nested: true }),
-    Highlight.configure({ multicolor: true }),
-    Selection,
-    Image,
-    TableOfContents.configure({
-      getIndex: getHierarchicalIndexes,
-      onUpdate(content) {
-        setTocContent(content)
-      },
-    }),
-    TableHandleExtension,
-    ListNormalization,
-    TripleClickBlockSelection,
-    ImageUploadNode.configure({
-      accept: 'image/*',
-      maxSize: MAX_FILE_SIZE,
-      limit: 3,
-      upload: uploadImage,
-      onError: () => console.error('[EditorProvider] image upload failed'),
-    }),
-    UniqueID.configure({
-      types: [
-        'table',
-        'paragraph',
-        'bulletList',
-        'orderedList',
-        'taskList',
-        'heading',
-        'blockquote',
-        'codeBlock',
-        'tocNode',
-      ],
-      filterTransaction: (transaction) => !isChangeOrigin(transaction),
-    }),
-    Typography,
-    UiState,
-    TocNode.configure({ topOffset: 48 }),
-  ],
+  extensions: createExtensionKit({
+    provider: props.provider,
+    ydoc: props.ydoc,
+    placeholder: () => props.placeholder,
+    user,
+    features: props.features,
+    imageUpload: uploadImage,
+    onImageUploadError: () => console.error('[EditorProvider] image upload failed'),
+    onTableOfContentsUpdate: setTocContent,
+  }),
 })
 
 watch(
@@ -427,9 +303,6 @@ onBeforeUnmount(() => {
   const editorInstance = editor.value
   if (editorInstance && lifecycleUpdateListener) {
     editorInstance.off('update', lifecycleUpdateListener)
-  }
-  if (editorInstance && interactionUpdateListener) {
-    editorInstance.off('update', interactionUpdateListener)
   }
   if (editorInstance && pendingUpdateCancellationListener) {
     editorInstance.off('transaction', pendingUpdateCancellationListener)

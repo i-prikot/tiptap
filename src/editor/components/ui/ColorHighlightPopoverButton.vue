@@ -17,6 +17,6 @@
 <script setup lang="ts">
 // Кнопка-триггер вида «Highlighter» в мобильном тулбаре
 // (порт ColorHighlightPopoverButton из чанка 3jdxmcvhjtoe-).
-import Button from '../primitives/Button.vue'
+import { Button } from '@/editor/components/primitives'
 import { HighlighterIcon } from '../../icons'
 </script>

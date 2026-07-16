@@ -1,19 +1,11 @@
 import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import { defineComponent, nextTick } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-
-const collaborationEnvironmentKeys = [
-  'VITE_TIPTAP_COLLAB_APP_ID',
-  'VITE_TIPTAP_COLLAB_TOKEN_URL',
-  'VITE_TIPTAP_COLLAB_TOKEN',
-  'VITE_TIPTAP_COLLAB_DOC_PREFIX',
-  'VITE_TIPTAP_AI_APP_ID',
-  'VITE_TIPTAP_AI_TOKEN_URL',
-  'VITE_TIPTAP_AI_TOKEN',
-] as const
-
-type CollaborationEnvironmentKey = (typeof collaborationEnvironmentKeys)[number]
-type CollaborationEnvironment = Partial<Record<CollaborationEnvironmentKey, string>>
+import type {
+  AiOptions,
+  CollaborationOptions,
+  EditorFeatureFlags,
+} from '../../../../src/editor/components/notion/public-api'
 
 const editorProviderModule = '../../../../src/editor/components/notion/EditorProvider.vue'
 const wrappers: VueWrapper[] = []
@@ -30,21 +22,25 @@ const EditorProviderStub = defineComponent({
     '<div data-testid="editor-provider" :data-provider-state="provider === null ? \'null\' : \'configured\'"></div>',
 })
 
-function configureEnvironment(overrides: CollaborationEnvironment = {}) {
-  for (const key of collaborationEnvironmentKeys) {
-    vi.stubEnv(key, overrides[key] ?? '')
-  }
+interface RenderEditorOptions {
+  ai?: AiOptions
+  collaboration?: CollaborationOptions
+  features?: Partial<EditorFeatureFlags>
 }
 
-async function renderEditor(environment: CollaborationEnvironment = {}) {
-  configureEnvironment(environment)
-  vi.resetModules()
+async function renderEditor({ ai, collaboration, features }: RenderEditorOptions = {}) {
   vi.doMock(editorProviderModule, () => ({ default: EditorProviderStub }))
 
   const { default: NotionEditor } =
     await import('../../../../src/editor/components/notion/NotionEditor.vue')
   const wrapper = mount(NotionEditor, {
-    props: { room: 'graceful-degradation-room' },
+    props: {
+      documentId: 'graceful-degradation-document',
+      baseUrl: 'https://editor.example.test/graceful-degradation-document',
+      ai,
+      collaboration,
+      features,
+    },
   })
 
   wrappers.push(wrapper)
@@ -63,8 +59,6 @@ afterEach(() => {
   }
 
   vi.doUnmock(editorProviderModule)
-  vi.resetModules()
-  vi.unstubAllEnvs()
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
 })
@@ -94,14 +88,83 @@ describe('NotionEditor graceful degradation', () => {
     ).not.toHaveBeenCalled()
   })
 
+  it('does not request an AI token when configured AI is disabled', async () => {
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+
+    const wrapper = await renderEditor({
+      ai: {
+        appId: 'test-ai-app-id',
+        tokenUrl: '/api/test-ai-token',
+      },
+    })
+    await flushEditorUpdates()
+
+    expect(
+      fetchMock,
+      'Configured AI must remain inert until the host explicitly enables features.ai.',
+    ).not.toHaveBeenCalled()
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false)
+    expect(wrapper.find('.spinner-container').exists()).toBe(false)
+  })
+
+  it('clears pending AI setup when the feature is disabled after mount', async () => {
+    type TokenResponse = Pick<Response, 'json' | 'ok'>
+
+    let resolveTokenRequest: ((response: TokenResponse) => void) | undefined
+    const tokenRequest = new Promise<TokenResponse>((resolve) => {
+      resolveTokenRequest = resolve
+    })
+    const fetchMock = vi.fn().mockReturnValue(tokenRequest)
+    vi.stubGlobal('fetch', fetchMock)
+
+    const wrapper = await renderEditor({
+      ai: {
+        appId: 'test-ai-app-id',
+        tokenUrl: '/api/test-ai-token',
+      },
+      features: { ai: true },
+    })
+    await nextTick()
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/test-ai-token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    await wrapper.setProps({ features: { ai: false } })
+    await nextTick()
+
+    expect(
+      wrapper.find('[role="alert"]').exists(),
+      'Disabling AI must clear setup errors while an earlier token request is pending.',
+    ).toBe(false)
+    expect(
+      wrapper.find('.spinner-container').exists(),
+      'Disabling AI must release the editor readiness gate while a token request is pending.',
+    ).toBe(false)
+
+    if (!resolveTokenRequest) throw new Error('AI token request was not started')
+    resolveTokenRequest({
+      ok: true,
+      json: async () => ({ token: 'test-ai-token' }),
+    })
+    await flushEditorUpdates()
+
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false)
+    expect(wrapper.find('.spinner-container').exists()).toBe(false)
+  })
+
   it('shows SetupError when configured collaboration cannot obtain a token', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 503 })
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined)
     vi.stubGlobal('fetch', fetchMock)
 
     const wrapper = await renderEditor({
-      VITE_TIPTAP_COLLAB_APP_ID: 'test-collab-app-id',
-      VITE_TIPTAP_COLLAB_TOKEN_URL: '/api/test-collaboration-token',
+      collaboration: {
+        appId: 'test-collab-app-id',
+        tokenUrl: '/api/test-collaboration-token',
+      },
     })
     await flushEditorUpdates()
 
@@ -109,11 +172,11 @@ describe('NotionEditor graceful degradation', () => {
     expect(
       setupError.text(),
       'A configured collaboration failure should render the real setup error heading.',
-    ).toContain('Environment Variables Required')
+    ).toContain('Cloud Configuration Required')
     expect(
       setupError.text(),
-      'A collaboration setup error should explain the required collaboration environment variables.',
-    ).toContain('VITE_TIPTAP_COLLAB_APP_ID')
+      'A collaboration setup error should explain the required collaboration configuration.',
+    ).toContain('collaboration.appId')
     expect(
       wrapper.find('[data-testid="editor-provider"]').exists(),
       'A configured collaboration failure should replace the editor provider with SetupError.',

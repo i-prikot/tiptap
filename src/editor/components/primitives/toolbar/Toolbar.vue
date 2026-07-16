@@ -16,7 +16,7 @@
  * стрелками по кнопкам, data-focus-visible для фокуса с клавиатуры.
  */
 import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
-import { useMenuNavigation } from '../../../composables/useMenuNavigation'
+import { useMenuNavigation } from '@/editor/composables'
 
 withDefaults(defineProps<{ variant?: 'floating' | 'fixed' }>(), { variant: 'fixed' })
 

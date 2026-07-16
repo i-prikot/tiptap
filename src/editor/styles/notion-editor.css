@@ -1,41 +1,29 @@
-body {
+.tinyfy-editor {
   --tt-toolbar-height: 44px;
   --tt-theme-text: var(--tt-gray-light-900);
-}
-.dark body {
-  --tt-theme-text: var(--tt-gray-dark-900);
-}
-body {
   color: var(--tt-theme-text);
-  font-optical-sizing: auto;
-  overscroll-behavior-y: none;
-  padding: 0;
+  background-color: var(--tt-bg-color);
   font-family: Inter, sans-serif;
+  font-optical-sizing: auto;
   font-style: normal;
   font-weight: 400;
+  overscroll-behavior: none;
 }
-html,
-body {
-  overscroll-behavior-x: none;
+.tinyfy-editor.dark {
+  --tt-theme-text: var(--tt-gray-dark-900);
 }
-html,
-body,
-#root,
-#app {
-  background-color: var(--tt-bg-color);
-}
-::-webkit-scrollbar {
+.tinyfy-editor ::-webkit-scrollbar {
   width: 0.25rem;
 }
-* {
+.tinyfy-editor * {
   scrollbar-width: thin;
   scrollbar-color: var(--tt-scrollbar-color) #0000;
 }
-::-webkit-scrollbar-thumb {
+.tinyfy-editor ::-webkit-scrollbar-thumb {
   background-color: var(--tt-scrollbar-color);
   border-radius: 9999px;
 }
-::-webkit-scrollbar-track {
+.tinyfy-editor ::-webkit-scrollbar-track {
   background: 0 0;
 }
 .tiptap.ProseMirror {
@@ -130,30 +118,4 @@ body,
 }
 .spinner-container .spinner-content .spinner-loading-text {
   text-align: center;
-}
-:root {
-  --tt-notion-like-editor-header-border: var(--tt-gray-light-a-200);
-  --tt-notion-like-editor-header-bg: var(--white);
-}
-.dark {
-  --tt-notion-like-editor-header-border: var(--tt-gray-dark-a-200);
-  --tt-notion-like-editor-header-bg: var(--black);
-}
-.notion-like-editor-header {
-  z-index: 50;
-  background-color: var(--tt-notion-like-editor-header-bg);
-  border-bottom: 1px solid var(--tt-notion-like-editor-header-border);
-  align-items: center;
-  width: 100%;
-  height: 3rem;
-  padding: 0.5rem 0.75rem;
-  display: flex;
-  position: sticky;
-  top: 0;
-}
-.notion-like-editor-header-actions {
-  flex-direction: row;
-  align-items: center;
-  gap: 0.5rem;
-  display: flex;
 }

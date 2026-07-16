@@ -32,10 +32,10 @@
 // Кнопка цвета текста (порт ColorTextButton из чанка 2mux2p9tadf0h).
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import Button from '../primitives/Button.vue'
-import Badge from '../primitives/Badge.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useColorText } from '../../composables/useColorText'
+import { Button, Badge } from '@/editor/components/primitives'
+
+import { useTiptapEditor, useColorText } from '@/editor/composables'
+
 import { parseShortcutKeys } from '../../utils/tiptap-utils'
 
 const props = withDefaults(

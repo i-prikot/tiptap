@@ -24,10 +24,10 @@
 // Кнопка indent/outdent (порт IndentButton из чанка 3xpmbr0kqzhen).
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import Button from '../primitives/Button.vue'
-import Badge from '../primitives/Badge.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useEditorSelectionSignal } from '../../composables/useEditorSelectionSignal'
+import { Button, Badge } from '@/editor/components/primitives'
+
+import { useTiptapEditor, useEditorSelectionSignal } from '@/editor/composables'
+
 import { isExtensionAvailable, parseShortcutKeys } from '../../utils/tiptap-utils'
 import { IndentDecreaseIcon, IndentIncreaseIcon } from '../../icons'
 

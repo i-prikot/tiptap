@@ -84,12 +84,11 @@
  */
 import { computed, ref, watch } from 'vue'
 import { TableMap } from '@tiptap/pm/tables'
-import Menu from '../primitives/menu/Menu.vue'
-import MenuContent from '../primitives/menu/MenuContent.vue'
+import { Menu, MenuContent } from '@/editor/components/primitives'
+
 import TableHandleMenuContent from './TableHandleMenuContent.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useTableHandleState } from '../../composables/useTableHandleState'
-import { useTableHandlePosition } from '../../composables/useTableHandlePositioning'
+import { useTiptapEditor, useTableHandleState, useTableHandlePosition } from '@/editor/composables'
+
 import { colDragStart, dragEnd, rowDragStart } from '../../extensions/table-handle'
 import { selectCellsByCoords } from '../../utils/table-utils'
 import { isValidPosition } from '../../utils/tiptap-utils'

@@ -1,7 +1,7 @@
-:root {
+.tinyfy-editor {
   --tiptap-ouline-fallback-color: var(--tt-gray-light-a-200);
 }
-.dark {
+.tinyfy-editor.dark {
   --tiptap-ouline-fallback-color: var(--tt-gray-dark-a-200);
 }
 .tiptap-button-color-text-popover {
@@ -29,7 +29,7 @@
   top: 0;
   left: 0;
 }
-.dark .tiptap-button-color-text-popover:after {
+.tinyfy-editor.dark .tiptap-button-color-text-popover:after {
   filter: brightness(140%);
   mix-blend-mode: lighten;
 }

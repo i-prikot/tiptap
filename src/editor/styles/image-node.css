@@ -1,7 +1,7 @@
-:root {
+.tinyfy-editor {
   --tiptap-image-handle-bg: var(--tt-brand-color-600);
 }
-.dark {
+.tinyfy-editor.dark {
   --tiptap-image-handle-bg: var(--tt-brand-color-400);
 }
 .tiptap.ProseMirror .ProseMirror-selectednode .tiptap-image .tiptap-image-container {

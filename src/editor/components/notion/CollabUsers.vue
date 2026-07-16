@@ -32,22 +32,26 @@
  * активном collaborationCaret (в оффлайн-режиме — ничего).
  * Порт CollabUsers из чанка 3xpmbr0kqzhen.
  */
-import { onBeforeUnmount, ref, watch } from 'vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import type { Editor } from '@tiptap/vue-3'
+import { useTiptapEditor } from '@/editor/composables'
 import { getAvatar } from '../../utils/user-utils'
 import type { CaretUser } from '../../types/user'
-import Button from '../primitives/Button.vue'
-import Avatar from '../primitives/avatar/Avatar.vue'
-import AvatarFallback from '../primitives/avatar/AvatarFallback.vue'
-import AvatarGroup from '../primitives/avatar/AvatarGroup.vue'
-import AvatarImage from '../primitives/avatar/AvatarImage.vue'
-import DropdownMenu from '../primitives/dropdown-menu/DropdownMenu.vue'
-import DropdownMenuContent from '../primitives/dropdown-menu/DropdownMenuContent.vue'
-import DropdownMenuGroup from '../primitives/dropdown-menu/DropdownMenuGroup.vue'
-import DropdownMenuItem from '../primitives/dropdown-menu/DropdownMenuItem.vue'
-import DropdownMenuTrigger from '../primitives/dropdown-menu/DropdownMenuTrigger.vue'
+import {
+  Button,
+  Avatar,
+  AvatarFallback,
+  AvatarGroup,
+  AvatarImage,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/editor/components/primitives'
 
-const editor = useTiptapEditor()
+const props = defineProps<{ editor?: Editor | null }>()
+const editor = useTiptapEditor(computed(() => props.editor))
 const users = ref<CaretUser[]>([])
 
 function readUsers() {

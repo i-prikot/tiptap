@@ -1,9 +1,9 @@
-:root {
+.tinyfy-editor {
   --emoji-input-bg-color: var(--white);
   --emoji-input-border-color: var(--tt-gray-light-a-100);
   --emoji-input-focus: var(--tt-brand-color-500);
 }
-.dark {
+.tinyfy-editor.dark {
   --emoji-input-border-color: var(--tt-gray-dark-a-50);
   --emoji-input-bg-color: var(--tt-gray-dark-50);
   --emoji-input-focus: var(--tt-brand-color-500);

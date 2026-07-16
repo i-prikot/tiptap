@@ -1,5 +1,5 @@
 <template>
-  <Teleport to="body">
+  <Teleport :to="teleportTarget">
     <div v-if="open" ref="floatingRef" :style="{ ...floatingStyles, zIndex }" v-bind="$attrs">
       <slot />
     </div>
@@ -17,7 +17,8 @@ import type { Editor } from '@tiptap/vue-3'
 import { Selection } from '@tiptap/pm/state'
 import { autoUpdate, flip, offset, shift, useFloating } from '@floating-ui/vue'
 import type { VirtualElement } from '@floating-ui/vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
+import { useTiptapEditor, useEditorOverlayTarget } from '@/editor/composables'
+
 import { getSelectionBoundingRect } from '../../utils/selection-utils'
 
 defineOptions({ inheritAttrs: false })
@@ -36,6 +37,8 @@ const props = withDefaults(
 const emit = defineEmits<{ 'update:open': [value: boolean] }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
+const overlayTarget = useEditorOverlayTarget()
+const teleportTarget = computed(() => overlayTarget?.value ?? 'body')
 const open = ref(false)
 const floatingRef = ref<HTMLElement | null>(null)
 

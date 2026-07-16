@@ -12,7 +12,7 @@
   --tt-badge-icon-color-subdued: var(--tt-gray-light-a-400);
   --tt-badge-icon-color-emphasized: var(--tt-brand-color-600);
 }
-.dark .tiptap-badge {
+.tinyfy-editor.dark .tiptap-badge {
   --tt-badge-border-color: var(--tt-gray-dark-a-200);
   --tt-badge-border-color-subdued: var(--tt-gray-dark-a-200);
   --tt-badge-border-color-emphasized: var(--tt-gray-dark-a-500);
@@ -40,7 +40,7 @@
   --tt-badge-icon-color-subdued: var(--tt-gray-light-a-400);
   --tt-badge-icon-color-emphasized: var(--tt-brand-color-600);
 }
-.dark .tiptap-badge[data-style='ghost'] {
+.tinyfy-editor.dark .tiptap-badge[data-style='ghost'] {
   --tt-badge-border-color: var(--tt-gray-dark-a-200);
   --tt-badge-border-color-subdued: var(--tt-gray-dark-a-200);
   --tt-badge-border-color-emphasized: var(--tt-gray-dark-a-500);
@@ -68,7 +68,7 @@
   --tt-badge-icon-color-subdued: var(--tt-gray-light-a-400);
   --tt-badge-icon-color-emphasized: var(--white);
 }
-.dark .tiptap-badge[data-style='gray'] {
+.tinyfy-editor.dark .tiptap-badge[data-style='gray'] {
   --tt-badge-border-color: var(--tt-gray-dark-a-200);
   --tt-badge-border-color-subdued: var(--tt-gray-dark-a-200);
   --tt-badge-border-color-emphasized: var(--tt-gray-dark-a-500);
@@ -96,7 +96,7 @@
   --tt-badge-icon-color-subdued: var(--tt-color-green-dec-2);
   --tt-badge-icon-color-emphasized: var(--tt-color-green-inc-5);
 }
-.dark .tiptap-badge[data-style='green'] {
+.tinyfy-editor.dark .tiptap-badge[data-style='green'] {
   --tt-badge-border-color: var(--tt-color-green-dec-2);
   --tt-badge-border-color-subdued: var(--tt-color-green-dec-3);
   --tt-badge-border-color-emphasized: var(--tt-color-green-base);
@@ -124,7 +124,7 @@
   --tt-badge-icon-color-subdued: var(--tt-color-yellow-dec-2);
   --tt-badge-icon-color-emphasized: var(--tt-color-yellow-dec-3);
 }
-.dark .tiptap-badge[data-style='yellow'] {
+.tinyfy-editor.dark .tiptap-badge[data-style='yellow'] {
   --tt-badge-border-color: var(--tt-color-yellow-dec-2);
   --tt-badge-border-color-subdued: var(--tt-color-yellow-dec-3);
   --tt-badge-border-color-emphasized: var(--tt-color-yellow-inc-1);
@@ -152,7 +152,7 @@
   --tt-badge-icon-color-subdued: var(--tt-color-red-dec-2);
   --tt-badge-icon-color-emphasized: var(--tt-color-red-inc-5);
 }
-.dark .tiptap-badge[data-style='red'] {
+.tinyfy-editor.dark .tiptap-badge[data-style='red'] {
   --tt-badge-border-color: var(--tt-color-red-dec-2);
   --tt-badge-border-color-subdued: var(--tt-color-red-dec-3);
   --tt-badge-border-color-emphasized: var(--tt-color-red-base);
@@ -180,7 +180,7 @@
   --tt-badge-icon-color-subdued: var(--tt-brand-color-700);
   --tt-badge-icon-color-emphasized: var(--tt-brand-color-100);
 }
-.dark .tiptap-badge[data-style='brand'] {
+.tinyfy-editor.dark .tiptap-badge[data-style='brand'] {
   --tt-badge-border-color: var(--tt-brand-color-700);
   --tt-badge-border-color-subdued: var(--tt-brand-color-800);
   --tt-badge-border-color-emphasized: var(--tt-brand-color-400);

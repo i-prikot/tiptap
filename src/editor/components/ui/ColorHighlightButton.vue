@@ -26,11 +26,10 @@
 // Кнопка цвета подсветки/фона (порт ColorHighlightButton из чанка 2mux2p9tadf0h).
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import Button from '../primitives/Button.vue'
-import Badge from '../primitives/Badge.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useColorHighlight } from '../../composables/useColorHighlight'
-import type { HighlightMode } from '../../composables/useColorHighlight'
+import { Button, Badge } from '@/editor/components/primitives'
+
+import { useTiptapEditor, useColorHighlight, type HighlightMode } from '@/editor/composables'
+
 import { parseShortcutKeys } from '../../utils/tiptap-utils'
 
 const props = withDefaults(

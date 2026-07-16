@@ -72,6 +72,9 @@
             <div class="tiptap-image-upload-details">
               <span class="tiptap-image-upload-text">{{ item.file.name }}</span>
               <span class="tiptap-image-upload-subtext">{{ formatFileSize(item.file.size) }}</span>
+              <span v-if="item.status === 'error'" class="tiptap-image-upload-subtext">
+                {{ item.errorMessage }}
+              </span>
             </div>
           </div>
           <div class="tiptap-image-upload-actions">
@@ -108,7 +111,7 @@
 import { computed, h, ref } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import { focusNextNode, isValidPosition } from '../../utils/tiptap-utils'
-import Button from '../../components/primitives/Button.vue'
+import { Button } from '@/editor/components/primitives'
 import type { ImageUploadNodeOptions } from './image-upload-node'
 
 const CloudUploadIcon = () =>
@@ -167,6 +170,7 @@ interface FileItem {
   status: 'uploading' | 'success' | 'error'
   url?: string
   abortController?: AbortController
+  errorMessage?: string
 }
 
 const fileItems = ref<FileItem[]>([])
@@ -180,6 +184,18 @@ function formatFileSize(bytes: number) {
   if (bytes === 0) return '0 Bytes'
   const unit = Math.floor(Math.log(bytes) / Math.log(1024))
   return `${parseFloat((bytes / Math.pow(1024, unit)).toFixed(2))} ${['Bytes', 'KB', 'MB', 'GB'][unit]}`
+}
+
+function validateUploadedImageUrl(value: string): string {
+  let url: URL
+  try {
+    url = new URL(value, window.location.href)
+  } catch {
+    throw new Error('Upload failed: Invalid URL returned')
+  }
+
+  if (url.protocol === 'http:' || url.protocol === 'https:') return url.href
+  throw new Error('Upload failed: Invalid URL returned')
 }
 
 async function uploadSingleFile(file: File): Promise<string | null> {
@@ -197,17 +213,17 @@ async function uploadSingleFile(file: File): Promise<string | null> {
   fileItems.value = [...fileItems.value, item]
 
   try {
-    if (!options.upload) throw new Error('Upload function is not defined')
-    const url = await options.upload(
-      file,
-      (event) => {
+    if (!options.upload) throw new Error('image upload adapter is not configured')
+    const uploadedUrl = await options.upload(file, {
+      onProgress: (event) => {
         fileItems.value = fileItems.value.map((entry) =>
           entry.id === id ? { ...entry, progress: event.progress } : entry,
         )
       },
-      abortController.signal,
-    )
-    if (!url) throw new Error('Upload failed: No URL returned')
+      abortSignal: abortController.signal,
+    })
+    if (!uploadedUrl) throw new Error('Upload failed: No URL returned')
+    const url = validateUploadedImageUrl(uploadedUrl)
     if (abortController.signal.aborted) return null
 
     fileItems.value = fileItems.value.map((entry) =>
@@ -217,8 +233,12 @@ async function uploadSingleFile(file: File): Promise<string | null> {
     return url
   } catch (error) {
     if (!abortController.signal.aborted) {
+      const errorMessage =
+        error instanceof Error && error.message === 'image upload adapter is not configured'
+          ? error.message
+          : 'Image upload failed'
       fileItems.value = fileItems.value.map((entry) =>
-        entry.id === id ? { ...entry, status: 'error' as const, progress: 0 } : entry,
+        entry.id === id ? { ...entry, status: 'error' as const, progress: 0, errorMessage } : entry,
       )
       options.onError?.(error instanceof Error ? error : new Error('Upload failed'))
     }

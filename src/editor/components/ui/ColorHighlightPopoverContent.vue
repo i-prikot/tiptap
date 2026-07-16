@@ -1,38 +1,45 @@
 <template>
-  <Card ref="cardRef" :tabindex="0" :style="isMobile ? { boxShadow: 'none', border: 0 } : {}">
-    <CardBody :style="isMobile ? { padding: 0 } : {}">
-      <CardItemGroup orientation="horizontal">
-        <ButtonGroup orientation="horizontal">
-          <ColorHighlightButton
-            v-for="(color, index) in colors"
-            :key="color.value"
-            :highlight-color="useColorValue ? (color.colorValue ?? color.value) : color.value"
-            :tooltip="color.label"
-            :aria-label="`${color.label} highlight color`"
-            :tabindex="index === selectedIndex ? 0 : -1"
-            :data-highlighted="selectedIndex === index"
-            :use-color-value="useColorValue"
-            @applied="emit('applied', $event)"
-          />
-        </ButtonGroup>
-        <Separator />
-        <ButtonGroup orientation="horizontal">
-          <Button
-            type="button"
-            role="menuitem"
-            variant="ghost"
-            aria-label="Remove highlight"
-            tooltip="Remove highlight"
-            :tabindex="selectedIndex === colors.length ? 0 : -1"
-            :data-highlighted="selectedIndex === colors.length"
-            @click="highlight.handleRemoveHighlight"
-          >
-            <BanIcon class="tiptap-button-icon" />
-          </Button>
-        </ButtonGroup>
-      </CardItemGroup>
-    </CardBody>
-  </Card>
+  <ColorPopoverPanel
+    :items="navItems"
+    :on-select="onNavigationSelect"
+    :style="isMobile ? { boxShadow: 'none', border: 0 } : {}"
+  >
+    <template #default="{ selectedIndex }">
+      <CardBody :style="isMobile ? { padding: 0 } : {}">
+        <CardItemGroup orientation="horizontal">
+          <ButtonGroup orientation="horizontal">
+            <ColorHighlightButton
+              v-for="(color, index) in colors"
+              :key="color.value"
+              :editor="editor"
+              :highlight-color="useColorValue ? (color.colorValue ?? color.value) : color.value"
+              :tooltip="color.label"
+              :aria-label="`${color.label} highlight color`"
+              :tabindex="index === selectedIndex ? 0 : -1"
+              :data-highlighted="selectedIndex === index"
+              :use-color-value="useColorValue"
+              @applied="emit('applied', $event)"
+            />
+          </ButtonGroup>
+          <Separator />
+          <ButtonGroup orientation="horizontal">
+            <Button
+              type="button"
+              role="menuitem"
+              variant="ghost"
+              aria-label="Remove highlight"
+              tooltip="Remove highlight"
+              :tabindex="selectedIndex === colors.length ? 0 : -1"
+              :data-highlighted="selectedIndex === colors.length"
+              @click="highlight.handleRemoveHighlight"
+            >
+              <BanIcon class="tiptap-button-icon" />
+            </Button>
+          </ButtonGroup>
+        </CardItemGroup>
+      </CardBody>
+    </template>
+  </ColorPopoverPanel>
 </template>
 
 <script setup lang="ts">
@@ -41,22 +48,28 @@
  * тулбара. Порт ColorHighlightPopoverContent из чанка 3jdxmcvhjtoe-
  * (модуль 102971, функция f).
  */
-import { computed, ref } from 'vue'
-import type { ComponentPublicInstance } from 'vue'
+import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import Card from '../primitives/card/Card.vue'
-import CardBody from '../primitives/card/CardBody.vue'
-import CardItemGroup from '../primitives/card/CardItemGroup.vue'
-import ButtonGroup from '../primitives/ButtonGroup.vue'
-import Button from '../primitives/Button.vue'
-import Separator from '../primitives/Separator.vue'
+import {
+  CardBody,
+  CardItemGroup,
+  ButtonGroup,
+  Button,
+  Separator,
+} from '@/editor/components/primitives'
+
+import ColorPopoverPanel from './ColorPopoverPanel.vue'
 import ColorHighlightButton from './ColorHighlightButton.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useColorHighlight, pickHighlightColorsByValue } from '../../composables/useColorHighlight'
+import {
+  useTiptapEditor,
+  useColorHighlight,
+  pickHighlightColorsByValue,
+  type HighlightMode,
+  useIsBreakpoint,
+} from '@/editor/composables'
+
 import type { HighlightColor } from '../../types/color'
-import type { HighlightMode } from '../../composables/useColorHighlight'
-import { useIsBreakpoint } from '../../composables/useIsBreakpoint'
-import { useMenuNavigation } from '../../composables/useMenuNavigation'
+
 import { BanIcon } from '../../icons'
 
 const props = withDefaults(
@@ -86,22 +99,11 @@ const editor = useTiptapEditor(computed(() => props.editor))
 const highlight = useColorHighlight({ editor })
 const isMobile = useIsBreakpoint()
 
-const cardRef = ref<ComponentPublicInstance | null>(null)
-const containerRef = computed(() => (cardRef.value?.$el as HTMLElement | null) ?? null)
-
 const navItems = computed(() => [...props.colors, { label: 'Remove highlight', value: 'none' }])
 
-const { selectedIndex } = useMenuNavigation({
-  editor: ref(null),
-  containerRef: containerRef as never,
-  query: ref(''),
-  items: navItems,
-  orientation: 'both',
-  autoSelectFirstItem: false,
-  onSelect: (item) => {
-    const highlighted = containerRef.value?.querySelector<HTMLElement>('[data-highlighted="true"]')
-    highlighted?.click()
-    if (item.value === 'none') highlight.handleRemoveHighlight()
-  },
-})
+function onNavigationSelect(item: unknown) {
+  if (typeof item === 'object' && item !== null && 'value' in item && item.value === 'none') {
+    highlight.handleRemoveHighlight()
+  }
+}
 </script>

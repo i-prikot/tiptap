@@ -66,7 +66,7 @@ export interface NavigateToHeadingOptions {
   behavior?: ScrollBehavior
 }
 
-/** Скроллит к заголовку, выделяет его и обновляет hash в URL. */
+/** Скроллит к заголовку, выделяет его. */
 export function navigateToHeading(item: TocItem, options: NavigateToHeadingOptions = {}) {
   const { topOffset = 0, behavior = 'smooth' } = options
   if (!item.dom) return
@@ -92,11 +92,5 @@ export function navigateToHeading(item: TocItem, options: NavigateToHeadingOptio
 
   if (item.editor && typeof item.pos === 'number') {
     selectNodeAndHideFloating(item.editor, item.pos)
-  }
-
-  if (item.id) {
-    const url = new URL(window.location.href)
-    url.hash = item.id
-    window.history.replaceState(null, '', url.toString())
   }
 }

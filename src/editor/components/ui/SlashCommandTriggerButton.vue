@@ -29,10 +29,10 @@
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
-import Button from '../primitives/Button.vue'
+import { Button } from '@/editor/components/primitives'
 import { PlusIcon } from '../../icons'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useEditorSelectionSignal } from '../../composables/useEditorSelectionSignal'
+import { useTiptapEditor, useEditorSelectionSignal } from '@/editor/composables'
+
 import { findNodePosition, isNodeTypeSelected, isValidPosition } from '../../utils/tiptap-utils'
 import { addSlashTrigger } from '../../utils/trigger-utils'
 

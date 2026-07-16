@@ -1,5 +1,5 @@
 <template>
-  <Teleport to="body">
+  <Teleport :to="teleportTarget">
     <div
       v-if="open && editor"
       ref="menuRef"
@@ -34,8 +34,8 @@ import {
   useFloating,
 } from '@floating-ui/vue'
 import type { Editor } from '@tiptap/vue-3'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useMenuNavigation } from '../../composables/useMenuNavigation'
+import { useTiptapEditor, useEditorOverlayTarget, useMenuNavigation } from '@/editor/composables'
+
 import { Suggestion, calculateStartPosition } from '../../utils/suggestion/suggestion'
 import type { SuggestionItem } from '../../types/suggestion'
 import type { SuggestionProps } from '../../utils/suggestion/suggestion'
@@ -63,6 +63,8 @@ const props = withDefaults(
 )
 
 const editor = useTiptapEditor(computed(() => props.editor))
+const overlayTarget = useEditorOverlayTarget()
+const teleportTarget = computed(() => overlayTarget?.value ?? 'body')
 
 const open = ref(false)
 const referenceRect = shallowRef<(() => DOMRect | null) | null>(null)

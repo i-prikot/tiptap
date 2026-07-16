@@ -58,16 +58,18 @@
  */
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import Card from '../primitives/card/Card.vue'
-import CardBody from '../primitives/card/CardBody.vue'
-import CardItemGroup from '../primitives/card/CardItemGroup.vue'
-import ButtonGroup from '../primitives/ButtonGroup.vue'
-import Button from '../primitives/Button.vue'
-import Separator from '../primitives/Separator.vue'
-import Input from '../primitives/input/Input.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useLinkPopover } from '../../composables/useLinkPopover'
-import { useIsBreakpoint } from '../../composables/useIsBreakpoint'
+import {
+  Card,
+  CardBody,
+  CardItemGroup,
+  ButtonGroup,
+  Button,
+  Separator,
+  Input,
+} from '@/editor/components/primitives'
+
+import { useTiptapEditor, useLinkPopover, useIsBreakpoint } from '@/editor/composables'
+
 import { CornerDownLeftIcon, ExternalLinkIcon, TrashIcon } from '../../icons'
 
 const props = defineProps<{ editor?: Editor | null }>()

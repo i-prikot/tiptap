@@ -1,24 +1,24 @@
 <template>
-  <FloatingElement v-if="!hidden" :should-show="shouldShow">
+  <FloatingElement v-if="!hidden" :editor="editor" :should-show="shouldShow">
     <Toolbar variant="floating">
       <ToolbarGroup>
-        <TurnIntoDropdown hide-when-unavailable />
+        <TurnIntoDropdown :editor="editor" hide-when-unavailable />
       </ToolbarGroup>
       <ToolbarSeparator />
       <ToolbarGroup>
-        <MarkButton type="bold" hide-when-unavailable />
-        <MarkButton type="italic" hide-when-unavailable />
-        <MarkButton type="underline" hide-when-unavailable />
-        <MarkButton type="strike" hide-when-unavailable />
-        <MarkButton type="code" hide-when-unavailable />
+        <MarkButton :editor="editor" type="bold" hide-when-unavailable />
+        <MarkButton :editor="editor" type="italic" hide-when-unavailable />
+        <MarkButton :editor="editor" type="underline" hide-when-unavailable />
+        <MarkButton :editor="editor" type="strike" hide-when-unavailable />
+        <MarkButton :editor="editor" type="code" hide-when-unavailable />
       </ToolbarGroup>
       <ToolbarSeparator />
       <ToolbarGroup>
-        <ImageNodeFloating />
+        <ImageNodeFloating :editor="editor" />
       </ToolbarGroup>
       <ToolbarGroup>
-        <LinkPopover :auto-open-on-link-active="false" hide-when-unavailable />
-        <ColorTextPopover hide-when-unavailable />
+        <LinkPopover :editor="editor" :auto-open-on-link-active="false" hide-when-unavailable />
+        <ColorTextPopover :editor="editor" hide-when-unavailable />
       </ToolbarGroup>
       <template v-if="moreOptionsVisible">
         <ToolbarSeparator />
@@ -37,20 +37,20 @@
             </template>
             <Toolbar variant="floating" :tabindex="0">
               <ToolbarGroup>
-                <MarkButton type="superscript" />
-                <MarkButton type="subscript" />
+                <MarkButton :editor="editor" type="superscript" />
+                <MarkButton :editor="editor" type="subscript" />
               </ToolbarGroup>
               <ToolbarSeparator />
               <ToolbarGroup>
-                <TextAlignButton align="left" />
-                <TextAlignButton align="center" />
-                <TextAlignButton align="right" />
-                <TextAlignButton align="justify" />
+                <TextAlignButton :editor="editor" align="left" />
+                <TextAlignButton :editor="editor" align="center" />
+                <TextAlignButton :editor="editor" align="right" />
+                <TextAlignButton :editor="editor" align="justify" />
               </ToolbarGroup>
               <ToolbarSeparator />
               <ToolbarGroup>
-                <IndentButton action="outdent" />
-                <IndentButton action="indent" />
+                <IndentButton :editor="editor" action="outdent" />
+                <IndentButton :editor="editor" action="indent" />
               </ToolbarGroup>
             </Toolbar>
           </Popover>
@@ -68,12 +68,16 @@
  * при отсутствии расширения `ai`.
  */
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import type { Editor } from '@tiptap/vue-3'
 import FloatingElement from './FloatingElement.vue'
-import Toolbar from '../primitives/toolbar/Toolbar.vue'
-import ToolbarGroup from '../primitives/toolbar/ToolbarGroup.vue'
-import ToolbarSeparator from '../primitives/toolbar/ToolbarSeparator.vue'
-import Popover from '../primitives/popover/Popover.vue'
-import Button from '../primitives/Button.vue'
+import {
+  Toolbar,
+  ToolbarGroup,
+  ToolbarSeparator,
+  Popover,
+  Button,
+} from '@/editor/components/primitives'
+
 import MarkButton from './MarkButton.vue'
 import TextAlignButton from './TextAlignButton.vue'
 import IndentButton from './IndentButton.vue'
@@ -81,23 +85,32 @@ import TurnIntoDropdown from './TurnIntoDropdown.vue'
 import LinkPopover from './LinkPopover.vue'
 import ColorTextPopover from './ColorTextPopover.vue'
 import ImageNodeFloating from './ImageNodeFloating.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useUiEditorState } from '../../composables/useUiEditorState'
-import { useIsBreakpoint } from '../../composables/useIsBreakpoint'
-import { useEditorSelectionSignal } from '../../composables/useEditorSelectionSignal'
-import { useFloatingToolbarVisibility } from '../../composables/useFloatingToolbarVisibility'
-import { canToggleMark } from '../../composables/useMark'
-import { canSetTextAlign } from '../../composables/useTextAlign'
-import type { TextAlign } from '../../composables/useTextAlign'
+import {
+  useTiptapEditor,
+  useUiEditorState,
+  useIsBreakpoint,
+  useEditorSelectionSignal,
+  useFloatingToolbarVisibility,
+  canToggleMark,
+  canSetTextAlign,
+  type TextAlign,
+} from '@/editor/composables'
+
 import { isSelectionValid } from '../../utils/selection-utils'
 import { MoreVerticalIcon } from '../../icons'
 
-const editor = useTiptapEditor()
+const props = withDefaults(defineProps<{ editor?: Editor | null; aiEnabled?: boolean }>(), {
+  aiEnabled: false,
+})
+
+const editor = useTiptapEditor(computed(() => props.editor))
 const uiState = useUiEditorState(editor)
 const isMobile = useIsBreakpoint('max', 480)
 const signal = useEditorSelectionSignal(editor)
 
-const extraHideWhen = computed(() => !!(uiState.aiGenerationActive || uiState.commentInputVisible))
+const extraHideWhen = computed(
+  () => !!((props.aiEnabled && uiState.aiGenerationActive) || uiState.commentInputVisible),
+)
 const { shouldShow } = useFloatingToolbarVisibility({ editor, isSelectionValid, extraHideWhen })
 
 // isDragging: во время переноса блока за drag-handle тулбар полностью

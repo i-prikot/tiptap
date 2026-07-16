@@ -1,10 +1,10 @@
-:root {
+.tinyfy-editor {
   --tiptap-avatar-border-color: var(--white);
   --tiptap-avatar-fallback-bg-color: var(--tt-gray-light-200);
   --tiptap-avatar-item-bg-color: var(--tt-gray-light-200);
   --tiptap-avatar-fallback-text-color: var(--tt-gray-light-a-600);
 }
-.dark {
+.tinyfy-editor.dark {
   --tiptap-avatar-border-color: var(--tt-gray-dark-200);
   --tiptap-avatar-fallback-bg-color: var(--tt-gray-dark-200);
   --tiptap-avatar-item-bg-color: var(--tt-gray-dark-300);

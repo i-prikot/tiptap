@@ -6,6 +6,7 @@ import {
 } from '../../../../src/editor/components/ui/slash-menu-items'
 
 const keys: SlashMenuItemKey[] = [
+  'continue_writing',
   'ai_ask_button',
   'text',
   'heading_1',
@@ -60,9 +61,10 @@ function createEditor({ available = true }: { available?: boolean } = {}) {
     isEditable: true,
     schema: { spec: { nodes: new Map(nodeNames.map((name) => [name, {}])) } },
     state: {
+      doc: { child: () => ({ textContent: 'Content above' }) },
       selection: {
         $anchor: { before: () => 1, node: () => ({}) },
-        $from: { after: () => 1 },
+        $from: { after: () => 1, index: () => 1 },
         empty: true,
       },
     },
@@ -76,12 +78,23 @@ afterEach(() => {
 })
 
 describe('slash menu items', () => {
-  it('creates and executes every available editor command item', () => {
-    const { commands, editor } = createEditor()
+  it('excludes AI items by default even when requested', () => {
+    const { editor } = createEditor()
     const items = getSlashMenuItems(editor, { enabledItems: keys })
+
+    expect(items).toHaveLength(keys.length - 2)
+    expect(items.map((item) => item.title)).not.toContain('Ask AI')
+    expect(items.map((item) => item.title)).not.toContain('Continue Writing')
+    expect(items.map((item) => item.group)).not.toContain('AI')
+  })
+
+  it('creates and executes every available editor command item when AI is enabled', () => {
+    const { commands, editor } = createEditor()
+    const items = getSlashMenuItems(editor, { enabledItems: keys }, true)
 
     expect(items).toHaveLength(keys.length)
     expect(items.map((item) => item.group)).toEqual([
+      'AI',
       'AI',
       'Style',
       'Style',

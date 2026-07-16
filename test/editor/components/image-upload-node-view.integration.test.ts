@@ -5,6 +5,7 @@ import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import ImageUploadNodeView from '../../../src/editor/nodes/image-upload/ImageUploadNodeView.vue'
+import type { ImageUploadCallbacks } from '../../../src/editor/types'
 
 const editors: Editor[] = []
 const wrappers: Array<{ unmount: () => void }> = []
@@ -96,7 +97,7 @@ describe('image upload node view', () => {
     const onSuccess = vi.fn()
     const revokeObjectURL = vi.fn()
     Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revokeObjectURL })
-    const upload = vi.fn(async (_file: File, onProgress: (event: { progress: number }) => void) => {
+    const upload = vi.fn(async (_file: File, { onProgress }: ImageUploadCallbacks) => {
       onProgress({ progress: 45 })
       return 'https://example.test/cover.png'
     })
@@ -110,6 +111,13 @@ describe('image upload node view', () => {
     await flushUploads()
 
     expect(upload).toHaveBeenCalledOnce()
+    expect(upload).toHaveBeenCalledWith(
+      expect.any(File),
+      expect.objectContaining({
+        onProgress: expect.any(Function),
+        abortSignal: expect.any(AbortSignal),
+      }),
+    )
     expect(onSuccess).toHaveBeenCalledWith('https://example.test/cover.png')
     expect(commandChain.deleteRange).toHaveBeenCalledWith({ from: 0, to: 1 })
     expect(commandChain.insertContentAt).toHaveBeenCalledWith(0, [
@@ -170,5 +178,78 @@ describe('image upload node view', () => {
       'Upload service unavailable',
     )
     expect(wrapper.text()).toContain('broken.png')
+  })
+
+  it.each(['javascript:alert(1)', 'data:image/svg+xml,<svg />', 'blob:unsafe-image'])(
+    'rejects an unsafe URL returned by the upload adapter: %s',
+    async (unsafeUrl) => {
+      const onError = vi.fn()
+      const onSuccess = vi.fn()
+      const upload = vi.fn(async () => unsafeUrl)
+      const { commandChain, wrapper } = mountUploadNode({ onError, onSuccess, upload })
+      const input = wrapper.get('input[type="file"]')
+      setInputFiles(input.element as HTMLInputElement, [
+        new File(['image'], 'unsafe.png', { type: 'image/png' }),
+      ])
+
+      await input.trigger('change')
+      await flushUploads()
+
+      expect((onError.mock.calls[0]?.[0] as Error).message).toBe(
+        'Upload failed: Invalid URL returned',
+      )
+      expect(onSuccess).not.toHaveBeenCalled()
+      expect(wrapper.text()).toContain('Image upload failed')
+      expect(commandChain.run).not.toHaveBeenCalled()
+    },
+  )
+
+  it('cancels an injected upload without reporting an error or replacing the node', async () => {
+    const onError = vi.fn()
+    let abortSignal: AbortSignal | undefined
+    const upload = vi.fn(
+      (_file: File, callbacks: ImageUploadCallbacks) =>
+        new Promise<string>((resolve) => {
+          abortSignal = callbacks.abortSignal
+          callbacks.abortSignal.addEventListener(
+            'abort',
+            () => resolve('https://example.test/cancelled.png'),
+            { once: true },
+          )
+        }),
+    )
+    const { commandChain, wrapper } = mountUploadNode({ onError, upload })
+    const input = wrapper.get('input[type="file"]')
+    setInputFiles(input.element as HTMLInputElement, [
+      new File(['image'], 'cancelled.png', { type: 'image/png' }),
+    ])
+
+    await input.trigger('change')
+    await nextTick()
+    await wrapper.get('button').trigger('click')
+    await flushUploads()
+
+    expect(upload).toHaveBeenCalledOnce()
+    expect(abortSignal?.aborted).toBe(true)
+    expect(onError).not.toHaveBeenCalled()
+    expect(commandChain.run).not.toHaveBeenCalled()
+  })
+
+  it('reports a missing injected upload adapter without replacing the node', async () => {
+    const onError = vi.fn()
+    const { commandChain, wrapper } = mountUploadNode({ onError })
+    const input = wrapper.get('input[type="file"]')
+    setInputFiles(input.element as HTMLInputElement, [
+      new File(['image'], 'unconfigured.png', { type: 'image/png' }),
+    ])
+
+    await input.trigger('change')
+    await flushUploads()
+
+    expect((onError.mock.calls[0]?.[0] as Error).message).toBe(
+      'image upload adapter is not configured',
+    )
+    expect(wrapper.text()).toContain('image upload adapter is not configured')
+    expect(commandChain.run).not.toHaveBeenCalled()
   })
 })

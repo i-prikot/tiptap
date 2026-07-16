@@ -22,10 +22,10 @@
 // Кнопка удаления блока (порт DeleteNodeButton из чанка 34p294mqk5mqb).
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import Button from '../primitives/Button.vue'
-import Badge from '../primitives/Badge.vue'
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import { useDeleteNode } from '../../composables/useNodeActions'
+import { Button, Badge } from '@/editor/components/primitives'
+
+import { useTiptapEditor, useDeleteNode } from '@/editor/composables'
+
 import { parseShortcutKeys } from '../../utils/tiptap-utils'
 
 const props = withDefaults(
