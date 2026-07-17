@@ -5,8 +5,8 @@
  */
 import { Extension } from '@tiptap/core'
 import type { EditorState, Transaction } from '@tiptap/pm/state'
-import { getSelectedNodesOfType, updateNodesAttr } from '../utils/tiptap-utils'
-import type { NodeWithPos } from '../utils/tiptap-utils'
+import { getSelectedNodesOfType, updateNodesAttr } from '../utils/tiptap-utils.js'
+import type { NodeWithPos } from '../utils/tiptap-utils.js'
 
 export interface NodeBackgroundOptions {
   /** Типы узлов, получающих атрибут backgroundColor. */

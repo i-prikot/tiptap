@@ -11,14 +11,14 @@ import {
   isHTMLElement,
   isTableNode,
   safeClosest,
-} from '../../utils/table-utils'
+} from '../../utils/table-utils.js'
 import {
   handleTableHandleDragOver,
   handleTableHandleDrop,
   setActiveTableHandleContext,
-} from './drag-and-drop'
-import { createTableHandleDecorations } from './decorations'
-import type { TableHandleDragContext, TableHandleState } from './types'
+} from './drag-and-drop.js'
+import { createTableHandleDecorations } from './decorations.js'
+import type { TableHandleDragContext, TableHandleState } from './types.js'
 
 export const tableHandlePluginKey = new PluginKey<boolean>('tableHandlePlugin')
 

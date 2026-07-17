@@ -8,7 +8,7 @@
 import { Extension } from '@tiptap/core'
 import type { EditorState } from '@tiptap/pm/state'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
-import { clamp, getSelectedNodesOfType, updateNodesAttr } from '../utils/tiptap-utils'
+import { clamp, getSelectedNodesOfType, updateNodesAttr } from '../utils/tiptap-utils.js'
 
 export interface IndentOptions {
   /** Типы блоков, которые получают атрибут indent. */

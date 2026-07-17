@@ -10,7 +10,7 @@ import {
   selectionCell,
 } from '@tiptap/pm/tables'
 
-import { isCellEmpty } from './table-calculations'
+import { isCellEmpty } from './table-calculations.js'
 import {
   getCellSelectionType,
   type IndexedCell,
@@ -18,7 +18,7 @@ import {
   type Orientation,
   type RowOrColumnCells,
   type TableInfo,
-} from './shared'
+} from './shared.js'
 
 const EMPTY_CELLS: IndexedCells = { cells: [], mergedCells: [] }
 

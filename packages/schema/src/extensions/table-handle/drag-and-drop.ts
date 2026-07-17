@@ -7,9 +7,9 @@ import {
   getIndexCoordinates,
   isHTMLElement,
   selectCellsByCoords,
-} from '../../utils/table-utils'
-import { isValidPosition } from '../../utils/tiptap-utils'
-import type { DraggedCellOrientation, TableHandleDragContext } from './types'
+} from '../../utils/table-utils.js'
+import { isValidPosition } from '../../utils/tiptap-utils.js'
+import type { DraggedCellOrientation, TableHandleDragContext } from './types.js'
 
 let activeHandleContext: TableHandleDragContext | null = null
 

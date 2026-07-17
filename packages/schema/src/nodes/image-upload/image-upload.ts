@@ -5,7 +5,7 @@
  * Порт из чанка 3jdxmcvhjtoe- (модуль 580454).
  */
 import { Node, mergeAttributes } from '@tiptap/core'
-import type { ImageUploadAdapter } from '../../types/image-upload'
+import type { ImageUploadAdapter } from '../../types/image-upload.js'
 
 export interface ImageUploadNodeOptions {
   /** Тип узла, вставляемого после загрузки. */
@@ -68,6 +68,7 @@ export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
     return {
       // Enter на выделенном узле открывает диалог выбора файла
       Enter: ({ editor }) => {
+        if (typeof HTMLElement === 'undefined') return false
         const { selection } = editor.state
         const { nodeAfter } = selection.$from
         if (nodeAfter && nodeAfter.type.name === 'imageUpload' && editor.isActive('imageUpload')) {

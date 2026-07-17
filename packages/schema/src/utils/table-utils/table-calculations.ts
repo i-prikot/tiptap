@@ -3,7 +3,7 @@ import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import { TableMap } from '@tiptap/pm/tables'
 import type { Rect } from '@tiptap/pm/tables'
 
-import type { DomCellInfo } from './shared'
+import type { DomCellInfo } from './shared.js'
 
 export function isHTMLElement(value: unknown): value is HTMLElement {
   return value instanceof HTMLElement

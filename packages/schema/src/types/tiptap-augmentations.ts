@@ -17,9 +17,9 @@ import '@tiptap/extension-text-style'
 import '@tiptap/extension-typography'
 import '@tiptap/extension-unique-id'
 import type { EmojiItem, EmojiStorage } from '@tiptap/extension-emoji'
-import type { UiEditorState } from '../extensions/ui-state'
-import type { TableHandleState } from '../extensions/table-handle'
-import type { TocNodeAttributes } from '../nodes/toc/toc'
+import type { UiEditorState } from '../extensions/ui-state.js'
+import type { TableHandleState } from '../extensions/table-handle.js'
+import type { TocNodeAttributes } from '../nodes/toc/toc.js'
 
 export type AiTextPromptFormat = 'rich-text'
 

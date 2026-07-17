@@ -22,7 +22,7 @@ import {
   tableEditing,
 } from '@tiptap/pm/tables'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
-import { EMPTY_CELL_WIDTH, RESIZE_MIN_WIDTH } from '../utils/table-utils'
+import { EMPTY_CELL_WIDTH, RESIZE_MIN_WIDTH } from '../utils/table-utils.js'
 
 /** Backspace/Delete: если выделены все ячейки — удалить таблицу. */
 const deleteTableWhenAllCellsSelected = ({ editor }: { editor: import('@tiptap/core').Editor }) => {

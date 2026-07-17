@@ -5,9 +5,9 @@ import type { EditorState, Transaction } from '@tiptap/pm/state'
 import { Mapping } from '@tiptap/pm/transform'
 import { CellSelection, TableMap, cellAround, isInTable, selectionCell } from '@tiptap/pm/tables'
 
-import { clamp } from './table-calculations'
-import { getTable } from './table-map'
-import { getCellSelectionType, isWithinMap, type Orientation } from './shared'
+import { clamp } from './table-calculations.js'
+import { getTable } from './table-map.js'
+import { getCellSelectionType, isWithinMap, type Orientation } from './shared.js'
 
 export function getTableSelectionType(
   editor: Editor | null,

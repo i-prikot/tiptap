@@ -1,8 +1,8 @@
 import type { Editor } from '@tiptap/core'
 import type { EditorState } from '@tiptap/pm/state'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
-import { getColumnCells, getRowCells } from '../../utils/table-utils'
-import type { TableHandleState } from './types'
+import { getColumnCells, getRowCells } from '../../utils/table-utils.js'
+import type { TableHandleState } from './types.js'
 
 interface TableHandleDecorationContext {
   editor: Editor
