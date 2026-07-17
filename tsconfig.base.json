@@ -11,7 +11,8 @@
     "strict": true,
     "paths": {
       "@tinyfy/editor-schema": ["packages/schema/src/index.ts"],
-      "@tinyfy/editor": ["packages/editor/src/index.ts"]
+      "@tinyfy/editor": ["packages/editor/src/index.ts"],
+      "@tinyfy/renderer": ["packages/renderer/src/index.ts"]
     },
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "skipLibCheck": true
