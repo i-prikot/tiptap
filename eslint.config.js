@@ -36,7 +36,13 @@ export default [
 
   {
     name: 'project/source-options',
-    files: ['src/**/*.{ts,vue}', 'vite.config.ts', 'vitest.config.ts'],
+    files: [
+      'packages/**/*.{ts,vue}',
+      'apps/**/*.{ts,vue}',
+      'vite.config.ts',
+      'vitest.config.ts',
+      'playwright.config.ts',
+    ],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -116,15 +122,32 @@ export default [
   },
 
   {
+    name: 'project/node-commonjs-scripts',
+    files: ['scripts/**/*.cjs'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'commonjs',
+      globals: globals.node,
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
+
+  {
     name: 'project/editor-layer-boundaries',
-    files: ['src/editor/{extensions,utils}/**/*.{ts,vue}'],
+    files: ['packages/{schema,editor}/src/**/*.{ts,vue}'],
     plugins: {
       import: importPlugin,
     },
     settings: {
       'import/resolver': {
         typescript: {
-          project: './tsconfig.json',
+          project: [
+            './packages/schema/tsconfig.json',
+            './packages/editor/tsconfig.json',
+            './apps/playground/tsconfig.json',
+          ],
         },
       },
     },
@@ -134,16 +157,10 @@ export default [
         {
           zones: [
             {
-              target: './src/editor/extensions',
-              from: './src/editor/components',
+              target: './packages/schema/src',
+              from: './packages/editor/src',
               message:
-                'Extensions must not depend on Vue components. Use a pure utility, extension API, or dependency inversion instead.',
-            },
-            {
-              target: './src/editor/utils',
-              from: './src/editor/components',
-              message:
-                'Utilities must not depend on Vue components. Use a pure utility, extension API, or dependency inversion instead.',
+                'The schema workspace must not depend on Vue editor code. Use schema APIs or dependency inversion instead.',
             },
           ],
         },

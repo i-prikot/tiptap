@@ -1,57 +1,22 @@
 {
-  "name": "notion-like-editor-vue",
+  "name": "tinyfy-editor-workspace",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
-    "build": "vue-tsc --noEmit && vite build",
-    "typecheck": "vue-tsc --noEmit",
-    "lint": "eslint .",
+    "dev": "echo '[workspace:@tinyfy/playground] dev' && npm run dev --workspace=@tinyfy/playground",
+    "build": "echo '[workspace:@tinyfy/editor-schema] build' && npm run build --workspace=@tinyfy/editor-schema && echo '[workspace:@tinyfy/editor] build' && npm run build --workspace=@tinyfy/editor && echo '[workspace:@tinyfy/renderer] build' && npm run build --workspace=@tinyfy/renderer && echo '[workspace:@tinyfy/playground] build' && npm run build --workspace=@tinyfy/playground",
+    "typecheck": "echo '[workspace:@tinyfy/editor-schema] build' && npm run build --workspace=@tinyfy/editor-schema && echo '[workspace:@tinyfy/editor] typecheck' && npm run typecheck --workspace=@tinyfy/editor && echo '[workspace:@tinyfy/editor] build' && npm run build --workspace=@tinyfy/editor && echo '[workspace:@tinyfy/renderer] typecheck' && npm run typecheck --workspace=@tinyfy/renderer && echo '[workspace:@tinyfy/playground] typecheck' && npm run typecheck --workspace=@tinyfy/playground",
+    "lint": "npm run lint --workspaces --if-present && eslint test e2e",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "prepare": "husky",
-    "precommit": "lint-staged && npm run typecheck",
+    "prepare": "node scripts/prepare-husky.cjs",
+    "precommit": "lint-staged --concurrent 1 && npm run typecheck",
     "test:e2e": "playwright test"
-  },
-  "dependencies": {
-    "@floating-ui/dom": "^1.7.4",
-    "@floating-ui/vue": "^1.1.9",
-    "@hocuspocus/provider": "^2.15.3",
-    "@tiptap/core": "^3.27.1",
-    "@tiptap/extension-collaboration": "^3.27.1",
-    "@tiptap/extension-collaboration-caret": "^3.27.1",
-    "@tiptap/extension-drag-handle": "^3.27.1",
-    "@tiptap/extension-drag-handle-vue-3": "^3.27.1",
-    "@tiptap/extension-emoji": "^3.27.1",
-    "@tiptap/extension-highlight": "^3.27.1",
-    "@tiptap/extension-image": "^3.27.1",
-    "@tiptap/extension-list": "^3.27.1",
-    "@tiptap/extension-mathematics": "^3.27.1",
-    "@tiptap/extension-mention": "^3.27.1",
-    "@tiptap/extension-node-range": "^3.27.1",
-    "@tiptap/extension-subscript": "^3.27.1",
-    "@tiptap/extension-superscript": "^3.27.1",
-    "@tiptap/extension-table": "^3.27.1",
-    "@tiptap/extension-table-of-contents": "^3.27.1",
-    "@tiptap/extension-text-align": "^3.27.1",
-    "@tiptap/extension-text-style": "^3.27.1",
-    "@tiptap/extension-typography": "^3.27.1",
-    "@tiptap/extension-unique-id": "^3.27.1",
-    "@tiptap/extensions": "^3.27.1",
-    "@tiptap/pm": "^3.27.1",
-    "@tiptap/starter-kit": "^3.27.1",
-    "@tiptap/suggestion": "^3.27.1",
-    "@tiptap/vue-3": "^3.27.1",
-    "katex": "^0.16.22",
-    "vue": "^3.5.13",
-    "y-prosemirror": "^1.3.7",
-    "y-protocols": "^1.0.7",
-    "yjs": "^13.6.31"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
@@ -80,5 +45,9 @@
   },
   "overrides": {
     "glob": "13.0.6"
-  }
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
 }

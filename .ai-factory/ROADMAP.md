@@ -28,39 +28,43 @@
 
 ## Milestones
 
-### Этап 3. Границы библиотеки и архитектура
+### Этап 4. Пакетизация и публикация
 
-> Цель этапа — провести чёткую границу «библиотека ↔ хост-приложение»,
-> без которой пакетизация (Этап 4) невозможна. Библиотека не читает env,
-> URL и не лезет в `localStorage` без префикса; всё внешнее приходит через
-> props/конфиг.
+> Превращение приложения в монорепозиторий из публикуемых пакетов.
+> Факт по коду: в `extensions/` нет ни одного импорта Vue; Vue-зависимость
+> нод — только `VueNodeViewRenderer` в image / image-upload / toc.
 
-#### Граница «библиотека ↔ хост»
+#### Структура монорепозитория
 
-- [ ] Спроектировать и зафиксировать публичный API компонента: props (`content` — Tiptap JSON, `placeholder`, `features` — флаги collab/ai/tables/…, `uploadImage` — адаптер загрузки), events (`update` c debounce, `ready` с экземпляром редактора), expose (`editor`, `getJSON`, `getHTML`, `focus`, `setContent`)
-- [ ] Убрать шапку из библиотеки: `NotionEditorHeader` и `CtaPopup` переезжают в playground; компонент библиотеки рендерит только контент + плавающие тулбары + табличный UI; TOC-сайдбар — опциональный проп. Undo/redo в шапке хоста — через экземпляр редактора (`editor.chain().undo()`, `editor.can().undo()` по `transaction`)
-- [ ] Экспортировать переиспользуемые кнопки-команды (`UndoRedoButton` и др., все принимают проп `editor`) как публичные компоненты пакета — для хостов, не желающих писать свои
-- [ ] Удалить `ThemeToggle` из библиотеки: тему задаёт хост; стили редактора реагируют на класс/токены на корне `.tinyfy-editor` (не на `html.dark`); в playground — собственный переключатель
-- [ ] Вынести чтение `import.meta.env` из `useCollab`/`useAi` в конфиг-объект, передаваемый снаружи через props/options; чтение env остаётся только в playground
-- [ ] Убрать чтение URL из библиотечного слоя (`getDocumentId`, `?noCollab=1`, формирование якорных ссылок с `location`) — идентификатор документа и базовый URL передаёт хост
-- [ ] Загрузка изображений — только через инжектируемый адаптер `uploadImage(file, callbacks) => Promise<url>`; убрать зашитое поведение из `handleImageUpload`
-- [ ] Seed демо-контента и флаг `hasInteracted-<docId>` перенести из библиотеки в playground (в Tinyfy новый документ создаётся сервером)
-- [ ] Префиксовать все `localStorage`-ключи библиотеки (`_tiptap_user_*`, недавние цвета) и дать хосту возможность отключить/заместить хранение идентичности
-- [ ] Зафиксировать слоистость линтером: запретить импорт Vue-компонентов из `extensions/` и `utils/` (правило `import/no-restricted-paths`)
+- [ ] Перевести репозиторий на npm workspaces: `packages/schema`, `packages/editor`, `packages/renderer`, `apps/playground`
+- [ ] `@tinyfy/editor-schema` — изоморфный пакет без Vue: все extensions/marks + определения кастомных нод (schema-атрибуты, `parseHTML`/`renderHTML`) без NodeView; работает в браузере и в Node
+- [ ] `@tinyfy/editor` — Vue-компонент: навешивает Vue-NodeView на ноды схемы через `.extend({ addNodeView: () => VueNodeViewRenderer(...) })`, содержит весь UI (тулбары, меню, таблицы, примитивы) и стили
+- [ ] `apps/playground` — текущее приложение (App.vue, `getDocumentId`, seed-контент, env-конфиг) как площадка разработки и ручного QA
+- [ ] Настроить TypeScript project references / paths между пакетами; общий `tsconfig.base.json`
 
-#### Внутренняя архитектура
+#### Серверный рендер (`@tinyfy/renderer`)
 
-- [ ] Вынести конфигурацию списка расширений из `EditorProvider.vue` в фабрику `extension-kit.ts` (параметры: provider, placeholder, user, features) — прямой задел под пакет схемы (Этап 4)
-- [ ] Разбить `utils/table-actions.ts` (~28 КБ) на модули по операциям: move, add/delete, sort, merge/split, header, clear
-- [ ] Разбить `utils/table-utils.ts` (~20 КБ) на модули: навигация по TableMap, выделение ячеек, подсчёты/предикаты
-- [ ] Разбить `extensions/table-handle.ts` (~26 КБ): отделить ProseMirror-плагин, drag&drop-логику и декорации в отдельные файлы
-- [ ] Разбить `utils/suggestion/suggestion.ts` (~23 КБ) на модули: плагин, состояние, декорации, mount/positioning
-- [ ] Разбить `composables/useNodeActions.ts` (~19 КБ) на отдельные composables-файлы (useDuplicate, useCopyToClipboard, useCopyAnchorLink, useResetAllFormatting, useDeleteNode, useImageDownload и т.д.)
-- [ ] Устранить дублирование Color/Highlight-логики: объединить общие части `useColorText`/`useColorHighlight` и попарных Popover/Content-компонентов (DRY)
-- [ ] Устранить дублирование floating-позиционеров: общая обёртка-позиционер для `Menu`/`DropdownMenu`/`Popover` (сейчас три копии схемы «wrapper несёт transform»)
-- [ ] Ревизия примитивов `Menu` vs `DropdownMenu`: описать границы применимости или объединить в один примитив (KISS)
-- [ ] Изолировать AI-функциональность за одним feature-флагом: `useAi`, AI-ветки UI и AI-пункты меню не удалять, а спрятать за единой точкой включения — задел под собственное AI-расширение (Этап 11)
-- [ ] Добавить barrel-экспорты (`index.ts`) для `composables/`, `primitives/` и `ui/` и унифицировать пути импортов через алиас `@/`
+- [ ] Реализовать `renderDocument(json): html` на `generateHTML` из `@tiptap/html` поверх `@tinyfy/editor-schema`
+- [ ] Проверить и доработать `renderHTML` всех кастомных нод для серверного рендера (image уже рендерит figure/figcaption; для toc-node решить представление на статической странице: развёрнутый список якорей или исключение из публикации)
+- [ ] Подготовить **лёгкий CSS для чтения** (типографика опубликованной страницы: заголовки, списки, таблицы, цитаты, формулы) — без стилей тулбаров, меню и интерактивного UI; это вес публичных страниц Tinyfy
+- [ ] Решить вопрос KaTeX на публичной странице: серверный рендер формул в HTML/MathML + katex.css, без клиентского JS
+- [ ] Написать snapshot-тесты детерминизма JSON → HTML на репрезентативном наборе документов (все типы узлов) — от этого зависят опубликованные страницы клиентов
+- [ ] Ввести `schemaVersion` в сохраняемый документ и модуль миграций схемы (`migrate(json, fromVersion): json`)
+
+#### Сборка и стили библиотеки
+
+- [ ] Настроить Vite library mode для `@tinyfy/editor`: ESM, `vue` и `@tiptap/*` в `external` + `peerDependencies` (защита от двух экземпляров ProseMirror в бандле хоста)
+- [ ] Объединить ~49 CSS-импортов из `main.ts` в единый `styles/index.css`, собрать в `dist/style.css`
+- [ ] Заскоупить все стили редактора под корневой класс (например `.tinyfy-editor`) — через postcss-prefix-selector или ручной аудит; убрать глобальные сбросы и стили на `body`/`html`
+- [ ] Дизайн-токены (`design-tokens.css`) оформить как публичный контракт темизации: перечень переопределяемых CSS-переменных задокументировать
+- [ ] Удалить из бандла библиотеки экраны и стили, принадлежащие playground (`setup-error`, CTA-попап — по решению)
+
+#### Публикация и процесс
+
+- [ ] Настроить публикацию в приватный registry (GitHub Packages или аналог): `@tinyfy/editor-schema`, `@tinyfy/editor`, `@tinyfy/renderer`
+- [ ] Внедрить changesets: semver, changelog, согласованные версии пакетов
+- [ ] CI-публикация по тегу/merge в main
+- [ ] Задокументировать процесс локальной разработки против кабинета Tinyfy (`npm pack` + установка тарбола или Vite alias на исходники)
 
 
 ## Completed
