@@ -26,13 +26,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 'INFO: Verify publishing environment protection rules'
+      - name: 'INFO: Checkout trusted release authorization tooling'
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: 'INFO: Set up Node.js 22'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+
+      - name: 'INFO: Verify publishing environment and v* release-tag protection rules'
         env:
           GH_TOKEN: ${{ github.token }}
           PUBLISH_ENVIRONMENT: tinyfy-private-package-publish
+          RELEASE_MAINTAINER_TEAM: release-maintainers
         run: |
           environment_file="$(mktemp)"
-          trap 'rm -f "${environment_file}"' EXIT
+          rulesets_file="$(mktemp)"
+          release_maintainer_team_file="$(mktemp)"
+          ruleset_details_dir="$(mktemp -d)"
+          trap 'rm -f "${environment_file}" "${rulesets_file}" "${release_maintainer_team_file}"; rm -rf "${ruleset_details_dir}"' EXIT
           echo "[DEBUG] Reading protection rules for ${PUBLISH_ENVIRONMENT}."
 
           if ! gh api "repos/${GITHUB_REPOSITORY}/environments/${PUBLISH_ENVIRONMENT}" > "${environment_file}"; then
@@ -40,12 +55,47 @@ jobs:
             exit 1
           fi
 
-          if ! jq -e 'any(.protection_rules[]?; .type == "required_reviewers" and ((.reviewers // []) | length > 0))' "${environment_file}" > /dev/null; then
-            echo "[ERROR] ${PUBLISH_ENVIRONMENT} must require at least one deployment reviewer before publishing." >&2
+          echo '[DEBUG] Reading repository tag rulesets.'
+          if ! gh api --paginate "repos/${GITHUB_REPOSITORY}/rulesets?per_page=100" > "${rulesets_file}"; then
+            echo '[ERROR] Could not read repository rulesets for release-tag verification.' >&2
             exit 1
           fi
 
-          echo "[INFO] ${PUBLISH_ENVIRONMENT} requires deployment reviewer approval."
+          echo "[DEBUG] Resolving the ${RELEASE_MAINTAINER_TEAM} release-maintainer team."
+          if ! gh api "orgs/${GITHUB_REPOSITORY_OWNER}/teams/${RELEASE_MAINTAINER_TEAM}" > "${release_maintainer_team_file}"; then
+            echo "[ERROR] Could not resolve the ${RELEASE_MAINTAINER_TEAM} team for release-tag verification." >&2
+            exit 1
+          fi
+
+          ruleset_count=0
+          while IFS= read -r ruleset_id; do
+            ruleset_count=$((ruleset_count + 1))
+            ruleset_file="${ruleset_details_dir}/${ruleset_id}.json"
+            echo "[DEBUG] Reading detail for repository ruleset ${ruleset_id}."
+
+            if ! gh api "repos/${GITHUB_REPOSITORY}/rulesets/${ruleset_id}" > "${ruleset_file}"; then
+              echo "[ERROR] Could not read repository ruleset ${ruleset_id} for release-tag verification." >&2
+              exit 1
+            fi
+          done < <(jq -r '.[]? | .id? // empty' "${rulesets_file}")
+
+          if [ "${ruleset_count}" -eq 0 ]; then
+            echo '[ERROR] An active v* tag ruleset is required before publishing.' >&2
+            exit 1
+          fi
+
+          if ! LOG_LEVEL=debug \
+            PUBLISH_ENVIRONMENT="${PUBLISH_ENVIRONMENT}" \
+            RELEASE_MAINTAINER_TEAM="${RELEASE_MAINTAINER_TEAM}" \
+            node scripts/verify-release-authorization.mjs \
+              "${environment_file}" \
+              "${release_maintainer_team_file}" \
+              "${ruleset_details_dir}"; then
+            echo '[ERROR] Publishing environment or v* release-tag authorization verification failed.' >&2
+            exit 1
+          fi
+
+          echo '[INFO] Publishing environment and v* release-tag protection rules are authorized.'
 
   publish:
     name: Publish validated private packages
@@ -90,6 +140,16 @@ jobs:
           fi
           echo '[INFO] Release artifacts passed trusted verification.'
 
+      - name: 'INFO: Verify administrator registry-credential attestation'
+        env:
+          TINYFY_PACKAGES_TOKEN_SCOPE_ATTESTATION: ${{ vars.TINYFY_PACKAGES_TOKEN_SCOPE_ATTESTATION }}
+        run: |
+          if [ "${TINYFY_PACKAGES_TOKEN_SCOPE_ATTESTATION:-}" != 'i-prikot-three-package-writes-only' ]; then
+            echo '[ERROR] Publishing is blocked until an i-prikot administrator sets the tinyfy-private-package-publish environment variable TINYFY_PACKAGES_TOKEN_SCOPE_ATTESTATION to i-prikot-three-package-writes-only after verifying the environment-only token and its exact package-write scope.' >&2
+            exit 1
+          fi
+
+          echo '[INFO] Environment-scoped administrator attestation is present.'
       - name: 'INFO: Publish validated private @i-prikot packages'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TINYFY_PACKAGES_TOKEN }}
