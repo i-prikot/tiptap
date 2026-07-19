@@ -1,1 +1,1 @@
-export type { CaretUser, CollabUser, MentionUser } from '@tinyfy/editor-schema'
+export type { CaretUser, CollabUser, MentionUser } from '@i-prikot/editor-schema'

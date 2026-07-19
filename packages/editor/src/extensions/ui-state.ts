@@ -1,2 +1,2 @@
-export { UiState, defaultUiState } from '@tinyfy/editor-schema'
-export type { UiEditorState } from '@tinyfy/editor-schema'
+export { UiState, defaultUiState } from '@i-prikot/editor-schema'
+export type { UiEditorState } from '@i-prikot/editor-schema'

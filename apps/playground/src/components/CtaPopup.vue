@@ -99,7 +99,7 @@
  * ?cta. Порт CTA-попапа из чанка 3xpmbr0kqzhen.
  */
 import { computed, ref } from 'vue'
-import { Button, useEditorOverlayTarget } from '@tinyfy/editor'
+import { Button, useEditorOverlayTarget } from '@i-prikot/editor'
 
 const overlayTarget = useEditorOverlayTarget()
 const teleportTarget = computed(() => overlayTarget?.value ?? 'body')

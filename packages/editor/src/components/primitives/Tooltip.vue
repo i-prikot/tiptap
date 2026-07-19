@@ -10,7 +10,7 @@
   >
     <slot />
   </span>
-  <Teleport :to="teleportTarget">
+  <EditorOverlayTeleport :target="teleportTarget">
     <div
       v-if="open"
       ref="floatingRef"
@@ -20,7 +20,7 @@
     >
       <slot name="content" />
     </div>
-  </Teleport>
+  </EditorOverlayTeleport>
 </template>
 
 <script setup lang="ts">
@@ -32,6 +32,7 @@
 import { computed, ref } from 'vue'
 import { flip, offset, shift, useFloating, autoUpdate } from '@floating-ui/vue'
 import { useEditorOverlayTarget } from '../../composables'
+import EditorOverlayTeleport from './EditorOverlayTeleport.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -43,7 +44,7 @@ const props = withDefaults(
 )
 
 const overlayTarget = useEditorOverlayTarget()
-const teleportTarget = computed(() => overlayTarget?.value ?? 'body')
+const teleportTarget = computed(() => overlayTarget?.value ?? null)
 const open = ref(false)
 const referenceRef = ref<HTMLElement | null>(null)
 const floatingRef = ref<HTMLElement | null>(null)

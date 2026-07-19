@@ -1,0 +1,112 @@
+name: Prepare GitHub Packages release artifacts
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prepare-github-packages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build release artifacts without publishing credentials
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'INFO: Checkout release tag'
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: 'INFO: Verify release tag is reachable from the protected default branch'
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          release_commit="$(git rev-parse "${GITHUB_SHA}^{commit}")"
+          echo "[DEBUG] Resolving release tag commit ${release_commit} against default branch ${DEFAULT_BRANCH}."
+
+          if ! git fetch --no-tags origin \
+            "+refs/heads/${DEFAULT_BRANCH}:refs/remotes/origin/${DEFAULT_BRANCH}"; then
+            echo "[ERROR] Could not fetch default branch ${DEFAULT_BRANCH} for release trust verification." >&2
+            exit 1
+          fi
+
+          if ! git merge-base --is-ancestor "${release_commit}" "origin/${DEFAULT_BRANCH}"; then
+            echo "[ERROR] Release tag commit ${release_commit} is not reachable from protected default branch ${DEFAULT_BRANCH}." >&2
+            exit 1
+          fi
+
+          echo "[INFO] Release tag commit is reachable from protected default branch ${DEFAULT_BRANCH}."
+
+      - name: 'INFO: Set up Node.js 22'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 'INFO: Install dependencies'
+        env:
+          HUSKY: '0'
+        run: |
+          if ! npm ci; then
+            echo '[ERROR] npm ci failed.' >&2
+            exit 1
+          fi
+
+      - name: 'INFO: Build workspaces'
+        run: |
+          if ! npm run build; then
+            echo '[ERROR] Workspace build failed.' >&2
+            exit 1
+          fi
+          echo '[INFO] Workspace build completed.'
+
+      - name: 'INFO: Verify tag and package versions'
+        run: |
+          if ! LOG_LEVEL=debug node scripts/verify-publish-tag.mjs "${GITHUB_REF_NAME}"; then
+            echo '[ERROR] Release tag verification failed.' >&2
+            exit 1
+          fi
+          echo '[INFO] Tag and package version verification completed.'
+
+      - name: 'INFO: Pack publishable workspaces'
+        run: |
+          artifact_dir="${RUNNER_TEMP}/github-packages-release-artifacts"
+          rm -rf "${artifact_dir}"
+          mkdir -p "${artifact_dir}"
+
+          pack_workspace() {
+            package_name="$1"
+            echo "[DEBUG] Packing package ${package_name}."
+            if ! npm pack --ignore-scripts --json --pack-destination "${artifact_dir}" \
+              "--workspace=${package_name}"; then
+              echo "[ERROR] Pack failed for ${package_name}." >&2
+              exit 1
+            fi
+            echo "[INFO] Packed ${package_name}."
+          }
+
+          pack_workspace '@i-prikot/editor-schema'
+          pack_workspace '@i-prikot/editor'
+          pack_workspace '@i-prikot/renderer'
+
+          archive_count="$(find "${artifact_dir}" -maxdepth 1 -type f -name '*.tgz' | wc -l | tr -d ' ')"
+          if [ "${archive_count}" -ne 3 ]; then
+            echo "[ERROR] Expected three release archives, found ${archive_count}." >&2
+            exit 1
+          fi
+          echo '[INFO] Prepared three release archives.'
+
+      - name: 'INFO: Upload release artifacts'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: github-packages-release-artifacts
+          path: ${{ runner.temp }}/github-packages-release-artifacts/*.tgz
+          if-no-files-found: error
+          retention-days: 1

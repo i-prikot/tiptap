@@ -1,5 +1,5 @@
 {
-  "name": "@tinyfy/playground",
+  "name": "@i-prikot/playground",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,10 +10,13 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@tinyfy/editor": "0.1.0",
-    "@tinyfy/editor-schema": "0.1.0",
+    "@i-prikot/editor": "0.1.0",
+    "@i-prikot/editor-schema": "0.1.0",
     "@tiptap/core": "^3.27.1",
     "@tiptap/vue-3": "^3.27.1",
     "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "postcss-prefix-selector": "^2.1.1"
   }
 }

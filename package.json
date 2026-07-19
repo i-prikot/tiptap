@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "echo '[workspace:@tinyfy/playground] dev' && npm run dev --workspace=@tinyfy/playground",
-    "build": "echo '[workspace:@tinyfy/editor-schema] build' && npm run build --workspace=@tinyfy/editor-schema && echo '[workspace:@tinyfy/editor] build' && npm run build --workspace=@tinyfy/editor && echo '[workspace:@tinyfy/renderer] build' && npm run build --workspace=@tinyfy/renderer && echo '[workspace:@tinyfy/playground] build' && npm run build --workspace=@tinyfy/playground",
+    "dev": "echo '[workspace:@i-prikot/playground] dev' && npm run dev --workspace=@i-prikot/playground",
+    "build": "echo '[workspace:@i-prikot/editor-schema] build' && npm run build --workspace=@i-prikot/editor-schema && echo '[workspace:@i-prikot/editor] build' && npm run build --workspace=@i-prikot/editor && echo '[workspace:@i-prikot/renderer] build' && npm run build --workspace=@i-prikot/renderer && echo '[workspace:@i-prikot/playground] build' && npm run build --workspace=@i-prikot/playground",
     "typecheck": "echo '[workspace] typecheck' && vue-tsc --build",
     "lint": "npm run lint --workspaces --if-present && eslint test e2e",
     "test": "vitest run",

@@ -15,25 +15,49 @@ import type { CollaborationOptions } from '../components/notion/public-api'
 
 /** Получает JWT коллаборации с бэкенда (оригинал: POST /api/collaboration). */
 export async function fetchCollabToken(config: CollaborationOptions): Promise<string | null> {
-  if (config.token) return config.token
+  if (config.token?.trim()) return config.token
+
   try {
     const response = await fetch(config.tokenUrl || '/api/collaboration', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     })
-    if (!response.ok) throw new Error(`Failed to fetch token: ${response.status}`)
-    return (await response.json()).token
-  } catch (error) {
-    console.error('Failed to fetch collaboration token:', error)
+
+    if (!response.ok) {
+      console.error('[useCollab] token fetch failed', {
+        service: 'collaboration',
+        status: response.status,
+      })
+      return null
+    }
+
+    const payload: unknown = await response.json()
+    const token =
+      typeof payload === 'object' && payload !== null && 'token' in payload
+        ? (payload as { token?: unknown }).token
+        : null
+
+    if (typeof token === 'string' && token.trim()) return token
+
+    console.error('[useCollab] token fetch failed', {
+      service: 'collaboration',
+      status: 'missing-token',
+    })
+  } catch {
+    console.error('[useCollab] token fetch failed', {
+      service: 'collaboration',
+      status: 'request-failed',
+    })
     return null
   }
+
+  return null
 }
 
 export interface CollabContext {
   hasCollab: ShallowRef<boolean>
   provider: ShallowRef<TiptapCollabProvider | null>
   ydoc: Y.Doc
-  setupError: ShallowRef<boolean>
 }
 
 const collabInjectionKey: InjectionKey<CollabContext> = Symbol('collab')
@@ -42,13 +66,12 @@ export function provideCollab(documentId: string, config?: CollaborationOptions)
   const collabConfigured = !!config?.appId
   const hasCollab = shallowRef(collabConfigured)
   const provider = shallowRef<TiptapCollabProvider | null>(null)
-  const setupError = shallowRef(false)
   const ydoc = new Y.Doc()
 
   if (config && hasCollab.value) {
     fetchCollabToken(config).then((token) => {
       if (!token) {
-        setupError.value = true
+        hasCollab.value = false
         return
       }
       const documentNamePrefix = config.documentNamePrefix || ''
@@ -66,7 +89,7 @@ export function provideCollab(documentId: string, config?: CollaborationOptions)
     provider.value?.destroy()
   })
 
-  const context: CollabContext = { hasCollab, provider, ydoc, setupError }
+  const context: CollabContext = { hasCollab, provider, ydoc }
   provide(collabInjectionKey, context)
   return context
 }

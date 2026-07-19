@@ -1,1 +1,1 @@
-export { TableKit } from '@tinyfy/editor-schema'
+export { TableKit } from '@i-prikot/editor-schema'

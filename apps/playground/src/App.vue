@@ -29,7 +29,7 @@ import NotionEditor, {
   type AiOptions,
   type CollaborationOptions,
   type ImageUploadAdapter,
-} from '@tinyfy/editor'
+} from '@i-prikot/editor'
 import NotionEditorHeader from './components/NotionEditorHeader.vue'
 import CtaPopup from './components/CtaPopup.vue'
 import { useDemoDocumentSeed } from './composables/useDemoDocumentSeed'

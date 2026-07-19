@@ -1,1 +1,1 @@
-export type { ImageUploadAdapter, ImageUploadCallbacks } from '@tinyfy/editor-schema'
+export type { ImageUploadAdapter, ImageUploadCallbacks } from '@i-prikot/editor-schema'

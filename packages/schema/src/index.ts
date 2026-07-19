@@ -3,7 +3,15 @@ import './types/tiptap-augmentations.js'
 export type { JSONContent } from '@tiptap/core'
 
 export {
+  CURRENT_SCHEMA_VERSION,
+  createPersistedDocument,
+  migrate,
+  type PersistedDocument,
+} from './migrations/index.js'
+
+export {
   createExtensionKit,
+  createRendererExtensionKit,
   type ExtensionKitFeatureFlags,
   type ExtensionKitNodeOverrides,
   type ExtensionKitOptions,

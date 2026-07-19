@@ -1,7 +1,9 @@
 {
-  "name": "@tinyfy/editor-schema",
+  "name": "@i-prikot/editor-schema",
   "version": "0.1.0",
-  "private": true,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "type": "module",
   "exports": {
     ".": {

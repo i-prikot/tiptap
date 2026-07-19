@@ -7,10 +7,10 @@ Mode: fast (Autonomous Handoff)
 
 ## Goal
 
-Deliver `@tinyfy/editor` as the Vue-facing editor package. It must contain the
+Deliver `@i-prikot/editor` as the Vue-facing editor package. It must contain the
 `NotionEditor` component, all Vue UI for toolbars, menus, tables and primitives,
 the editor-owned composables and styles, while consuming the isomorphic
-`@tinyfy/editor-schema` package for document schema and ProseMirror behavior.
+`@i-prikot/editor-schema` package for document schema and ProseMirror behavior.
 
 The repository already contains the initial workspace migration. Use it as the
 baseline, close any remaining boundary or packaging gaps, and do not duplicate
@@ -31,7 +31,7 @@ editor-library item in Roadmap Stage 4.
 
 ## Constraints
 
-- [ ] Keep `@tinyfy/editor-schema` free of `vue`, `@tiptap/vue-3`, Vue SFCs, and `VueNodeViewRenderer` imports.
+- [ ] Keep `@i-prikot/editor-schema` free of `vue`, `@tiptap/vue-3`, Vue SFCs, and `VueNodeViewRenderer` imports.
 - [ ] Keep host-specific concerns in `apps/playground`: bootstrap, header, demo seed content, environment access, CTA UI, and mock upload behavior.
 - [ ] Use relative imports inside a workspace and package-name imports across workspace boundaries.
 - [ ] Preserve the public `NotionEditor` contract, feature flags, collaboration/image-upload adapters, lifecycle events, and host overlay target API.
@@ -46,7 +46,7 @@ editor-library item in Roadmap Stage 4.
 
 ### Phase 1: Define the package boundary
 
-- [x] **Task 1: Finalize the `@tinyfy/editor` workspace and build contract.**
+- [x] **Task 1: Finalize the `@i-prikot/editor` workspace and build contract.**
   - [ ] Files: `packages/editor/package.json`, `packages/editor/tsconfig.json`, `packages/editor/vite.config.ts`, `package.json`, `tsconfig.base.json`, `tsconfig.json`.
   - [ ] Ensure the package has ESM and declaration output, a public root export and a `./styles.css` export, and is included in npm workspaces and TypeScript project references.
   - [ ] Configure Vite library mode to emit the Vue package entry and stylesheet without bundling host-owned or duplicate framework dependencies. Keep `vue`, `@tiptap/*`, the schema package, Floating UI, collaboration/Yjs libraries, and KaTeX external where required by the consumer contract.
@@ -71,7 +71,7 @@ editor-library item in Roadmap Stage 4.
 
 - [x] **Task 4: Package the complete editor UI stylesheet behind a stable consumer import.**
   - [ ] Files: `packages/editor/src/styles.css`, `packages/editor/src/styles/**`, `packages/editor/src/components/**`, `packages/editor/vite.config.ts`, `packages/editor/package.json`.
-  - [ ] Aggregate all editor CSS from a single source entry and emit it as `dist/styles.css`, reachable through `@tinyfy/editor/styles.css`.
+  - [ ] Aggregate all editor CSS from a single source entry and emit it as `dist/styles.css`, reachable through `@i-prikot/editor/styles.css`.
   - [ ] Keep styles required by menus, floating UI, table controls, custom nodes, primitives, editor typography, and design tokens with the editor package. Scope selectors to the editor root (`.tinyfy-editor`) where feasible so application CSS is not unintentionally affected.
   - [ ] Exclude playground-only styles such as the header and CTA popup from the library output; retain only styles required for `NotionEditor` and explicitly exported reusable controls.
   - [ ] **Logging:** do not add runtime logging. At build time, record `INFO` output for the generated CSS artifact and use temporary `DEBUG` inspection only for unresolved CSS imports or unintended global selectors.
@@ -80,7 +80,7 @@ editor-library item in Roadmap Stage 4.
 
 - [x] **Task 5: Make `apps/playground` consume the editor strictly as a package client.**
   - [ ] Files: `apps/playground/package.json`, `apps/playground/tsconfig.json`, `apps/playground/vite.config.ts`, `apps/playground/src/main.ts`, `apps/playground/src/App.vue`, `apps/playground/src/components/**`, `apps/playground/src/composables/**`, `apps/playground/src/content/**`, `apps/playground/src/styles/**`.
-  - [ ] Import `NotionEditor`, its public types/helpers, and `@tinyfy/editor/styles.css` from package entry points; leave source aliases only where local development needs them and ensure they match the production export contract.
+  - [ ] Import `NotionEditor`, its public types/helpers, and `@i-prikot/editor/styles.css` from package entry points; leave source aliases only where local development needs them and ensure they match the production export contract.
   - [ ] Keep document-id parsing, seed data, environment reads, collaboration/AI options, mock image upload, header/theme controls, and CTA behavior in the playground.
   - [ ] Remove any remaining application imports of editor internals or former root-app paths, while preserving the existing browser behavior and overlay target setup.
   - [ ] **Logging:** preserve development diagnostics passed through the public `NotionEditor` API and existing error callbacks. Do not emit secret-bearing environment values; use `WARN` only for disabled optional integrations and `ERROR` for failed setup.
@@ -89,14 +89,14 @@ editor-library item in Roadmap Stage 4.
   - [ ] Files: inspect generated `packages/editor/dist/**`; modify only the configuration files from tasks 1–5 if validation exposes a package-contract defect.
   - [ ] Run the package-level typecheck/build commands and the root workspace build. Confirm that the editor emits `dist/index.js`, declarations, and `dist/styles.css`; confirm the playground builds against the package API.
   - [ ] Inspect import boundaries: schema must not import Vue, editor must not import playground modules, and the published editor entry must not expose private implementation paths by accident.
-  - [ ] Use `npm pack --dry-run --workspace=@tinyfy/editor` to confirm that the package archive contains only the intended distributable files and exports.
+  - [ ] Use `npm pack --dry-run --workspace=@i-prikot/editor` to confirm that the package archive contains only the intended distributable files and exports.
   - [ ] **Logging:** retain full command output as verbose implementation evidence, classify validation failures as `ERROR`, and report boundary violations with the offending path. Do not create or run new test cases because testing is explicitly disabled for this task.
 
 ## Completion Criteria
 
-- [x] `@tinyfy/editor` contains the Vue editor UI, composables, NodeView SFCs, reusable controls, and library styles.
-- [x] `@tinyfy/editor-schema` remains isomorphic and contains no Vue rendering dependency.
+- [x] `@i-prikot/editor` contains the Vue editor UI, composables, NodeView SFCs, reusable controls, and library styles.
+- [x] `@i-prikot/editor-schema` remains isomorphic and contains no Vue rendering dependency.
 - [x] Image, image-upload, and TOC extensions use editor-side `.extend({ addNodeView: () => VueNodeViewRenderer(...) })` adapters.
-- [x] `@tinyfy/editor/styles.css` resolves to the built stylesheet and excludes playground-only CSS.
+- [x] `@i-prikot/editor/styles.css` resolves to the built stylesheet and excludes playground-only CSS.
 - [x] `apps/playground` runs as a package consumer without importing editor internals.
 - [x] Package typecheck/build and workspace build pass; no new tests or documentation work are introduced.

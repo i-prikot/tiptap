@@ -1,0 +1,161 @@
+name: Publish GitHub Packages
+
+on:
+  workflow_run:
+    workflows:
+      - Prepare GitHub Packages release artifacts
+    types:
+      - completed
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: publish-github-packages-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  verify-release-authorization:
+    name: Verify publishing environment requires reviewer approval
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      startsWith(github.event.workflow_run.head_branch, 'v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'INFO: Verify publishing environment protection rules'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLISH_ENVIRONMENT: tinyfy-private-package-publish
+        run: |
+          environment_file="$(mktemp)"
+          trap 'rm -f "${environment_file}"' EXIT
+          echo "[DEBUG] Reading protection rules for ${PUBLISH_ENVIRONMENT}."
+
+          if ! gh api "repos/${GITHUB_REPOSITORY}/environments/${PUBLISH_ENVIRONMENT}" > "${environment_file}"; then
+            echo "[ERROR] Could not read protection rules for ${PUBLISH_ENVIRONMENT}." >&2
+            exit 1
+          fi
+
+          if ! jq -e 'any(.protection_rules[]?; .type == "required_reviewers" and ((.reviewers // []) | length > 0))' "${environment_file}" > /dev/null; then
+            echo "[ERROR] ${PUBLISH_ENVIRONMENT} must require at least one deployment reviewer before publishing." >&2
+            exit 1
+          fi
+
+          echo "[INFO] ${PUBLISH_ENVIRONMENT} requires deployment reviewer approval."
+
+  publish:
+    name: Publish validated private packages
+    needs: verify-release-authorization
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      startsWith(github.event.workflow_run.head_branch, 'v')
+    environment: tinyfy-private-package-publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'INFO: Checkout trusted release tooling'
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: 'INFO: Set up Node.js 22'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+
+      - name: 'INFO: Download release artifacts'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: github-packages-release-artifacts
+          path: ${{ runner.temp }}/github-packages-release-artifacts
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: 'INFO: Verify release artifacts'
+        env:
+          RELEASE_TAG: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          if ! LOG_LEVEL=debug node scripts/verify-publish-artifacts.mjs \
+            "${RUNNER_TEMP}/github-packages-release-artifacts" \
+            "${RELEASE_TAG}"; then
+            echo '[ERROR] Release artifact verification failed.' >&2
+            exit 1
+          fi
+          echo '[INFO] Release artifacts passed trusted verification.'
+
+      - name: 'INFO: Publish validated private @i-prikot packages'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.TINYFY_PACKAGES_TOKEN }}
+        run: |
+          if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
+            echo '[ERROR] TINYFY_PACKAGES_TOKEN is not configured with write access for @i-prikot packages.' >&2
+            exit 1
+          fi
+
+          artifact_dir="${RUNNER_TEMP}/github-packages-release-artifacts"
+          publish_dir="${RUNNER_TEMP}/github-packages-publish"
+          publish_npmrc="${publish_dir}/npmrc"
+          umask 077
+          rm -rf "${publish_dir}"
+          mkdir -p "${publish_dir}"
+          trap 'rm -rf "${publish_dir}"' EXIT
+          printf '%s\n' \
+            '@i-prikot:registry=https://npm.pkg.github.com' \
+            "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" > "${publish_npmrc}"
+
+          publish_archive() {
+            archive_name="$1"
+            package_name="$2"
+            package_version="$3"
+            npm_view_error_file="${publish_dir}/npm-view-${archive_name}.log"
+
+            echo "[DEBUG] Checking whether ${package_name}@${package_version} is already published."
+            if published_version="$(
+              (
+                cd "${publish_dir}"
+                NPM_CONFIG_USERCONFIG="${publish_npmrc}" \
+                  NPM_CONFIG_GLOBALCONFIG=/dev/null \
+                  npm view "${package_name}@${package_version}" version \
+                    --registry=https://npm.pkg.github.com
+              ) 2>"${npm_view_error_file}"
+            )"; then
+              if [ "${published_version}" != "${package_version}" ]; then
+                echo "[ERROR] Registry returned ${published_version:-<missing>} for ${package_name}@${package_version}." >&2
+                exit 1
+              fi
+              echo "[INFO] Skipping ${archive_name}; ${package_name}@${package_version} is already published."
+              return
+            fi
+
+            if ! grep -q 'E404' "${npm_view_error_file}"; then
+              echo "[ERROR] Registry lookup failed for ${package_name}@${package_version}; refusing to publish." >&2
+              exit 1
+            fi
+
+            rm -f "${npm_view_error_file}"
+            echo "[DEBUG] Publishing validated archive ${archive_name}."
+            if ! (
+              cd "${publish_dir}"
+              NPM_CONFIG_USERCONFIG="${publish_npmrc}" \
+                NPM_CONFIG_GLOBALCONFIG=/dev/null \
+                npm publish --ignore-scripts \
+                  --registry=https://npm.pkg.github.com \
+                  "${artifact_dir}/${archive_name}"
+            ); then
+              echo "[ERROR] Publish failed for ${archive_name}." >&2
+              exit 1
+            fi
+            echo "[INFO] Published ${archive_name}."
+          }
+
+          release_version="${RELEASE_TAG#v}"
+          publish_archive "i-prikot-editor-schema-${release_version}.tgz" '@i-prikot/editor-schema' "${release_version}"
+          publish_archive "i-prikot-editor-${release_version}.tgz" '@i-prikot/editor' "${release_version}"
+          publish_archive "i-prikot-renderer-${release_version}.tgz" '@i-prikot/renderer' "${release_version}"

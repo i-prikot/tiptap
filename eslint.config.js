@@ -135,6 +135,16 @@ export default [
   },
 
   {
+    name: 'project/node-esm-scripts',
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: globals.node,
+    },
+  },
+
+  {
     name: 'project/editor-layer-boundaries',
     files: ['packages/{schema,editor}/src/**/*.{ts,vue}'],
     plugins: {

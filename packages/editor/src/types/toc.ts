@@ -1,1 +1,1 @@
-export type { TocItem } from '@tinyfy/editor-schema'
+export type { TocItem } from '@i-prikot/editor-schema'

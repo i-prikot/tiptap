@@ -1,5 +1,5 @@
 <template>
-  <Teleport :to="teleportTarget">
+  <EditorOverlayTeleport :target="teleportTarget">
     <div
       v-if="open && editor"
       ref="menuRef"
@@ -12,7 +12,7 @@
     >
       <slot :items="suggestionItems" :selected-index="selectedIndex" :on-select="handleSelect" />
     </div>
-  </Teleport>
+  </EditorOverlayTeleport>
 </template>
 
 <script setup lang="ts" generic="Item extends SuggestionItem = SuggestionItem">
@@ -35,6 +35,7 @@ import {
 } from '@floating-ui/vue'
 import type { Editor } from '@tiptap/vue-3'
 import { useTiptapEditor, useEditorOverlayTarget, useMenuNavigation } from '../../composables'
+import EditorOverlayTeleport from '../primitives/EditorOverlayTeleport.vue'
 
 import { Suggestion, calculateStartPosition } from '../../utils/suggestion/suggestion'
 import type { SuggestionItem } from '../../types/suggestion'
@@ -64,7 +65,7 @@ const props = withDefaults(
 
 const editor = useTiptapEditor(computed(() => props.editor))
 const overlayTarget = useEditorOverlayTarget()
-const teleportTarget = computed(() => overlayTarget?.value ?? 'body')
+const teleportTarget = computed(() => overlayTarget?.value ?? null)
 
 const open = ref(false)
 const referenceRect = shallowRef<(() => DOMRect | null) | null>(null)

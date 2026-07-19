@@ -3,7 +3,7 @@
  *
  * Отличие от оригинала: расширение Ai распространяется только через
  * платный registry Tiptap Pro и не может быть включено в порт. Контекст
- * повторяет исходный интерфейс (aiToken/hasAi/setupError): при заданных
+ * повторяет исходный интерфейс (aiToken/hasAi): при заданных
  * tokenUrl/token токен запрашивается как в оригинале, иначе hasAi=false —
  * и все AI-элементы UI скрываются той же
  * логикой isExtensionAvailable(editor, 'ai'), что и в оригинале.
@@ -14,24 +14,48 @@ import type { AiOptions } from '../components/notion/public-api'
 
 /** Получает JWT для AI с бэкенда (оригинал: POST /api/ai). */
 export async function fetchAiToken(config: AiOptions): Promise<string | null> {
-  if (config.token) return config.token
+  if (config.token?.trim()) return config.token
+
   try {
     const response = await fetch(config.tokenUrl || '/api/ai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     })
-    if (!response.ok) throw new Error(`Failed to fetch token: ${response.status}`)
-    return (await response.json()).token
+
+    if (!response.ok) {
+      console.error('[useAi] token fetch failed', {
+        service: 'ai',
+        status: response.status,
+      })
+      return null
+    }
+
+    const payload: unknown = await response.json()
+    const token =
+      typeof payload === 'object' && payload !== null && 'token' in payload
+        ? (payload as { token?: unknown }).token
+        : null
+
+    if (typeof token === 'string' && token.trim()) return token
+
+    console.error('[useAi] token fetch failed', {
+      service: 'ai',
+      status: 'missing-token',
+    })
   } catch {
-    console.error('[useAi] AI token retrieval failed')
+    console.error('[useAi] token fetch failed', {
+      service: 'ai',
+      status: 'request-failed',
+    })
     return null
   }
+
+  return null
 }
 
 export interface AiContext {
   hasAi: ShallowRef<boolean>
   aiToken: ShallowRef<string | null>
-  setupError: ShallowRef<boolean>
 }
 
 const aiInjectionKey: InjectionKey<AiContext> = Symbol('ai')
@@ -42,7 +66,6 @@ export function provideAi(
 ): AiContext {
   const hasAi = shallowRef(false)
   const aiToken = shallowRef<string | null>(null)
-  const setupError = shallowRef(false)
   let tokenRequestVersion = 0
 
   watch(
@@ -53,7 +76,6 @@ export function provideAi(
 
       hasAi.value = aiConfigured
       aiToken.value = null
-      setupError.value = false
 
       if (!aiConfigured || !config) return
 
@@ -62,13 +84,13 @@ export function provideAi(
         if (requestVersion !== tokenRequestVersion) return
 
         aiToken.value = token
-        setupError.value = !token
+        if (!token) hasAi.value = false
       })
     },
     { immediate: true },
   )
 
-  const context: AiContext = { hasAi, aiToken, setupError }
+  const context: AiContext = { hasAi, aiToken }
   provide(aiInjectionKey, context)
   return context
 }

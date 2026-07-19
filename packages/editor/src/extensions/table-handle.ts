@@ -1,8 +1,8 @@
-export { TableHandleExtension, colDragStart, dragEnd, rowDragStart } from '@tinyfy/editor-schema'
+export { TableHandleExtension, colDragStart, dragEnd, rowDragStart } from '@i-prikot/editor-schema'
 export type {
   DraggedCellOrientation,
   Orientation,
   TableDraggingState,
   TableHandleDragContext,
   TableHandleState,
-} from '@tinyfy/editor-schema'
+} from '@i-prikot/editor-schema'

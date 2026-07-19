@@ -1,5 +1,5 @@
 <template>
-  <Teleport to="body">
+  <EditorOverlayTeleport :target="teleportTarget">
     <!-- Обёртка-позиционер: transform от floating-ui живёт здесь и не конфликтует с CSS-анимацией контента -->
     <div
       v-if="context.open.value"
@@ -14,7 +14,7 @@
         <slot />
       </div>
     </div>
-  </Teleport>
+  </EditorOverlayTeleport>
 </template>
 
 <script setup lang="ts">
@@ -30,6 +30,8 @@
  */
 import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { autoUpdate, flip, offset, shift, size, useFloating } from '@floating-ui/vue'
+import { useEditorOverlayTarget } from '../../../composables'
+import EditorOverlayTeleport from '../EditorOverlayTeleport.vue'
 import { menuInjectionKey } from './menu-context'
 
 const props = withDefaults(defineProps<{ closeOnSelect?: boolean }>(), { closeOnSelect: true })
@@ -39,6 +41,9 @@ const emit = defineEmits<{ close: [] }>()
 const injected = inject(menuInjectionKey)
 if (!injected) throw new Error('MenuContent must be used within Menu')
 const context = injected
+
+const overlayTarget = useEditorOverlayTarget()
+const teleportTarget = computed(() => overlayTarget?.value ?? null)
 
 const floatingRef = ref<HTMLElement | null>(null)
 

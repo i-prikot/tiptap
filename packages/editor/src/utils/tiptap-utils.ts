@@ -1,1 +1,1 @@
-export * from '@tinyfy/editor-schema'
+export * from '@i-prikot/editor-schema'

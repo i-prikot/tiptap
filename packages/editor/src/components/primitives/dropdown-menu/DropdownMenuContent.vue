@@ -1,5 +1,5 @@
 <template>
-  <Teleport to="body">
+  <EditorOverlayTeleport :target="teleportTarget">
     <!-- Обёртка-позиционер (аналог [data-radix-popper-content-wrapper]):
          transform floating-ui здесь, CSS-анимация контента — внутри -->
     <div
@@ -18,7 +18,7 @@
         <slot />
       </div>
     </div>
-  </Teleport>
+  </EditorOverlayTeleport>
 </template>
 
 <script setup lang="ts">
@@ -31,6 +31,8 @@
  */
 import { computed, inject, onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
 import { autoUpdate, flip, offset, shift, size, useFloating } from '@floating-ui/vue'
+import { useEditorOverlayTarget } from '../../../composables'
+import EditorOverlayTeleport from '../EditorOverlayTeleport.vue'
 import { dropdownMenuInjectionKey } from './dropdown-menu-context'
 
 const props = withDefaults(
@@ -46,6 +48,9 @@ const props = withDefaults(
 const injected = inject(dropdownMenuInjectionKey)
 if (!injected) throw new Error('DropdownMenuContent must be used within DropdownMenu')
 const context = injected
+
+const overlayTarget = useEditorOverlayTarget()
+const teleportTarget = computed(() => overlayTarget?.value ?? null)
 
 const floatingRef = ref<HTMLElement | null>(null)
 

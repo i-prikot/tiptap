@@ -16,8 +16,8 @@ Rationale: Skipped by autonomous Handoff defaults.
 ## Current Baseline and Scope
 - [ ] The workspace migration in commit `9cbe2c0` already places the host application under `apps/playground`; the implementation must preserve this separation rather than move library code back into the app.
 - [ ] `apps/playground/src/App.vue`, `apps/playground/src/utils/document-id.ts`, `apps/playground/src/composables/useDemoDocumentSeed.ts`, and `apps/playground/src/content/default-content.ts` are playground-owned behavior.
-- [ ] `@tinyfy/editor` and `@tinyfy/editor-schema` remain reusable packages. The playground accesses them only through their public package exports.
-- [ ] The root `.env.example` is not loaded by Vite when `npm run dev` starts the `@tinyfy/playground` workspace. Put the demo environment template where the playground Vite project loads it, without adding secrets to version control.
+- [ ] `@i-prikot/editor` and `@i-prikot/editor-schema` remain reusable packages. The playground accesses them only through their public package exports.
+- [ ] The root `.env.example` is not loaded by Vite when `npm run dev` starts the `@i-prikot/playground` workspace. Put the demo environment template where the playground Vite project loads it, without adding secrets to version control.
 
 ## Commit Plan
 - [ ] **Commit 1** (after Tasks 1–3): `refactor(playground): move demo host application into workspace`
@@ -26,16 +26,16 @@ Rationale: Skipped by autonomous Handoff defaults.
 ## Tasks
 
 ### Phase 1: Establish the Playground Boundary
-- [x] **Task 1: Make `@tinyfy/playground` the sole development-app entry point.**
+- [x] **Task 1: Make `@i-prikot/playground` the sole development-app entry point.**
   - [ ] **Files:** `package.json`, `apps/playground/package.json`, `apps/playground/tsconfig.json`, `apps/playground/vite.config.ts`, `apps/playground/index.html`.
-  - [ ] **Deliverable:** Keep the npm workspace declaration and root `dev` script targeting `@tinyfy/playground`; ensure the app package owns its Vite entry, output directory, TypeScript config, and direct runtime dependencies. Retain Vite aliases only for local development resolution of public `@tinyfy/editor` and `@tinyfy/editor-schema` interfaces.
+  - [ ] **Deliverable:** Keep the npm workspace declaration and root `dev` script targeting `@i-prikot/playground`; ensure the app package owns its Vite entry, output directory, TypeScript config, and direct runtime dependencies. Retain Vite aliases only for local development resolution of public `@i-prikot/editor` and `@i-prikot/editor-schema` interfaces.
   - [ ] **Expected behavior:** `npm run dev` starts the playground, while editor and schema packages remain independently buildable and contain no app shell concerns.
   - [ ] **Logging:** During relocation only, use guarded `DEBUG` diagnostics around Vite/import resolution if needed; remove them before completion. Do not add permanent `console` output.
   - [ ] **Dependencies:** None.
 
 - [x] **Task 2: Relocate and preserve the demo host shell.**
   - [ ] **Files:** `apps/playground/src/main.ts`, `apps/playground/src/App.vue`, `apps/playground/src/components/CtaPopup.vue`, `apps/playground/src/components/NotionEditorHeader.vue`, `apps/playground/src/components/ThemeToggle.vue`, `apps/playground/src/styles/**`; remove any obsolete root `src/main.ts`, `src/App.vue`, and host-only component/style copies if present.
-  - [ ] **Deliverable:** Keep application bootstrap, stylesheet imports, header/theme controls, CTA UI, overlay target, editor lifecycle handling, URL synchronization, and collaboration/AI option assembly in the playground. Replace former internal editor imports with public `@tinyfy/editor` exports and retain relative imports only for app-owned files.
+  - [ ] **Deliverable:** Keep application bootstrap, stylesheet imports, header/theme controls, CTA UI, overlay target, editor lifecycle handling, URL synchronization, and collaboration/AI option assembly in the playground. Replace former internal editor imports with public `@i-prikot/editor` exports and retain relative imports only for app-owned files.
   - [ ] **Expected behavior:** Opening the playground creates the same editor session and host UI; changing URL/history state updates document context, and `?noCollab=1` remains a playground-only override.
   - [ ] **Logging:** If a relocation failure must be traced, emit temporary `DEBUG` messages at bootstrap/session recreation boundaries without including tokens or document JSON; keep existing error propagation through component callbacks/UI and remove temporary logs before merge.
   - [ ] **Dependencies:** Task 1.

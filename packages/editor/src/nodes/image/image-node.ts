@@ -1,5 +1,5 @@
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import { Image as SchemaImage } from '@tinyfy/editor-schema'
+import { Image as SchemaImage } from '@i-prikot/editor-schema'
 import ImageNodeView from './ImageNodeView.vue'
 
 export const Image = SchemaImage.extend({

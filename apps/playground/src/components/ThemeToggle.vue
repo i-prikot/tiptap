@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { Button, MoonStarIcon, SunIcon } from '@tinyfy/editor'
+import { Button, MoonStarIcon, SunIcon } from '@i-prikot/editor'
 
 const props = defineProps<{ isDarkMode: boolean }>()
 const emit = defineEmits<{ toggle: [] }>()

@@ -1,8 +1,8 @@
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import { TocNode as SchemaTocNode } from '@tinyfy/editor-schema'
+import { TocNode as SchemaTocNode } from '@i-prikot/editor-schema'
 import TocNodeView from './TocNodeView.vue'
 
-export type { TocNodeAttributes, TocNodeOptions } from '@tinyfy/editor-schema'
+export type { TocNodeAttributes, TocNodeOptions } from '@i-prikot/editor-schema'
 
 export const TocNode = SchemaTocNode.extend({
   addNodeView() {

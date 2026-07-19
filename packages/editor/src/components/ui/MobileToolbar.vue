@@ -1,5 +1,5 @@
 <template>
-  <Teleport :to="teleportTarget">
+  <EditorOverlayTeleport :target="teleportTarget">
     <Toolbar
       v-if="isMobile && editor && editor.isEditable"
       ref="toolbarRef"
@@ -176,7 +176,7 @@
         <LinkContent v-else :editor="editor" @set-link="viewId = 'main'" />
       </template>
     </Toolbar>
-  </Teleport>
+  </EditorOverlayTeleport>
 </template>
 
 <script setup lang="ts">
@@ -190,6 +190,7 @@ import { computed, ref, watch } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import type { TurnIntoMenuItem } from '../../types/menu'
+import EditorOverlayTeleport from '../primitives/EditorOverlayTeleport.vue'
 import {
   Toolbar,
   ToolbarGroup,
@@ -253,7 +254,7 @@ const props = defineProps<{ editor?: Editor | null }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
 const overlayTarget = useEditorOverlayTarget()
-const teleportTarget = computed(() => overlayTarget?.value ?? 'body')
+const teleportTarget = computed(() => overlayTarget?.value ?? null)
 const isMobile = useIsBreakpoint('max', 480)
 const signal = useEditorSelectionSignal(editor)
 

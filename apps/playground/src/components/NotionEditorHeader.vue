@@ -20,7 +20,7 @@
  * коллаборации. Порт NotionEditorHeader из чанка 3xpmbr0kqzhen.
  */
 import type { Editor } from '@tiptap/vue-3'
-import { ButtonGroup, CollabUsers, Separator, Spacer, UndoRedoButton } from '@tinyfy/editor'
+import { ButtonGroup, CollabUsers, Separator, Spacer, UndoRedoButton } from '@i-prikot/editor'
 import ThemeToggle from './ThemeToggle.vue'
 
 const props = defineProps<{ editor: Editor | null; isDarkMode: boolean }>()

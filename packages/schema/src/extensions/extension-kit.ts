@@ -16,6 +16,7 @@ import { Superscript } from '@tiptap/extension-superscript'
 import { Subscript } from '@tiptap/extension-subscript'
 import { TaskItem, TaskList } from '@tiptap/extension-list'
 import { Highlight } from '@tiptap/extension-highlight'
+import { Table, TableCell, TableHeader, TableRow } from '@tiptap/extension-table'
 import {
   TableOfContents,
   getHierarchicalIndexes,
@@ -39,6 +40,35 @@ import { TocNode } from '../nodes/toc/toc.js'
 import type { ImageUploadAdapter } from '../types/image-upload.js'
 import type { CollabUser } from '../types/user.js'
 import { MAX_FILE_SIZE } from '../utils/tiptap-utils.js'
+
+const nodeBackgroundTypes = [
+  'paragraph',
+  'heading',
+  'blockquote',
+  'taskList',
+  'bulletList',
+  'orderedList',
+  'tableCell',
+  'tableHeader',
+  'tocNode',
+]
+
+const uniqueIdTypes = [
+  'table',
+  'paragraph',
+  'bulletList',
+  'orderedList',
+  'taskList',
+  'heading',
+  'blockquote',
+  'codeBlock',
+  'tocNode',
+]
+
+const emojiOptions = {
+  emojis: gitHubEmojis.filter((emoji) => !emoji.name.includes('regional')),
+  forceFallbackImages: true,
+}
 
 export interface ExtensionKitFeatureFlags {
   tocSidebar: boolean
@@ -66,6 +96,43 @@ export interface ExtensionKitOptions {
   imageUpload: ImageUploadAdapter
   onImageUploadError: (error: Error) => void
   onTableOfContentsUpdate: (content: TableOfContentData) => void
+}
+
+export function createRendererExtensionKit(): Extensions {
+  return [
+    StarterKit.configure({
+      horizontalRule: false,
+      link: { openOnClick: false },
+    }),
+    HorizontalRule,
+    TextAlign.configure({ types: ['heading', 'paragraph'] }),
+    Mention,
+    Emoji.configure(emojiOptions),
+    Table.configure({ resizable: false, cellMinWidth: 120 }),
+    TableCell,
+    TableHeader,
+    TableRow,
+    NodeBackground.configure({ types: nodeBackgroundTypes }),
+    NodeAlignment,
+    TextStyle,
+    Mathematics,
+    Superscript,
+    Subscript,
+    Indent,
+    Color,
+    TaskList,
+    TaskItem.configure({ nested: true }),
+    Highlight.configure({ multicolor: true }),
+    Image,
+    ImageUploadNode.configure({
+      accept: 'image/*',
+      maxSize: MAX_FILE_SIZE,
+      limit: 3,
+    }),
+    UniqueID.configure({ types: uniqueIdTypes }),
+    Typography,
+    TocNode.configure({ topOffset: 48 }),
+  ]
 }
 
 export function createExtensionKit(
@@ -97,23 +164,10 @@ export function createExtensionKit(
       emptyNodeClass: 'is-empty with-slash',
     }),
     Mention,
-    Emoji.configure({
-      emojis: gitHubEmojis.filter((emoji) => !emoji.name.includes('regional')),
-      forceFallbackImages: true,
-    }),
+    Emoji.configure(emojiOptions),
     TableKit.configure({ table: { resizable: true, cellMinWidth: 120 } }),
     NodeBackground.configure({
-      types: [
-        'paragraph',
-        'heading',
-        'blockquote',
-        'taskList',
-        'bulletList',
-        'orderedList',
-        'tableCell',
-        'tableHeader',
-        'tocNode',
-      ],
+      types: nodeBackgroundTypes,
     }),
     NodeAlignment,
     TextStyle,
@@ -142,17 +196,7 @@ export function createExtensionKit(
       onError: options.onImageUploadError,
     }),
     UniqueID.configure({
-      types: [
-        'table',
-        'paragraph',
-        'bulletList',
-        'orderedList',
-        'taskList',
-        'heading',
-        'blockquote',
-        'codeBlock',
-        'tocNode',
-      ],
+      types: uniqueIdTypes,
       filterTransaction: (transaction) => !isChangeOrigin(transaction),
     }),
     Typography,

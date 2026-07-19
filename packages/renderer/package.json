@@ -1,17 +1,23 @@
 {
-  "name": "@tinyfy/renderer",
+  "name": "@i-prikot/renderer",
   "version": "0.1.0",
-  "private": true,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./styles.css": "./styles.css",
+    "./katex.css": "./katex.css"
   },
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "styles.css",
+    "katex.css"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -19,6 +25,9 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@tinyfy/editor-schema": "0.1.0"
+    "@i-prikot/editor-schema": "0.1.0",
+    "@tiptap/html": "^3.28.0",
+    "happy-dom": "^20.10.6",
+    "katex": "^0.16.47"
   }
 }

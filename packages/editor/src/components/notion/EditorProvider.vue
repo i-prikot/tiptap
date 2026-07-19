@@ -34,6 +34,7 @@ import type { Editor, JSONContent } from '@tiptap/core'
 import type { Transaction } from '@tiptap/pm/state'
 import type { TiptapCollabProvider } from '@hocuspocus/provider'
 import type * as Y from 'yjs'
+import { CURRENT_SCHEMA_VERSION } from '@i-prikot/editor-schema'
 import { createExtensionKit } from '../../extensions/extension-kit'
 import { useUser, useToc, provideTiptapEditor, provideEditorOverlayTarget } from '../../composables'
 
@@ -157,12 +158,17 @@ function flushUpdate(editorInstance: Editor) {
   }
 
   try {
-    emit('update', { json: editorInstance.getJSON(), html: editorInstance.getHTML() })
+    emit('update', {
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+      json: editorInstance.getJSON(),
+      html: editorInstance.getHTML(),
+    })
     emittedUpdateCount += 1
     debugEditor('update-flushed', {
       debounceMs: EDITOR_UPDATE_DEBOUNCE_MS,
       scheduledUpdateCount,
       emittedUpdateCount,
+      schemaVersion: CURRENT_SCHEMA_VERSION,
     })
   } catch {
     console.error('[EditorProvider] document update serialization failed')

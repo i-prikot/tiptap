@@ -51,6 +51,7 @@ export type NotionEditorReadyPayload = Editor
  * with `v-html` or otherwise treating it as trusted HTML.
  */
 export interface NotionEditorUpdatePayload {
+  schemaVersion: number
   json: JSONContent
   html: string
 }

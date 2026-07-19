@@ -91,8 +91,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@tinyfy/editor-schema': resolve(projectRoot, 'packages/schema/src/index.ts'),
-      '@tinyfy/editor': resolve(projectRoot, 'packages/editor/src/index.ts'),
+      '@i-prikot/editor-schema': resolve(projectRoot, 'packages/schema/src/index.ts'),
+      '@i-prikot/editor': resolve(projectRoot, 'packages/editor/src/index.ts'),
     },
   },
   test: {
