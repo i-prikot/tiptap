@@ -1,4 +1,4 @@
-<!-- handoff:task:78769c9a-3af9-44f9-bced-9364ca8b5363 -->
+﻿<!-- handoff:task:78769c9a-3af9-44f9-bced-9364ca8b5363 -->
 # Migrate the Repository to npm Workspaces
 
 **Created:** 2026-07-16  
@@ -13,7 +13,7 @@ Convert the current single Vite/Vue application into an npm-workspaces monorepo 
 | --- | --- | --- |
 | `packages/schema` | `@i-prikot/editor-schema` | Isomorphic Tiptap extensions, custom-node schemas, document types, and schema assembly; no Vue imports or NodeViews. |
 | `packages/editor` | `@i-prikot/editor` | Vue editor component, Vue NodeView adapters, composables, UI primitives, menus, editor styles, and public Vue API. |
-| `packages/renderer` | `@i-prikot/renderer` | Server-renderer workspace foundation that consumes the schema package; rendering functionality itself remains out of this migration's scope. |
+| `packages/renderer` | `@i-prikot/editor-renderer` | Server-renderer workspace foundation that consumes the schema package; rendering functionality itself remains out of this migration's scope. |
 | `apps/playground` | `@i-prikot/playground` | Existing demo application, development configuration, environment integration, and manual QA host. |
 
 The root remains private and owns workspace orchestration, shared development tooling, Git hooks, and the npm lockfile.
@@ -79,11 +79,11 @@ The root remains private and owns workspace orchestration, shared development to
   - [x] **Logging:** preserve existing application diagnostics; add no migration-specific browser logs. Vite commands must clearly identify the playground workspace.
   - [x] **Depends on:** tasks 1–3.
 
-- [x] **5. Create the `@i-prikot/renderer` workspace boundary without implementing publishing renderer features.**
+- [x] **5. Create the `@i-prikot/editor-renderer` workspace boundary without implementing publishing renderer features.**
   - [x] **Files:** create `packages/renderer/package.json`, `packages/renderer/tsconfig.json`, and `packages/renderer/src/index.ts` (plus minimal type/source entry files required by configured builds).
   - [x] Define the package as Node-compatible ESM and give it an explicit dependency on `@i-prikot/editor-schema` using the npm-compatible matching local version `0.1.0` (npm creates the workspace link); reserve `@tiptap/html` and server-rendering dependencies for the renderer implementation only when its exported API needs them.
   - [x] Add a narrow, truthful public entrypoint (for example, renderer input/output types or a deliberate empty foundation) rather than shipping a stub `renderDocument` that appears functional. Keep all Vue and browser-only code out of this package.
-  - [x] Add package exports and build/typecheck metadata consistent with the other workspaces so consumers can resolve `@i-prikot/renderer` once its rendering milestone is implemented.
+  - [x] Add package exports and build/typecheck metadata consistent with the other workspaces so consumers can resolve `@i-prikot/editor-renderer` once its rendering milestone is implemented.
   - [x] **Logging:** no runtime logs; package commands should report renderer build/typecheck failures with workspace context.
   - [x] **Depends on:** tasks 1–2.
 
@@ -106,7 +106,7 @@ The root remains private and owns workspace orchestration, shared development to
 - [x] `@i-prikot/editor-schema` can be typechecked without Vue packages or Vue NodeView code.
 - [x] `@i-prikot/editor` consumes the locally linked schema workspace through npm-compatible matching version `0.1.0`, owns Vue UI and NodeView adapters, and exports the existing editor public API plus a stylesheet entry.
 - [x] `@i-prikot/playground` builds and starts through its workspace command while importing `@i-prikot/editor` rather than root-relative editor source files.
-- [x] `@i-prikot/renderer` is a resolvable workspace package with a schema dependency and no Vue/browser dependency.
+- [x] `@i-prikot/editor-renderer` is a resolvable workspace package with a schema dependency and no Vue/browser dependency.
 - [x] `package-lock.json` is npm-generated and represents all workspaces; no old root `src` or root app entrypoint remains.
 - [x] `npm run typecheck`, `npm run lint`, and `npm run build` succeed; test cases and documentation are not added or changed for this task.
 

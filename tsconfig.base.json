@@ -12,7 +12,7 @@
     "paths": {
       "@i-prikot/editor-schema": ["packages/schema/src/index.ts"],
       "@i-prikot/editor": ["packages/editor/src/index.ts"],
-      "@i-prikot/renderer": ["packages/renderer/src/index.ts"]
+      "@i-prikot/editor-renderer": ["packages/renderer/src/index.ts"]
     },
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "skipLibCheck": true

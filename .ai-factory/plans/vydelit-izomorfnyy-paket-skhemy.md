@@ -1,4 +1,4 @@
-<!-- handoff:task:5ed90f5f-95c1-4903-b0bb-0567422ff1ad -->
+﻿<!-- handoff:task:5ed90f5f-95c1-4903-b0bb-0567422ff1ad -->
 # Implementation Plan: Extract an Isomorphic Editor Schema Package
 
 Branch: `main`
@@ -66,5 +66,5 @@ Rationale: "Autonomous handoff defaults to no roadmap linkage; this is an intern
 - [x] `@i-prikot/editor-schema` is a standalone ESM workspace package with declarations and no Vue dependency or import path.
 - [x] All schema extensions, marks configured by the extension kit, custom node specs, schema attributes, `parseHTML`, and `renderHTML` behavior are owned by the schema package.
 - [x] Vue NodeViews stay in `@i-prikot/editor`, and its three custom nodes are thin `.extend()` adapters over schema exports.
-- [x] `@i-prikot/renderer` can import schema types in Node.js without loading Vue or requiring browser globals at module import time.
+- [x] `@i-prikot/editor-renderer` can import schema types in Node.js without loading Vue or requiring browser globals at module import time.
 - [x] Static package builds, workspace type checking, and linting pass; no tests or documentation files are changed.

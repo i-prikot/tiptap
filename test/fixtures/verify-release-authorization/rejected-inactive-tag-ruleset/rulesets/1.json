@@ -1,0 +1,30 @@
+{
+  "id": 1,
+  "name": "Protect v* release tags",
+  "target": "tag",
+  "enforcement": "disabled",
+  "conditions": {
+    "ref_name": {
+      "include": ["refs/tags/v*"],
+      "exclude": []
+    }
+  },
+  "rules": [
+    {
+      "type": "creation"
+    },
+    {
+      "type": "update"
+    },
+    {
+      "type": "deletion"
+    }
+  ],
+  "bypass_actors": [
+    {
+      "actor_id": 13579,
+      "actor_type": "User",
+      "bypass_mode": "always"
+    }
+  ]
+}

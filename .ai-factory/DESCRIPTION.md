@@ -1,4 +1,4 @@
-# Описание проекта
+﻿# Описание проекта
 
 > Документ отвечает на вопрос «Что представляет собой проект?»: назначение,
 > возможности и бизнес-логика. Технические детали внутреннего устройства —
@@ -193,13 +193,14 @@ editor»**, изначально написанного на Next.js + React, и
 ## 10. Контракт публикации пакетов
 
 - Публикуемые workspace-пакеты имеют единственный допустимый npm scope:
-  `@i-prikot/editor-schema`, `@i-prikot/editor` и `@i-prikot/renderer`.
+  `@i-prikot/editor-schema`, `@i-prikot/editor` и `@i-prikot/editor-renderer`.
 - `.npmrc` и release workflow используют GitHub Packages только для scope
   `@i-prikot` (`https://npm.pkg.github.com`); имена архивов npm начинаются с
   `i-prikot-`.
 - `TINYFY_PACKAGES_TOKEN` — сохранённое имя GitHub Environment secret, а не
   указание на namespace пакетов. Планы и реализации не должны возвращать
-  `@tinyfy/*` в manifest-файлы, импорты, конфигурацию, verifier-ы или workflow.
+  устаревший scope `@tinyfy/*` в manifest-файлы, импорты, конфигурацию,
+  verifier-ы или workflow.
 - Удалённый GitHub Environment `tinyfy-private-package-publish` должен хранить
   этот токен как environment secret и требовать approval release maintainer-ов.
   Это требование нельзя подтвердить только по содержимому репозитория.

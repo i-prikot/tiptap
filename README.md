@@ -1,10 +1,10 @@
 # Tinyfy Tiptap Editor
 
-Tinyfy Tiptap Editor is a Vue 3 + Vite + TypeScript implementation of a Notion-like rich text editor built on Tiptap v3. The project is intended to serve as an embeddable editor library/component for Tinyfy while still running today as a local Vite demo application.
+Tinyfy Tiptap Editor is a Vue 3 + Vite + TypeScript implementation of a Notion-like rich text editor built on Tiptap v3. The repository contains npm workspaces for the editor, its schema, and an optional static renderer, plus a local Vite playground for development.
 
 The current editor includes rich text blocks, headings, lists, task lists, tables, image nodes, table of contents support, floating toolbars, slash commands, mention and emoji menus, light/dark theme switching, local editing mode, optional Tiptap Cloud collaboration, and an optional AI token flow placeholder.
 
-> Current packaging note: this repository is not configured as a published npm library yet. Tinyfy integration should treat `src/editor/components/notion/NotionEditor.vue` as the main component boundary to extract or import, and add formal library exports/build settings separately if direct package consumption is required.
+> Package entry points: Tinyfy consumes `NotionEditor` from `@i-prikot/editor` and the stylesheet from `@i-prikot/editor/style.css`. Resolve `@i-prikot/editor-schema` whenever it is required by the cabinet or the editor dependency graph.
 
 ## Tech Stack
 
@@ -106,19 +106,121 @@ Leave `APP_ID` values empty to run fully locally.
 
 ## Tinyfy Embedding Notes
 
-The current entry flow is:
+### Local Integration with the Tinyfy Cabinet
+
+Use one of these workflows when developing the cabinet and editor together:
+
+- **Packed local tarballs** validate the same `dist`-based package boundary that a consumer receives. Use this workflow before accepting a release-boundary change.
+- **Vite source aliases** point the cabinet directly at this checkout's source files. Use them for faster editor-source iteration, then return to the tarball workflow for packed-artifact validation.
+
+Both workflows use the same integration surface:
+
+```ts
+import { NotionEditor } from '@i-prikot/editor'
+import '@i-prikot/editor/style.css'
+```
+
+Install or resolve `@i-prikot/editor-schema` whenever the cabinet or the editor dependency graph requires it. The detailed tarball and source-alias procedures follow in this section.
+
+### Component Integration
+
+The package entry point maps to the following editor flow:
 
 1. `src/main.ts` imports global CSS and mounts the Vue app.
 2. `src/App.vue` calls `getDocumentId()` and passes the result as `room`.
 3. `src/editor/components/notion/NotionEditor.vue` provides user, collaboration, AI, and TOC contexts, then renders `NotionEditorContent`.
 4. `NotionEditorContent` and `EditorProvider` create the Tiptap editor instance and compose the header, content area, floating UI, table UI, and sidebars.
 
-For Tinyfy, `NotionEditor.vue` is the main integration boundary. It currently accepts:
+`NotionEditor` is the main cabinet integration boundary. It currently accepts:
 
 - `room?: string` — document/collaboration room id.
 - `placeholder?: string` — editor placeholder text, defaulting to `Start writing...`.
 
-Because the repository currently runs as a Vite app/demo, a production Tinyfy embedding pass should decide how to expose the editor component, styles, and peer dependencies. Possible follow-up work includes adding a library-mode Vite build, explicit exports, package metadata for distribution, and integration tests in the consuming Tinyfy app.
+The cabinet must provide compatible `vue` and `@tiptap/*` runtime versions. Incompatible or duplicated copies can create separate editor or ProseMirror instances.
+
+### Packed Local Tarballs
+
+Use local tarballs to validate the production package boundary. This exercises the built `dist` artifacts rather than resolving workspace source files.
+
+From this editor checkout, install dependencies, build every workspace package, then pack the schema **before** the editor:
+
+```bash
+npm install
+npm run build
+npm pack --workspace=@i-prikot/editor-schema
+npm pack --workspace=@i-prikot/editor
+
+# Only when the cabinet uses static rendering:
+npm pack --workspace=@i-prikot/editor-renderer
+```
+
+Each `npm pack` command prints the generated `.tgz` path. Keep those paths and install them in the cabinet in the same order, replacing each placeholder with the path printed on your machine:
+
+```bash
+# Run in the Tinyfy cabinet checkout.
+npm install <path-to-editor-schema-tarball>.tgz
+npm install <path-to-editor-tarball>.tgz
+
+# Only when the cabinet uses static rendering:
+npm install <path-to-renderer-tarball>.tgz
+```
+
+The installed editor must resolve the normal imports:
+
+```ts
+import { NotionEditor } from '@i-prikot/editor'
+import '@i-prikot/editor/style.css'
+```
+
+Before treating the installation as valid, check the following:
+
+- `node_modules/@i-prikot/editor` and `node_modules/@i-prikot/editor-schema` are extracted package archives, not symlinks to this workspace.
+- The editor package contains its built `dist` files, including the JavaScript entry point, declarations, and stylesheet.
+- The cabinet resolves compatible versions of `vue` and the required `@tiptap/*` packages; incompatible peer runtimes can duplicate editor or ProseMirror instances.
+- No generated `.tgz` archive is staged or committed in either repository.
+
+After any package change, repeat the loop: run `npm run build`, pack the schema and editor again, reinstall the new tarballs in the cabinet, then restart its Vite dev server if dependency pre-bundling prevents the update from appearing. A tarball install verifies the consumer boundary; do not replace it with a workspace link or a source alias when checking a release-boundary change.
+
+### Vite Source Aliases
+
+For rapid source-level iteration, the cabinet can alias package imports to this checkout. The alias array and filesystem-access shape mirror the known-good pattern in `apps/playground/vite.config.ts`.
+
+In the cabinet's `vite.config.ts`, replace the path placeholder with the root of your local editor checkout. Do not commit a machine-specific path:
+
+```ts
+import { resolve } from 'node:path'
+import { defineConfig } from 'vite'
+
+const editorCheckoutRoot = '<path-to-local-tinyfy-editor-checkout>'
+
+export default defineConfig({
+  resolve: {
+    alias: [
+      {
+        find: '@i-prikot/editor/style.css',
+        replacement: resolve(editorCheckoutRoot, 'packages/editor/src/styles.css'),
+      },
+      {
+        find: '@i-prikot/editor-schema',
+        replacement: resolve(editorCheckoutRoot, 'packages/schema/src/index.ts'),
+      },
+      {
+        find: '@i-prikot/editor',
+        replacement: resolve(editorCheckoutRoot, 'packages/editor/src/index.ts'),
+      },
+    ],
+  },
+  server: {
+    fs: {
+      allow: [editorCheckoutRoot],
+    },
+  },
+})
+```
+
+`server.fs.allow` is required when the cabinet repository is outside this workspace; without it Vite rejects imports from the editor checkout. These aliases intentionally bypass packed `dist` artifacts. Remove them before production packaging, and ensure the cabinet and editor share compatible `vue` and `@tiptap/*` runtimes so Vite does not load duplicate editor or ProseMirror instances.
+
+To verify the alias workflow, start the cabinet dev server, edit an editor source or style file in this checkout, and confirm that the cabinet receives hot reload. If Vite does not apply the change, restart the cabinet dev server and confirm the updated file is still resolved through the alias. Return to the packed-tarball workflow before accepting any release-boundary change.
 
 ## Development Notes
 

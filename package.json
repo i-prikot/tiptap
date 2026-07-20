@@ -4,8 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "changeset": "changeset",
+    "changeset:status": "changeset status",
+    "version:packages": "changeset version && npm install --package-lock-only --ignore-scripts",
     "dev": "echo '[workspace:@i-prikot/playground] dev' && npm run dev --workspace=@i-prikot/playground",
-    "build": "echo '[workspace:@i-prikot/editor-schema] build' && npm run build --workspace=@i-prikot/editor-schema && echo '[workspace:@i-prikot/editor] build' && npm run build --workspace=@i-prikot/editor && echo '[workspace:@i-prikot/renderer] build' && npm run build --workspace=@i-prikot/renderer && echo '[workspace:@i-prikot/playground] build' && npm run build --workspace=@i-prikot/playground",
+    "build": "echo '[workspace:@i-prikot/editor-schema] build' && npm run build --workspace=@i-prikot/editor-schema && echo '[workspace:@i-prikot/editor] build' && npm run build --workspace=@i-prikot/editor && echo '[workspace:@i-prikot/editor-renderer] build' && npm run build --workspace=@i-prikot/editor-renderer && echo '[workspace:@i-prikot/playground] build' && npm run build --workspace=@i-prikot/playground",
     "typecheck": "echo '[workspace] typecheck' && vue-tsc --build",
     "lint": "npm run lint --workspaces --if-present && eslint test e2e",
     "test": "vitest run",
@@ -16,9 +19,11 @@
     "format:check": "prettier . --check",
     "prepare": "node scripts/prepare-husky.cjs",
     "precommit": "lint-staged --concurrent 1 && npm run typecheck",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:release-verifiers": "node --experimental-strip-types --import ./scripts/register-release-verifier-test-loader.mjs scripts/run-release-verifier-tests.mjs test/scripts/verify-publish-tag.test.ts test/scripts/verify-publish-artifacts.test.ts test/scripts/verify-release-authorization.test.ts"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.1",
     "@eslint/js": "^9.17.0",
     "@playwright/test": "^1.61.1",
     "@vitejs/plugin-vue": "^5.2.1",

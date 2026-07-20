@@ -1,106 +1,116 @@
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const logLevels = Object.freeze({ debug: 10, info: 20, error: 30, silent: Infinity })
-const configuredLevel = (process.env.LOG_LEVEL ?? 'info').toLowerCase()
-const currentLevel = logLevels[configuredLevel] ?? logLevels.info
-const projectRoot = fileURLToPath(new URL('..', import.meta.url))
-const expectedPackages = Object.freeze([
-  { name: '@i-prikot/editor-schema', manifestPath: 'packages/schema/package.json' },
-  { name: '@i-prikot/editor', manifestPath: 'packages/editor/package.json' },
-  { name: '@i-prikot/renderer', manifestPath: 'packages/renderer/package.json' },
-])
+const repositoryRoot = process.cwd()
+const packageDefinitions = [
+  { file: 'packages/schema/package.json', name: '@i-prikot/editor-schema' },
+  { file: 'packages/editor/package.json', name: '@i-prikot/editor' },
+  { file: 'packages/renderer/package.json', name: '@i-prikot/editor-renderer' },
+]
+const expectedRegistry = 'https://npm.pkg.github.com'
+const expectedNpmrc = '@i-prikot:registry=https://npm.pkg.github.com\n'
+const logLevels = { debug: 10, info: 20, error: 30, silent: Number.POSITIVE_INFINITY }
+const configuredLogLevel = process.env.LOG_LEVEL?.toLowerCase() ?? 'info'
+const minimumLogLevel = logLevels[configuredLogLevel] ?? logLevels.info
 
 function log(level, message, context = {}) {
-  if (logLevels[level] < currentLevel) {
+  if (logLevels[level] < minimumLogLevel) {
     return
   }
 
-  const prefix = level.toUpperCase()
   const serializedContext = Object.keys(context).length > 0 ? ` ${JSON.stringify(context)}` : ''
-  const output = `[${prefix}] ${message}${serializedContext}`
-  const writer = level === 'error' ? console.error : console.log
-  writer(output)
+  console.log(`[${level.toUpperCase()}] ${message}${serializedContext}`)
 }
 
-async function readManifest(manifestPath) {
-  const absolutePath = resolve(projectRoot, manifestPath)
-  log('debug', 'Reading package manifest.', { manifestPath })
+async function readJson(file) {
+  const content = await readFile(resolve(repositoryRoot, file), 'utf8')
+  return JSON.parse(content)
+}
 
-  try {
-    return JSON.parse(await readFile(absolutePath, 'utf8'))
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
-    throw new Error(`Unable to read ${manifestPath}: ${message}`)
+function parseReleaseTag(tag) {
+  const match =
+    /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/.exec(
+      tag,
+    )
+
+  if (!match) {
+    throw new Error('Release tag must use the v<semver> format.')
+  }
+
+  if (match[4]) {
+    throw new Error('Release tag must not include a prerelease identifier.')
+  }
+
+  return tag.slice(1)
+}
+
+function validatePackage(packageJson, definition, expectedVersion) {
+  if (packageJson.name !== definition.name) {
+    throw new Error(`${definition.file} must declare ${definition.name}.`)
+  }
+
+  if (packageJson.version !== expectedVersion) {
+    throw new Error(
+      `${definition.name} version ${packageJson.version ?? '<missing>'} does not match ${expectedVersion}.`,
+    )
+  }
+
+  if (Object.hasOwn(packageJson, 'private')) {
+    throw new Error(`${definition.name} must not declare private before publishing.`)
+  }
+
+  if (packageJson.publishConfig?.registry !== expectedRegistry) {
+    throw new Error(`${definition.name} must publish to ${expectedRegistry}.`)
+  }
+
+  log('debug', 'Validated release package version.', {
+    package: definition.name,
+    version: packageJson.version,
+  })
+}
+
+async function validateRegistryConfiguration() {
+  const npmrc = await readFile(resolve(repositoryRoot, '.npmrc'), 'utf8')
+  if (npmrc !== expectedNpmrc) {
+    throw new Error('.npmrc must contain only the @i-prikot GitHub Packages registry mapping.')
   }
 }
 
-async function verifyPublishTag(tag) {
-  log('info', 'Starting publish tag verification.', { tag })
-
-  if (!tag) {
-    throw new Error('Expected exactly one release tag argument in the form v<version>.')
+async function main() {
+  const [tag] = process.argv.slice(2)
+  if (!tag || process.argv.length !== 3) {
+    throw new Error('Usage: node scripts/verify-publish-tag.mjs v<version>.')
   }
 
-  const manifests = await Promise.all(
-    expectedPackages.map(async ({ name, manifestPath }) => ({
-      expectedName: name,
-      manifestPath,
-      manifest: await readManifest(manifestPath),
+  const expectedVersion = parseReleaseTag(tag)
+  log('info', 'Starting release tag validation.', { tag })
+
+  const rootPackage = await readJson('package.json')
+  if (rootPackage.private !== true) {
+    throw new Error('The root workspace must remain private.')
+  }
+
+  await validateRegistryConfiguration()
+
+  const packageJsons = await Promise.all(
+    packageDefinitions.map(async (definition) => ({
+      definition,
+      packageJson: await readJson(definition.file),
     })),
   )
 
-  const versions = manifests.map(({ manifest }) => manifest.version)
-  const sharedVersion = versions[0]
-  const expectedTag = `v${sharedVersion}`
+  for (const { definition, packageJson } of packageJsons) {
+    validatePackage(packageJson, definition, expectedVersion)
+  }
 
-  log('debug', 'Comparing package release metadata.', {
-    packages: manifests.map(({ expectedName, manifest }) => ({
-      expectedName,
-      name: manifest.name,
-      version: manifest.version,
-      private: manifest.private === true,
-    })),
-    expectedTag,
+  log('info', 'Release tag validation completed.', {
+    tag,
+    packageCount: packageDefinitions.length,
   })
-
-  if (!/^v[^\s]+$/.test(tag)) {
-    throw new Error(`Release tag must use the v<version> format; received ${tag}.`)
-  }
-
-  if (!sharedVersion || !versions.every((version) => version === sharedVersion)) {
-    throw new Error(`Target package versions must match; received ${versions.join(', ')}.`)
-  }
-
-  if (tag !== expectedTag) {
-    throw new Error(`Release tag ${tag} does not match package version ${sharedVersion}.`)
-  }
-
-  for (const { expectedName, manifestPath, manifest } of manifests) {
-    if (manifest.name !== expectedName) {
-      throw new Error(
-        `Package name mismatch in ${manifestPath}: expected ${expectedName}, received ${manifest.name ?? '<missing>'}.`,
-      )
-    }
-
-    if (manifest.private === true) {
-      throw new Error(`Package ${expectedName} is still private and cannot be published.`)
-    }
-  }
-
-  log('info', 'Publish tag verification completed.', { tag, version: sharedVersion })
 }
 
-const [tag, ...extraArguments] = process.argv.slice(2)
-
-if (extraArguments.length > 0) {
-  log('error', 'Publish tag verification failed.', { reason: 'Too many release tag arguments.' })
+main().catch((error) => {
+  const message = error instanceof Error ? error.message : String(error)
+  log('error', 'Release tag validation failed.', { message })
   process.exitCode = 1
-} else {
-  verifyPublishTag(tag).catch((error) => {
-    const message = error instanceof Error ? error.message : String(error)
-    log('error', 'Publish tag verification failed.', { message })
-    process.exitCode = 1
-  })
-}
+})

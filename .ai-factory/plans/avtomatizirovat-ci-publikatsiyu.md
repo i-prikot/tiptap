@@ -1,4 +1,4 @@
-<!-- handoff:task:b0a1d720-42df-4130-9a3d-65cc5c2d7923 -->
+﻿<!-- handoff:task:b0a1d720-42df-4130-9a3d-65cc5c2d7923 -->
 # Implementation Plan: Автоматизировать CI-публикацию
 
 Branch: `main`
@@ -8,7 +8,7 @@ Mode: fast (Autonomous Handoff)
 ## Goal
 
 Автоматизировать безопасный выпуск `@i-prikot/editor-schema`, `@i-prikot/editor` и
-`@i-prikot/renderer` по стратегии **Changesets version PR + выпускной тег**:
+`@i-prikot/editor-renderer` по стратегии **Changesets version PR + выпускной тег**:
 
 1. каждый merge в `main` создаёт или обновляет один Changesets version PR с
    синхронной версией и changelog;
@@ -20,9 +20,9 @@ Mode: fast (Autonomous Handoff)
 
 ## Settings
 
-- [ ] Testing: no — не добавлять, не изменять и не запускать тесты.
-- [ ] Logging: verbose — диагностировать workflow boundaries и версии без runtime-логов.
-- [ ] Docs: no — не создавать documentation tasks или обязательную docs checkpoint.
+- [x] Testing: rework-исключение — обновить и запустить только целевой тест release authorization, чтобы зафиксировать blocking findings.
+- [x] Logging: verbose — диагностировать workflow boundaries и версии без runtime-логов.
+- [x] Docs: no — не создавать documentation tasks или обязательную docs checkpoint.
 
 ## Roadmap Linkage
 
@@ -33,16 +33,16 @@ roadmap-артефакт.
 
 ## Release Contract
 
-- [ ] `main` — единственный источник Changesets version PR; публикация от pull
+- [x] `main` — единственный источник Changesets version PR; публикация от pull
   request или обычного push в `main` запрещена.
-- [ ] Tag `v<version>` обязан совпадать с общей версией всех трёх пакетов fixed
+- [x] Tag `v<version>` обязан совпадать с общей версией всех трёх пакетов fixed
   version group.
-- [ ] Только publishing workflow получает `packages: write`; авторизация идёт
+- [x] Только publishing workflow получает `packages: write`; авторизация идёт
   исключительно через краткоживущий `${{ secrets.GITHUB_TOKEN }}` в
   `NODE_AUTH_TOKEN`.
-- [ ] Registry config, YAML-логи и скрипты не содержат literal token, PAT или
+- [x] Registry config, YAML-логи и скрипты не содержат literal token, PAT или
   их значение.
-- [ ] Публикация идёт в порядке `editor-schema` → `editor` → `renderer`; root
+- [x] Публикация идёт в порядке `editor-schema` → `editor` → `renderer`; root
   workspace и `@i-prikot/playground` никогда не публикуются.
 
 ## Prerequisites
@@ -60,98 +60,109 @@ roadmap-артефакт.
 
 ### Phase 1: Establish release inputs
 
-- [ ] **Task 1: Финализировать единый контракт версий и release-команд.**
-  - [ ] Files: `package.json`, `package-lock.json`, `.changeset/config.json`,
+- [x] **Task 1: Финализировать единый контракт версий и release-команд.**
+  - [x] Files: `package.json`, `package-lock.json`, `.changeset/config.json`,
     `packages/schema/package.json`, `packages/editor/package.json`,
     `packages/renderer/package.json`.
-  - [ ] Добавить или подтвердить root-команды создания, просмотра и применения
+  - [x] Добавить или подтвердить root-команды создания, просмотра и применения
     Changesets и закрепить `@changesets/cli` в lockfile.
-  - [ ] Настроить fixed group ровно из трёх библиотек с `baseBranch: main`,
+  - [x] Настроить fixed group ровно из трёх библиотек с `baseBranch: main`,
     генерируемыми changelog и исключением root workspace/playground.
-  - [ ] Сохранить одинаковые версии пакетов и их export maps; не добавлять
+  - [x] Сохранить одинаковые версии пакетов и их export maps; не добавлять
     конкурирующий versioning или самостоятельные publish scripts.
-  - [ ] **Logging:** `INFO` о Changesets phase и результате version PR, `DEBUG`
+  - [x] **Logging:** `INFO` о Changesets phase и результате version PR, `DEBUG`
     только для package names/versions, `ERROR` о fixed-group/version mismatch;
     credentials и package archive contents не логировать.
-  - [ ] Dependencies: prerequisites completed.
+  - [x] Dependencies: prerequisites completed.
 
-- [ ] **Task 2: Зафиксировать безопасный registry и tag-validation boundary.**
-  - [ ] Files: `.npmrc`, `packages/schema/package.json`,
+- [x] **Task 2: Зафиксировать безопасный registry и tag-validation boundary.**
+  - [x] Files: `.npmrc`, `packages/schema/package.json`,
     `packages/editor/package.json`, `packages/renderer/package.json`,
     `scripts/verify-publish-tag.mjs`.
-  - [ ] Оставить root private; убрать `private: true` только с трёх библиотек и
+  - [x] Оставить root private; убрать `private: true` только с трёх библиотек и
     задать им `publishConfig.registry: "https://npm.pkg.github.com"`.
-  - [ ] Коммитить в `.npmrc` только
+  - [x] Коммитить в `.npmrc` только
     `@i-prikot:registry=https://npm.pkg.github.com`; запретить `:_authToken`, PAT,
     literal `always-auth` и глобальную замену npm registry.
-  - [ ] Реализовать dependency-free validation: формат `v<version>`, точное
+  - [x] Реализовать dependency-free validation: формат `v<version>`, точное
     совпадение всех package versions, ожидаемые names, отсутствие `private` и
     исключение root/playground из publish set.
-  - [ ] **Logging:** `INFO` для успешной tag/version validation, `DEBUG` только
+  - [x] **Logging:** `INFO` для успешной tag/version validation, `DEBUG` только
     для имён/версий, `ERROR` с причиной и package; не читать и не печатать env tokens.
-  - [ ] Dependencies: Task 1.
+  - [x] Dependencies: Task 1.
 
 ### Phase 2: Automate reviewed versioning on `main`
 
-- [ ] **Task 3: Добавить least-privilege Changesets version-PR workflow.**
-  - [ ] Files: `.github/workflows/changesets.yml`.
-  - [ ] Триггеры: push в `main` и `workflow_dispatch`; использовать Node 22,
-    npm cache, `npm ci`, затем Changesets action, создающий/обновляющий один
-    version PR вместо прямого version commit в `main`.
-  - [ ] Выдать только `contents: write` и `pull-requests: write`; не выдавать
+- [x] **Task 3: Добавить least-privilege Changesets version-PR workflow.**
+  - [x] Files: `.github/workflows/changesets.yml`.
+  - [x] Триггер: только push в `main`; `workflow_dispatch` намеренно запрещён,
+    чтобы workflow с `contents: write` и `pull-requests: write` всегда выполнял
+    trusted код из `main` при создании/обновлении version PR.
+  - [x] Выдать только `contents: write` и `pull-requests: write`; не выдавать
     `packages: write`, `id-token: write`, `NODE_AUTH_TOKEN` или registry secrets.
-  - [ ] Добавить concurrency по workflow/branch, предотвращающую конкурирующие
+  - [x] Добавить concurrency по workflow/branch, предотвращающую конкурирующие
     version PR при параллельных merge.
-  - [ ] До versioning запускать безтестовые quality gates:
+  - [x] До versioning запускать безтестовые quality gates:
     `npm run typecheck`, `npm run lint`, `npm run build`.
-  - [ ] **Logging:** `INFO` для checkout/install/gates/version PR, `DEBUG` для
+  - [x] **Logging:** `INFO` для checkout/install/gates/version PR, `DEBUG` для
     итоговых версий, `ERROR` для failed step и exit status; token values не выводить.
-  - [ ] Dependencies: Tasks 1–2.
+  - [x] Dependencies: Tasks 1–2.
 
 ### Phase 3: Publish only an explicit release tag
 
-- [ ] **Task 4: Добавить защищённый tag-triggered publishing workflow.**
-  - [ ] Files: `.github/workflows/publish.yml`, `.github/workflows/ci.yml`.
-  - [ ] Триггеры publishing workflow: только push tags `v*` и manual dispatch с
+- [x] **Task 4: Добавить защищённый tag-triggered publishing workflow.**
+  - [x] Files: `.github/workflows/publish.yml`, `.github/workflows/ci.yml`.
+  - [x] Триггеры publishing workflow: только push tags `v*` и manual dispatch с
     явным `release_tag`; не публиковать от pull request или push в `main`.
-  - [ ] Настроить `contents: read` и `packages: write` только здесь; использовать
+  - [x] Настроить `contents: read` и `packages: write` только здесь; использовать
     `actions/setup-node@v4`, Node 22, GitHub Packages registry и scope `@i-prikot`.
-  - [ ] Выполнять `npm ci`, `typecheck`, `lint`, `build`,
+  - [x] Выполнять `npm ci`, `typecheck`, `lint`, `build`,
     `node scripts/verify-publish-tag.mjs <resolved-tag>`, затем `npm publish`
     workspaces строго schema → editor → renderer.
-  - [ ] Передавать `${{ secrets.GITHUB_TOKEN }}` как `NODE_AUTH_TOKEN` только в
+  - [x] Передавать `${{ secrets.GITHUB_TOKEN }}` как `NODE_AUTH_TOKEN` только в
     publish-step environment; не помещать token в файлы, CLI arguments, job-wide
     env или diagnostic output.
-  - [ ] Добавить concurrency по tag/ref и безопасную ошибку, если immutable
+  - [x] Rework (2026-07-19): удалить runtime-проверки GitHub Rulesets API, так как
+    стандартный `GITHUB_TOKEN` не имеет repository-administration read access;
+    verifier проверяет только доступные environment reviewer и deployment policy `v*`,
+    а `workflow_dispatch` по-прежнему требует точный `refs/tags/<release_tag>` до
+    выдачи publishing credentials.
+  - [x] Rework (2026-07-19): `verify-release-authorization.mjs` требует
+    `can_admins_bypass === false`; fixture и regression test отклоняют environment,
+    где administrator может обойти deployment reviewer (finding `e74ac02ba28f`).
+  - [x] Добавить concurrency по tag/ref и безопасную ошибку, если immutable
     package version уже опубликована; не пытаться перезаписывать её.
-  - [ ] Оставить `.github/workflows/ci.yml` PR-only и без package-write прав.
-  - [ ] **Logging:** `INFO` для resolved tag, gates, validation и package boundaries,
+  - [x] Оставить `.github/workflows/ci.yml` PR-only и без package-write прав.
+  - [x] **Logging:** `INFO` для resolved tag, gates, validation и package boundaries,
     `DEBUG` для package/version, `ERROR` для failing package/command/status;
     GitHub secret masking обязателен.
-  - [ ] Dependencies: Tasks 2–3.
+  - [x] Dependencies: Tasks 2–3.
 
 ### Phase 4: Verify the release boundary without tests
 
 - [ ] **Task 5: Провести release-preflight и закрепить ручные gates первого выпуска.**
-  - [ ] Files: inspect `package.json`, `package-lock.json`, `.changeset/config.json`,
+  - [x] Files: inspect `package.json`, `package-lock.json`, `.changeset/config.json`,
     `.npmrc`, `scripts/verify-publish-tag.mjs`, `.github/workflows/changesets.yml`,
     `.github/workflows/publish.yml`, `.github/workflows/ci.yml`; менять только
     перечисленные файлы при обнаружении дефекта.
   - [ ] Выполнить `npm ci`, `npm run typecheck`, `npm run lint`, `npm run build` и
     `node scripts/verify-publish-tag.mjs v<shared-package-version>`; не запускать
-    и не добавлять тесты.
-  - [ ] Статически проверить YAML: `main` workflow создаёт version PR без registry
+    полный test suite. Rework-исключение: обновить и запустить только целевой
+    regression test release authorization.
+  - [x] Rework (2026-07-19): обновить и запустить только целевой regression test
+    release authorization, подтверждающий отсутствие runtime Rulesets API checks.
+  - [x] Статически проверить YAML: `main` workflow создаёт version PR без registry
     credentials; tag workflow — единственный с `packages: write`, а secret
     используется только как `NODE_AUTH_TOKEN` publish step.
-  - [ ] Выполнить `npm pack --dry-run` для всех трёх packages, проверить archive
+  - [x] Выполнить `npm pack --dry-run` для всех трёх packages, проверить archive
     contents и подтвердить отсутствие root/playground в publish set.
   - [ ] Перед первым релизом вручную подтвердить GitHub Packages access для
     `@i-prikot`, затем создать `v<shared-version>` только после merge version PR и
     проверить появление трёх private packages.
-  - [ ] **Logging:** `INFO` summary для каждого gate, `DEBUG` для archive files и
+  - [x] **Logging:** `INFO` summary для каждого gate, `DEBUG` для archive files и
     version comparison, `ERROR` для unsafe permissions, package access или gate
     failure; secrets и полное archive content не публиковать.
-  - [ ] Dependencies: Task 4.
+  - [x] Dependencies: Task 4.
 
 ## Commit Plan
 
@@ -161,11 +172,20 @@ roadmap-артефакт.
 
 ## Completion Criteria
 
-- [ ] Merge в `main` создаёт/обновляет один Changesets version PR после
+- [x] Merge в `main` создаёт/обновляет один Changesets version PR после
   безтестовых quality checks и без package-write secret.
-- [ ] Только tag `v<shared-version>` проходит package/tag validation, сборку и
+- [x] Только tag `v<shared-version>` проходит package/tag validation, сборку и
   публикацию библиотек в правильном порядке.
-- [ ] Publishing job — единственный с `packages: write`; registry authentication
+- [x] Publishing job — единственный с `packages: write`; registry authentication
   ограничена `secrets.GITHUB_TOKEN` в `NODE_AUTH_TOKEN`.
-- [ ] Повторный тот же release tag не может перезаписать immutable package version.
-- [ ] Тесты, тестовые файлы и документация не добавлены, не изменены и не запущены.
+- [x] Повторный тот же release tag не может перезаписать immutable package version.
+- [x] Rework (2026-07-19): удалены runtime Rulesets API checks, а целевой regression
+  test release authorization подтверждает отсутствие недоступных API-вызовов;
+  документация не изменялась.
+- [x] Rework (2026-07-19): `verify-publish-tag.mjs` отклоняет prerelease-теги до
+  package validation, защищая npm `latest` dist-tag; regression coverage добавлено для
+  `v1.2.3-rc.1` (finding `dee76a702b34`). `.github/workflows/prepare-publish-artifacts.yml`
+  ограничен workflow-level `permissions: { contents: read }` (finding `afc5b05ba818`).
+- [x] Rework (2026-07-19): release authorization verifier строго отклоняет
+  `can_admins_bypass: true`; dedicated fixture/test покрывает запрет administrator bypass
+  для protected publish environment (finding `e74ac02ba28f`).

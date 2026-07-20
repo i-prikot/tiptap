@@ -1,0 +1,50 @@
+name: Changesets Version PR
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: changesets-version-pr
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: Create or update version PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'INFO: Checkout main'
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: 'INFO: Set up Node.js 22'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 'INFO: Install locked dependencies'
+        run: npm ci
+
+      - name: 'INFO: Run typecheck gate'
+        run: npm run typecheck
+
+      - name: 'INFO: Run lint gate'
+        run: npm run lint
+
+      - name: 'INFO: Run build gate'
+        run: npm run build
+
+      - name: 'INFO: Process Changesets status and update version PR'
+        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
+        with:
+          version: npm run version:packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

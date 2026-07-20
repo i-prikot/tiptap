@@ -94,7 +94,7 @@ jobs:
 
           pack_workspace '@i-prikot/editor-schema'
           pack_workspace '@i-prikot/editor'
-          pack_workspace '@i-prikot/renderer'
+          pack_workspace '@i-prikot/editor-renderer'
 
           archive_count="$(find "${artifact_dir}" -maxdepth 1 -type f -name '*.tgz' | wc -l | tr -d ' ')"
           if [ "${archive_count}" -ne 3 ]; then

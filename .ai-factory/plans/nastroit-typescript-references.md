@@ -1,4 +1,4 @@
-<!-- handoff:task:bfdf7a86-62e8-4549-9405-4a2de2b74125 -->
+﻿<!-- handoff:task:bfdf7a86-62e8-4549-9405-4a2de2b74125 -->
 # Configure TypeScript Project References
 
 **Branch:** `main`  
@@ -13,7 +13,7 @@ Make the npm-workspaces monorepo use one explicit TypeScript solution contract: 
 
 - [ ] `tsconfig.base.json` already provides strict shared compiler options and source aliases for `@i-prikot/editor-schema` and `@i-prikot/editor`.
 - [ ] The root `tsconfig.json` already lists `schema`, `editor`, `renderer`, and `playground` as solution projects.
-- [ ] Package references currently follow `schema → editor`, `schema → renderer`, and `schema/editor → playground`; however, the shared alias table does not cover the public `@i-prikot/renderer` entry point.
+- [ ] Package references currently follow `schema → editor`, `schema → renderer`, and `schema/editor → playground`; however, the shared alias table does not cover the public `@i-prikot/editor-renderer` entry point.
 - [ ] Vite uses separate source aliases for runtime development. Keep those aliases aligned with TypeScript rather than adding a wildcard path mapping or a new alias-resolution plugin.
 
 ## Settings
@@ -34,7 +34,7 @@ Make the npm-workspaces monorepo use one explicit TypeScript solution contract: 
 
 - [x] **1. Centralize shared compiler options and public workspace aliases.**  
   **Files:** `tsconfig.base.json`.  
-  Keep language target, strictness, bundler resolution, standard libraries, and `baseUrl` in the base config. Define exact source aliases for every public internal package entry point: `@i-prikot/editor-schema`, `@i-prikot/editor`, and `@i-prikot/renderer`. Do not introduce `@i-prikot/*` or package wildcard mappings, so package-private modules remain inaccessible across workspace boundaries; keep the CSS subpath as a Vite-only runtime alias.  
+  Keep language target, strictness, bundler resolution, standard libraries, and `baseUrl` in the base config. Define exact source aliases for every public internal package entry point: `@i-prikot/editor-schema`, `@i-prikot/editor`, and `@i-prikot/editor-renderer`. Do not introduce `@i-prikot/*` or package wildcard mappings, so package-private modules remain inaccessible across workspace boundaries; keep the CSS subpath as a Vite-only runtime alias.  
   **Expected behavior:** dependent packages resolve their public workspace imports to current source during development while retaining package-boundary discipline.  
   **Logging:** no application logging; run subsequent validation commands with verbose compiler diagnostics.
 
@@ -64,7 +64,7 @@ Make the npm-workspaces monorepo use one explicit TypeScript solution contract: 
 
 - [x] `tsconfig.base.json` is the single source for shared compiler options and exact public internal-package paths.
 - [x] `tsconfig.json` and all workspace `tsconfig.json` files form a valid composite project-reference graph matching package dependencies.
-- [x] `@i-prikot/editor-schema`, `@i-prikot/editor`, and `@i-prikot/renderer` resolve consistently in TypeScript; existing CSS runtime resolution remains handled by Vite.
+- [x] `@i-prikot/editor-schema`, `@i-prikot/editor`, and `@i-prikot/editor-renderer` resolve consistently in TypeScript; existing CSS runtime resolution remains handled by Vite.
 - [x] `npm run typecheck` uses the root TypeScript solution rather than manually reproducing dependency ordering.
 - [x] A clean `vue-tsc --build --verbose` succeeds, and an unchanged follow-up build is incremental.
 - [x] No automated tests or documentation changes are introduced.

@@ -7,6 +7,8 @@ import { afterEach, describe, expect, it } from 'vitest'
 const projectRoot = process.cwd()
 const artifactVerifierPath = resolve(projectRoot, 'scripts/verify-publish-artifacts.mjs')
 const temporaryDirectories: string[] = []
+const archiveCreationTimeoutMs = 1_000
+const verifierTimeoutMs = 4_000
 
 function createArchive(
   artifactDirectory: string,
@@ -31,15 +33,19 @@ function createArchive(
     )}\n`,
   )
 
-  execFileSync('tar', [
-    '--create',
-    '--gzip',
-    '--file',
-    join(artifactDirectory, archiveName),
-    '--directory',
-    fixtureRoot,
-    'package',
-  ])
+  execFileSync(
+    'tar',
+    [
+      '--create',
+      '--gzip',
+      '--file',
+      join(artifactDirectory, archiveName),
+      '--directory',
+      fixtureRoot,
+      'package',
+    ],
+    { timeout: archiveCreationTimeoutMs },
+  )
 }
 
 function createArtifactDirectory(packageNames: string[]) {
@@ -48,7 +54,7 @@ function createArtifactDirectory(packageNames: string[]) {
   const archiveNames = [
     'i-prikot-editor-schema-1.2.3.tgz',
     'i-prikot-editor-1.2.3.tgz',
-    'i-prikot-renderer-1.2.3.tgz',
+    'i-prikot-editor-renderer-1.2.3.tgz',
   ]
 
   archiveNames.forEach((archiveName, index) => {
@@ -59,7 +65,7 @@ function createArtifactDirectory(packageNames: string[]) {
 }
 
 function runArtifactVerifier(artifactDirectory: string) {
-  return spawnSync(process.execPath, [artifactVerifierPath, artifactDirectory, 'v1.2.3'], {
+  const result = spawnSync(process.execPath, [artifactVerifierPath, artifactDirectory, 'v1.2.3'], {
     cwd: projectRoot,
     encoding: 'utf8',
     env: {
@@ -67,7 +73,22 @@ function runArtifactVerifier(artifactDirectory: string) {
       LOG_LEVEL: 'debug',
       TINYFY_PACKAGES_TOKEN: 'test-token-must-not-be-logged',
     },
+    timeout: verifierTimeoutMs,
   })
+
+  if (result.error) {
+    throw new Error(
+      `verify-publish-artifacts.mjs did not complete within ${verifierTimeoutMs}ms: ${result.error.message}`,
+    )
+  }
+
+  if (result.signal) {
+    throw new Error(
+      `verify-publish-artifacts.mjs exited unexpectedly with signal ${result.signal}.`,
+    )
+  }
+
+  return result
 }
 
 afterEach(() => {
@@ -81,7 +102,7 @@ describe('verify publish artifacts script', () => {
     const artifactDirectory = createArtifactDirectory([
       '@i-prikot/editor-schema',
       '@i-prikot/editor',
-      '@i-prikot/renderer',
+      '@i-prikot/editor-renderer',
     ])
     const result = runArtifactVerifier(artifactDirectory)
 
@@ -91,11 +112,11 @@ describe('verify publish artifacts script', () => {
     expect(`${result.stdout}${result.stderr}`).not.toContain('test-token-must-not-be-logged')
   })
 
-  it('rejects an archive containing an obsolete @tinyfy package manifest', () => {
+  it('rejects an archive containing a legacy @tinyfy package manifest', () => {
     const artifactDirectory = createArtifactDirectory([
       '@i-prikot/editor-schema',
       '@tinyfy/editor',
-      '@i-prikot/renderer',
+      '@i-prikot/editor-renderer',
     ])
     const result = runArtifactVerifier(artifactDirectory)
 

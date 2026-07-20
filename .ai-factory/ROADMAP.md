@@ -1,4 +1,4 @@
-# Project Roadmap
+﻿# Project Roadmap
 
 > План развития редактора (Vue 3 + TypeScript + Tiptap v3) как **встраиваемой
 > библиотеки для сервиса Tinyfy**, развиваемой в отдельном репозитории.
@@ -12,13 +12,13 @@
 >   опубликованных страниц получают **статический HTML без JS редактора**
 >   (принцип Tinyfy «скорость — это статус», TTFB < 50 ms).
 > - **Форма поставки**: монорепозиторий из пакетов
->   `@tinyfy/editor-schema` (изоморфный набор расширений, без Vue),
->   `@tinyfy/editor` (Vue-компонент + стили),
->   `@tinyfy/renderer` (серверный рендер Tiptap JSON → HTML)
+>   `@i-prikot/editor-schema` (изоморфный набор расширений, без Vue),
+>   `@i-prikot/editor` (Vue-компонент + стили),
+>   `@i-prikot/editor-renderer` (серверный рендер Tiptap JSON → HTML)
 >   и `apps/playground` (текущее демо-приложение для разработки).
 > - **Источник истины документа**: Tiptap JSON + поле `schemaVersion`;
 >   хранение — бэкенд Tinyfy (Node.js + MySQL). HTML публичной страницы —
->   производный артефакт, генерируемый `@tinyfy/renderer`.
+>   производный артефакт, генерируемый `@i-prikot/editor-renderer`.
 > - **AI**: платное расширение Tiptap Pro AI не используется; в перспективе —
 >   собственное AI-расширение (Этап 11).
 > - **Коллаборация**: внедряется позднее, после появления собственной
@@ -37,14 +37,14 @@
 #### Структура монорепозитория
 
 - [ ] Перевести репозиторий на npm workspaces: `packages/schema`, `packages/editor`, `packages/renderer`, `apps/playground`
-- [ ] `@tinyfy/editor-schema` — изоморфный пакет без Vue: все extensions/marks + определения кастомных нод (schema-атрибуты, `parseHTML`/`renderHTML`) без NodeView; работает в браузере и в Node
-- [ ] `@tinyfy/editor` — Vue-компонент: навешивает Vue-NodeView на ноды схемы через `.extend({ addNodeView: () => VueNodeViewRenderer(...) })`, содержит весь UI (тулбары, меню, таблицы, примитивы) и стили
+- [ ] `@i-prikot/editor-schema` — изоморфный пакет без Vue: все extensions/marks + определения кастомных нод (schema-атрибуты, `parseHTML`/`renderHTML`) без NodeView; работает в браузере и в Node
+- [ ] `@i-prikot/editor` — Vue-компонент: навешивает Vue-NodeView на ноды схемы через `.extend({ addNodeView: () => VueNodeViewRenderer(...) })`, содержит весь UI (тулбары, меню, таблицы, примитивы) и стили
 - [ ] `apps/playground` — текущее приложение (App.vue, `getDocumentId`, seed-контент, env-конфиг) как площадка разработки и ручного QA
 - [ ] Настроить TypeScript project references / paths между пакетами; общий `tsconfig.base.json`
 
-#### Серверный рендер (`@tinyfy/renderer`)
+#### Серверный рендер (`@i-prikot/editor-renderer`)
 
-- [ ] Реализовать `renderDocument(json): html` на `generateHTML` из `@tiptap/html` поверх `@tinyfy/editor-schema`
+- [ ] Реализовать `renderDocument(json): html` на `generateHTML` из `@tiptap/html` поверх `@i-prikot/editor-schema`
 - [ ] Проверить и доработать `renderHTML` всех кастомных нод для серверного рендера (image уже рендерит figure/figcaption; для toc-node решить представление на статической странице: развёрнутый список якорей или исключение из публикации)
 - [ ] Подготовить **лёгкий CSS для чтения** (типографика опубликованной страницы: заголовки, списки, таблицы, цитаты, формулы) — без стилей тулбаров, меню и интерактивного UI; это вес публичных страниц Tinyfy
 - [ ] Решить вопрос KaTeX на публичной странице: серверный рендер формул в HTML/MathML + katex.css, без клиентского JS
@@ -53,7 +53,7 @@
 
 #### Сборка и стили библиотеки
 
-- [ ] Настроить Vite library mode для `@tinyfy/editor`: ESM, `vue` и `@tiptap/*` в `external` + `peerDependencies` (защита от двух экземпляров ProseMirror в бандле хоста)
+- [ ] Настроить Vite library mode для `@i-prikot/editor`: ESM, `vue` и `@tiptap/*` в `external` + `peerDependencies` (защита от двух экземпляров ProseMirror в бандле хоста)
 - [ ] Объединить ~49 CSS-импортов из `main.ts` в единый `styles/index.css`, собрать в `dist/style.css`
 - [ ] Заскоупить все стили редактора под корневой класс (например `.tinyfy-editor`) — через postcss-prefix-selector или ручной аудит; убрать глобальные сбросы и стили на `body`/`html`
 - [ ] Дизайн-токены (`design-tokens.css`) оформить как публичный контракт темизации: перечень переопределяемых CSS-переменных задокументировать
@@ -61,7 +61,7 @@
 
 #### Публикация и процесс
 
-- [ ] Настроить публикацию в приватный registry (GitHub Packages или аналог): `@tinyfy/editor-schema`, `@tinyfy/editor`, `@tinyfy/renderer`
+- [ ] Настроить публикацию в приватный registry (GitHub Packages или аналог): `@i-prikot/editor-schema`, `@i-prikot/editor`, `@i-prikot/editor-renderer`
 - [ ] Внедрить changesets: semver, changelog, согласованные версии пакетов
 - [ ] CI-публикация по тегу/merge в main
 - [ ] Задокументировать процесс локальной разработки против кабинета Tinyfy (`npm pack` + установка тарбола или Vite alias на исходники)

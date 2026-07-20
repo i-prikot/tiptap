@@ -11,7 +11,7 @@ const registry = 'https://npm.pkg.github.com'
 const expectedPackages = Object.freeze([
   { name: '@i-prikot/editor-schema', archivePrefix: 'i-prikot-editor-schema-' },
   { name: '@i-prikot/editor', archivePrefix: 'i-prikot-editor-' },
-  { name: '@i-prikot/renderer', archivePrefix: 'i-prikot-renderer-' },
+  { name: '@i-prikot/editor-renderer', archivePrefix: 'i-prikot-editor-renderer-' },
 ])
 
 function log(level, message, context = {}) {

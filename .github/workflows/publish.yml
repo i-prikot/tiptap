@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   verify-release-authorization:
-    name: Verify publishing environment requires reviewer approval
+    name: Verify release-tag authorization
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
@@ -41,17 +41,26 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PUBLISH_ENVIRONMENT: tinyfy-private-package-publish
-          RELEASE_MAINTAINER_TEAM: release-maintainers
+          RELEASE_MAINTAINER_LOGIN: i-prikot
         run: |
           environment_file="$(mktemp)"
+          deployment_branch_policies_file="$(mktemp)"
           rulesets_file="$(mktemp)"
-          release_maintainer_team_file="$(mktemp)"
+          release_maintainer_user_file="$(mktemp)"
           ruleset_details_dir="$(mktemp -d)"
-          trap 'rm -f "${environment_file}" "${rulesets_file}" "${release_maintainer_team_file}"; rm -rf "${ruleset_details_dir}"' EXIT
+          trap 'rm -f "${environment_file}" "${deployment_branch_policies_file}" "${rulesets_file}" "${release_maintainer_user_file}"; rm -rf "${ruleset_details_dir}"' EXIT
           echo "[DEBUG] Reading protection rules for ${PUBLISH_ENVIRONMENT}."
 
           if ! gh api "repos/${GITHUB_REPOSITORY}/environments/${PUBLISH_ENVIRONMENT}" > "${environment_file}"; then
             echo "[ERROR] Could not read protection rules for ${PUBLISH_ENVIRONMENT}." >&2
+            exit 1
+          fi
+
+          echo '[DEBUG] Reading publishing environment deployment branch and tag policies.'
+          if ! gh api --paginate --slurp \
+            "repos/${GITHUB_REPOSITORY}/environments/${PUBLISH_ENVIRONMENT}/deployment-branch-policies?per_page=100" \
+            > "${deployment_branch_policies_file}"; then
+            echo "[ERROR] Could not read deployment branch and tag policies for ${PUBLISH_ENVIRONMENT}." >&2
             exit 1
           fi
 
@@ -61,9 +70,14 @@ jobs:
             exit 1
           fi
 
-          echo "[DEBUG] Resolving the ${RELEASE_MAINTAINER_TEAM} release-maintainer team."
-          if ! gh api "orgs/${GITHUB_REPOSITORY_OWNER}/teams/${RELEASE_MAINTAINER_TEAM}" > "${release_maintainer_team_file}"; then
-            echo "[ERROR] Could not resolve the ${RELEASE_MAINTAINER_TEAM} team for release-tag verification." >&2
+          if [ "${GITHUB_REPOSITORY_OWNER}" != "${RELEASE_MAINTAINER_LOGIN}" ]; then
+            echo "[ERROR] Release authorization is configured only for the personal ${RELEASE_MAINTAINER_LOGIN} repository owner." >&2
+            exit 1
+          fi
+
+          echo "[DEBUG] Resolving the ${RELEASE_MAINTAINER_LOGIN} personal release maintainer."
+          if ! gh api "users/${RELEASE_MAINTAINER_LOGIN}" > "${release_maintainer_user_file}"; then
+            echo "[ERROR] Could not resolve the ${RELEASE_MAINTAINER_LOGIN} user for release-tag verification." >&2
             exit 1
           fi
 
@@ -86,11 +100,12 @@ jobs:
 
           if ! LOG_LEVEL=debug \
             PUBLISH_ENVIRONMENT="${PUBLISH_ENVIRONMENT}" \
-            RELEASE_MAINTAINER_TEAM="${RELEASE_MAINTAINER_TEAM}" \
+            RELEASE_MAINTAINER_LOGIN="${RELEASE_MAINTAINER_LOGIN}" \
             node scripts/verify-release-authorization.mjs \
               "${environment_file}" \
-              "${release_maintainer_team_file}" \
-              "${ruleset_details_dir}"; then
+              "${release_maintainer_user_file}" \
+              "${ruleset_details_dir}" \
+              "${deployment_branch_policies_file}"; then
             echo '[ERROR] Publishing environment or v* release-tag authorization verification failed.' >&2
             exit 1
           fi
@@ -107,6 +122,8 @@ jobs:
       startsWith(github.event.workflow_run.head_branch, 'v')
     environment: tinyfy-private-package-publish
     runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ github.event.workflow_run.head_branch }}
 
     steps:
       - name: 'INFO: Checkout trusted release tooling'
@@ -119,6 +136,8 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: '@i-prikot'
 
       - name: 'INFO: Download release artifacts'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
@@ -129,8 +148,6 @@ jobs:
           github-token: ${{ github.token }}
 
       - name: 'INFO: Verify release artifacts'
-        env:
-          RELEASE_TAG: ${{ github.event.workflow_run.head_branch }}
         run: |
           if ! LOG_LEVEL=debug node scripts/verify-publish-artifacts.mjs \
             "${RUNNER_TEMP}/github-packages-release-artifacts" \
@@ -150,6 +167,7 @@ jobs:
           fi
 
           echo '[INFO] Environment-scoped administrator attestation is present.'
+
       - name: 'INFO: Publish validated private @i-prikot packages'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TINYFY_PACKAGES_TOKEN }}
@@ -218,4 +236,4 @@ jobs:
           release_version="${RELEASE_TAG#v}"
           publish_archive "i-prikot-editor-schema-${release_version}.tgz" '@i-prikot/editor-schema' "${release_version}"
           publish_archive "i-prikot-editor-${release_version}.tgz" '@i-prikot/editor' "${release_version}"
-          publish_archive "i-prikot-renderer-${release_version}.tgz" '@i-prikot/renderer' "${release_version}"
+          publish_archive "i-prikot-editor-renderer-${release_version}.tgz" '@i-prikot/editor-renderer' "${release_version}"

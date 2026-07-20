@@ -1,0 +1,15 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.1.4/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [["@i-prikot/editor-schema", "@i-prikot/editor", "@i-prikot/editor-renderer"]],
+  "linked": [],
+  "access": "restricted",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": ["@i-prikot/playground"],
+  "privatePackages": {
+    "version": false,
+    "tag": false
+  }
+}
