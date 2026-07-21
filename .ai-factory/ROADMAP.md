@@ -28,49 +28,27 @@
 
 ## Milestones
 
-### Этап 4. Пакетизация и публикация
+### Этап 6. Vue 3: лучшие практики
 
-> Превращение приложения в монорепозиторий из публикуемых пакетов.
-> Факт по коду: в `extensions/` нет ни одного импорта Vue; Vue-зависимость
-> нод — только `VueNodeViewRenderer` в image / image-upload / toc.
-
-#### Структура монорепозитория
-
-- [ ] Перевести репозиторий на npm workspaces: `packages/schema`, `packages/editor`, `packages/renderer`, `apps/playground`
-- [ ] `@i-prikot/editor-schema` — изоморфный пакет без Vue: все extensions/marks + определения кастомных нод (schema-атрибуты, `parseHTML`/`renderHTML`) без NodeView; работает в браузере и в Node
-- [ ] `@i-prikot/editor` — Vue-компонент: навешивает Vue-NodeView на ноды схемы через `.extend({ addNodeView: () => VueNodeViewRenderer(...) })`, содержит весь UI (тулбары, меню, таблицы, примитивы) и стили
-- [ ] `apps/playground` — текущее приложение (App.vue, `getDocumentId`, seed-контент, env-конфиг) как площадка разработки и ручного QA
-- [ ] Настроить TypeScript project references / paths между пакетами; общий `tsconfig.base.json`
-
-#### Серверный рендер (`@i-prikot/editor-renderer`)
-
-- [ ] Реализовать `renderDocument(json): html` на `generateHTML` из `@tiptap/html` поверх `@i-prikot/editor-schema`
-- [ ] Проверить и доработать `renderHTML` всех кастомных нод для серверного рендера (image уже рендерит figure/figcaption; для toc-node решить представление на статической странице: развёрнутый список якорей или исключение из публикации)
-- [ ] Подготовить **лёгкий CSS для чтения** (типографика опубликованной страницы: заголовки, списки, таблицы, цитаты, формулы) — без стилей тулбаров, меню и интерактивного UI; это вес публичных страниц Tinyfy
-- [ ] Решить вопрос KaTeX на публичной странице: серверный рендер формул в HTML/MathML + katex.css, без клиентского JS
-- [ ] Написать snapshot-тесты детерминизма JSON → HTML на репрезентативном наборе документов (все типы узлов) — от этого зависят опубликованные страницы клиентов
-- [ ] Ввести `schemaVersion` в сохраняемый документ и модуль миграций схемы (`migrate(json, fromVersion): json`)
-
-#### Сборка и стили библиотеки
-
-- [ ] Настроить Vite library mode для `@i-prikot/editor`: ESM, `vue` и `@tiptap/*` в `external` + `peerDependencies` (защита от двух экземпляров ProseMirror в бандле хоста)
-- [ ] Объединить ~49 CSS-импортов из `main.ts` в единый `styles/index.css`, собрать в `dist/style.css`
-- [ ] Заскоупить все стили редактора под корневой класс (например `.tinyfy-editor`) — через postcss-prefix-selector или ручной аудит; убрать глобальные сбросы и стили на `body`/`html`
-- [ ] Дизайн-токены (`design-tokens.css`) оформить как публичный контракт темизации: перечень переопределяемых CSS-переменных задокументировать
-- [ ] Удалить из бандла библиотеки экраны и стили, принадлежащие playground (`setup-error`, CTA-попап — по решению)
-
-#### Публикация и процесс
-
-- [ ] Настроить публикацию в приватный registry (GitHub Packages или аналог): `@i-prikot/editor-schema`, `@i-prikot/editor`, `@i-prikot/editor-renderer`
-- [ ] Внедрить changesets: semver, changelog, согласованные версии пакетов
-- [ ] CI-публикация по тегу/merge в main
-- [ ] Задокументировать процесс локальной разработки против кабинета Tinyfy (`npm pack` + установка тарбола или Vite alias на исходники)
+- [x] Провести аудит всех компонентов: убедиться, что везде используется `<script setup lang="ts">` (унифицировать исключения)
+- [ ] Типизировать все `defineProps`/`defineEmits` дженериками; заменить runtime-декларации, где они остались
+- [ ] Декомпозировать `DragContextMenu.vue` (~14 КБ): вынести подменю (ColorMenu, TableAlignMenu, TurnInto) и логику построения пунктов в composable
+- [ ] Декомпозировать `MobileToolbar.vue` (~13 КБ): виды main/highlighter/link — отдельные подкомпоненты
+- [ ] Декомпозировать `TableSelectionOverlay.vue` (~12 КБ): вычисление рамки выделения — в composable, rAF-слежение — в отдельный хук
+- [ ] Декомпозировать `ImageUploadNodeView.vue` (~13 КБ): состояние загрузки/прогресса — в composable `useImageUpload`
+- [ ] Декомпозировать `TableHandleMenuContent.vue` (~9 КБ) и `TableHandle.vue`: пункты меню — данные + маленькие компоненты
+- [ ] Вынести бизнес-логику из компонентов `ui/` в composables (компонент = шаблон + вызовы composable)
+- [ ] Аудит реактивности: заменить лишние `ref` на `shallowRef` для тяжёлых объектов (editor, provider, floating-элементы)
+- [ ] Аудит `computed`/`watch`: устранить сайд-эффекты в `computed`, заменить `watch` на `computed`/`watchEffect` там, где это уместно, добавить недостающие опции (`immediate`, `flush`)
+- [ ] Проверить очистку всех подписок: `editor.on`/DOM-listeners/rAF снимаются в `onBeforeUnmount`/`onScopeDispose` (утечка: `provider.on('synced')` в `EditorProvider` не отписывается) — критично для SPA-кабинета Tinyfy, где редактор многократно монтируется/размонтируется
+- [ ] Унифицировать структуру каталогов компонентов: единые правила для `notion/`, `ui/`, `table/`, `primitives/` (описать в ARCHITECTURE.md и привести к ним код)
 
 
 ## Completed
 
 | Date | Milestone | Work |
 | --- | --- | --- |
+| 2026-07-20 | Этап 6. Vue 3: лучшие практики | Аудированы 94 Vue SFC в `apps/playground/src` и `packages/editor/src`: каждый использует ровно один `<script setup lang="ts">`; исключений и миграций не потребовалось. |
 | 2026-07-10 | Этап 2. Тестирование: фундамент (до рефакторинга и пакетизации) | Проверены npm-скрипты `test`, `test:watch`, `test:coverage`; coverage запускается через `@vitest/coverage-v8`. |
 | 2026-07-10 | Этап 1. TypeScript: строгость и типы | Проверены и типизированы Vue `provide/inject` контексты через `InjectionKey<T>`; убраны DI-касты в меню и редакторском контексте. |
 | 2026-07-09 | Этап 1. TypeScript: строгость и типы | Создан `src/editor/types/`; общие типы пользователя, TOC, цветов, пунктов меню и suggestion-item вынесены в shared modules; импорты нормализованы. |

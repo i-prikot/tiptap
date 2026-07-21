@@ -58,8 +58,8 @@ import { CellSelection, cellAround, columnResizingPluginKey } from '@tiptap/pm/t
 import { useFloating } from '@floating-ui/vue'
 import type { VirtualElement } from '@floating-ui/vue'
 import TableCellHandleMenu from './TableCellHandleMenu.vue'
-import { useTiptapEditor } from '../../composables'
-import { domCellAround, getTable, rectEq } from '../../utils/table-utils'
+import { useRafLoop, useTableSelectionRect, useTiptapEditor } from '../../composables'
+import { domCellAround } from '../../utils/table-utils'
 
 type Corner = 'tl' | 'tr' | 'bl' | 'br'
 
@@ -86,11 +86,14 @@ const emit = defineEmits<{ menuOpenChange: [value: boolean] }>()
 
 const editor = useTiptapEditor()
 
-const visible = ref(true)
-const selectionRect = ref<DOMRect | null>(null)
+const {
+  visible,
+  selectionRect,
+  tableDom,
+  refresh: refreshTableSelection,
+} = useTableSelectionRect(editor)
 const activeCorner = ref<Corner | null>(null)
 const menuOpen = ref(false)
-const tableDom = ref<HTMLElement | null>(null)
 const anchorCellPos = ref<number | null>(null)
 
 const corners: Corner[] = ['tl', 'tr', 'bl', 'br']
@@ -107,131 +110,56 @@ const { floatingStyles, update } = useFloating(reference, floatingRef, { placeme
 
 watch([selectionRect, floatingRef], () => update())
 
-/** Прямоугольник текущего выделения ячеек (union rect). */
-function computeSelectionRect() {
+const { start: startResizeTracking, stop: stopResizeTracking } = useRafLoop(() => {
   const instance = editor.value
-  if (!instance) return
-  const { selection } = instance.state
-  if (selection instanceof CellSelection) {
-    const domNodes: HTMLElement[] = []
-    selection.forEachCell((_, pos) => {
-      const dom = instance.view.nodeDOM(pos) as HTMLElement | null
-      if (dom) domNodes.push(dom)
-    })
-    if (domNodes.length === 0) {
-      visible.value = false
-      if (selectionRect.value) selectionRect.value = null
-      return
-    }
-    const bounds = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity }
-    domNodes.forEach((dom) => {
-      const rect = dom.getBoundingClientRect()
-      bounds.left = Math.min(bounds.left, rect.left)
-      bounds.top = Math.min(bounds.top, rect.top)
-      bounds.right = Math.max(bounds.right, rect.right)
-      bounds.bottom = Math.max(bounds.bottom, rect.bottom)
-    })
-    const rect = new DOMRect(
-      bounds.left,
-      bounds.top,
-      bounds.right - bounds.left,
-      bounds.bottom - bounds.top,
-    )
-    if (!rectEq(selectionRect.value, rect)) selectionRect.value = rect
-    visible.value = true
-    return
-  }
-  const $cell = cellAround(selection.$anchor)
-  if ($cell) {
-    const dom = instance.view.nodeDOM($cell.pos) as HTMLElement | null
-    if (dom) {
-      const domRect = dom.getBoundingClientRect()
-      const rect = new DOMRect(domRect.left, domRect.top, domRect.width, domRect.height)
-      if (!rectEq(selectionRect.value, rect)) selectionRect.value = rect
-      visible.value = true
-      return
-    }
-  }
-  visible.value = false
-  if (selectionRect.value) selectionRect.value = null
-}
+  if (!instance) return false
 
-function updateTableDom() {
-  const instance = editor.value
-  if (!instance) {
-    tableDom.value = null
-    return
-  }
-  const table = getTable(instance)
-  tableDom.value = table ? ((instance.view.nodeDOM(table.pos) as HTMLElement | null) ?? null) : null
-}
-
-// -------- слежение за ресайзом столбцов (rAF, пока тянется ручка)
-let rafId: number | null = null
-
-function stopResizeTracking() {
-  if (rafId !== null) {
-    cancelAnimationFrame(rafId)
-    rafId = null
-  }
-}
-
-function trackColumnResize() {
-  if (rafId !== null) return
-  const tick = () => {
-    const instance = editor.value
-    if (!instance) return
-    const resizeState = columnResizingPluginKey.getState(instance.state)
-    const dragging = !!(resizeState as { dragging?: unknown } | undefined)?.dragging
-    computeSelectionRect()
-    if (dragging) rafId = requestAnimationFrame(tick)
-    else {
-      stopResizeTracking()
-      computeSelectionRect()
-    }
-  }
-  rafId = requestAnimationFrame(tick)
-}
+  refreshTableSelection()
+  const resizeState = columnResizingPluginKey.getState(instance.state)
+  return !!(resizeState as { dragging?: unknown } | undefined)?.dragging
+})
 
 // -------- подписки на редактор
-let cleanups: Array<() => void> = []
+let cleanup: (() => void) | null = null
 watch(
   editor,
   (instance) => {
-    cleanups.forEach((fn) => fn())
-    cleanups = []
-    if (!instance) return
-    const onSelectionUpdate = () => {
-      computeSelectionRect()
-      updateTableDom()
+    stopResizeTracking()
+    cleanup?.()
+    cleanup = null
+    if (!instance) {
+      refreshTableSelection()
+      return
     }
+    const onSelectionUpdate = () => refreshTableSelection()
     const onTransaction = ({ transaction }: ColumnResizeTransactionPayload) => {
-      computeSelectionRect()
+      refreshTableSelection()
       const meta = transaction.getMeta(columnResizingPluginKey)
       if (isColumnResizePluginMeta(meta)) {
         if (Object.prototype.hasOwnProperty.call(meta, 'setDragging') && meta.setDragging)
-          trackColumnResize()
+          startResizeTracking()
         if (Object.prototype.hasOwnProperty.call(meta, 'setDragging') && meta.setDragging == null) {
           stopResizeTracking()
-          computeSelectionRect()
+          refreshTableSelection()
         }
-        if (Object.prototype.hasOwnProperty.call(meta, 'setHandle')) computeSelectionRect()
+        if (Object.prototype.hasOwnProperty.call(meta, 'setHandle')) refreshTableSelection()
       }
     }
     instance.on('selectionUpdate', onSelectionUpdate)
     instance.on('transaction', onTransaction as never)
-    computeSelectionRect()
-    updateTableDom()
-    cleanups.push(() => {
+    refreshTableSelection()
+    cleanup = () => {
       instance.off('selectionUpdate', onSelectionUpdate)
       instance.off('transaction', onTransaction as never)
-      stopResizeTracking()
-    })
+    }
   },
   { immediate: true },
 )
 
-onBeforeUnmount(() => cleanups.forEach((fn) => fn()))
+onBeforeUnmount(() => {
+  cleanup?.()
+  stopResizeTracking()
+})
 
 // -------- угловые точки: ресайз выделения перетаскиванием
 function cornerStyle(corner: Corner): CSSProperties {
