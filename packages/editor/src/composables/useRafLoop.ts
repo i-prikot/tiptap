@@ -1,4 +1,4 @@
-import { onBeforeUnmount } from 'vue'
+import { onScopeDispose } from 'vue'
 
 export type RafLoopCallback = (timestamp: number) => boolean
 
@@ -29,7 +29,7 @@ export function useRafLoop(callback: RafLoopCallback) {
     schedule()
   }
 
-  onBeforeUnmount(stop)
+  onScopeDispose(stop)
 
   return { start, stop }
 }

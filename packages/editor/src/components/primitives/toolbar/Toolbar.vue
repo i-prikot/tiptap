@@ -20,7 +20,7 @@ import { useMenuNavigation } from '../../../composables'
 
 withDefaults(defineProps<{ variant?: 'floating' | 'fixed' }>(), { variant: 'fixed' })
 
-const toolbarRef = ref<HTMLElement | null>(null)
+const toolbarRef = shallowRef<HTMLElement | null>(null)
 const focusableItems = shallowRef<HTMLElement[]>([])
 const query = ref('')
 

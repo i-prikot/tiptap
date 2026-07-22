@@ -4,8 +4,8 @@
  * Порт useTableHandlePositioning (чанк 3gf8l96fmxb-u, модуль 783422) и
  * позиционирования extend-кнопок (чанк 34p294mqk5mqb, модуль 976237).
  */
-import { computed, ref, watch } from 'vue'
-import type { ComputedRef, Ref } from 'vue'
+import { computed, shallowRef, watch } from 'vue'
+import type { ComputedRef, ShallowRef } from 'vue'
 import { offset, size, useFloating } from '@floating-ui/vue'
 import type { VirtualElement } from '@floating-ui/vue'
 import { clamp } from '../utils/table-utils'
@@ -14,7 +14,7 @@ import type { TableDraggingState } from '../extensions/table-handle'
 export type HandleOrientation = 'row' | 'col'
 
 export interface HandlePositioning {
-  floatingRef: Ref<HTMLElement | null>
+  floatingRef: ShallowRef<HTMLElement | null>
   style: ComputedRef<Record<string, string>>
 }
 
@@ -56,8 +56,8 @@ export function useTableHandlePosition(
   tableRect: ComputedRef<DOMRect | null | undefined>,
   draggingState: ComputedRef<TableDraggingState | null | undefined>,
 ): HandlePositioning {
-  const floatingRef = ref<HTMLElement | null>(null)
-  const reference = ref<VirtualElement>({
+  const floatingRef = shallowRef<HTMLElement | null>(null)
+  const reference = shallowRef<VirtualElement>({
     getBoundingClientRect: () => {
       const cell = cellRect.value
       const table = tableRect.value
@@ -93,7 +93,7 @@ export function useTableHandlePosition(
     ],
   })
 
-  watch([open, cellRect, tableRect, draggingState, floatingRef], () => update())
+  watch([open, cellRect, tableRect, draggingState, floatingRef], () => update(), { flush: 'post' })
 
   const style = computed<Record<string, string>>(() => ({
     display: 'flex',
@@ -108,8 +108,8 @@ export function useTableExtendPosition(
   open: ComputedRef<boolean>,
   tableRect: ComputedRef<DOMRect | null | undefined>,
 ): HandlePositioning {
-  const floatingRef = ref<HTMLElement | null>(null)
-  const reference = ref<VirtualElement>({
+  const floatingRef = shallowRef<HTMLElement | null>(null)
+  const reference = shallowRef<VirtualElement>({
     getBoundingClientRect: () => tableRect.value ?? new DOMRect(),
   })
   const sizeProperty = orientation === 'row' ? 'width' : 'height'
@@ -128,7 +128,7 @@ export function useTableExtendPosition(
     ],
   })
 
-  watch([open, tableRect, floatingRef], () => update())
+  watch([open, tableRect, floatingRef], () => update(), { flush: 'post' })
 
   const style = computed<Record<string, string>>(() => ({
     display: 'flex',

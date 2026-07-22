@@ -6,7 +6,7 @@ import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import { CellSelection, TableMap } from '@tiptap/pm/tables'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { provideTiptapEditor } from '../../../src/editor/composables/useTiptapEditor'
-import TableSelectionOverlay from '../../../src/editor/components/table/TableSelectionOverlay.vue'
+import TableSelectionOverlay from '../../../src/editor/components/table/table-selection/TableSelectionOverlay.vue'
 import { TableKit } from '../../../src/editor/extensions/table-kit'
 
 interface TableFixture {

@@ -35,19 +35,21 @@
 - [ ] Декомпозировать `DragContextMenu.vue` (~14 КБ): вынести подменю (ColorMenu, TableAlignMenu, TurnInto) и логику построения пунктов в composable
 - [ ] Декомпозировать `MobileToolbar.vue` (~13 КБ): виды main/highlighter/link — отдельные подкомпоненты
 - [ ] Декомпозировать `TableSelectionOverlay.vue` (~12 КБ): вычисление рамки выделения — в composable, rAF-слежение — в отдельный хук
-- [ ] Декомпозировать `ImageUploadNodeView.vue` (~13 КБ): состояние загрузки/прогресса — в composable `useImageUpload`
+- [x] Декомпозировать `ImageUploadNodeView.vue` (~13 КБ): состояние загрузки/прогресса — в composable `useImageUpload`
 - [ ] Декомпозировать `TableHandleMenuContent.vue` (~9 КБ) и `TableHandle.vue`: пункты меню — данные + маленькие компоненты
 - [ ] Вынести бизнес-логику из компонентов `ui/` в composables (компонент = шаблон + вызовы composable)
 - [ ] Аудит реактивности: заменить лишние `ref` на `shallowRef` для тяжёлых объектов (editor, provider, floating-элементы)
 - [ ] Аудит `computed`/`watch`: устранить сайд-эффекты в `computed`, заменить `watch` на `computed`/`watchEffect` там, где это уместно, добавить недостающие опции (`immediate`, `flush`)
 - [ ] Проверить очистку всех подписок: `editor.on`/DOM-listeners/rAF снимаются в `onBeforeUnmount`/`onScopeDispose` (утечка: `provider.on('synced')` в `EditorProvider` не отписывается) — критично для SPA-кабинета Tinyfy, где редактор многократно монтируется/размонтируется
-- [ ] Унифицировать структуру каталогов компонентов: единые правила для `notion/`, `ui/`, `table/`, `primitives/` (описать в ARCHITECTURE.md и привести к ним код)
+- [x] Унифицировать структуру каталогов компонентов: единые правила для `notion/`, `ui/`, `table/`, `primitives/` (описать в ARCHITECTURE.md и привести к ним код)
 
 
 ## Completed
 
 | Date | Milestone | Work |
 | --- | --- | --- |
+| 2026-07-21 | Этап 6. Vue 3: лучшие практики | Унифицирована структура `notion/`, `ui/`, `table/` и `primitives/`: feature-модули в kebab-case, корневые barrell-экспорты и правила владения зафиксированы в ARCHITECTURE.md. |
+| 2026-07-21 | Этап 6. Vue 3: лучшие практики | Состояние, прогресс, отмена и замена upload-узла из `ImageUploadNodeView.vue` вынесены в `useImageUpload`; NodeView оставлен для UI-привязки. |
 | 2026-07-20 | Этап 6. Vue 3: лучшие практики | Аудированы 94 Vue SFC в `apps/playground/src` и `packages/editor/src`: каждый использует ровно один `<script setup lang="ts">`; исключений и миграций не потребовалось. |
 | 2026-07-10 | Этап 2. Тестирование: фундамент (до рефакторинга и пакетизации) | Проверены npm-скрипты `test`, `test:watch`, `test:coverage`; coverage запускается через `@vitest/coverage-v8`. |
 | 2026-07-10 | Этап 1. TypeScript: строгость и типы | Проверены и типизированы Vue `provide/inject` контексты через `InjectionKey<T>`; убраны DI-касты в меню и редакторском контексте. |

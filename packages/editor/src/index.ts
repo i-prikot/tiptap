@@ -1,6 +1,6 @@
 import './styles.css'
 
-export { default, default as NotionEditor } from './components/notion/NotionEditor.vue'
+export { default, default as NotionEditor } from './components/notion'
 export { UndoRedoButton } from './components/ui'
 export { MarkButton } from './components/ui'
 export { TextAlignButton } from './components/ui'
@@ -34,13 +34,13 @@ export {
   type NotionEditorReadyPayload,
   type NotionEditorSetContentOptions,
   type NotionEditorUpdatePayload,
-} from './components/notion/public-api'
+} from './components/notion'
 
-export { default as CollabUsers } from './components/notion/CollabUsers.vue'
-export { default as Button } from './components/primitives/Button.vue'
-export { default as ButtonGroup } from './components/primitives/ButtonGroup.vue'
-export { default as Separator } from './components/primitives/Separator.vue'
-export { default as Spacer } from './components/primitives/Spacer.vue'
+export { CollabUsers } from './components/notion'
+export { Button } from './components/primitives'
+export { ButtonGroup } from './components/primitives'
+export { Separator } from './components/primitives'
+export { Spacer } from './components/primitives'
 export {
   provideEditorOverlayTarget,
   useEditorOverlayTarget,

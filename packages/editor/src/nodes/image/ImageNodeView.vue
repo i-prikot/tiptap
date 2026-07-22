@@ -54,7 +54,7 @@
  * selection уходит за пределы узла и подпись пуста.
  * Порт React-компонента из чанка 34p294mqk5mqb.
  */
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { NodeSelection } from '@tiptap/pm/state'
 import { NodeViewContent, NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import { isValidPosition } from '../../utils/tiptap-utils'
@@ -80,11 +80,12 @@ interface ResizeState {
   initialWidth: number
   initialClientX: number
 }
-const resizeState = ref<ResizeState | undefined>()
+const resizeState = shallowRef<ResizeState | undefined>()
 
-const containerRef = ref<HTMLElement | null>(null)
-const leftHandleRef = ref<HTMLElement | null>(null)
-const rightHandleRef = ref<HTMLElement | null>(null)
+const containerRef = shallowRef<HTMLElement | null>(null)
+const leftHandleRef = shallowRef<HTMLElement | null>(null)
+const rightHandleRef = shallowRef<HTMLElement | null>(null)
+const touchMoveListenerOptions: AddEventListenerOptions = { passive: false }
 
 // скрывать пустую подпись, когда выделение уходит за пределы узла
 watch(
@@ -198,14 +199,14 @@ function handlePointerUp(event: MouseEvent | TouchEvent) {
 onMounted(() => {
   window.addEventListener('mousemove', handlePointerMove)
   window.addEventListener('mouseup', handlePointerUp)
-  window.addEventListener('touchmove', handlePointerMove, { passive: false })
+  window.addEventListener('touchmove', handlePointerMove, touchMoveListenerOptions)
   window.addEventListener('touchend', handlePointerUp)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('mousemove', handlePointerMove)
   window.removeEventListener('mouseup', handlePointerUp)
-  window.removeEventListener('touchmove', handlePointerMove)
+  window.removeEventListener('touchmove', handlePointerMove, touchMoveListenerOptions)
   window.removeEventListener('touchend', handlePointerUp)
 })
 </script>

@@ -65,10 +65,10 @@ src/
 ├── App.vue                      # Корень: getDocumentId() → <NotionEditor room>
 └── editor/
     ├── components/
-    │   ├── notion/              # Оболочка редактора (провайдеры, хедер, layout, TOC-сайдбар, экраны)
-    │   ├── ui/                  # Прикладной UI (меню, попапы, кнопки форматирования, тулбары)
-    │   ├── table/              # Табличный UI (ручки, overlay выделения, extend-кнопки, меню ячеек)
-    │   └── primitives/         # Переиспользуемые примитивы (Button, Popover, Menu, Tooltip, Avatar, Card…)
+    │   ├── notion/              # Корневой barrel + модули оболочки редактора
+    │   ├── ui/                  # Корневой barrel + модули прикладного UI
+    │   ├── table/               # Корневой barrel + модули табличного UI
+    │   └── primitives/          # Корневой barrel + модули базовых примитивов
     ├── composables/             # Логика представления (provide/inject-контексты + хуки-обёртки над редактором)
     │   └── blocks/             # Конверсия блоков (turn-into)
     ├── extensions/              # Tiptap-расширения (схема-атрибуты, ProseMirror-плагины, команды)
@@ -81,13 +81,51 @@ src/
 
 Псевдоним путей: `@/*` → `src/*` (`tsconfig.json`).
 
+### Контракт каталогов компонентов
+
+Каталоги `components/notion/`, `components/ui/`, `components/table/` и
+`components/primitives/` имеют одинаковую форму:
+
+- В корне каталога находится только `index.ts` и каталоги feature-модулей.
+  Этот barrel — единственная публичная точка входа каталога. Корневые `.vue`,
+  `public-api.ts`, `*-context.ts`, `*-signals.ts` и data-модули запрещены.
+- Каждый feature-модуль именуется в `kebab-case`, содержит собственный
+  `index.ts` и ко-локирует Vue-представления, локальные типы, константы,
+  контексты/сигналы и data-only helpers, относящиеся только к этому feature.
+- Внутри одного feature допустимы относительные импорты. Между feature-модулями
+  и каталогами используются только экспортируемые члены соответствующего
+  feature- или catalog-barrel; импорт чужих приватных файлов запрещён.
+- Повторно используемая логика остаётся в `composables/`, редакторная и
+  schema-логика — в `extensions/` либо `nodes/`, чистый код — в `utils/`.
+  Локальные файлы feature не становятся альтернативным домом такой логики.
+- Миграция каталогов не меняет имена компонентов, props, emits, CSS-классы,
+  стили и package-level API.
+
+Карта владельцев feature-модулей:
+
+- `notion/notion-editor/` владеет `NotionEditor.vue`,
+  `NotionEditorContent.vue`, `EditorProvider.vue`, `EditorContentArea.vue`,
+  `editor-lifecycle-signals.ts` и типами публичного API редактора;
+  `notion/collaboration/`, `notion/toc/` и `notion/feedback/` владеют
+  соответственно `CollabUsers.vue`, `TocSidebar.vue` и `LoadingSpinner.vue`.
+- `ui/` группирует feature-модули `color`, `image`, `link`, `mobile-toolbar`,
+  `drag-context-menu`, `emoji-menu`, `mention-menu`, `slash-menu`,
+  `suggestion`, `turn-into`, `formatting` и `toolbar`.
+- `table/` группирует `table-handle`, `table-cell-handle`, `table-selection`,
+  `table-extend` и `table-align`. `TableAlignMenu.vue` принадлежит
+  `components/table/table-align/`, а не `components/ui/`.
+- Каждый примитив — отдельный именованный feature-модуль, включая `badge`,
+  `button`, `button-group`, `editor-overlay-teleport`,
+  `floating-positioning-wrapper`, `separator`, `spacer`, `tooltip`, `avatar`,
+  `card`, `dropdown-menu`, `input`, `menu`, `popover` и `toolbar`.
+
 ## 3. Ответственность слоёв
 
 | Слой | Директория | Ответственность |
 |---|---|---|
-| **Оболочка / провайдеры** | `components/notion/` | Сборка дерева провайдеров, гейт готовности, создание редактора, хедер, layout, экраны загрузки/ошибки. |
-| **Прикладной UI** | `components/ui/`, `components/table/` | Плавающие меню (slash/emoji/mention), тулбары (десктоп/мобайл), попапы цвета/ссылок, drag-меню блока, табличные ручки и overlay. |
-| **Примитивы** | `components/primitives/` | Базовые непривязанные к домену элементы (Button, Popover, DropdownMenu, Menu, Tooltip, Avatar, Card, Input, Toolbar, Badge, Separator, Spacer). |
+| **Оболочка / провайдеры** | `components/notion/<feature>/` | Сборка дерева провайдеров, гейт готовности, создание редактора, хедер, layout, TOC и экраны; `notion/index.ts` экспортирует поддерживаемую поверхность. |
+| **Прикладной UI** | `components/ui/<feature>/`, `components/table/<feature>/` | Плавающие меню (slash/emoji/mention), тулбары, попапы цвета/ссылок, drag-меню блока, а также табличные ручки и overlay; каждый каталог публикуется только через свой `index.ts`. |
+| **Примитивы** | `components/primitives/<feature>/` | Базовые непривязанные к домену элементы (Button, Popover, DropdownMenu, Menu, Tooltip, Avatar, Card, Input, Toolbar, Badge, Separator, Spacer), по одному feature-модулю на примитив. |
 | **Composables** | `composables/` | Контексты через `provide/inject` и хуки, связывающие Vue-реактивность с редактором (подписки на события/транзакции, вычисление доступности команд, позиционирование). |
 | **Расширения** | `extensions/` | Схема-атрибуты, команды и ProseMirror-плагины. Определяют *поведение* редактора. |
 | **Ноды** | `nodes/` | Кастомные узлы документа с Vue-NodeView (изображение, загрузка изображения, оглавление). |
@@ -95,9 +133,19 @@ src/
 | **Стили** | `styles/` | Дизайн-токены (CSS-переменные) и постилевые файлы; визуальная точность вынесена в CSS, не в JS. |
 
 Направление зависимостей строго сверху вниз: `components → composables → extensions/utils`.
-Расширения и утилиты не импортируют Vue-компоненты.
+Расширения и утилиты не импортируют Vue-компоненты. Между feature-модулями
+компонентов направление проходит через их публичные `index.ts`; package entry
+`packages/editor/src/index.ts` экспортирует поддерживаемый API только из
+catalog-barrels, никогда из приватного пути feature.
 
 ## 4. Дерево компонентов
+
+Пути в дереве ниже сокращены до имён компонентов. Их физическое размещение
+следует контракту каталогов: оболочка находится в
+`notion/notion-editor/`, коллаборация — в `notion/collaboration/`, TOC — в
+`notion/toc/`, а экран загрузки — в `notion/feedback/`. Прикладные и табличные
+контролы сгруппированы по feature-модулям; `TableAlignMenu` входит в
+`table/table-align/`.
 
 ```
 App.vue ( room = getDocumentId() )
@@ -294,6 +342,16 @@ flowchart TD
 | Кастомные глобальные атрибуты (`Indent`, `NodeBackground`, `NodeAlignment`) | Отступ, фон и выравнивание применяются к множеству типов узлов через `addGlobalAttributes`, а не отдельными нодами. |
 
 ## 11. Зависимости между подсистемами
+
+### Границы каталогов компонентов
+
+- `notion/` может собирать `ui/`, `table/` и `primitives/` через их
+  catalog-barrels.
+- `ui/` и `table/` используют `primitives/` через его feature- или
+  catalog-barrel и не импортируют приватные файлы других feature-модулей.
+- `primitives/` не зависят от доменных feature `notion/`, `ui/` и `table/`.
+- Соседние файлы одного feature используют относительные пути; все остальные
+  component-зависимости проходят через опубликованный `index.ts` владельца.
 
 ```mermaid
 flowchart TD

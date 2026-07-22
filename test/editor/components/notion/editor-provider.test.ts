@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils'
 import { shallowRef } from 'vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as Y from 'yjs'
-import EditorProvider from '../../../../src/editor/components/notion/EditorProvider.vue'
+import EditorProvider from '../../../../src/editor/components/notion/notion-editor/EditorProvider.vue'
 import type { ImageUploadAdapter } from '../../../../src/editor/types'
 
 interface ChainCall {
@@ -76,36 +76,34 @@ vi.mock('../../../../src/editor/composables/useTiptapEditor', () => ({
   provideTiptapEditor: testState.provideTiptapEditor,
 }))
 
-vi.mock('../../../../src/editor/components/notion/NotionEditorHeader.vue', () => ({
+vi.mock('../../../../src/editor/components/notion/notion-editor/EditorContentArea.vue', () => ({
   default: { render: () => null },
 }))
-vi.mock('../../../../src/editor/components/notion/EditorContentArea.vue', () => ({
+vi.mock('../../../../src/editor/components/notion/toc/TocSidebar.vue', () => ({
   default: { render: () => null },
 }))
-vi.mock('../../../../src/editor/components/notion/TocSidebar.vue', () => ({
+vi.mock('../../../../src/editor/components/notion/feedback/LoadingSpinner.vue', () => ({
   default: { render: () => null },
 }))
-vi.mock('../../../../src/editor/components/notion/LoadingSpinner.vue', () => ({
+vi.mock('../../../../src/editor/components/table/table-handle/TableHandle.vue', () => ({
   default: { render: () => null },
 }))
-vi.mock('../../../../src/editor/components/notion/CtaPopup.vue', () => ({
-  default: { render: () => null },
-}))
-vi.mock('../../../../src/editor/components/table/TableHandle.vue', () => ({
-  default: { render: () => null },
-}))
-vi.mock('../../../../src/editor/components/table/TableSelectionOverlay.vue', () => ({
-  default: { render: () => null },
-}))
-vi.mock('../../../../src/editor/components/table/TableExtendRowColumnButtons.vue', () => ({
-  default: { render: () => null },
-}))
+vi.mock(
+  '../../../../src/editor/components/table/table-selection/TableSelectionOverlay.vue',
+  () => ({
+    default: { render: () => null },
+  }),
+)
+vi.mock(
+  '../../../../src/editor/components/table/table-extend/TableExtendRowColumnButtons.vue',
+  () => ({
+    default: { render: () => null },
+  }),
+)
 const visualStubs = {
-  NotionEditorHeader: true,
   EditorContentArea: true,
   TocSidebar: true,
   LoadingSpinner: true,
-  CtaPopup: true,
   TableHandle: true,
   TableSelectionOverlay: true,
   TableExtendRowColumnButtons: true,

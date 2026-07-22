@@ -12,28 +12,25 @@
  * closeAll по родительской цепочке используйте Menu; не подменяйте примитивы
  * только потому, что оба рендерят позиционируемое меню.
  */
-import { provide, ref, watch } from 'vue'
+import { computed, provide, ref, shallowRef } from 'vue'
 import { dropdownMenuInjectionKey } from './dropdown-menu-context'
 
 const props = defineProps<{ open?: boolean }>()
 const emit = defineEmits<{ 'update:open': [value: boolean] }>()
 
-const open = ref(props.open ?? false)
-const reference = ref<HTMLElement | null>(null)
-
-watch(
-  () => props.open,
-  (value) => {
-    if (value !== undefined) open.value = value
+const uncontrolledOpen = ref(props.open ?? false)
+const open = computed({
+  get: () => props.open ?? uncontrolledOpen.value,
+  set: (value: boolean) => {
+    if (props.open === undefined) uncontrolledOpen.value = value
+    emit('update:open', value)
   },
-)
+})
+const reference = shallowRef<HTMLElement | null>(null)
 
 provide(dropdownMenuInjectionKey, {
   open,
-  setOpen: (value) => {
-    open.value = value
-    emit('update:open', value)
-  },
+  setOpen: (value) => (open.value = value),
   reference,
 })
 </script>

@@ -38,14 +38,17 @@ export function useWindowSize() {
     Object.assign(size, { width, height, offsetTop, offsetLeft, scale })
   }, 200)
 
+  let viewport: VisualViewport | null = null
+
   onMounted(() => {
-    const viewport = window.visualViewport
+    viewport = window.visualViewport
     if (!viewport) return
     viewport.addEventListener('resize', update)
     update()
   })
   onBeforeUnmount(() => {
-    window.visualViewport?.removeEventListener('resize', update)
+    viewport?.removeEventListener('resize', update)
+    viewport = null
     update.cancel()
   })
 

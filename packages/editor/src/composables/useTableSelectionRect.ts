@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, shallowRef } from 'vue'
 import type { ComputedRef, Ref } from 'vue'
 import { CellSelection, cellAround } from '@tiptap/pm/tables'
 import type { Editor } from '@tiptap/vue-3'
@@ -8,8 +8,8 @@ type TiptapEditorRef = ComputedRef<Editor | null> | Ref<Editor | null>
 
 export function useTableSelectionRect(editor: TiptapEditorRef) {
   const visible = ref(true)
-  const selectionRect = ref<DOMRect | null>(null)
-  const tableDom = ref<HTMLElement | null>(null)
+  const selectionRect = shallowRef<DOMRect | null>(null)
+  const tableDom = shallowRef<HTMLElement | null>(null)
 
   function clearSelectionRect() {
     visible.value = false

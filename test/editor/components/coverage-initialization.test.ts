@@ -15,15 +15,15 @@ import { TableHandleExtension } from '../../../src/editor/extensions/table-handl
 import { TableKit } from '../../../src/editor/extensions/table-kit'
 
 const components = {
-  ...import.meta.glob('../../../src/editor/components/ui/*.vue', {
+  ...import.meta.glob('../../../src/editor/components/ui/**/*.vue', {
     eager: true,
     import: 'default',
   }),
-  ...import.meta.glob('../../../src/editor/components/notion/*.vue', {
+  ...import.meta.glob('../../../src/editor/components/notion/**/*.vue', {
     eager: true,
     import: 'default',
   }),
-  ...import.meta.glob('../../../src/editor/components/table/*.vue', {
+  ...import.meta.glob('../../../src/editor/components/table/**/*.vue', {
     eager: true,
     import: 'default',
   }),

@@ -14,7 +14,7 @@
  * side/align/sideOffset используйте DropdownMenu; не подменяйте примитивы
  * только потому, что оба рендерят позиционируемое меню.
  */
-import { inject, onBeforeUnmount, onMounted, provide, ref, watch } from 'vue'
+import { computed, inject, onBeforeUnmount, onMounted, provide, ref, shallowRef } from 'vue'
 import { menuInjectionKey } from './menu-context'
 import type { Placement } from '@floating-ui/vue'
 
@@ -32,20 +32,19 @@ const parentMenu = inject(menuInjectionKey, null)
 // Подменю (вложенное меню) открывается/закрывается по наведению курсора.
 const isSubmenu = parentMenu !== null
 
-const open = ref(props.open ?? false)
-const reference = ref<HTMLElement | null>(null)
-const triggerWrapperRef = ref<HTMLElement | null>(null)
-
-watch(
-  () => props.open,
-  (value) => {
-    if (value !== undefined) open.value = value
+const uncontrolledOpen = ref(props.open ?? false)
+const open = computed({
+  get: () => props.open ?? uncontrolledOpen.value,
+  set: (value: boolean) => {
+    if (props.open === undefined) uncontrolledOpen.value = value
+    emit('update:open', value)
   },
-)
+})
+const reference = shallowRef<HTMLElement | null>(null)
+const triggerWrapperRef = shallowRef<HTMLElement | null>(null)
 
 function setOpen(value: boolean) {
   open.value = value
-  emit('update:open', value)
 }
 
 function closeAll() {

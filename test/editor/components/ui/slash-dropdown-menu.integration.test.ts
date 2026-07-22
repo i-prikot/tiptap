@@ -3,7 +3,7 @@ import StarterKit from '@tiptap/starter-kit'
 import { mount, type VueWrapper } from '@vue/test-utils'
 import { defineComponent, h, nextTick, shallowRef } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import SlashDropdownMenu from '../../../../src/editor/components/ui/SlashDropdownMenu.vue'
+import SlashDropdownMenu from '../../../../src/editor/components/ui/slash-menu/SlashDropdownMenu.vue'
 import { provideTiptapEditor } from '../../../../src/editor/composables/useTiptapEditor'
 
 vi.mock('@floating-ui/vue', () => ({

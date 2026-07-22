@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import Tooltip from '../../../../src/editor/components/primitives/Tooltip.vue'
+import Tooltip from '../../../../src/editor/components/primitives/tooltip/Tooltip.vue'
 import { mountInDocument, settleTeleportUpdates } from './test-utils'
 
 function mountTooltip(props: Record<string, unknown> = {}) {

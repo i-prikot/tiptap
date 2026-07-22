@@ -76,7 +76,7 @@ vi.mock('../../../src/editor/utils/selection-utils', () => ({
   getNodeDisplayName: () => 'Paragraph',
 }))
 
-import MobileToolbar from '../../../src/editor/components/ui/MobileToolbar.vue'
+import MobileToolbar from '../../../src/editor/components/ui/mobile-toolbar/MobileToolbar.vue'
 
 const editors: Editor[] = []
 

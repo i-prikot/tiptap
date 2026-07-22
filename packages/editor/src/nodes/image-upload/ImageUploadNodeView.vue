@@ -108,10 +108,10 @@
  * и курсор переходит к следующему блоку.
  * Порт React-компонента из чанка 3jdxmcvhjtoe-.
  */
-import { computed, h, ref } from 'vue'
+import { computed, h } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
-import { focusNextNode, isValidPosition } from '../../utils/tiptap-utils'
 import { Button } from '../../components/primitives'
+import { useImageUpload } from '../../composables/useImageUpload'
 import type { ImageUploadNodeOptions } from './image-upload-node'
 
 const CloudUploadIcon = () =>
@@ -158,176 +158,26 @@ const CloseIcon = (props: { class?: string }) =>
 
 const props = defineProps(nodeViewProps)
 
-const accept = computed(() => props.node.attrs.accept as string)
-const limit = computed(() => props.node.attrs.limit as number)
-const maxSize = computed(() => props.node.attrs.maxSize as number)
-const uploadOptions = computed(() => props.extension.options as ImageUploadNodeOptions)
-
-interface FileItem {
-  id: string
-  file: File
-  progress: number
-  status: 'uploading' | 'success' | 'error'
-  url?: string
-  abortController?: AbortController
-  errorMessage?: string
-}
-
-const fileItems = ref<FileItem[]>([])
-const hasFiles = computed(() => fileItems.value.length > 0)
-
-const dragActive = ref(false)
-const dragOver = ref(false)
-const fileInputRef = ref<HTMLInputElement | null>(null)
-
-function formatFileSize(bytes: number) {
-  if (bytes === 0) return '0 Bytes'
-  const unit = Math.floor(Math.log(bytes) / Math.log(1024))
-  return `${parseFloat((bytes / Math.pow(1024, unit)).toFixed(2))} ${['Bytes', 'KB', 'MB', 'GB'][unit]}`
-}
-
-function validateUploadedImageUrl(value: string): string {
-  let url: URL
-  try {
-    url = new URL(value, window.location.href)
-  } catch {
-    throw new Error('Upload failed: Invalid URL returned')
-  }
-
-  if (url.protocol === 'http:' || url.protocol === 'https:') return url.href
-  throw new Error('Upload failed: Invalid URL returned')
-}
-
-async function uploadSingleFile(file: File): Promise<string | null> {
-  const options = uploadOptions.value
-  if (file.size > options.maxSize) {
-    options.onError?.(
-      new Error(`File size exceeds maximum allowed (${options.maxSize / 1024 / 1024}MB)`),
-    )
-    return null
-  }
-
-  const abortController = new AbortController()
-  const id = crypto.randomUUID()
-  const item: FileItem = { id, file, progress: 0, status: 'uploading', abortController }
-  fileItems.value = [...fileItems.value, item]
-
-  try {
-    if (!options.upload) throw new Error('image upload adapter is not configured')
-    const uploadedUrl = await options.upload(file, {
-      onProgress: (event) => {
-        fileItems.value = fileItems.value.map((entry) =>
-          entry.id === id ? { ...entry, progress: event.progress } : entry,
-        )
-      },
-      abortSignal: abortController.signal,
-    })
-    if (!uploadedUrl) throw new Error('Upload failed: No URL returned')
-    const url = validateUploadedImageUrl(uploadedUrl)
-    if (abortController.signal.aborted) return null
-
-    fileItems.value = fileItems.value.map((entry) =>
-      entry.id === id ? { ...entry, status: 'success' as const, url, progress: 100 } : entry,
-    )
-    options.onSuccess?.(url)
-    return url
-  } catch (error) {
-    if (!abortController.signal.aborted) {
-      const errorMessage =
-        error instanceof Error && error.message === 'image upload adapter is not configured'
-          ? error.message
-          : 'Image upload failed'
-      fileItems.value = fileItems.value.map((entry) =>
-        entry.id === id ? { ...entry, status: 'error' as const, progress: 0, errorMessage } : entry,
-      )
-      options.onError?.(error instanceof Error ? error : new Error('Upload failed'))
-    }
-    return null
-  }
-}
-
-async function uploadFiles(files: File[]): Promise<string[]> {
-  const options = uploadOptions.value
-  if (!files || files.length === 0) {
-    options.onError?.(new Error('No files to upload'))
-    return []
-  }
-  if (options.limit && files.length > options.limit) {
-    options.onError?.(
-      new Error(`Maximum ${options.limit} file${options.limit === 1 ? '' : 's'} allowed`),
-    )
-    return []
-  }
-  const results = await Promise.all(files.map((file) => uploadSingleFile(file)))
-  return results.filter((url): url is string => url !== null)
-}
-
-function removeFileItem(id: string) {
-  const item = fileItems.value.find((entry) => entry.id === id)
-  if (item?.abortController) item.abortController.abort()
-  if (item?.url) URL.revokeObjectURL(item.url)
-  fileItems.value = fileItems.value.filter((entry) => entry.id !== id)
-}
-
-function clearAllFiles() {
-  fileItems.value.forEach((item) => {
-    if (item.abortController) item.abortController.abort()
-    if (item.url) URL.revokeObjectURL(item.url)
-  })
-  fileItems.value = []
-}
-
-/** Заменяет upload-узел загруженными изображениями. */
-async function handleFiles(files: File[]) {
-  const urls = await uploadFiles(files)
-  if (urls.length === 0) return
-
-  const pos = props.getPos()
-  if (!isValidPosition(pos)) return
-
-  const options = uploadOptions.value
-  const imageNodes = urls.map((url, index) => {
-    const name = files[index]?.name.replace(/\.[^/.]+$/, '') || 'unknown'
-    return { type: options.type, attrs: { ...options, src: url, alt: name, title: name } }
-  })
-
-  props.editor
-    .chain()
-    .focus()
-    .deleteRange({ from: pos, to: pos + props.node.nodeSize })
-    .insertContentAt(pos, imageNodes)
-    .run()
-  focusNextNode(props.editor)
-}
-
-function handleWrapperClick() {
-  if (fileInputRef.value && fileItems.value.length === 0) {
-    fileInputRef.value.value = ''
-    fileInputRef.value.click()
-  }
-}
-
-function handleDragLeave(event: DragEvent) {
-  const currentTarget = event.currentTarget as HTMLElement
-  if (!currentTarget.contains(event.relatedTarget as Node | null)) {
-    dragActive.value = false
-    dragOver.value = false
-  }
-}
-
-function handleDrop(event: DragEvent) {
-  dragActive.value = false
-  dragOver.value = false
-  const files = Array.from(event.dataTransfer?.files ?? [])
-  if (files.length > 0) handleFiles(files)
-}
-
-function handleFileInputChange(event: Event) {
-  const files = (event.target as HTMLInputElement).files
-  if (files && files.length !== 0) {
-    handleFiles(Array.from(files))
-  } else {
-    uploadOptions.value.onError?.(new Error('No file selected'))
-  }
-}
+const {
+  accept,
+  clearAllFiles,
+  dragActive,
+  dragOver,
+  fileInputRef,
+  fileItems,
+  formatFileSize,
+  handleDragLeave,
+  handleDrop,
+  handleFileInputChange,
+  handleWrapperClick,
+  hasFiles,
+  limit,
+  maxSize,
+  removeFileItem,
+} = useImageUpload({
+  editor: props.editor,
+  getPos: props.getPos,
+  node: computed(() => props.node),
+  options: computed(() => props.extension.options as ImageUploadNodeOptions),
+})
 </script>

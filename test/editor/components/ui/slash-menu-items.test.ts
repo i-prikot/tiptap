@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   getSlashMenuItems,
   type SlashMenuItemKey,
-} from '../../../../src/editor/components/ui/slash-menu-items'
+} from '../../../../src/editor/components/ui/slash-menu'
 
 const keys: SlashMenuItemKey[] = [
   'continue_writing',

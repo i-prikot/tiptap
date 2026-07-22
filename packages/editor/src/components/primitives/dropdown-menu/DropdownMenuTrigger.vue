@@ -6,14 +6,14 @@
 
 <script setup lang="ts">
 // Триггер выпадающего меню: клик открывает/закрывает.
-import { inject, onMounted, ref } from 'vue'
+import { inject, onMounted, shallowRef } from 'vue'
 import { dropdownMenuInjectionKey } from './dropdown-menu-context'
 
 const injected = inject(dropdownMenuInjectionKey)
 if (!injected) throw new Error('DropdownMenuTrigger must be used within DropdownMenu')
 const context = injected
 
-const triggerRef = ref<HTMLElement | null>(null)
+const triggerRef = shallowRef<HTMLElement | null>(null)
 
 onMounted(() => {
   // реальный DOM-элемент триггера — первый ребёнок обёртки display:contents

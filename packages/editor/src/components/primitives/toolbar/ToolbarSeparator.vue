@@ -4,5 +4,5 @@
 
 <script setup lang="ts">
 // Вертикальный разделитель тулбара.
-import Separator from '../Separator.vue'
+import { Separator } from '../separator'
 </script>

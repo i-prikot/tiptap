@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import Button from '../../../../src/editor/components/primitives/Button.vue'
-import Tooltip from '../../../../src/editor/components/primitives/Tooltip.vue'
+import Button from '../../../../src/editor/components/primitives/button/Button.vue'
+import Tooltip from '../../../../src/editor/components/primitives/tooltip/Tooltip.vue'
 import { mountInDocument, settleTeleportUpdates } from './test-utils'
 
 describe('Button', () => {

@@ -42,7 +42,7 @@ describe('playground host theme boundary', () => {
     vi.doMock('../../src/playground/components/NotionEditorHeader.vue', () => ({
       default: HeaderProbe,
     }))
-    vi.doMock('../../src/editor/components/notion/NotionEditor.vue', () => ({
+    vi.doMock('../../src/editor/components/notion/notion-editor/NotionEditor.vue', () => ({
       default: NotionEditorStub,
     }))
 
@@ -72,7 +72,8 @@ describe('playground host theme boundary', () => {
     window.history.replaceState({}, '', '/?cta')
     vi.resetModules()
 
-    const { default: Tooltip } = await import('../../src/editor/components/primitives/Tooltip.vue')
+    const { default: Tooltip } =
+      await import('../../src/editor/components/primitives/tooltip/Tooltip.vue')
     const HeaderProbe = {
       components: { Tooltip },
       template: `
@@ -86,7 +87,7 @@ describe('playground host theme boundary', () => {
     vi.doMock('../../src/playground/components/NotionEditorHeader.vue', () => ({
       default: HeaderProbe,
     }))
-    vi.doMock('../../src/editor/components/notion/NotionEditor.vue', () => ({
+    vi.doMock('../../src/editor/components/notion/notion-editor/NotionEditor.vue', () => ({
       default: NotionEditorStub,
     }))
 

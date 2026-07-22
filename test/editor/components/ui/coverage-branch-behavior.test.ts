@@ -1,9 +1,9 @@
 import { mount } from '@vue/test-utils'
 import { defineComponent, h } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import ColorMenu from '../../../../src/editor/components/ui/ColorMenu.vue'
-import EmojiDropdownMenu from '../../../../src/editor/components/ui/EmojiDropdownMenu.vue'
-import MentionDropdownMenu from '../../../../src/editor/components/ui/MentionDropdownMenu.vue'
+import ColorMenu from '../../../../src/editor/components/ui/color/ColorMenu.vue'
+import EmojiDropdownMenu from '../../../../src/editor/components/ui/emoji-menu/EmojiDropdownMenu.vue'
+import MentionDropdownMenu from '../../../../src/editor/components/ui/mention-menu/MentionDropdownMenu.vue'
 
 const colorMocks = vi.hoisted(() => ({
   addRecentColor: vi.fn(),

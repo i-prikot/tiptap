@@ -5,9 +5,10 @@ import type {
   AiOptions,
   CollaborationOptions,
   EditorFeatureFlags,
-} from '../../../../src/editor/components/notion/public-api'
+} from '../../../../src/editor/components/notion/notion-editor/public-api'
 
-const editorProviderModule = '../../../../src/editor/components/notion/EditorProvider.vue'
+const editorProviderModule =
+  '../../../../src/editor/components/notion/notion-editor/EditorProvider.vue'
 const wrappers: VueWrapper[] = []
 
 const EditorProviderStub = defineComponent({
@@ -32,7 +33,7 @@ async function renderEditor({ ai, collaboration, features }: RenderEditorOptions
   vi.doMock(editorProviderModule, () => ({ default: EditorProviderStub }))
 
   const { default: NotionEditor } =
-    await import('../../../../src/editor/components/notion/NotionEditor.vue')
+    await import('../../../../src/editor/components/notion/notion-editor/NotionEditor.vue')
   const wrapper = mount(NotionEditor, {
     props: {
       documentId: 'graceful-degradation-document',

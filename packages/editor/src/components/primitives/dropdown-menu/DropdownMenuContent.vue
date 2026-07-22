@@ -29,10 +29,10 @@
  * владеющим Menu, или closeAll: для таких контекстных действий используйте
  * MenuContent.
  */
-import { computed, inject, onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
+import { computed, inject, onBeforeUnmount, onMounted, shallowRef, watchEffect } from 'vue'
 import { autoUpdate, flip, offset, shift, size, useFloating } from '@floating-ui/vue'
 import { useEditorOverlayTarget } from '../../../composables'
-import EditorOverlayTeleport from '../EditorOverlayTeleport.vue'
+import { EditorOverlayTeleport } from '../editor-overlay-teleport'
 import { dropdownMenuInjectionKey } from './dropdown-menu-context'
 
 const props = withDefaults(
@@ -52,7 +52,7 @@ const context = injected
 const overlayTarget = useEditorOverlayTarget()
 const teleportTarget = computed(() => overlayTarget?.value ?? null)
 
-const floatingRef = ref<HTMLElement | null>(null)
+const floatingRef = shallowRef<HTMLElement | null>(null)
 
 const placement = computed(() => {
   if (props.align === 'center') return props.side
@@ -101,12 +101,15 @@ const { floatingStyles, placement: resolvedPlacement } = useFloating(
 const resolvedSide = computed(() => resolvedPlacement.value.split('-')[0])
 
 // origin зависит от итогового placement (после flip)
-watchEffect(() => {
-  floatingRef.value?.style.setProperty(
-    '--radix-dropdown-menu-content-transform-origin',
-    transformOrigin(resolvedPlacement.value),
-  )
-})
+watchEffect(
+  () => {
+    floatingRef.value?.style.setProperty(
+      '--radix-dropdown-menu-content-transform-origin',
+      transformOrigin(resolvedPlacement.value),
+    )
+  },
+  { flush: 'post' },
+)
 
 function handleOutsidePointerDown(event: PointerEvent) {
   if (!context) return

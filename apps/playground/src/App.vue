@@ -70,7 +70,7 @@ const documentId = ref(getDocumentId())
 const { initializeDemoDocumentSeed, cleanupDemoDocumentSeed } = useDemoDocumentSeed(documentId)
 const baseUrl = ref(getBaseUrlFromLocation())
 const currentAnchor = ref(getAnchorFromLocation())
-const collaboration = ref<CollaborationOptions | undefined>(getCollaborationOptions())
+const collaboration = shallowRef<CollaborationOptions | undefined>(getCollaborationOptions())
 const editorSessionKey = ref(0)
 const ai: AiOptions | undefined = aiAppId
   ? {

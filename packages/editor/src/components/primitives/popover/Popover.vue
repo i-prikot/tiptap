@@ -20,7 +20,7 @@
  * Поповер (порт Popover из чанка 3q2p49kc-ifgd): триггер + floating
  * контент, закрытие по Escape/клику снаружи.
  */
-import { computed, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watchEffect } from 'vue'
 import {
   autoUpdate,
   flip,
@@ -30,7 +30,7 @@ import {
   useFloating,
 } from '@floating-ui/vue'
 import type { Placement } from '@floating-ui/vue'
-import FloatingPositioningWrapper from '../FloatingPositioningWrapper.vue'
+import { FloatingPositioningWrapper } from '../floating-positioning-wrapper'
 
 const props = withDefaults(
   defineProps<{
@@ -45,26 +45,26 @@ const props = withDefaults(
 
 const emit = defineEmits<{ 'update:open': [value: boolean] }>()
 
-const open = ref(props.open ?? false)
-watch(
-  () => props.open,
-  (value) => {
-    if (value !== undefined) open.value = value
+const uncontrolledOpen = ref(props.open ?? false)
+const open = computed({
+  get: () => props.open ?? uncontrolledOpen.value,
+  set: (value: boolean) => {
+    if (props.open === undefined) uncontrolledOpen.value = value
+    emit('update:open', value)
   },
-)
+})
 
 function setOpen(value: boolean) {
   open.value = value
-  emit('update:open', value)
 }
 
 function toggle() {
   setOpen(!open.value)
 }
 
-const triggerWrapperRef = ref<HTMLElement | null>(null)
-const reference = ref<HTMLElement | null>(null)
-const floatingRef = ref<HTMLElement | null>(null)
+const triggerWrapperRef = shallowRef<HTMLElement | null>(null)
+const reference = shallowRef<HTMLElement | null>(null)
+const floatingRef = shallowRef<HTMLElement | null>(null)
 
 onMounted(() => {
   reference.value = (triggerWrapperRef.value?.firstElementChild as HTMLElement | null) ?? null
@@ -99,18 +99,21 @@ const { floatingStyles, placement: resolvedPlacement } = useFloating(reference, 
 })
 
 // transform-origin у края, прилегающего к триггеру (как в Radix)
-watchEffect(() => {
-  const [resolvedSide, resolvedAlign] = resolvedPlacement.value.split('-')
-  let origin: string
-  if (resolvedSide === 'top' || resolvedSide === 'bottom') {
-    const x = resolvedAlign === 'start' ? 'left' : resolvedAlign === 'end' ? 'right' : 'center'
-    origin = `${x} ${resolvedSide === 'top' ? 'bottom' : 'top'}`
-  } else {
-    const y = resolvedAlign === 'start' ? 'top' : resolvedAlign === 'end' ? 'bottom' : 'center'
-    origin = `${resolvedSide === 'left' ? 'right' : 'left'} ${y}`
-  }
-  floatingRef.value?.style.setProperty('--radix-popover-content-transform-origin', origin)
-})
+watchEffect(
+  () => {
+    const [resolvedSide, resolvedAlign] = resolvedPlacement.value.split('-')
+    let origin: string
+    if (resolvedSide === 'top' || resolvedSide === 'bottom') {
+      const x = resolvedAlign === 'start' ? 'left' : resolvedAlign === 'end' ? 'right' : 'center'
+      origin = `${x} ${resolvedSide === 'top' ? 'bottom' : 'top'}`
+    } else {
+      const y = resolvedAlign === 'start' ? 'top' : resolvedAlign === 'end' ? 'bottom' : 'center'
+      origin = `${resolvedSide === 'left' ? 'right' : 'left'} ${y}`
+    }
+    floatingRef.value?.style.setProperty('--radix-popover-content-transform-origin', origin)
+  },
+  { flush: 'post' },
+)
 
 function handleOutsidePointerDown(event: PointerEvent) {
   if (!open.value) return

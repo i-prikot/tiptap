@@ -1,6 +1,6 @@
 import { inject, provide } from 'vue'
 import type { ComputedRef, InjectionKey } from 'vue'
-import type { NotionEditorAnchorId } from '../components/notion/public-api'
+import type { NotionEditorAnchorId } from '../components/notion'
 
 export interface AnchorNavigationContext {
   baseUrl: ComputedRef<string>

@@ -28,10 +28,10 @@
  * Для одноуровневого trigger-owned селектора с side/align/sideOffset и
  * локальным click-to-close используйте DropdownMenuContent.
  */
-import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, inject, onBeforeUnmount, onMounted, shallowRef, watch } from 'vue'
 import { autoUpdate, flip, offset, shift, size, useFloating } from '@floating-ui/vue'
 import { useEditorOverlayTarget } from '../../../composables'
-import EditorOverlayTeleport from '../EditorOverlayTeleport.vue'
+import { EditorOverlayTeleport } from '../editor-overlay-teleport'
 import { menuInjectionKey } from './menu-context'
 
 const props = withDefaults(defineProps<{ closeOnSelect?: boolean }>(), { closeOnSelect: true })
@@ -45,7 +45,7 @@ const context = injected
 const overlayTarget = useEditorOverlayTarget()
 const teleportTarget = computed(() => overlayTarget?.value ?? null)
 
-const floatingRef = ref<HTMLElement | null>(null)
+const floatingRef = shallowRef<HTMLElement | null>(null)
 
 const { floatingStyles, placement: resolvedPlacement } = useFloating(
   context.reference,
@@ -111,12 +111,17 @@ function handleContentClick(event: MouseEvent) {
 onMounted(() => {
   document.addEventListener('pointerdown', handleOutsidePointerDown, true)
   document.addEventListener('keydown', handleKeydown)
-  floatingRef.value?.addEventListener('click', handleContentClick)
 })
 
-watch(floatingRef, (element) => {
-  element?.addEventListener('click', handleContentClick)
-})
+watch(
+  floatingRef,
+  (element, _previousElement, onCleanup) => {
+    if (!element) return
+    element.addEventListener('click', handleContentClick)
+    onCleanup(() => element.removeEventListener('click', handleContentClick))
+  },
+  { flush: 'post' },
+)
 
 onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', handleOutsidePointerDown, true)

@@ -11,7 +11,7 @@ import { onBeforeUnmount, provide, inject, shallowRef } from 'vue'
 import type { InjectionKey, ShallowRef } from 'vue'
 import * as Y from 'yjs'
 import { TiptapCollabProvider } from '@hocuspocus/provider'
-import type { CollaborationOptions } from '../components/notion/public-api'
+import type { CollaborationOptions } from '../components/notion'
 
 /** Получает JWT коллаборации с бэкенда (оригинал: POST /api/collaboration). */
 export async function fetchCollabToken(config: CollaborationOptions): Promise<string | null> {

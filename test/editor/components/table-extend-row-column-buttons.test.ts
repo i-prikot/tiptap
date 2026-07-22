@@ -3,7 +3,7 @@ import { Schema, type Node as ProseMirrorNode, type NodeSpec } from '@tiptap/pm/
 import { tableNodes } from '@tiptap/pm/tables'
 import { nextTick, ref } from 'vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import TableExtendRowColumnButtons from '../../../src/editor/components/table/TableExtendRowColumnButtons.vue'
+import TableExtendRowColumnButtons from '../../../src/editor/components/table/table-extend/TableExtendRowColumnButtons.vue'
 
 const mocks = vi.hoisted(() => ({
   countEmptyColumnsFromEnd: vi.fn(() => 1),

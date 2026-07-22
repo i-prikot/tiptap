@@ -58,13 +58,24 @@ export function useCursorVisibility(options: {
   )
 
   let cleanups: Array<() => void> = []
+  let observerFrameId: number | null = null
 
   onMounted(() => {
     updateRect()
     if (typeof ResizeObserver !== 'undefined') {
-      const observer = new ResizeObserver(() => window.requestAnimationFrame(() => updateRect()))
+      const observer = new ResizeObserver(() => {
+        if (observerFrameId !== null) return
+        observerFrameId = window.requestAnimationFrame(() => {
+          observerFrameId = null
+          updateRect()
+        })
+      })
       observer.observe(document.body)
-      cleanups.push(() => observer.disconnect())
+      cleanups.push(() => {
+        if (observerFrameId !== null) window.cancelAnimationFrame(observerFrameId)
+        observerFrameId = null
+        observer.disconnect()
+      })
     }
     const handler = () => updateRect()
     window.addEventListener('scroll', handler, true)

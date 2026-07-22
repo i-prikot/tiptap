@@ -10,7 +10,7 @@
  */
 import { inject, provide, shallowRef, toValue, watch } from 'vue'
 import type { InjectionKey, MaybeRefOrGetter, ShallowRef } from 'vue'
-import type { AiOptions } from '../components/notion/public-api'
+import type { AiOptions } from '../components/notion'
 
 /** Получает JWT для AI с бэкенда (оригинал: POST /api/ai). */
 export async function fetchAiToken(config: AiOptions): Promise<string | null> {

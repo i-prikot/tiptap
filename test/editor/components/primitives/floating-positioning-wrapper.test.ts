@@ -1,6 +1,6 @@
 import { defineComponent, h, shallowRef } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
-import FloatingPositioningWrapper from '../../../../src/editor/components/primitives/FloatingPositioningWrapper.vue'
+import FloatingPositioningWrapper from '../../../../src/editor/components/primitives/floating-positioning-wrapper/FloatingPositioningWrapper.vue'
 import { provideEditorOverlayTarget } from '../../../../src/editor/composables/useEditorOverlayTarget'
 import { mountInDocument, settleTeleportUpdates } from './test-utils'
 

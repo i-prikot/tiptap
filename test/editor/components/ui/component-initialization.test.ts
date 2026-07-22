@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils'
 import type { Component } from 'vue'
 import { describe, expect, it } from 'vitest'
 
-const components = import.meta.glob('../../../../src/editor/components/ui/*.vue', {
+const components = import.meta.glob('../../../../src/editor/components/ui/**/*.vue', {
   eager: true,
   import: 'default',
 }) as Record<string, Component>

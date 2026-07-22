@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import FloatingElement from '../../../../src/editor/components/ui/FloatingElement.vue'
+import FloatingElement from '../../../../src/editor/components/ui/suggestion/FloatingElement.vue'
 
 const selectionMocks = vi.hoisted(() => ({
   near: vi.fn(() => ({ type: 'reset-selection' })),
