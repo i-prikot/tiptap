@@ -15,11 +15,11 @@
 <script setup lang="ts">
 /**
  * Корень Notion-like редактора: цепочка провайдеров
- * User → Collab(documentId) → Ai → Toc, затем контент.
+ * EditorI18n → User → Collab(documentId) → Ai → Toc, затем контент.
  * Порт NotionEditor из чанка 3xpmbr0kqzhen (React-провайдеры заменены
  * на provide/inject через composables).
  */
-import { computed, onBeforeUnmount, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, shallowRef, toRef, watch } from 'vue'
 import type { Editor, JSONContent } from '@tiptap/core'
 import {
   provideUser,
@@ -27,6 +27,7 @@ import {
   provideAi,
   provideToc,
   provideAnchorNavigation,
+  provideEditorI18n,
 } from '../../../composables'
 import { createDevelopmentDiagnostics } from '../../../utils/development-diagnostics'
 
@@ -133,6 +134,11 @@ defineExpose<NotionEditorExpose>({
 const identityPersistenceMode =
   props.identityStorage === false ? 'disabled' : props.identityStorage ? 'custom' : 'default'
 
+provideEditorI18n(
+  toRef(props, 'locale'),
+  toRef(props, 'messages'),
+  computed(() => props.developmentDiagnostics === true),
+)
 provideUser(props.identityStorage)
 diagnostics.debug('identity-persistence', { mode: identityPersistenceMode })
 provideCollab(props.documentId, props.collaboration)

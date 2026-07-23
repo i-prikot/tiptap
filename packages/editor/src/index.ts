@@ -20,11 +20,19 @@ export { LinkPopover } from './components/ui'
 export { TurnIntoDropdown } from './components/ui'
 export { ImageNodeFloating } from './components/ui'
 export {
+  defaultEditorLocale,
+  defaultEditorMessageCatalog,
+  defaultEditorMessages,
   defaultEditorFeatureFlags,
   EDITOR_UPDATE_DEBOUNCE_MS,
   type AiOptions,
   type CollaborationOptions,
   type EditorFeatureFlags,
+  type EditorLocale,
+  type EditorMessageCatalog,
+  type EditorMessageOverrides,
+  type EditorMessageTree,
+  type EditorMessageValue,
   type IdentityStorage,
   type ImageUploadAdapter,
   type ImageUploadCallbacks,

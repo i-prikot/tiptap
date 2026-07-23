@@ -1,7 +1,33 @@
 import type { Editor, JSONContent } from '@tiptap/core'
+import { en } from '../../../i18n'
+import type { EditorLocale, EditorMessageCatalog, EditorMessageTree } from '../../../i18n/types'
 import type { ImageUploadAdapter } from '../../../types/image-upload'
 
 export type { ImageUploadAdapter, ImageUploadCallbacks } from '../../../types/image-upload'
+
+export type {
+  EditorLocale,
+  EditorMessageCatalog,
+  EditorMessageOverrides,
+  EditorMessageTree,
+  EditorMessageValue,
+} from '../../../i18n/types'
+
+/** Default locale used when the host does not provide `NotionEditorProps.locale`. */
+export const defaultEditorLocale = 'en'
+
+/**
+ * Canonical English editor messages.
+ *
+ * This catalog keeps the stable facade placeholder while later tasks migrate
+ * the remaining audited editor copy into the domain namespaces.
+ */
+export const defaultEditorMessages: EditorMessageTree = en
+
+/** Default catalog entry exported for host typing and composition. */
+export const defaultEditorMessageCatalog: EditorMessageCatalog = {
+  [defaultEditorLocale]: defaultEditorMessages,
+}
 
 /** Optional presentation surfaces for the Notion-like editor UI. */
 export interface EditorFeatureFlags {
@@ -69,6 +95,24 @@ export interface NotionEditorProps {
   currentAnchor?: NotionEditorAnchorId
   content?: JSONContent
   placeholder?: string
+  /**
+   * Active host-selected locale. Defaults to `en`; missing selected-locale
+   * keys fall back to the package's English defaults.
+   *
+   * Changes are reactive and update editor-scoped text resolution without
+   * recreating the editor. This API does not require Vue I18n or any other
+   * host localization plugin.
+   */
+  locale?: EditorLocale
+  /**
+   * Host-supplied locale overrides shaped like the package-owned canonical
+   * English messages. Changes are reactive and missing keys fall back to
+   * English per key without recreating the editor.
+   *
+   * Development diagnostics never log message values, host content, or whole
+   * dictionaries; they only report redacted resolver events.
+   */
+  messages?: EditorMessageCatalog
   features?: Partial<EditorFeatureFlags>
   /** Sticky top offset for the optional table-of-contents sidebar, in pixels. */
   tocSidebarStickyTopOffset?: number
