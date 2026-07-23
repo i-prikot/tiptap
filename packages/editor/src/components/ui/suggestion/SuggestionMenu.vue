@@ -25,16 +25,10 @@
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import type { CSSProperties } from 'vue'
 import { PluginKey } from '@tiptap/pm/state'
-import {
-  flip,
-  offset as offsetMiddleware,
-  shift,
-  size,
-  autoUpdate,
-  useFloating,
-} from '@floating-ui/vue'
+import { flip, offset as offsetMiddleware, shift, size, useFloating } from '@floating-ui/vue'
 import type { Editor } from '@tiptap/vue-3'
 import { useTiptapEditor, useEditorOverlayTarget, useMenuNavigation } from '../../../composables'
+import { throttledAutoUpdate } from '../../../utils/throttle'
 import { EditorOverlayTeleport } from '../../primitives'
 
 import { Suggestion, calculateStartPosition } from '../../../utils/suggestion/suggestion'
@@ -84,7 +78,7 @@ const virtualReference = computed(() => {
 
 const { floatingStyles: rawFloatingStyles } = useFloating(virtualReference, menuRef, {
   placement: 'bottom-start',
-  whileElementsMounted: autoUpdate,
+  whileElementsMounted: throttledAutoUpdate,
   middleware: [
     offsetMiddleware(10),
     flip({ mainAxis: true, crossAxis: false }),

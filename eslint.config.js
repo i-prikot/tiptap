@@ -124,7 +124,7 @@ export default [
 
   {
     name: 'project/node-commonjs-scripts',
-    files: ['scripts/**/*.cjs'],
+    files: ['scripts/**/*.cjs', '{apps,packages}/**/scripts/**/*.cjs'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'commonjs',
@@ -137,11 +137,27 @@ export default [
 
   {
     name: 'project/node-esm-scripts',
-    files: ['scripts/**/*.mjs'],
+    files: ['scripts/**/*.mjs', '{apps,packages}/**/scripts/**/*.mjs'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
       globals: globals.node,
+    },
+  },
+
+  {
+    name: 'project/node-cli-output',
+    files: ['scripts/**/*.{cjs,mjs}', '{apps,packages}/**/scripts/**/*.{cjs,mjs}'],
+    rules: {
+      'no-console': ['warn', { allow: ['log', 'table', 'warn', 'error'] }],
+    },
+  },
+
+  {
+    name: 'project/vite-config-output',
+    files: ['vite.config.ts', '{apps,packages}/**/vite.config.ts'],
+    rules: {
+      'no-console': ['warn', { allow: ['info', 'warn', 'error'] }],
     },
   },
 

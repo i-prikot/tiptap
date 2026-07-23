@@ -33,8 +33,9 @@ export function useUndoRedo(
       unsubscribe?.()
       unsubscribe = undefined
       if (!instance) {
-        canExecute.value = false
-        isVisible.value = !shouldHide
+        if (canExecute.value) canExecute.value = false
+        const nextVisibility = !shouldHide
+        if (isVisible.value !== nextVisibility) isVisible.value = nextVisibility
         diagnostics.debug('editor unavailable', {
           action: currentAction,
           isVisible: isVisible.value,
@@ -44,9 +45,10 @@ export function useUndoRedo(
 
       const update = () => {
         const available = canExecuteAction(instance, currentAction)
-        canExecute.value = available
-        isVisible.value =
+        if (canExecute.value !== available) canExecute.value = available
+        const nextVisibility =
           !shouldHide || (instance.isEditable && (instance.isActive('code') || available))
+        if (isVisible.value !== nextVisibility) isVisible.value = nextVisibility
       }
 
       update()

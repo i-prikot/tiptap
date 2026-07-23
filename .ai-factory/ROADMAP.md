@@ -28,26 +28,29 @@
 
 ## Milestones
 
-### Этап 6. Vue 3: лучшие практики
+### Этап 7. Производительность
 
-- [x] Провести аудит всех компонентов: убедиться, что везде используется `<script setup lang="ts">` (унифицировать исключения)
-- [ ] Типизировать все `defineProps`/`defineEmits` дженериками; заменить runtime-декларации, где они остались
-- [ ] Декомпозировать `DragContextMenu.vue` (~14 КБ): вынести подменю (ColorMenu, TableAlignMenu, TurnInto) и логику построения пунктов в composable
-- [ ] Декомпозировать `MobileToolbar.vue` (~13 КБ): виды main/highlighter/link — отдельные подкомпоненты
-- [ ] Декомпозировать `TableSelectionOverlay.vue` (~12 КБ): вычисление рамки выделения — в composable, rAF-слежение — в отдельный хук
-- [x] Декомпозировать `ImageUploadNodeView.vue` (~13 КБ): состояние загрузки/прогресса — в composable `useImageUpload`
-- [ ] Декомпозировать `TableHandleMenuContent.vue` (~9 КБ) и `TableHandle.vue`: пункты меню — данные + маленькие компоненты
-- [ ] Вынести бизнес-логику из компонентов `ui/` в composables (компонент = шаблон + вызовы composable)
-- [ ] Аудит реактивности: заменить лишние `ref` на `shallowRef` для тяжёлых объектов (editor, provider, floating-элементы)
-- [ ] Аудит `computed`/`watch`: устранить сайд-эффекты в `computed`, заменить `watch` на `computed`/`watchEffect` там, где это уместно, добавить недостающие опции (`immediate`, `flush`)
-- [ ] Проверить очистку всех подписок: `editor.on`/DOM-listeners/rAF снимаются в `onBeforeUnmount`/`onScopeDispose` (утечка: `provider.on('synced')` в `EditorProvider` не отписывается) — критично для SPA-кабинета Tinyfy, где редактор многократно монтируется/размонтируется
-- [x] Унифицировать структуру каталогов компонентов: единые правила для `notion/`, `ui/`, `table/`, `primitives/` (описать в ARCHITECTURE.md и привести к ним код)
+> Публичные страницы Tinyfy JS редактора не грузят вовсе (Этап 4/5) —
+> этот этап про вес и отзывчивость самого редактора в кабинете.
+
+- [ ] Проанализировать бандл `@i-prikot/editor` (`rollup-plugin-visualizer`) и зафиксировать текущие размеры как baseline
+- [ ] Разбить `icons/index.ts` (~120 КБ, ~97 иконок в одном файле) на файл-на-иконку с barrel-экспортом для tree-shaking
+- [ ] Лениво загружать KaTeX (JS + CSS) — только при наличии формул или вставке первой формулы
+- [ ] Настроить `manualChunks`/code-splitting: `@tiptap/*`, `yjs`+`@hocuspocus`, `katex` — отдельные чанки на стороне хоста; проверить, что peer-подход этому не мешает
+- [x] Лениво монтировать тяжёлые оверлеи (`MobileToolbar`, `DragContextMenu`, table-UI) через `defineAsyncComponent`/условный рендер
+- [x] Лениво загружать `content/default-content.ts` (~46 КБ) в playground через динамический `import()` (в библиотеку не входит)
+- [ ] Устранить лишние ререндеры: проверить, что подписки на `transaction`/`selectionUpdate` обновляют только затронутые компоненты (селективные сигналы вместо общего состояния)
+- [ ] Троттлинг/дебаунс дорогих обработчиков: `mousemove` в TableHandlePlugin, resize/scroll в floating-хуках — проверить и унифицировать через `utils/throttle.ts`
+- [ ] Проверить `gitHubEmojis`: фильтрация и объём набора эмодзи в бандле, при необходимости — ленивое подключение
+- [ ] Замерить и оптимизировать вес reader-CSS и HTML публичной страницы (бюджет размера страницы Tinyfy)
 
 
 ## Completed
 
 | Date | Milestone | Work |
 | --- | --- | --- |
+| 2026-07-22 | Этап 7. Производительность | Лениво загружается playground `content/default-content.ts` через динамический `import()`; payload вынесен в отдельный production chunk и не входит в опубликованный `@i-prikot/editor`. |
+| 2026-07-22 | Этап 7. Производительность | Отложено монтирование `MobileToolbar`, `DragContextMenu` и table-UI: поверхности загружаются через `defineAsyncComponent` при первой релевантной интеракции. |
 | 2026-07-21 | Этап 6. Vue 3: лучшие практики | Унифицирована структура `notion/`, `ui/`, `table/` и `primitives/`: feature-модули в kebab-case, корневые barrell-экспорты и правила владения зафиксированы в ARCHITECTURE.md. |
 | 2026-07-21 | Этап 6. Vue 3: лучшие практики | Состояние, прогресс, отмена и замена upload-узла из `ImageUploadNodeView.vue` вынесены в `useImageUpload`; NodeView оставлен для UI-привязки. |
 | 2026-07-20 | Этап 6. Vue 3: лучшие практики | Аудированы 94 Vue SFC в `apps/playground/src` и `packages/editor/src`: каждый использует ровно один `<script setup lang="ts">`; исключений и миграций не потребовалось. |

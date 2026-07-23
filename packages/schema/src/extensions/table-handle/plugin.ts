@@ -12,6 +12,7 @@ import {
   isTableNode,
   safeClosest,
 } from '../../utils/table-utils.js'
+import { throttle, type ThrottledFunction } from '../../utils/throttle.js'
 import {
   handleTableHandleDragOver,
   handleTableHandleDrop,
@@ -32,11 +33,16 @@ class TableHandleView implements TableHandleDragContext {
   tablePos: number | undefined
   tableElement: HTMLElement | null | undefined
   emitUpdate: () => void
+  throttledMouseMoveHandler: ThrottledFunction<[MouseEvent]>
 
   constructor(editor: Editor, view: EditorView, emit: (state: TableHandleState) => void) {
     this.editor = editor
     this.editorView = view
     this.emitUpdate = () => this.state && emit(this.state)
+    this.throttledMouseMoveHandler = throttle((event) => this.handleMouseMove(event, false), 16, {
+      leading: true,
+      trailing: true,
+    })
     this.editorView.dom.addEventListener('mousemove', this.mouseMoveHandler)
     this.editorView.dom.addEventListener('mousedown', this.viewMousedownHandler)
     window.addEventListener('mouseup', this.mouseUpHandler)
@@ -75,14 +81,20 @@ class TableHandleView implements TableHandleDragContext {
 
   mouseUpHandler = (event: MouseEvent) => {
     this.mouseState = 'up'
-    this.mouseMoveHandler(event)
+    this.throttledMouseMoveHandler.cancel()
+    this.handleMouseMove(event, false)
   }
 
   mouseMoveHandler = (event: MouseEvent) => {
+    this.handleMouseMove(event, true)
+  }
+
+  handleMouseMove(event: MouseEvent, throttled: boolean) {
     if (this.menuFrozen || this.mouseState === 'selecting') return
     const target = event.target
     if (isHTMLElement(target) && this.editorView.dom.contains(target))
-      this.handleMouseMoveNow(event)
+      if (throttled) this.throttledMouseMoveHandler(event)
+      else this.handleMouseMoveNow(event)
   }
 
   hideHandles() {
@@ -190,6 +202,7 @@ class TableHandleView implements TableHandleDragContext {
   dragOverHandler = (event: DragEvent) => handleTableHandleDragOver(this, event)
 
   dropHandler = () => {
+    this.throttledMouseMoveHandler.cancel()
     this.mouseState = 'up'
     return handleTableHandleDrop(this)
   }
@@ -200,7 +213,10 @@ class TableHandleView implements TableHandleDragContext {
 
   update(view: EditorView) {
     const frozen = tableHandlePluginKey.getState(view.state)
-    if (frozen !== undefined && frozen !== this.menuFrozen) this.menuFrozen = frozen as boolean
+    if (frozen !== undefined && frozen !== this.menuFrozen) {
+      this.menuFrozen = frozen as boolean
+      if (this.menuFrozen) this.throttledMouseMoveHandler.cancel()
+    }
     if (!this.state?.show) return
     if (!this.tableElement?.isConnected) {
       this.hideHandles()
@@ -258,6 +274,7 @@ class TableHandleView implements TableHandleDragContext {
   }
 
   destroy() {
+    this.throttledMouseMoveHandler.cancel()
     this.editorView.dom.removeEventListener('mousemove', this.mouseMoveHandler)
     window.removeEventListener('mouseup', this.mouseUpHandler)
     this.editorView.dom.removeEventListener('mousedown', this.viewMousedownHandler)

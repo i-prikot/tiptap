@@ -35,6 +35,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { useTiptapEditor } from '../../../composables'
+import { createDevelopmentDiagnostics } from '../../../utils/development-diagnostics'
 import { getAvatar } from '../../../utils/user-utils'
 import type { CaretUser } from '../../../types/user'
 import {
@@ -53,21 +54,34 @@ import {
 const props = defineProps<{ editor?: Editor | null }>()
 const editor = useTiptapEditor(computed(() => props.editor))
 const users = ref<CaretUser[]>([])
+const diagnostics = createDevelopmentDiagnostics('CollabUsers')
 
-function readUsers() {
-  const instance = editor.value
+function areUsersEqual(previous: CaretUser[], next: CaretUser[]): boolean {
+  return (
+    previous.length === next.length &&
+    previous.every(
+      (user, index) =>
+        user.id === next[index]?.id &&
+        user.name === next[index]?.name &&
+        user.color === next[index]?.color,
+    )
+  )
+}
+
+function readUsers(instance: Editor | null) {
   const caretStorage = instance?.storage.collaborationCaret as
     { users?: Array<Record<string, unknown>> } | undefined
-  if (!instance || !caretStorage) {
-    users.value = []
-    return
-  }
-  users.value = (caretStorage.users ?? []).map((user) => ({
-    clientId: user.clientId as number,
-    id: String(user.clientId),
-    name: (user.name as string) || 'Anonymous',
-    color: (user.color as string) || '#000000',
-  }))
+  const nextUsers =
+    !instance || !caretStorage
+      ? []
+      : (caretStorage.users ?? []).map((user) => ({
+          clientId: user.clientId as number,
+          id: String(user.clientId),
+          name: (user.name as string) || 'Anonymous',
+          color: (user.color as string) || '#000000',
+        }))
+
+  if (!areUsersEqual(users.value, nextUsers)) users.value = nextUsers
 }
 
 let unsubscribe: (() => void) | null = null
@@ -76,11 +90,15 @@ watch(
   (instance) => {
     unsubscribe?.()
     unsubscribe = null
-    readUsers()
+    readUsers(instance)
     if (!instance) return
-    const handler = () => readUsers()
+    const handler = () => readUsers(instance)
     instance.on('transaction', handler)
-    unsubscribe = () => instance.off('transaction', handler)
+    unsubscribe = () => {
+      instance.off('transaction', handler)
+      diagnostics.debug('transaction subscription removed')
+    }
+    diagnostics.debug('transaction subscription added')
   },
   { immediate: true },
 )

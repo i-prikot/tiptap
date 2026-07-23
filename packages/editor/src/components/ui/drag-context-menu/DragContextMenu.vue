@@ -141,7 +141,7 @@ const props = withDefaults(
 )
 
 const editor = useTiptapEditor()
-const uiState = useUiEditorState(editor)
+const uiState = useUiEditorState(editor, ['aiGenerationActive', 'isDragging'] as const)
 const isMobile = useIsBreakpoint('max', props.mobileBreakpoint)
 const selectionSignal = useEditorSelectionSignal(editor)
 const {

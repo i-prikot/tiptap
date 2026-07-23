@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./renderer": {
+      "types": "./dist/renderer.d.ts",
+      "import": "./dist/renderer.js"
     }
   },
   "types": "./dist/index.d.ts",
@@ -29,7 +33,6 @@
     "@tiptap/extension-horizontal-rule": "^3.27.1",
     "@tiptap/extension-image": "^3.27.1",
     "@tiptap/extension-list": "^3.27.1",
-    "@tiptap/extension-mathematics": "^3.27.1",
     "@tiptap/extension-mention": "^3.27.1",
     "@tiptap/extension-subscript": "^3.27.1",
     "@tiptap/extension-superscript": "^3.27.1",

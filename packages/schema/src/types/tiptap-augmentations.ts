@@ -2,11 +2,9 @@ import '@tiptap/core'
 import '@tiptap/starter-kit'
 import '@tiptap/extension-collaboration'
 import '@tiptap/extension-collaboration-caret'
-import '@tiptap/extension-emoji'
 import '@tiptap/extension-highlight'
 import '@tiptap/extension-image'
 import '@tiptap/extension-list'
-import '@tiptap/extension-mathematics'
 import '@tiptap/extension-mention'
 import '@tiptap/extension-subscript'
 import '@tiptap/extension-superscript'
@@ -17,7 +15,8 @@ import '@tiptap/extension-text-style'
 import '@tiptap/extension-typography'
 import '@tiptap/extension-unique-id'
 import type { EmojiItem, EmojiStorage } from '@tiptap/extension-emoji'
-import type { UiEditorState } from '../extensions/ui-state.js'
+import '../extensions/mathematics.js'
+import type { UiEditorState, UiStateUpdate } from '../extensions/ui-state.js'
 import type { TableHandleState } from '../extensions/table-handle.js'
 import type { TocNodeAttributes } from '../nodes/toc/toc.js'
 
@@ -95,5 +94,6 @@ declare module '@tiptap/core' {
 
   interface EditorEvents {
     tableHandleState: TableHandleState
+    uiStateUpdate: UiStateUpdate
   }
 }

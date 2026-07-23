@@ -30,8 +30,9 @@
  * из чанка 3q2p49kc-ifgd.
  */
 import { computed, ref, shallowRef } from 'vue'
-import { flip, offset, shift, useFloating, autoUpdate } from '@floating-ui/vue'
+import { flip, offset, shift, useFloating } from '@floating-ui/vue'
 import { useEditorOverlayTarget } from '../../../composables'
+import { throttledAutoUpdate } from '../../../utils/throttle'
 import { EditorOverlayTeleport } from '../editor-overlay-teleport'
 
 const props = withDefaults(
@@ -51,7 +52,7 @@ const floatingRef = shallowRef<HTMLElement | null>(null)
 
 const { floatingStyles } = useFloating(referenceRef, floatingRef, {
   placement: props.placement,
-  whileElementsMounted: autoUpdate,
+  whileElementsMounted: throttledAutoUpdate,
   middleware: [
     offset(4),
     flip({ fallbackAxisSideDirection: 'start', padding: 4 }),

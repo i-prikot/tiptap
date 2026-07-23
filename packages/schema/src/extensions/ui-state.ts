@@ -15,6 +15,12 @@ export interface UiEditorState {
   isDragging: boolean
 }
 
+export type UiEditorStateChanges = Partial<UiEditorState>
+
+export interface UiStateUpdate {
+  changed: UiEditorStateChanges
+}
+
 export const defaultUiState: UiEditorState = {
   aiGenerationIsSelection: false,
   aiGenerationIsLoading: false,
@@ -25,6 +31,13 @@ export const defaultUiState: UiEditorState = {
   isDragging: false,
 }
 
+const isDevelopment = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV === true
+
+function debug(event: string, metadata?: Record<string, unknown>) {
+  if (!isDevelopment) return
+  globalThis.console.debug(`[UiState] ${event}`, metadata)
+}
+
 export const UiState = Extension.create<Record<string, never>, UiEditorState>({
   name: 'uiState',
 
@@ -33,12 +46,31 @@ export const UiState = Extension.create<Record<string, never>, UiEditorState>({
   },
 
   addCommands() {
+    const updateState = (nextState: UiEditorStateChanges) => {
+      const changed: UiEditorStateChanges = {}
+
+      for (const key of Object.keys(nextState) as Array<keyof UiEditorState>) {
+        const value = nextState[key]
+        if (value === undefined || this.storage[key] === value) continue
+        this.storage[key] = value
+        changed[key] = value
+      }
+
+      const changedKeys = Object.keys(changed) as Array<keyof UiEditorState>
+      if (changedKeys.length) {
+        this.editor.emit('uiStateUpdate', { changed })
+        debug('state updated', { changedKeys })
+      } else {
+        debug('state update skipped', { requestedKeys: Object.keys(nextState) })
+      }
+    }
+
     const setValue = (key: keyof UiEditorState) => (value: boolean) => () => {
-      this.storage[key] = value
+      updateState({ [key]: value })
       return true
     }
     const setConstant = (key: keyof UiEditorState, value: boolean) => () => () => {
-      this.storage[key] = value
+      updateState({ [key]: value })
       return true
     }
 
@@ -53,7 +85,7 @@ export const UiState = Extension.create<Record<string, never>, UiEditorState>({
       setLockDragHandle: setValue('lockDragHandle'),
       setIsDragging: setValue('isDragging'),
       resetUiState: () => () => {
-        Object.assign(this.storage, { ...defaultUiState })
+        updateState(defaultUiState)
         return true
       },
     }
@@ -61,5 +93,6 @@ export const UiState = Extension.create<Record<string, never>, UiEditorState>({
 
   onCreate() {
     Object.assign(this.storage, { ...defaultUiState })
+    debug('extension initialized')
   },
 })

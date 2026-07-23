@@ -1,4 +1,4 @@
-import type { Extensions } from '@tiptap/core'
+import type { AnyExtension, Extension, Extensions } from '@tiptap/core'
 import type * as Y from 'yjs'
 import StarterKit from '@tiptap/starter-kit'
 import { Placeholder, Selection } from '@tiptap/extensions'
@@ -9,9 +9,7 @@ import {
   type CollaborationCaretOptions,
 } from '@tiptap/extension-collaboration-caret'
 import { Mention } from '@tiptap/extension-mention'
-import { Emoji, gitHubEmojis } from '@tiptap/extension-emoji'
 import { Color, TextStyle } from '@tiptap/extension-text-style'
-import { Mathematics } from '@tiptap/extension-mathematics'
 import { Superscript } from '@tiptap/extension-superscript'
 import { Subscript } from '@tiptap/extension-subscript'
 import { TaskItem, TaskList } from '@tiptap/extension-list'
@@ -28,6 +26,7 @@ import { Typography } from '@tiptap/extension-typography'
 import { HorizontalRule } from './horizontal-rule.js'
 import { Indent } from './indent.js'
 import { ListNormalization } from './list-normalization.js'
+import { Mathematics } from './mathematics.js'
 import { TripleClickBlockSelection } from './triple-click-block-selection.js'
 import { NodeBackground } from './node-background.js'
 import { NodeAlignment } from './node-alignment.js'
@@ -65,11 +64,6 @@ const uniqueIdTypes = [
   'tocNode',
 ]
 
-const emojiOptions = {
-  emojis: gitHubEmojis.filter((emoji) => !emoji.name.includes('regional')),
-  forceFallbackImages: true,
-}
-
 export interface ExtensionKitFeatureFlags {
   tocSidebar: boolean
   floatingMenus: boolean
@@ -82,6 +76,7 @@ export type ExtensionKitPlaceholder = string | (() => string)
 export interface ExtensionKitNodeOverrides {
   image?: typeof Image
   imageUpload?: typeof ImageUploadNode
+  mathematics?: Extension
   toc?: typeof TocNode
 }
 
@@ -98,7 +93,16 @@ export interface ExtensionKitOptions {
   onTableOfContentsUpdate: (content: TableOfContentData) => void
 }
 
-export function createRendererExtensionKit(): Extensions {
+async function createInteractiveEmojiExtension(): Promise<AnyExtension> {
+  const { Emoji, gitHubEmojis } = await import('@tiptap/extension-emoji')
+
+  return Emoji.configure({
+    emojis: gitHubEmojis.filter((emoji) => !emoji.name.includes('regional')),
+    forceFallbackImages: true,
+  })
+}
+
+export function createRendererExtensionKitWithEmoji(emojiExtension: AnyExtension): Extensions {
   return [
     StarterKit.configure({
       horizontalRule: false,
@@ -107,7 +111,7 @@ export function createRendererExtensionKit(): Extensions {
     HorizontalRule,
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
     Mention,
-    Emoji.configure(emojiOptions),
+    emojiExtension,
     Table.configure({ resizable: false, cellMinWidth: 120 }),
     TableCell,
     TableHeader,
@@ -135,10 +139,11 @@ export function createRendererExtensionKit(): Extensions {
   ]
 }
 
-export function createExtensionKit(
+export async function createExtensionKit(
   options: ExtensionKitOptions,
   nodeOverrides: ExtensionKitNodeOverrides = {},
-): Extensions {
+): Promise<Extensions> {
+  const emojiExtension = await createInteractiveEmojiExtension()
   const collaborationExtensions = options.provider
     ? [
         Collaboration.configure({ document: options.ydoc }),
@@ -164,14 +169,14 @@ export function createExtensionKit(
       emptyNodeClass: 'is-empty with-slash',
     }),
     Mention,
-    Emoji.configure(emojiOptions),
+    emojiExtension,
     TableKit.configure({ table: { resizable: true, cellMinWidth: 120 } }),
     NodeBackground.configure({
       types: nodeBackgroundTypes,
     }),
     NodeAlignment,
     TextStyle,
-    Mathematics,
+    nodeOverrides.mathematics ?? Mathematics,
     Superscript,
     Subscript,
     Indent,

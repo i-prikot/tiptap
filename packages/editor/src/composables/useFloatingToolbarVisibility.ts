@@ -11,6 +11,7 @@ import { isNodeSelection } from '@tiptap/core'
 import { NodeSelection } from '@tiptap/pm/state'
 import type { Selection } from '@tiptap/pm/state'
 import { HIDE_FLOATING_META } from '../utils/toc-utils'
+import { createDevelopmentDiagnostics } from '../utils/development-diagnostics'
 
 export function useFloatingToolbarVisibility(options: {
   editor: ComputedRef<Editor | null>
@@ -23,6 +24,7 @@ export function useFloatingToolbarVisibility(options: {
   // пока пользователь не кликнет по узлу.
   let hiddenByMeta = false
   let cleanups: Array<() => void> = []
+  const diagnostics = createDevelopmentDiagnostics('useFloatingToolbarVisibility')
 
   watch(
     editor,
@@ -36,8 +38,10 @@ export function useFloatingToolbarVisibility(options: {
       }: {
         transaction: { getMeta(key: string): unknown; selectionSet: boolean }
       }) => {
-        if (transaction.getMeta(HIDE_FLOATING_META)) hiddenByMeta = true
+        const hideFloatingMeta = transaction.getMeta(HIDE_FLOATING_META)
+        if (hideFloatingMeta !== undefined) hiddenByMeta = Boolean(hideFloatingMeta)
         else if (transaction.selectionSet) hiddenByMeta = false
+        else return
       }
       instance.on('transaction', onTransaction as never)
       cleanups.push(() => instance.off('transaction', onTransaction as never))
@@ -64,7 +68,11 @@ export function useFloatingToolbarVisibility(options: {
       }
       onSelectionUpdate()
       instance.on('selectionUpdate', onSelectionUpdate)
-      cleanups.push(() => instance.off('selectionUpdate', onSelectionUpdate))
+      cleanups.push(() => {
+        instance.off('selectionUpdate', onSelectionUpdate)
+        diagnostics.debug('editor subscriptions removed')
+      })
+      diagnostics.debug('editor subscriptions added')
     },
     { immediate: true },
   )

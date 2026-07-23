@@ -1,4 +1,5 @@
-import { createRendererExtensionKit, type JSONContent } from '@i-prikot/editor-schema'
+import type { JSONContent } from '@i-prikot/editor-schema'
+import { createRendererExtensionKit } from '@i-prikot/editor-schema/renderer'
 import { generateHTML } from '@tiptap/html'
 import { Window } from 'happy-dom'
 import katex from 'katex'
@@ -110,6 +111,8 @@ function renderMathPlaceholders(html: string): string {
         throwOnError: false,
         trust: false,
       })
+      placeholder.removeAttribute('data-latex')
+      placeholder.removeAttribute('data-type')
     }
 
     return document.body.innerHTML

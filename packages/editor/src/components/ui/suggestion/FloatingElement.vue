@@ -15,9 +15,10 @@
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { Selection } from '@tiptap/pm/state'
-import { autoUpdate, flip, offset, shift, useFloating } from '@floating-ui/vue'
+import { flip, offset, shift, useFloating } from '@floating-ui/vue'
 import type { VirtualElement } from '@floating-ui/vue'
 import { useTiptapEditor, useEditorOverlayTarget } from '../../../composables'
+import { throttledAutoUpdate } from '../../../utils/throttle'
 import { EditorOverlayTeleport } from '../../primitives'
 
 import { getSelectionBoundingRect } from '../../../utils/selection-utils'
@@ -53,7 +54,7 @@ const virtualReference = shallowRef<VirtualElement>({
 
 const { floatingStyles, update } = useFloating(virtualReference, floatingRef, {
   placement: 'top',
-  whileElementsMounted: autoUpdate,
+  whileElementsMounted: throttledAutoUpdate,
   middleware: [shift(), flip(), offset(4)],
 })
 

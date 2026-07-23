@@ -1,7 +1,8 @@
 import type { Editor } from '@tiptap/core'
 import type { EditorView } from '@tiptap/pm/view'
-import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom'
+import { computePosition, flip, offset } from '@floating-ui/dom'
 import type { Middleware, Placement, Strategy } from '@floating-ui/dom'
+import { throttledAutoUpdate } from '../throttle'
 import type { MountOptions, SuggestionProps } from './types'
 
 export interface SuggestionFloatingUiConfig {
@@ -104,7 +105,7 @@ export function createSuggestionMount(config: SuggestionMountConfig): Suggestion
         element.style.width = 'max-content'
       }
     }
-    const stopAutoUpdate = autoUpdate(
+    const stopAutoUpdate = throttledAutoUpdate(
       virtualReference,
       element,
       () => {

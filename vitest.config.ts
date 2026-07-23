@@ -91,6 +91,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      '@i-prikot/editor-schema/renderer': resolve(projectRoot, 'packages/schema/src/renderer.ts'),
       '@i-prikot/editor-schema': resolve(projectRoot, 'packages/schema/src/index.ts'),
       '@i-prikot/editor': resolve(projectRoot, 'packages/editor/src/index.ts'),
     },

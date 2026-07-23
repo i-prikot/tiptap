@@ -98,7 +98,12 @@ const props = withDefaults(defineProps<{ editor?: Editor | null; aiEnabled?: boo
 })
 
 const editor = useTiptapEditor(computed(() => props.editor))
-const uiState = useUiEditorState(editor)
+const uiState = useUiEditorState(editor, [
+  'aiGenerationActive',
+  'commentInputVisible',
+  'isDragging',
+  'lockDragHandle',
+] as const)
 const isMobile = useIsBreakpoint('max', 480)
 const signal = useEditorSelectionSignal(editor)
 

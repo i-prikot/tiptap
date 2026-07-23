@@ -21,15 +21,9 @@
  * контент, закрытие по Escape/клику снаружи.
  */
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watchEffect } from 'vue'
-import {
-  autoUpdate,
-  flip,
-  offset as offsetMiddleware,
-  shift,
-  size,
-  useFloating,
-} from '@floating-ui/vue'
+import { flip, offset as offsetMiddleware, shift, size, useFloating } from '@floating-ui/vue'
 import type { Placement } from '@floating-ui/vue'
+import { throttledAutoUpdate } from '../../../utils/throttle'
 import { FloatingPositioningWrapper } from '../floating-positioning-wrapper'
 
 const props = withDefaults(
@@ -76,7 +70,7 @@ const placement = computed<Placement>(() =>
 
 const { floatingStyles, placement: resolvedPlacement } = useFloating(reference, floatingRef, {
   placement,
-  whileElementsMounted: autoUpdate,
+  whileElementsMounted: throttledAutoUpdate,
   middleware: [
     offsetMiddleware({ mainAxis: props.sideOffset, crossAxis: props.alignOffset }),
     flip({ padding: 4 }),

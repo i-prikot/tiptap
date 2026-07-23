@@ -21,6 +21,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "measure:public-payload": "node ./scripts/measure-public-payload.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src"
   },

@@ -11,6 +11,7 @@
     "strict": true,
     "paths": {
       "@i-prikot/editor-schema": ["packages/schema/src/index.ts"],
+      "@i-prikot/editor-schema/renderer": ["packages/schema/src/renderer.ts"],
       "@i-prikot/editor": ["packages/editor/src/index.ts"],
       "@i-prikot/editor-renderer": ["packages/renderer/src/index.ts"]
     },

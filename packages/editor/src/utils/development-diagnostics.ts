@@ -2,6 +2,7 @@ export type DevelopmentDiagnosticMetadata = Record<string, unknown>
 
 export interface DevelopmentDiagnostics {
   debug(event: string, metadata?: DevelopmentDiagnosticMetadata): void
+  error(event: string, metadata?: DevelopmentDiagnosticMetadata): void
 }
 
 export interface DevelopmentDiagnosticsOptions {
@@ -18,6 +19,10 @@ export function createDevelopmentDiagnostics(
     debug(event, metadata) {
       if (!isDevelopment || (options.isEnabled && !options.isEnabled())) return
       globalThis.console.debug(`[${namespace}] ${event}`, metadata)
+    },
+    error(event, metadata) {
+      if (!isDevelopment || (options.isEnabled && !options.isEnabled())) return
+      globalThis.console.error(`[${namespace}] ${event}`, metadata)
     },
   }
 }

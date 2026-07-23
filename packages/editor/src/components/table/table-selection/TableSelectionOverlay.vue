@@ -60,6 +60,7 @@ import type { VirtualElement } from '@floating-ui/vue'
 import { TableCellHandleMenu } from '../table-cell-handle'
 import { useRafLoop, useTableSelectionRect, useTiptapEditor } from '../../../composables'
 import { domCellAround } from '../../../utils/table-utils'
+import { createDevelopmentDiagnostics } from '../../../utils/development-diagnostics'
 
 type Corner = 'tl' | 'tr' | 'bl' | 'br'
 
@@ -96,6 +97,8 @@ const activeCorner = ref<Corner | null>(null)
 const menuOpen = ref(false)
 const anchorCellPos = ref<number | null>(null)
 let stopCornerResize: (() => void) | null = null
+
+const diagnostics = createDevelopmentDiagnostics('TableSelectionOverlay')
 
 const corners: Corner[] = ['tl', 'tr', 'bl', 'br']
 
@@ -134,17 +137,16 @@ watch(
     }
     const onSelectionUpdate = () => refreshTableSelection()
     const onTransaction = ({ transaction }: ColumnResizeTransactionPayload) => {
-      refreshTableSelection()
       const meta = transaction.getMeta(columnResizingPluginKey)
-      if (isColumnResizePluginMeta(meta)) {
-        if (Object.prototype.hasOwnProperty.call(meta, 'setDragging') && meta.setDragging)
-          startResizeTracking()
-        if (Object.prototype.hasOwnProperty.call(meta, 'setDragging') && meta.setDragging == null) {
-          stopResizeTracking()
-          refreshTableSelection()
-        }
-        if (Object.prototype.hasOwnProperty.call(meta, 'setHandle')) refreshTableSelection()
-      }
+      if (!isColumnResizePluginMeta(meta)) return
+
+      const hasDraggingUpdate = Object.prototype.hasOwnProperty.call(meta, 'setDragging')
+      const hasHandleUpdate = Object.prototype.hasOwnProperty.call(meta, 'setHandle')
+      if (!hasDraggingUpdate && !hasHandleUpdate) return
+
+      if (hasDraggingUpdate && meta.setDragging) startResizeTracking()
+      if (hasDraggingUpdate && meta.setDragging == null) stopResizeTracking()
+      refreshTableSelection()
     }
     instance.on('selectionUpdate', onSelectionUpdate)
     instance.on('transaction', onTransaction as never)
@@ -152,7 +154,9 @@ watch(
     cleanup = () => {
       instance.off('selectionUpdate', onSelectionUpdate)
       instance.off('transaction', onTransaction as never)
+      diagnostics.debug('editor subscriptions removed')
     }
+    diagnostics.debug('editor subscriptions added')
   },
   { immediate: true },
 )

@@ -1,60 +1,24 @@
-/**
- * Троттлинг с leading/trailing и cancel — замена lodash.throttle из
- * чанка 3jdxmcvhjtoe- (useThrottledCallback, модуль 192439).
- */
-export interface ThrottledFunction<Args extends unknown[]> {
-  (...args: Args): void
-  cancel(): void
-}
+import { autoUpdate, type AutoUpdateOptions, type ReferenceElement } from '@floating-ui/dom'
+import { throttle } from '@i-prikot/editor-schema'
 
-export function throttle<Args extends unknown[]>(
-  fn: (...args: Args) => void,
-  wait: number,
-  options: { leading?: boolean; trailing?: boolean } = {},
-): ThrottledFunction<Args> {
-  const { leading = true, trailing = true } = options
-  let lastCallTime = 0
-  let timer: ReturnType<typeof setTimeout> | null = null
-  let trailingArgs: Args | null = null
+export { throttle, type ThrottledFunction } from '@i-prikot/editor-schema'
 
-  const invoke = (args: Args) => {
-    lastCallTime = Date.now()
-    fn(...args)
+export const FLOATING_UPDATE_THROTTLE_MS = 16
+
+export function throttledAutoUpdate(
+  reference: ReferenceElement,
+  floating: HTMLElement,
+  update: () => void,
+  options?: AutoUpdateOptions,
+): () => void {
+  const throttledUpdate = throttle(update, FLOATING_UPDATE_THROTTLE_MS, {
+    leading: true,
+    trailing: true,
+  })
+  const cleanup = autoUpdate(reference, floating, throttledUpdate, options)
+
+  return () => {
+    cleanup()
+    throttledUpdate.cancel()
   }
-
-  const throttled = (...args: Args) => {
-    const now = Date.now()
-    if (!lastCallTime && !leading) lastCallTime = now
-    const remaining = wait - (now - lastCallTime)
-    if (remaining <= 0 || remaining > wait) {
-      if (timer) {
-        clearTimeout(timer)
-        timer = null
-      }
-      invoke(args)
-    } else if (trailing) {
-      trailingArgs = args
-      if (!timer) {
-        timer = setTimeout(() => {
-          timer = null
-          if (trailingArgs) {
-            const args = trailingArgs
-            trailingArgs = null
-            invoke(args)
-          }
-        }, remaining)
-      }
-    }
-  }
-
-  throttled.cancel = () => {
-    if (timer) {
-      clearTimeout(timer)
-      timer = null
-    }
-    trailingArgs = null
-    lastCallTime = 0
-  }
-
-  return throttled
 }

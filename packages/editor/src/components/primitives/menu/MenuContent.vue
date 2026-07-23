@@ -29,8 +29,9 @@
  * локальным click-to-close используйте DropdownMenuContent.
  */
 import { computed, inject, onBeforeUnmount, onMounted, shallowRef, watch } from 'vue'
-import { autoUpdate, flip, offset, shift, size, useFloating } from '@floating-ui/vue'
+import { flip, offset, shift, size, useFloating } from '@floating-ui/vue'
 import { useEditorOverlayTarget } from '../../../composables'
+import { throttledAutoUpdate } from '../../../utils/throttle'
 import { EditorOverlayTeleport } from '../editor-overlay-teleport'
 import { menuInjectionKey } from './menu-context'
 
@@ -52,7 +53,7 @@ const { floatingStyles, placement: resolvedPlacement } = useFloating(
   floatingRef,
   {
     placement: context.placement,
-    whileElementsMounted: autoUpdate,
+    whileElementsMounted: throttledAutoUpdate,
     middleware: [
       offset(4),
       flip({ padding: 8 }),

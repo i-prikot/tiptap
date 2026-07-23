@@ -1,112 +1,56 @@
 .tinyfy-public-document {
-  --tinyfy-public-foreground: #18212f;
-  --tinyfy-public-muted: #5b6472;
-  --tinyfy-public-link: #1d4ed8;
-  --tinyfy-public-border: #d9dee7;
-  --tinyfy-public-quote-accent: #7c3aed;
-  --tinyfy-public-inline-code: #f3f4f6;
-  --tinyfy-public-space: 1.25rem;
-
-  color: var(--tinyfy-public-foreground);
+  --m: #5b6472;
+  --l: #1d4ed8;
+  --b: #d9dee7;
+  --s: 1.25rem;
+  color: #18212f;
   line-height: 1.65;
 }
 
-.tinyfy-public-document :where(p, ul, ol, blockquote, pre, figure, table, hr, .katex-display) {
-  margin-block: var(--tinyfy-public-space);
+.tinyfy-public-document :is(p, ul, ol, blockquote, pre, figure, table, hr, .katex-display) {
+  margin-block: var(--s);
 }
 
 .tinyfy-public-document > :first-child {
   margin-top: 0;
 }
-
 .tinyfy-public-document > :last-child {
   margin-bottom: 0;
 }
 
-.tinyfy-public-document :where(h1, h2, h3, h4, h5, h6) {
-  color: inherit;
+.tinyfy-public-document :is(h1, h2, h3, h4, h5, h6) {
   font-weight: 700;
   line-height: 1.2;
-  margin: calc(var(--tinyfy-public-space) * 1.6) 0 0.65em;
-  scroll-margin-top: 1.5rem;
+  margin: calc(var(--s) * 1.6) 0 0.65em;
 }
 
 .tinyfy-public-document h1 {
   font-size: clamp(2rem, 5vw, 3rem);
 }
-
 .tinyfy-public-document h2 {
   font-size: clamp(1.65rem, 4vw, 2.25rem);
 }
-
 .tinyfy-public-document h3 {
   font-size: clamp(1.35rem, 3vw, 1.75rem);
 }
-
-.tinyfy-public-document h4 {
-  font-size: 1.35rem;
-}
-
-.tinyfy-public-document h5 {
-  font-size: 1.15rem;
-}
-
-.tinyfy-public-document h6 {
-  color: var(--tinyfy-public-muted);
-  font-size: 1rem;
-}
-
-.tinyfy-public-document :where(ul, ol) {
+.tinyfy-public-document :is(ul, ol) {
   padding-left: 1.5em;
-}
-
-.tinyfy-public-document :where(ul, ol) :where(ul, ol) {
-  margin-block: 0.4em;
-}
-
-.tinyfy-public-document ol ol {
-  list-style-type: lower-alpha;
-}
-
-.tinyfy-public-document ol ol ol {
-  list-style-type: lower-roman;
-}
-
-.tinyfy-public-document ul ul {
-  list-style-type: circle;
-}
-
-.tinyfy-public-document ul ul ul {
-  list-style-type: square;
-}
-
-.tinyfy-public-document li + li {
-  margin-top: 0.35em;
-}
-
-.tinyfy-public-document li > p {
-  margin-block: 0.35em;
 }
 
 .tinyfy-public-document ul[data-type='taskList'] {
   list-style: none;
   padding-left: 0;
 }
-
 .tinyfy-public-document ul[data-type='taskList'] li {
   align-items: flex-start;
   display: flex;
   gap: 0.55em;
 }
-
 .tinyfy-public-document ul[data-type='taskList'] li > label {
   flex: none;
-  margin-top: 0.3em;
-  pointer-events: none;
 }
-
 .tinyfy-public-document ul[data-type='taskList'] li > label::before {
-  border: 1px solid var(--tinyfy-public-border);
+  border: 1px solid var(--b);
   border-radius: 0.2em;
   content: '';
   display: block;
@@ -121,14 +65,13 @@
   margin: -1px;
   overflow: hidden;
   position: absolute;
-  white-space: nowrap;
   width: 1px;
 }
 
 .tinyfy-public-document ul[data-type='taskList'] li[data-checked='true'] > label::before {
-  background: var(--tinyfy-public-link);
-  border-color: var(--tinyfy-public-link);
-  color: white;
+  background: var(--l);
+  border-color: var(--l);
+  color: #fff;
   content: '✓';
   display: grid;
   font-size: 0.75em;
@@ -137,16 +80,15 @@
 }
 
 .tinyfy-public-document ul[data-type='taskList'] li[data-checked='true'] > div {
-  color: var(--tinyfy-public-muted);
+  color: var(--m);
   text-decoration: line-through;
 }
 
 .tinyfy-public-document a {
-  color: var(--tinyfy-public-link);
+  color: var(--l);
   text-decoration-thickness: 0.08em;
   text-underline-offset: 0.15em;
 }
-
 .tinyfy-public-document a:focus-visible {
   border-radius: 0.15em;
   outline: 2px solid currentColor;
@@ -154,14 +96,16 @@
 }
 
 .tinyfy-public-document blockquote {
-  border-left: 0.25rem solid var(--tinyfy-public-quote-accent);
-  color: var(--tinyfy-public-muted);
+  border-left: 0.25rem solid #7c3aed;
+  color: var(--m);
   margin-inline: 0;
   padding-left: 1rem;
 }
 
-.tinyfy-public-document :where(code, kbd, samp) {
-  background: var(--tinyfy-public-inline-code);
+.tinyfy-public-document :is(code, pre) {
+  background: #f3f4f6;
+}
+.tinyfy-public-document code {
   border-radius: 0.25rem;
   font-size: 0.9em;
   padding: 0.15em 0.35em;
@@ -169,8 +113,7 @@
 }
 
 .tinyfy-public-document pre {
-  background: var(--tinyfy-public-inline-code);
-  border: 1px solid var(--tinyfy-public-border);
+  border: 1px solid var(--b);
   border-radius: 0.5rem;
   overflow-x: auto;
   padding: 1rem;
@@ -191,47 +134,25 @@
   width: max-content;
 }
 
-.tinyfy-public-document :where(th, td) {
-  border: 1px solid var(--tinyfy-public-border);
+.tinyfy-public-document :is(th, td) {
+  border: 1px solid var(--b);
   padding: 0.65rem 0.8rem;
 }
-
-.tinyfy-public-document th {
-  font-weight: 700;
-}
-
-.tinyfy-public-document :where(img, figure) {
+.tinyfy-public-document :is(img, figure, math, .katex) {
   max-width: 100%;
 }
-
 .tinyfy-public-document img {
   display: block;
   height: auto;
 }
-
-.tinyfy-public-document figure {
-  margin-inline: 0;
-}
-
-.tinyfy-public-document figcaption {
-  color: var(--tinyfy-public-muted);
-  font-size: 0.9em;
-  margin-top: 0.5rem;
-}
-
 .tinyfy-public-document hr {
   border: 0;
-  border-top: 1px solid var(--tinyfy-public-border);
+  border-top: 1px solid var(--b);
 }
 
-.tinyfy-public-document math,
-.tinyfy-public-document .katex {
-  max-width: 100%;
-}
-
-.tinyfy-public-document :where([data-type='block-math'], math[display='block'], .katex-display) {
+.tinyfy-public-document :is(math[display='block'], .katex-display) {
   display: block;
-  margin-block: var(--tinyfy-public-space);
+  margin-block: var(--s);
   max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;

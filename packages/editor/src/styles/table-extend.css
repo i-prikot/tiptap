@@ -8,6 +8,10 @@
   --tt-table-extend-icon-color: var(--tt-gray-dark-a-400);
 }
 
+.table-controls {
+  z-index: 30;
+}
+
 .tiptap-table-extend-row-column-button {
   background-color: var(--tt-table-handle-bg-color);
   border-radius: var(--tt-radius-lg);

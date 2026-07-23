@@ -30,8 +30,9 @@
  * MenuContent.
  */
 import { computed, inject, onBeforeUnmount, onMounted, shallowRef, watchEffect } from 'vue'
-import { autoUpdate, flip, offset, shift, size, useFloating } from '@floating-ui/vue'
+import { flip, offset, shift, size, useFloating } from '@floating-ui/vue'
 import { useEditorOverlayTarget } from '../../../composables'
+import { throttledAutoUpdate } from '../../../utils/throttle'
 import { EditorOverlayTeleport } from '../editor-overlay-teleport'
 import { dropdownMenuInjectionKey } from './dropdown-menu-context'
 
@@ -75,7 +76,7 @@ const { floatingStyles, placement: resolvedPlacement } = useFloating(
   floatingRef,
   {
     placement,
-    whileElementsMounted: autoUpdate,
+    whileElementsMounted: throttledAutoUpdate,
     middleware: [
       offset(props.sideOffset),
       flip({ padding: 8 }),

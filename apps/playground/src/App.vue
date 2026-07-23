@@ -108,10 +108,10 @@ function toggleTheme() {
   isDarkMode.value = !isDarkMode.value
 }
 
-function handleReady(instance: CoreEditor) {
+async function handleReady(instance: CoreEditor) {
   cleanupDemoDocumentSeed()
   editor.value = instance as Editor
-  initializeDemoDocumentSeed(instance)
+  await initializeDemoDocumentSeed(instance)
 }
 
 function syncUrlContext() {
@@ -126,7 +126,10 @@ function syncUrlContext() {
   currentAnchor.value = getAnchorFromLocation()
   collaboration.value = nextCollaboration
 
-  if (shouldRecreateEditor) editorSessionKey.value += 1
+  if (shouldRecreateEditor) {
+    cleanupDemoDocumentSeed()
+    editorSessionKey.value += 1
+  }
 }
 
 function handleAnchorChange(anchor: string) {

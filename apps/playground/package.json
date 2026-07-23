@@ -7,7 +7,8 @@
     "dev": "vite --host 127.0.0.1",
     "build": "vue-tsc -p tsconfig.json --noEmit && vite build",
     "typecheck": "vue-tsc -p tsconfig.json --noEmit",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "analyze": "vue-tsc -p tsconfig.json --noEmit && vite build --mode analyze"
   },
   "dependencies": {
     "@i-prikot/editor": "0.1.0",
@@ -17,6 +18,7 @@
     "vue": "^3.5.13"
   },
   "devDependencies": {
-    "postcss-prefix-selector": "^2.1.1"
+    "postcss-prefix-selector": "^2.1.1",
+    "rollup-plugin-visualizer": "^7.0.1"
   }
 }

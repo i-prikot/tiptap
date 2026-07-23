@@ -114,6 +114,18 @@ function createTableFixture(): TableFixture {
   return { editor, table: selectedTable, tablePos: selectedTablePos, cells }
 }
 
+function dispatchTableHandleMouseMove(
+  fixture: TableFixture,
+  cell: HTMLElement,
+  clientX: number,
+  clientY: number,
+) {
+  const stopAtEditorRoot = (event: Event) => event.stopPropagation()
+  fixture.editor.view.dom.addEventListener('mousemove', stopAtEditorRoot)
+  cell.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX, clientY }))
+  fixture.editor.view.dom.removeEventListener('mousemove', stopAtEditorRoot)
+}
+
 function selectAllTableCells(fixture: TableFixture) {
   const map = TableMap.get(fixture.table)
   const firstCell = fixture.tablePos + 1 + map.map[0]!
@@ -129,6 +141,7 @@ function selectAllTableCells(fixture: TableFixture) {
 }
 
 afterEach(() => {
+  vi.useRealTimers()
   while (editors.length) editors.pop()?.destroy()
   while (hosts.length) hosts.pop()?.remove()
   document.body.replaceChildren()
@@ -199,5 +212,44 @@ describe('table handle extension', () => {
     )
 
     expect(fixture.editor.state.selection).toBeInstanceOf(TextSelection)
+  })
+
+  it('does not emit a queued mousemove update after handles freeze', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-07-22T19:25:00.000Z'))
+    const fixture = createTableFixture()
+    const updates: unknown[] = []
+    fixture.editor.on('tableHandleState', (state) => updates.push(state))
+
+    dispatchTableHandleMouseMove(fixture, fixture.cells[0]![0]!, 20, 20)
+    dispatchTableHandleMouseMove(fixture, fixture.cells[1]![1]!, 180, 60)
+    expect(updates).toHaveLength(1)
+
+    fixture.editor.commands.freezeHandles()
+    vi.advanceTimersByTime(16)
+
+    expect(updates).toHaveLength(1)
+  })
+
+  it('cancels a queued mousemove before dropping a table row', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-07-22T19:25:00.000Z'))
+    const fixture = createTableFixture()
+    const updates: unknown[] = []
+    fixture.editor.on('tableHandleState', (state) => updates.push(state))
+
+    dispatchTableHandleMouseMove(fixture, fixture.cells[0]![0]!, 20, 20)
+    dispatchTableHandleMouseMove(fixture, fixture.cells[1]![1]!, 180, 60)
+    selectAllTableCells(fixture)
+    const rowControl = document.createElement('button')
+    document.body.append(rowControl)
+    setRect(rowControl, rect(0, 0, 30, 30))
+    rowDragStart(createDragEvent('dragstart', rowControl, 20, 20).event)
+    document.dispatchEvent(new Event('drop', { bubbles: true, cancelable: true }))
+    const updatesAfterDrop = updates.length
+
+    vi.advanceTimersByTime(16)
+
+    expect(updates).toHaveLength(updatesAfterDrop)
   })
 })

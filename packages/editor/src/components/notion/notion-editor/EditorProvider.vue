@@ -8,11 +8,7 @@
       />
     </div>
     <div ref="overlayTarget" data-tiptap-overlay-root=""></div>
-    <template v-if="props.features.tableControls">
-      <TableExtendRowColumnButtons />
-      <TableHandle />
-      <TableSelectionOverlay :show-resize-handles="true" />
-    </template>
+    <TableOverlays v-if="props.features.tableControls" />
   </div>
   <LoadingSpinner v-else />
 </template>
@@ -29,8 +25,8 @@
  *   скрываются штатной проверкой isExtensionAvailable.
  */
 import { onBeforeUnmount, shallowRef, watch } from 'vue'
-import { useEditor } from '@tiptap/vue-3'
-import type { Editor, JSONContent } from '@tiptap/core'
+import { Editor as TiptapEditor } from '@tiptap/vue-3'
+import type { JSONContent } from '@tiptap/core'
 import type { Transaction } from '@tiptap/pm/state'
 import type { TiptapCollabProvider } from '@hocuspocus/provider'
 import type * as Y from 'yjs'
@@ -49,9 +45,7 @@ import { CANCEL_PENDING_UPDATE_META } from './editor-lifecycle-signals'
 import EditorContentArea from './EditorContentArea.vue'
 import { TocSidebar } from '../toc'
 import { LoadingSpinner } from '../feedback'
-import { TableHandle } from '../../table'
-import { TableSelectionOverlay } from '../../table'
-import { TableExtendRowColumnButtons } from '../../table'
+import TableOverlays from '../../table/table-overlays/TableOverlays.vue'
 import {
   EDITOR_UPDATE_DEBOUNCE_MS,
   defaultEditorFeatureFlags,
@@ -133,7 +127,7 @@ function removeCollabSyncedListener() {
   collabSyncedProvider = undefined
 }
 
-function applyExternalContent(editorInstance: Editor, content: JSONContent) {
+function applyExternalContent(editorInstance: TiptapEditor, content: JSONContent) {
   if (hasEqualContent(editorInstance.getJSON(), content)) {
     diagnostics.debug('content-sync', { result: 'skipped-equal' })
     return false
@@ -162,7 +156,7 @@ function cancelScheduledUpdate(
   diagnostics.debug('update-cancelled', { reason, scheduledUpdateCount, emittedUpdateCount })
 }
 
-function flushUpdate(editorInstance: Editor) {
+function flushUpdate(editorInstance: TiptapEditor) {
   updateTimer = undefined
 
   if (isTearingDown || editorInstance.isDestroyed) {
@@ -192,7 +186,7 @@ function flushUpdate(editorInstance: Editor) {
   }
 }
 
-function scheduleUpdate(editorInstance: Editor) {
+function scheduleUpdate(editorInstance: TiptapEditor) {
   if (isTearingDown || isApplyingExternalContent) {
     diagnostics.debug('update-cancelled', {
       reason: 'unready',
@@ -212,7 +206,7 @@ function scheduleUpdate(editorInstance: Editor) {
   updateTimer = setTimeout(() => flushUpdate(editorInstance), EDITOR_UPDATE_DEBOUNCE_MS)
 }
 
-function emitReady(editorInstance: Editor) {
+function emitReady(editorInstance: TiptapEditor) {
   if (isTearingDown || hasEmittedReady) return
 
   lifecycleUpdateListener = () => scheduleUpdate(editorInstance)
@@ -229,7 +223,7 @@ function emitReady(editorInstance: Editor) {
   diagnostics.debug('features-resolved', { ...props.features })
 }
 
-function initializeContent(editorInstance: Editor, onInitialized: () => void) {
+function initializeContent(editorInstance: TiptapEditor, onInitialized: () => void) {
   const applyHostContent = () => {
     if (props.content !== undefined) {
       applyExternalContent(editorInstance, props.content)
@@ -258,16 +252,19 @@ function initializeContent(editorInstance: Editor, onInitialized: () => void) {
 
 diagnostics.debug('image-upload-config', { configured: Boolean(props.imageUpload) })
 
-const editor = useEditor({
-  editorProps: {
-    attributes: { class: 'notion-like-editor' },
-  },
-  onCreate: ({ editor: editorInstance }) => {
-    initializeContent(editorInstance, () => {
-      emitReady(editorInstance)
-    })
-  },
-  extensions: createExtensionKit({
+const editor = shallowRef<TiptapEditor>()
+let hasStartedEditorInitialization = false
+
+function initializeEditor() {
+  if (hasStartedEditorInitialization) {
+    diagnostics.error('editor-initialization', { result: 'skipped-duplicate' })
+    return
+  }
+
+  hasStartedEditorInitialization = true
+  diagnostics.debug('emoji-load', { result: 'started' })
+
+  void createExtensionKit({
     provider: props.provider,
     ydoc: props.ydoc,
     placeholder: () => props.placeholder,
@@ -276,8 +273,50 @@ const editor = useEditor({
     imageUpload: uploadImage,
     onImageUploadError: () => console.error('[EditorProvider] image upload failed'),
     onTableOfContentsUpdate: setTocContent,
-  }),
-})
+  })
+    .then((extensions) => {
+      if (isTearingDown) {
+        diagnostics.debug('emoji-load', { result: 'skipped-teardown' })
+        return
+      }
+
+      diagnostics.debug('emoji-load', { result: 'completed' })
+      const editorInstance = new TiptapEditor({
+        editorProps: {
+          attributes: { class: 'notion-like-editor' },
+        },
+        onCreate: ({ editor: createdEditor }) => {
+          const initializedEditor = createdEditor as TiptapEditor
+          initializeContent(initializedEditor, () => {
+            emitReady(initializedEditor)
+          })
+        },
+        extensions,
+      })
+
+      if (isTearingDown) {
+        editorInstance.destroy()
+        diagnostics.debug('editor-initialization', { result: 'destroyed-during-teardown' })
+        return
+      }
+
+      editor.value = editorInstance
+      diagnostics.debug('editor-initialization', { result: 'completed' })
+    })
+    .catch((error: unknown) => {
+      if (isTearingDown) {
+        diagnostics.debug('emoji-load', { result: 'failed-during-teardown' })
+        return
+      }
+
+      diagnostics.error('emoji-load', {
+        result: 'failed',
+        failureType: error instanceof Error ? error.name : 'unknown',
+      })
+    })
+}
+
+initializeEditor()
 
 watch(
   () => props.content,
