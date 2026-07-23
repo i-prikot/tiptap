@@ -1,5 +1,5 @@
 import type { Editor, JSONContent } from '@tiptap/core'
-import { en } from '../../../i18n'
+import { en, ru } from '../../../i18n'
 import type { EditorLocale, EditorMessageCatalog, EditorMessageTree } from '../../../i18n/types'
 import type { ImageUploadAdapter } from '../../../types/image-upload'
 
@@ -14,19 +14,20 @@ export type {
 } from '../../../i18n/types'
 
 /** Default locale used when the host does not provide `NotionEditorProps.locale`. */
-export const defaultEditorLocale = 'en'
+export const defaultEditorLocale = 'ru'
 
 /**
- * Canonical English editor messages.
+ * Canonical Russian editor messages used for per-key package fallback.
  *
- * This catalog keeps the stable facade placeholder while later tasks migrate
- * the remaining audited editor copy into the domain namespaces.
+ * Hosts can select the complete built-in English catalog with `locale="en"`
+ * or overlay either built-in catalog with a recursively partial dictionary.
  */
-export const defaultEditorMessages: EditorMessageTree = en
+export const defaultEditorMessages: EditorMessageTree = ru
 
-/** Default catalog entry exported for host typing and composition. */
-export const defaultEditorMessageCatalog: EditorMessageCatalog = {
-  [defaultEditorLocale]: defaultEditorMessages,
+/** Complete built-in catalogs available without a host-supplied dictionary. */
+export const defaultEditorMessageCatalog: Readonly<Record<'en' | 'ru', EditorMessageTree>> = {
+  en,
+  ru,
 }
 
 /** Optional presentation surfaces for the Notion-like editor UI. */
@@ -96,8 +97,8 @@ export interface NotionEditorProps {
   content?: JSONContent
   placeholder?: string
   /**
-   * Active host-selected locale. Defaults to `en`; missing selected-locale
-   * keys fall back to the package's English defaults.
+   * Active host-selected locale. Defaults to `ru`; missing selected-locale
+   * keys fall back to the package's Russian defaults.
    *
    * Changes are reactive and update editor-scoped text resolution without
    * recreating the editor. This API does not require Vue I18n or any other
@@ -106,8 +107,8 @@ export interface NotionEditorProps {
   locale?: EditorLocale
   /**
    * Host-supplied locale overrides shaped like the package-owned canonical
-   * English messages. Changes are reactive and missing keys fall back to
-   * English per key without recreating the editor.
+   * English-derived message shape. Changes are reactive and missing keys fall back to
+   * Russian per key without recreating the editor.
    *
    * Development diagnostics never log message values, host content, or whole
    * dictionaries; they only report redacted resolver events.

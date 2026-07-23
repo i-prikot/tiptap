@@ -2,6 +2,7 @@ import { computed, inject, provide, toValue, watch } from 'vue'
 import type { ComputedRef, InjectionKey, MaybeRefOrGetter } from 'vue'
 import {
   defaultEditorLocale,
+  defaultEditorMessageCatalog,
   defaultEditorMessages,
   type EditorLocale,
   type EditorMessageCatalog,
@@ -68,6 +69,12 @@ function getMessageValue(
   return typeof current === 'string' ? current : undefined
 }
 
+const defaultEditorI18nContext: EditorI18nContext = {
+  locale: computed(() => defaultEditorLocale),
+  messages: computed(() => defaultEditorMessages),
+  t: (key) => getMessageValue(defaultEditorMessages, key) ?? '',
+}
+
 /**
  * Creates an editor-scoped localization resolver without coupling to a host
  * localization plugin. Hosts may derive `messages` from any i18n system.
@@ -78,8 +85,15 @@ export function provideEditorI18n(
   developmentDiagnostics: MaybeRefOrGetter<boolean | undefined> = false,
 ): EditorI18nContext {
   const activeLocale = computed(() => toValue(locale) || defaultEditorLocale)
+  const selectedBuiltInMessages = computed(
+    () =>
+      defaultEditorMessageCatalog[activeLocale.value as keyof typeof defaultEditorMessageCatalog],
+  )
   const resolvedMessages = computed(() =>
-    mergeMessageTrees(defaultEditorMessages, toValue(messages)?.[activeLocale.value]),
+    mergeMessageTrees(
+      selectedBuiltInMessages.value ?? defaultEditorMessages,
+      toValue(messages)?.[activeLocale.value],
+    ),
   )
   const diagnostics = createDevelopmentDiagnostics('EditorI18n', {
     isEnabled: () => toValue(developmentDiagnostics) === true,
@@ -108,7 +122,7 @@ export function provideEditorI18n(
         return ''
       }
 
-      if (activeLocale.value !== defaultEditorLocale && selectedValue === undefined) {
+      if (selectedBuiltInMessages.value === undefined && selectedValue === undefined) {
         const fallbackId = `${activeLocale.value}:${key}`
         if (!reportedFallbacks.has(fallbackId)) {
           reportedFallbacks.add(fallbackId)
@@ -125,7 +139,5 @@ export function provideEditorI18n(
 }
 
 export function useEditorI18n(): EditorI18nContext {
-  const context = inject(editorI18nInjectionKey)
-  if (!context) throw new Error('useEditorI18n must be used inside provideEditorI18n()')
-  return context
+  return inject(editorI18nInjectionKey, defaultEditorI18nContext)
 }

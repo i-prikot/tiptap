@@ -3,7 +3,7 @@
     char="/"
     plugin-key="slashDropdownMenu"
     decoration-class="tiptap-slash-decoration"
-    decoration-content="Filter..."
+    :decoration-content="t('editor.slashPlaceholder')"
     selector="tiptap-slash-dropdown-menu"
     :items="getFilteredItems"
   >
@@ -69,6 +69,7 @@ import { Card, CardBody, CardItemGroup, CardGroupLabel, Separator } from '../../
 
 import { filterSuggestionItems } from '../../../utils/suggestion/suggestion'
 import { getSlashMenuItems } from './slash-menu-items'
+import { useEditorI18n } from '../../../composables/useEditorI18n'
 import type { SlashMenuConfig, SlashMenuItem as SlashMenuEntry } from './slash-menu-items'
 
 const props = withDefaults(defineProps<{ config?: SlashMenuConfig; aiEnabled?: boolean }>(), {
@@ -76,9 +77,10 @@ const props = withDefaults(defineProps<{ config?: SlashMenuConfig; aiEnabled?: b
 })
 
 const showGroups = props.config?.showGroups !== false
+const { t } = useEditorI18n()
 
 function getFilteredItems({ query, editor }: { query: string; editor: Editor }): SlashMenuEntry[] {
-  return filterSuggestionItems(getSlashMenuItems(editor, props.config, props.aiEnabled), query)
+  return filterSuggestionItems(getSlashMenuItems(editor, t, props.config, props.aiEnabled), query)
 }
 
 interface GroupedEntries {

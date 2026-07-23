@@ -1,3 +1,17 @@
 import type { EditorTranslationImageMessages } from '../types'
 
-export const image = {} as const satisfies EditorTranslationImageMessages
+export const image = {
+  alignLeft: 'Image align left',
+  alignCenter: 'Image align center',
+  alignRight: 'Image align right',
+  caption: 'Caption',
+  download: 'Download image',
+  replace: 'Replace',
+  add: 'Add image',
+  captionPlaceholder: 'Add a caption...',
+  clickToUpload: 'Click to upload',
+  dragAndDrop: 'or drag and drop',
+  maximumFiles: 'Maximum {limit} file(s), {maxSize}MB each.',
+  uploadingFiles: 'Uploading {count} files',
+  clearAll: 'Clear All',
+} as const satisfies EditorTranslationImageMessages

@@ -6,6 +6,7 @@ import type { ComputedRef, FunctionalComponent } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { isExtensionAvailable, isNodeTypeSelected } from '../utils/tiptap-utils'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
+import { useEditorI18n } from './useEditorI18n'
 import { AlignCenterIcon, AlignJustifyIcon, AlignLeftIcon, AlignRightIcon } from '../icons'
 
 export type TextAlign = 'left' | 'center' | 'right' | 'justify'
@@ -24,12 +25,12 @@ export const textAlignIcons: Record<TextAlign, FunctionalComponent> = {
   justify: AlignJustifyIcon,
 }
 
-const TEXT_ALIGN_LABELS: Record<TextAlign, string> = {
-  left: 'Align left',
-  center: 'Align center',
-  right: 'Align right',
-  justify: 'Align justify',
-}
+const textAlignMessageKeys = {
+  left: 'toolbar.alignLeft',
+  center: 'toolbar.alignCenter',
+  right: 'toolbar.alignRight',
+  justify: 'toolbar.alignJustify',
+} as const
 
 export function canSetTextAlign(editor: Editor | null, align: TextAlign): boolean {
   if (
@@ -53,6 +54,7 @@ export function useTextAlign(
   hideWhenUnavailable = false,
 ) {
   const signal = useEditorSelectionSignal(editor)
+  const { t } = useEditorI18n()
 
   const canAlign = computed(() => (signal.value, canSetTextAlign(editor.value, align)))
   const isActive = computed(() => (signal.value, isTextAlignActive(editor.value, align)))
@@ -79,7 +81,7 @@ export function useTextAlign(
     isActive,
     canAlign,
     handleTextAlign,
-    label: TEXT_ALIGN_LABELS[align],
+    label: computed(() => t(textAlignMessageKeys[align])),
     shortcutKeys: TEXT_ALIGN_SHORTCUT_KEYS[align],
     Icon: textAlignIcons[align],
   }

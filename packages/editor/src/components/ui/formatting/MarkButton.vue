@@ -8,9 +8,9 @@
     :data-disabled="!mark.canToggle.value"
     role="button"
     :tabindex="-1"
-    :aria-label="mark.label"
+    :aria-label="mark.label.value"
     :aria-pressed="mark.isActive.value"
-    :tooltip="mark.label"
+    :tooltip="mark.label.value"
     :shortcut-keys="mark.shortcutKeys"
     @click="handleClick"
   >

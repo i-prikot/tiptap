@@ -45,7 +45,6 @@ import {
 } from './public-api'
 
 const props = withDefaults(defineProps<NotionEditorProps>(), {
-  placeholder: 'Start writing...',
   tocSidebarStickyTopOffset: 0,
 })
 

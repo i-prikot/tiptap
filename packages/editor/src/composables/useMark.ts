@@ -8,6 +8,7 @@ import type { FunctionalComponent } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { isMarkInSchema, isNodeTypeSelected } from '../utils/tiptap-utils'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
+import { useEditorI18n } from './useEditorI18n'
 import {
   BoldIcon,
   Code2Icon,
@@ -59,6 +60,7 @@ export function useMark(
   hideWhenUnavailable = false,
 ) {
   const signal = useEditorSelectionSignal(editor)
+  const { t } = useEditorI18n()
 
   const canToggle = computed(() => (signal.value, canToggleMark(editor.value, type)))
   const isActive = computed(
@@ -90,7 +92,18 @@ export function useMark(
     isActive,
     canToggle,
     handleMark,
-    label: type.charAt(0).toUpperCase() + type.slice(1),
+    label: computed(() =>
+      t(
+        `toolbar.${type}` as
+          | 'toolbar.bold'
+          | 'toolbar.italic'
+          | 'toolbar.underline'
+          | 'toolbar.strike'
+          | 'toolbar.code'
+          | 'toolbar.superscript'
+          | 'toolbar.subscript',
+      ),
+    ),
     shortcutKeys: MARK_SHORTCUT_KEYS[type],
     Icon: markIcons[type],
   }

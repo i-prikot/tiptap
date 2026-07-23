@@ -9,6 +9,8 @@ import { isExtensionAvailable, isNodeInSchema } from '../../../utils/tiptap-util
 import { findSelectionPosition, hasContentAbove } from '../../../utils/selection-utils'
 import { addEmojiTrigger, addMentionTrigger } from '../../../utils/trigger-utils'
 import type { SuggestionItem } from '../../../types/suggestion'
+import type { EditorI18nContext } from '../../../composables/useEditorI18n'
+import type { EditorMessageKey } from '../../../i18n/types'
 import type { AiTextPromptOptions } from '../../../types/tiptap-augmentations'
 import {
   AiSparklesIcon,
@@ -97,125 +99,133 @@ interface SlashMenuTableInsertOptions {
   withHeaderRow: boolean
 }
 
-const ITEM_METADATA: Record<SlashMenuItemKey, SlashMenuItemMeta> = {
+const ITEM_METADATA: Record<
+  SlashMenuItemKey,
+  Omit<SlashMenuItemMeta, 'title' | 'subtext' | 'keywords' | 'group'> & {
+    titleKey: EditorMessageKey
+    descriptionKey: EditorMessageKey
+    keywordsKey: EditorMessageKey
+    groupKey: EditorMessageKey
+  }
+> = {
   continue_writing: {
-    title: 'Continue Writing',
-    subtext: 'Continue writing from the current position',
-    keywords: ['continue', 'write', 'continue writing', 'ai'],
+    titleKey: 'menus.slash.continueWriting.title',
+    descriptionKey: 'menus.slash.continueWriting.description',
+    keywordsKey: 'menus.slash.continueWriting.keywords',
+    groupKey: 'menus.groups.ai',
     badge: AiSparklesIcon,
-    group: 'AI',
   },
   ai_ask_button: {
-    title: 'Ask AI',
-    subtext: 'Ask AI to generate content',
-    keywords: ['ai', 'ask', 'generate'],
+    titleKey: 'menus.slash.askAi.title',
+    descriptionKey: 'menus.slash.askAi.description',
+    keywordsKey: 'menus.slash.askAi.keywords',
+    groupKey: 'menus.groups.ai',
     badge: AiSparklesIcon,
-    group: 'AI',
   },
   text: {
-    title: 'Text',
-    subtext: 'Regular text paragraph',
-    keywords: ['p', 'paragraph', 'text'],
+    titleKey: 'menus.slash.text.title',
+    descriptionKey: 'menus.slash.text.description',
+    keywordsKey: 'menus.slash.text.keywords',
+    groupKey: 'menus.groups.style',
     badge: TypeIcon,
-    group: 'Style',
   },
   heading_1: {
-    title: 'Heading 1',
-    subtext: 'Top-level heading',
-    keywords: ['h', 'heading1', 'h1'],
+    titleKey: 'menus.slash.heading1.title',
+    descriptionKey: 'menus.slash.heading1.description',
+    keywordsKey: 'menus.slash.heading1.keywords',
+    groupKey: 'menus.groups.style',
     badge: HeadingOneIcon,
-    group: 'Style',
   },
   heading_2: {
-    title: 'Heading 2',
-    subtext: 'Key section heading',
-    keywords: ['h2', 'heading2', 'subheading'],
+    titleKey: 'menus.slash.heading2.title',
+    descriptionKey: 'menus.slash.heading2.description',
+    keywordsKey: 'menus.slash.heading2.keywords',
+    groupKey: 'menus.groups.style',
     badge: HeadingTwoIcon,
-    group: 'Style',
   },
   heading_3: {
-    title: 'Heading 3',
-    subtext: 'Subsection and group heading',
-    keywords: ['h3', 'heading3', 'subheading'],
+    titleKey: 'menus.slash.heading3.title',
+    descriptionKey: 'menus.slash.heading3.description',
+    keywordsKey: 'menus.slash.heading3.keywords',
+    groupKey: 'menus.groups.style',
     badge: HeadingThreeIcon,
-    group: 'Style',
   },
   bullet_list: {
-    title: 'Bullet List',
-    subtext: 'List with unordered items',
-    keywords: ['ul', 'li', 'list', 'bulletlist', 'bullet list'],
+    titleKey: 'menus.slash.bulletList.title',
+    descriptionKey: 'menus.slash.bulletList.description',
+    keywordsKey: 'menus.slash.bulletList.keywords',
+    groupKey: 'menus.groups.style',
     badge: ListIcon,
-    group: 'Style',
   },
   ordered_list: {
-    title: 'Numbered List',
-    subtext: 'List with ordered items',
-    keywords: ['ol', 'li', 'list', 'numberedlist', 'numbered list'],
+    titleKey: 'menus.slash.orderedList.title',
+    descriptionKey: 'menus.slash.orderedList.description',
+    keywordsKey: 'menus.slash.orderedList.keywords',
+    groupKey: 'menus.groups.style',
     badge: ListOrderedIcon,
-    group: 'Style',
   },
   task_list: {
-    title: 'To-do list',
-    subtext: 'List with tasks',
-    keywords: ['tasklist', 'task list', 'todo', 'checklist'],
+    titleKey: 'menus.slash.taskList.title',
+    descriptionKey: 'menus.slash.taskList.description',
+    keywordsKey: 'menus.slash.taskList.keywords',
+    groupKey: 'menus.groups.style',
     badge: ListTodoIcon,
-    group: 'Style',
   },
   quote: {
-    title: 'Blockquote',
-    subtext: 'Blockquote block',
-    keywords: ['quote', 'blockquote'],
+    titleKey: 'menus.slash.quote.title',
+    descriptionKey: 'menus.slash.quote.description',
+    keywordsKey: 'menus.slash.quote.keywords',
+    groupKey: 'menus.groups.style',
     badge: BlockquoteIcon,
-    group: 'Style',
   },
   code_block: {
-    title: 'Code Block',
-    subtext: 'Code block with syntax highlighting',
-    keywords: ['code', 'pre'],
+    titleKey: 'menus.slash.codeBlock.title',
+    descriptionKey: 'menus.slash.codeBlock.description',
+    keywordsKey: 'menus.slash.codeBlock.keywords',
+    groupKey: 'menus.groups.style',
     badge: CodeBlockIcon,
-    group: 'Style',
   },
   mention: {
-    title: 'Mention',
-    subtext: 'Mention a user or item',
-    keywords: ['mention', 'user', 'item', 'tag'],
+    titleKey: 'menus.slash.mention.title',
+    descriptionKey: 'menus.slash.mention.description',
+    keywordsKey: 'menus.slash.mention.keywords',
+    groupKey: 'menus.groups.insert',
     badge: AtSignIcon,
-    group: 'Insert',
   },
   emoji: {
-    title: 'Emoji',
-    subtext: 'Insert an emoji',
-    keywords: ['emoji', 'emoticon', 'smiley'],
+    titleKey: 'menus.slash.emoji.title',
+    descriptionKey: 'menus.slash.emoji.description',
+    keywordsKey: 'menus.slash.emoji.keywords',
+    groupKey: 'menus.groups.insert',
     badge: SmilePlusIcon,
-    group: 'Insert',
   },
   table: {
-    title: 'Table',
-    subtext: 'Insert a table',
-    keywords: ['table', 'insertTable'],
+    titleKey: 'menus.slash.table.title',
+    descriptionKey: 'menus.slash.table.description',
+    keywordsKey: 'menus.slash.table.keywords',
+    groupKey: 'menus.groups.insert',
     badge: TableIcon,
-    group: 'Insert',
   },
   divider: {
-    title: 'Separator',
-    subtext: 'Horizontal line to separate content',
-    keywords: ['hr', 'horizontalRule', 'line', 'separator'],
+    titleKey: 'menus.slash.divider.title',
+    descriptionKey: 'menus.slash.divider.description',
+    keywordsKey: 'menus.slash.divider.keywords',
+    groupKey: 'menus.groups.insert',
     badge: MinusIcon,
-    group: 'Insert',
   },
   toc: {
-    title: 'Table of contents',
-    subtext: 'Insert a table of contents',
-    keywords: ['toc', 'tableofcontents', 'table of contents'],
+    titleKey: 'menus.slash.toc.title',
+    descriptionKey: 'menus.slash.toc.description',
+    keywordsKey: 'menus.slash.toc.keywords',
+    groupKey: 'menus.groups.insert',
     badge: ListIndentedIcon,
-    group: 'Insert',
   },
   image: {
-    title: 'Image',
-    subtext: 'Resizable image with caption',
-    keywords: ['image', 'imageUpload', 'upload', 'img', 'picture', 'media', 'url'],
+    titleKey: 'menus.slash.image.title',
+    descriptionKey: 'menus.slash.image.description',
+    keywordsKey: 'menus.slash.image.keywords',
+    groupKey: 'menus.groups.upload',
     badge: ImageIcon,
-    group: 'Upload',
   },
 }
 
@@ -360,6 +370,7 @@ function buildBehaviors(): Record<SlashMenuItemKey, SlashMenuItemBehavior> {
 /** Собирает доступные пункты слэш-меню для текущего редактора. */
 export function getSlashMenuItems(
   editor: Editor,
+  t: EditorI18nContext['t'],
   config?: SlashMenuConfig,
   aiEnabled = false,
 ): SlashMenuItem[] {
@@ -376,8 +387,12 @@ export function getSlashMenuItems(
     const metadata = ITEM_METADATA[key]
     if (behavior && metadata && behavior.check(editor)) {
       const item: SlashMenuItem = {
+        title: t(metadata.titleKey),
+        subtext: t(metadata.descriptionKey),
+        keywords: t(metadata.keywordsKey).split('|'),
+        group: t(metadata.groupKey),
+        badge: metadata.badge,
         onSelect: ({ editor: selectedEditor }) => behavior.action({ editor: selectedEditor }),
-        ...metadata,
       }
       if (config?.itemGroups?.[key]) item.group = config.itemGroups[key]
       else if (!showGroups) item.group = ''

@@ -39,18 +39,15 @@ import type {
   NotionEditorUpdatePayload,
 } from './public-api'
 
-const props = withDefaults(
-  defineProps<{
-    documentId: string
-    content?: JSONContent
-    placeholder?: string
-    features: EditorFeatureFlags
-    tocSidebarStickyTopOffset?: number
-    imageUpload?: ImageUploadAdapter
-    developmentDiagnostics?: boolean
-  }>(),
-  { placeholder: 'Start writing...' },
-)
+const props = defineProps<{
+  documentId: string
+  content?: JSONContent
+  placeholder?: string
+  features: EditorFeatureFlags
+  tocSidebarStickyTopOffset?: number
+  imageUpload?: ImageUploadAdapter
+  developmentDiagnostics?: boolean
+}>()
 
 const emit = defineEmits<{
   ready: [editor: NotionEditorReadyPayload]

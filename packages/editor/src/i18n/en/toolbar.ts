@@ -1,3 +1,31 @@
 import type { EditorTranslationToolbarMessages } from '../types'
 
-export const toolbar = {} as const satisfies EditorTranslationToolbarMessages
+export const toolbar = {
+  bold: 'Bold',
+  italic: 'Italic',
+  underline: 'Underline',
+  strike: 'Strike',
+  code: 'Code',
+  superscript: 'Superscript',
+  subscript: 'Subscript',
+  increaseIndent: 'Increase indent',
+  decreaseIndent: 'Decrease indent',
+  alignLeft: 'Align left',
+  alignCenter: 'Align center',
+  alignRight: 'Align right',
+  alignJustify: 'Align justify',
+  undo: 'Undo',
+  redo: 'Redo',
+  moveUp: 'Move Up',
+  moveDown: 'Move Down',
+  delete: 'Delete',
+  turnInto: 'Turn into',
+  turnIntoCurrent: 'Turn into (current: {label})',
+  moreOptions: 'More options',
+  clickForOptions: 'Click for options',
+  resetFormatting: 'Reset formatting',
+  duplicateNode: 'Duplicate node',
+  copyToClipboard: 'Copy to clipboard',
+  copyAnchorLink: 'Copy anchor link',
+  insertSlashCommand: 'Insert slash command',
+} as const satisfies EditorTranslationToolbarMessages

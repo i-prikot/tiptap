@@ -8,9 +8,9 @@
     :data-disabled="!alignApi.canAlign.value"
     role="button"
     :tabindex="-1"
-    :aria-label="alignApi.label"
+    :aria-label="alignApi.label.value"
     :aria-pressed="alignApi.isActive.value"
-    :tooltip="alignApi.label"
+    :tooltip="alignApi.label.value"
     :shortcut-keys="alignApi.shortcutKeys"
     @click="handleClick"
   >

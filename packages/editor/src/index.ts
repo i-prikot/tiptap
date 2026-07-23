@@ -19,6 +19,7 @@ export { ColorTextPopover } from './components/ui'
 export { LinkPopover } from './components/ui'
 export { TurnIntoDropdown } from './components/ui'
 export { ImageNodeFloating } from './components/ui'
+export { en, ru } from './i18n'
 export {
   defaultEditorLocale,
   defaultEditorMessageCatalog,

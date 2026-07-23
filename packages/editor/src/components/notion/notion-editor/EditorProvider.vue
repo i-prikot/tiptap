@@ -24,7 +24,7 @@
  * - расширение Ai (Tiptap Pro) недоступно в порте — AI-элементы UI
  *   скрываются штатной проверкой isExtensionAvailable.
  */
-import { onBeforeUnmount, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, shallowRef, watch } from 'vue'
 import { Editor as TiptapEditor } from '@tiptap/vue-3'
 import type { JSONContent } from '@tiptap/core'
 import type { Transaction } from '@tiptap/pm/state'
@@ -35,6 +35,7 @@ import { createExtensionKit } from '../../../extensions/extension-kit'
 import {
   useUser,
   useToc,
+  useEditorI18n,
   provideTiptapEditor,
   provideEditorOverlayTarget,
 } from '../../../composables'
@@ -70,7 +71,6 @@ const props = withDefaults(
   }>(),
   {
     provider: null,
-    placeholder: 'Start writing...',
     features: () => ({ ...defaultEditorFeatureFlags }),
     aiToken: null,
   },
@@ -86,6 +86,8 @@ provideEditorOverlayTarget(overlayTarget)
 
 const { user } = useUser()
 const { setTocContent } = useToc()
+const { messages } = useEditorI18n()
+const resolvedPlaceholder = computed(() => props.placeholder ?? messages.value.editor.placeholder)
 
 const diagnostics = createDevelopmentDiagnostics('EditorProvider', {
   isEnabled: () => props.developmentDiagnostics === true,
@@ -267,7 +269,7 @@ function initializeEditor() {
   void createExtensionKit({
     provider: props.provider,
     ydoc: props.ydoc,
-    placeholder: () => props.placeholder,
+    placeholder: () => resolvedPlaceholder.value,
     user,
     features: props.features,
     imageUpload: uploadImage,
@@ -331,24 +333,21 @@ watch(
   },
 )
 
-watch(
-  () => props.placeholder,
-  () => {
-    const editorInstance = editor.value
-    if (!editorInstance || editorInstance.isDestroyed) {
-      diagnostics.debug('placeholder-refresh', { result: 'skipped-unready' })
-      return
-    }
+watch(resolvedPlaceholder, () => {
+  const editorInstance = editor.value
+  if (!editorInstance || editorInstance.isDestroyed) {
+    diagnostics.debug('placeholder-refresh', { result: 'skipped-unready' })
+    return
+  }
 
-    editorInstance.view.dispatch(
-      editorInstance.state.tr
-        .setSelection(editorInstance.state.selection)
-        .setMeta('addToHistory', false)
-        .setMeta('notion-editor:placeholder-refresh', true),
-    )
-    diagnostics.debug('placeholder-refresh', { result: 'applied' })
-  },
-)
+  editorInstance.view.dispatch(
+    editorInstance.state.tr
+      .setSelection(editorInstance.state.selection)
+      .setMeta('addToHistory', false)
+      .setMeta('notion-editor:placeholder-refresh', true),
+  )
+  diagnostics.debug('placeholder-refresh', { result: 'applied' })
+})
 
 provideTiptapEditor(editor)
 

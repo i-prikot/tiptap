@@ -5,14 +5,11 @@ import { IndentDecreaseIcon, IndentIncreaseIcon } from '../icons'
 import { isExtensionAvailable } from '../utils/tiptap-utils'
 import { createDevelopmentDiagnostics } from '../utils/development-diagnostics'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
+import { useEditorI18n } from './useEditorI18n'
 
 export type IndentAction = 'indent' | 'outdent'
 
 const shortcutKeysByAction: Record<IndentAction, string> = { indent: 'Tab', outdent: 'Shift-Tab' }
-const labelsByAction: Record<IndentAction, string> = {
-  indent: 'Increase indent',
-  outdent: 'Decrease indent',
-}
 const iconsByAction = { indent: IndentIncreaseIcon, outdent: IndentDecreaseIcon }
 
 const diagnostics = createDevelopmentDiagnostics('useIndent')
@@ -28,6 +25,7 @@ export function useIndent(
   hideWhenUnavailable: ComputedRef<boolean>,
 ) {
   const signal = useEditorSelectionSignal(editor)
+  const { t } = useEditorI18n()
   const canIndent = computed(() => (signal.value, canExecuteAction(editor.value, action.value)))
   const isVisible = computed(() => {
     void signal.value
@@ -56,7 +54,9 @@ export function useIndent(
     canIndent,
     isVisible,
     execute,
-    label: computed(() => labelsByAction[action.value]),
+    label: computed(() =>
+      t(action.value === 'indent' ? 'toolbar.increaseIndent' : 'toolbar.decreaseIndent'),
+    ),
     shortcutKeys: computed(() => shortcutKeysByAction[action.value]),
     icon: computed(() => iconsByAction[action.value]),
   }

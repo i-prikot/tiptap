@@ -1,3 +1,17 @@
 import type { EditorTranslationFormattingMessages } from '../types'
 
-export const formatting = {} as const satisfies EditorTranslationFormattingMessages
+export const formatting = {
+  text: 'Text',
+  heading1: 'Heading 1',
+  heading2: 'Heading 2',
+  heading3: 'Heading 3',
+  heading: 'Heading {level}',
+  bulletList: 'Bulleted list',
+  bulletListConversion: 'Bullet List',
+  numberedList: 'Numbered list',
+  numberedListConversion: 'Numbered List',
+  todoList: 'To-do list',
+  blockquote: 'Blockquote',
+  codeBlock: 'Code block',
+  codeBlockConversion: 'Code Block',
+} as const satisfies EditorTranslationFormattingMessages
