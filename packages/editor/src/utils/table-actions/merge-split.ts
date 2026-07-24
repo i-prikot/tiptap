@@ -1,9 +1,12 @@
+import { createLogger } from '@i-prikot/editor-schema'
 import type { Editor } from '@tiptap/core'
 import type { EditorMessageKey } from '../../i18n/types'
 import { mergeCells, splitCell } from '@tiptap/pm/tables'
 import { isExtensionAvailable } from '../tiptap-utils'
 import { TABLE_EXTENSION } from './shared'
 import type { MergeSplitAction } from './shared'
+
+const logger = createLogger('table-actions/merge-split')
 
 export const MERGE_SPLIT_LABELS = {
   merge: 'table.mergeCells',
@@ -38,7 +41,7 @@ export function mergeSplitCells(editor: Editor | null, action: MergeSplitAction)
     if (!canSplitCell(editor)) return false
     return splitCell(editor.state, editor.view.dispatch.bind(editor.view))
   } catch (error) {
-    console.error(`Error ${action}ing table cell:`, error)
+    logger.error(`Error ${action}ing table cell:`, error)
     return false
   }
 }

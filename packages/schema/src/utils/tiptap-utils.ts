@@ -3,6 +3,7 @@
  * Порт `lib/tiptap-utils` и `lib/tiptap-advanced-utils` оригинального шаблона
  * (минифицированный источник: чанк 3ftd-biwbiqel, модуль 680256).
  */
+import { createLogger } from './logger.js'
 import { findParentNodeClosestToPos } from '@tiptap/core'
 import type { Editor } from '@tiptap/core'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
@@ -14,6 +15,8 @@ import {
 } from '@tiptap/pm/state'
 import type { Selection, Transaction } from '@tiptap/pm/state'
 import { CellSelection, cellAround } from '@tiptap/pm/tables'
+
+const logger = createLogger('tiptap-utils')
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
@@ -77,9 +80,9 @@ export function findNodePosition(args: {
     let resolved: ProseMirrorNode | null = null
     try {
       resolved = editor.state.doc.nodeAt(nodePos!)
-      if (!resolved) console.warn(`No node found at position ${nodePos}`)
+      if (!resolved) logger.warn(`No node found at position ${nodePos}`)
     } catch (error) {
-      console.error(`Error getting node at position ${nodePos}:`, error)
+      logger.error(`Error getting node at position ${nodePos}:`, error)
     }
     if (resolved) return { pos: nodePos!, node: resolved }
   }
@@ -103,7 +106,7 @@ export function focusNextNode(editor: Editor): boolean {
 
   const paragraph = state.schema.nodes.paragraph
   if (!paragraph) {
-    console.warn('No paragraph node type found in schema.')
+    logger.warn('No paragraph node type found in schema.')
     return false
   }
 
@@ -182,7 +185,7 @@ export function isExtensionAvailable(
     editor.extensionManager.extensions.some((extension) => extension.name === name),
   )
   if (!available) {
-    console.warn(
+    logger.warn(
       `None of the extensions [${names.join(', ')}] were found in the editor schema. Ensure they are included in the editor configuration.`,
     )
   }

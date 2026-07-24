@@ -123,6 +123,22 @@ export default [
   },
 
   {
+    name: 'project/runtime-console-restrictions',
+    files: ['packages/{schema,editor}/src/**/*.{ts,vue}'],
+    rules: {
+      'no-console': 'error',
+    },
+  },
+
+  {
+    name: 'project/logger-console-sink',
+    files: ['packages/schema/src/utils/logger.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+
+  {
     name: 'project/node-commonjs-scripts',
     files: ['scripts/**/*.cjs', '{apps,packages}/**/scripts/**/*.cjs'],
     languageOptions: {

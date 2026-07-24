@@ -19,6 +19,7 @@
  * Порт NotionEditor из чанка 3xpmbr0kqzhen (React-провайдеры заменены
  * на provide/inject через composables).
  */
+import { createLogger } from '@i-prikot/editor-schema'
 import { computed, onBeforeUnmount, shallowRef, toRef, watch } from 'vue'
 import type { Editor, JSONContent } from '@tiptap/core'
 import {
@@ -43,6 +44,8 @@ import {
   type NotionEditorSetContentOptions,
   type NotionEditorUpdatePayload,
 } from './public-api'
+
+const logger = createLogger('NotionEditor')
 
 const props = withDefaults(defineProps<NotionEditorProps>(), {
   tocSidebarStickyTopOffset: 0,
@@ -115,7 +118,7 @@ function setContent(
     diagnostics.debug('set-content', { emitUpdate })
     return updated
   } catch {
-    console.error('[NotionEditor] imperative content update failed')
+    logger.error('imperative content update failed')
     return false
   }
 }

@@ -24,6 +24,7 @@
  * - расширение Ai (Tiptap Pro) недоступно в порте — AI-элементы UI
  *   скрываются штатной проверкой isExtensionAvailable.
  */
+import { createLogger } from '@i-prikot/editor-schema'
 import { computed, onBeforeUnmount, shallowRef, watch } from 'vue'
 import { Editor as TiptapEditor } from '@tiptap/vue-3'
 import type { JSONContent } from '@tiptap/core'
@@ -55,6 +56,8 @@ import {
   type NotionEditorReadyPayload,
   type NotionEditorUpdatePayload,
 } from './public-api'
+
+const logger = createLogger('EditorProvider')
 
 const props = withDefaults(
   defineProps<{
@@ -142,7 +145,7 @@ function applyExternalContent(editorInstance: TiptapEditor, content: JSONContent
     diagnostics.debug('content-sync', { result: 'applied' })
     return true
   } catch {
-    console.error('[EditorProvider] content synchronization failed')
+    logger.error('content synchronization failed')
     return false
   } finally {
     isApplyingExternalContent = false
@@ -184,7 +187,7 @@ function flushUpdate(editorInstance: TiptapEditor) {
       schemaVersion: CURRENT_SCHEMA_VERSION,
     })
   } catch {
-    console.error('[EditorProvider] document update serialization failed')
+    logger.error('document update serialization failed')
   }
 }
 
@@ -273,7 +276,7 @@ function initializeEditor() {
     user,
     features: props.features,
     imageUpload: uploadImage,
-    onImageUploadError: () => console.error('[EditorProvider] image upload failed'),
+    onImageUploadError: () => logger.error('image upload failed'),
     onTableOfContentsUpdate: setTocContent,
   })
     .then((extensions) => {

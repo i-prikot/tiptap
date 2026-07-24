@@ -36,6 +36,7 @@
  * TableHandleExtension, тянутся (drag&drop перестановка) и открывают
  * меню действий. Порт TableHandle из чанка 3gf8l96fmxb-u (функции O/B/I).
  */
+import { createLogger } from '@i-prikot/editor-schema'
 import { computed, ref, watch } from 'vue'
 import { TableMap } from '@tiptap/pm/tables'
 
@@ -45,6 +46,8 @@ import { useTiptapEditor, useTableHandleState, useTableHandlePosition } from '..
 import { colDragStart, dragEnd, rowDragStart } from '../../../extensions/table-handle'
 import { selectCellsByCoords } from '../../../utils/table-utils'
 import { isValidPosition } from '../../../utils/tiptap-utils'
+
+const logger = createLogger('TableHandle')
 
 const editor = useTiptapEditor()
 const state = useTableHandleState(editor)
@@ -89,7 +92,7 @@ function selectLine(orientation: 'row' | 'column') {
       dispatch: instance.view.dispatch.bind(instance.view),
     })
   } catch (error) {
-    console.warn('Failed to select row/column:', error)
+    logger.warn('Failed to select row/column:', error)
   }
 }
 

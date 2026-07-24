@@ -1,3 +1,4 @@
+import { createLogger } from '@i-prikot/editor-schema'
 import type { EditorState } from '@tiptap/pm/state'
 import { CellSelection, moveTableColumn, moveTableRow, selectedRect } from '@tiptap/pm/tables'
 import { isExtensionAvailable } from '../tiptap-utils'
@@ -12,6 +13,8 @@ import type { Orientation } from '../table-utils'
 import { HANDLE_EXTENSION, dispatchOf, safeColumnIsHeader, safeRowIsHeader } from './shared'
 import type { MoveDirection, RowColumnArgs } from './shared'
 import type { EditorMessageKey } from '../../i18n/types'
+
+const logger = createLogger('table-actions/movement')
 
 export const MOVE_LABELS = {
   row: {
@@ -127,7 +130,7 @@ export function moveRowColumn(args: RowColumnArgs & { direction: MoveDirection }
       dispatch,
     )
   } catch (error) {
-    console.error('Error moving table row/column:', error)
+    logger.error('Error moving table row/column:', error)
     return false
   }
 }

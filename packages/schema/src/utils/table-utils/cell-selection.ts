@@ -1,3 +1,4 @@
+import { createLogger } from '../logger.js'
 import type { Editor } from '@tiptap/core'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import { Selection } from '@tiptap/pm/state'
@@ -8,6 +9,8 @@ import { CellSelection, TableMap, cellAround, isInTable, selectionCell } from '@
 import { clamp } from './table-calculations.js'
 import { getTable } from './table-map.js'
 import { getCellSelectionType, isWithinMap, type Orientation } from './shared.js'
+
+const logger = createLogger('table-utils/cell-selection')
 
 export function getTableSelectionType(
   editor: Editor | null,
@@ -123,7 +126,7 @@ export function selectCellsByCoords(
         return state.apply(tr)
     }
   } catch (error) {
-    console.error('Failed to create cell selection:', error)
+    logger.error('Failed to create cell selection:', error)
     return undefined
   }
 }
@@ -142,11 +145,12 @@ export function selectLastCell(
   const mapIndex = row * map.width + col
   const relative = map.map[mapIndex]
   if (!relative && relative !== 0) {
-    console.warn('selectLastCell: cell position not found in map', {
+    logger.warn('selectLastCell: cell position not found in map', {
       index: mapIndex,
       row,
       col,
-      map,
+      width: map.width,
+      height: map.height,
     })
     return false
   }
@@ -225,6 +229,6 @@ export function updateSelectionAfterAction(
       editor.view.dispatch(state.tr.setSelection(selection))
     }
   } catch (error) {
-    console.warn('Failed to update selection after move:', error)
+    logger.warn('Failed to update selection after move:', error)
   }
 }

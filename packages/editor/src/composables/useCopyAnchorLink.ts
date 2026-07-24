@@ -1,3 +1,4 @@
+import { createLogger } from '@i-prikot/editor-schema'
 import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
@@ -6,6 +7,8 @@ import { getEditorExtension } from './useScrollToHash'
 import { useAnchorNavigation } from './useAnchorNavigation'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
 import { getAnchorNodeAndPos } from './nodeActionUtils'
+
+const logger = createLogger('useCopyAnchorLink')
 
 export const COPY_ANCHOR_LINK_SHORTCUT_KEY = 'mod+ctrl+l'
 
@@ -35,7 +38,7 @@ export function useCopyAnchorLink(editor: ComputedRef<Editor | null>) {
       await navigator.clipboard.writeText(url.toString())
       return true
     } catch (error) {
-      console.error('Failed to copy node ID to clipboard:', error)
+      logger.error('Failed to copy node ID to clipboard:', error)
       return false
     }
   }

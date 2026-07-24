@@ -7,6 +7,7 @@
  * коллаборацию только если хост передал appId и tokenUrl (или token);
  * иначе hasCollab=false и редактор работает локально с обычной историей.
  */
+import { createLogger } from '@i-prikot/editor-schema'
 import { onBeforeUnmount, provide, inject, shallowRef } from 'vue'
 import type { InjectionKey, ShallowRef } from 'vue'
 import * as Y from 'yjs'
@@ -24,7 +25,7 @@ export async function fetchCollabToken(config: CollaborationOptions): Promise<st
     })
 
     if (!response.ok) {
-      console.error('[useCollab] token fetch failed', {
+      logger.error('token fetch failed', {
         service: 'collaboration',
         status: response.status,
       })
@@ -39,12 +40,12 @@ export async function fetchCollabToken(config: CollaborationOptions): Promise<st
 
     if (typeof token === 'string' && token.trim()) return token
 
-    console.error('[useCollab] token fetch failed', {
+    logger.error('token fetch failed', {
       service: 'collaboration',
       status: 'missing-token',
     })
   } catch {
-    console.error('[useCollab] token fetch failed', {
+    logger.error('token fetch failed', {
       service: 'collaboration',
       status: 'request-failed',
     })
@@ -59,6 +60,8 @@ export interface CollabContext {
   provider: ShallowRef<TiptapCollabProvider | null>
   ydoc: Y.Doc
 }
+
+const logger = createLogger('useCollab')
 
 const collabInjectionKey: InjectionKey<CollabContext> = Symbol('collab')
 

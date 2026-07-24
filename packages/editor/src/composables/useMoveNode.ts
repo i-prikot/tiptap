@@ -2,6 +2,7 @@
  * Перемещение текущего блока вверх/вниз.
  * Порт useMoveNode из чанка 34p294mqk5mqb (модуль 962287).
  */
+import { createLogger } from '@i-prikot/editor-schema'
 import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
@@ -11,6 +12,8 @@ import { getAnchorNodeAndPos } from './useNodeActions'
 import { AlignBottomIcon, AlignTopIcon } from '../icons'
 
 export type MoveDirection = 'up' | 'down'
+
+const logger = createLogger('useMoveNode')
 
 export const MOVE_NODE_SHORTCUT_KEYS: Record<MoveDirection, string> = {
   up: 'mod+shift+ArrowUp',
@@ -62,7 +65,7 @@ function moveNode(editor: Editor | null, direction: MoveDirection): boolean {
     editor.view.dispatch(tr)
     return true
   } catch (error) {
-    console.error('Error moving node:', error)
+    logger.error('Error moving node:', error)
     return false
   }
 }

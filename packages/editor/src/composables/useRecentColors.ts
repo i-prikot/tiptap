@@ -2,9 +2,12 @@
  * Недавние цвета, сохраняемые в namespaced localStorage.
  * Порт useRecentColors из чанка 2mux2p9tadf0h (модуль 959411).
  */
+import { createLogger } from '@i-prikot/editor-schema'
 import { onMounted, ref } from 'vue'
 import type { RecentColor } from '../types/color'
 import { getNamespacedStorageKey } from '../utils/storage'
+
+const logger = createLogger('useRecentColors')
 
 const STORAGE_KEY = getNamespacedStorageKey('tiptapRecentlyUsedColors')
 
@@ -17,7 +20,7 @@ export function useRecentColors(maxColors = 3) {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) recentColors.value = (JSON.parse(stored) as RecentColor[]).slice(0, maxColors)
     } catch (error) {
-      console.error('Failed to load stored colors:', error)
+      logger.error('Failed to load stored colors:', error)
     } finally {
       isInitialized.value = true
     }
@@ -31,7 +34,7 @@ export function useRecentColors(maxColors = 3) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
     } catch (error) {
-      console.error('Failed to store colors:', error)
+      logger.error('Failed to store colors:', error)
     }
     recentColors.value = next
   }

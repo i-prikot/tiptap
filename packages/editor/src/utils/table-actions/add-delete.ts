@@ -1,3 +1,4 @@
+import { createLogger } from '@i-prikot/editor-schema'
 import type { Editor } from '@tiptap/core'
 import type { EditorState } from '@tiptap/pm/state'
 import {
@@ -28,6 +29,8 @@ import {
 } from './shared'
 import type { AddSide, RowColumnArgs } from './shared'
 import type { EditorMessageKey } from '../../i18n/types'
+
+const logger = createLogger('table-actions/add-delete')
 
 export const DUPLICATE_LABELS = {
   row: 'table.duplicateRow',
@@ -114,7 +117,7 @@ function duplicateLine(
     }
     return false
   } catch (error) {
-    console.error(`Error duplicating ${orientation}:`, error)
+    logger.error(`Error duplicating ${orientation}:`, error)
     return false
   }
 }
@@ -207,7 +210,7 @@ export function addRowColumn(args: RowColumnArgs & { side: AddSide }): boolean {
     }
     return added
   } catch (error) {
-    console.error('Error adding row/column:', error)
+    logger.error('Error adding row/column:', error)
     return false
   }
 }
@@ -247,7 +250,7 @@ export function deleteRowColumn({ editor, index, orientation, tablePos }: RowCol
     if (!state) return false
     return command(state as EditorState, dispatch)
   } catch (error) {
-    console.error('Error deleting table row/column:', error)
+    logger.error('Error deleting table row/column:', error)
     return false
   }
 }

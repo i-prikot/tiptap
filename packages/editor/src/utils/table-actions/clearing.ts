@@ -1,3 +1,4 @@
+import { createLogger } from '@i-prikot/editor-schema'
 import type { Editor } from '@tiptap/core'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import { NodeSelection } from '@tiptap/pm/state'
@@ -15,6 +16,8 @@ import type { Orientation, TableInfo } from '../table-utils'
 import type { EditorMessageKey } from '../../i18n/types'
 import { RESET_CELL_ATTRS, TABLE_EXTENSION } from './shared'
 import type { RowColumnArgs } from './shared'
+
+const logger = createLogger('table-actions/clearing')
 
 export const CLEAR_LABELS = {
   row: 'table.clearRowContents',
@@ -83,7 +86,7 @@ function resetCellAttrs(editor: Editor): boolean {
   try {
     return setCellAttr(RESET_CELL_ATTRS)(editor.state, editor.view.dispatch)
   } catch (error) {
-    console.error('Error resetting cell attributes:', error)
+    logger.error('Error resetting cell attributes:', error)
     return false
   }
 }
@@ -119,7 +122,7 @@ export function clearRowColumnContent(args: RowColumnArgs & { resetAttrs?: boole
         }
         return false
       } catch (error) {
-        console.error(`Error clearing ${selectionType.orientation} content:`, error)
+        logger.error(`Error clearing ${selectionType.orientation} content:`, error)
         return false
       }
     }
@@ -142,11 +145,11 @@ export function clearRowColumnContent(args: RowColumnArgs & { resetAttrs?: boole
       editor.view.dispatch(editor.state.tr.delete(from, to))
       return true
     } catch (error) {
-      console.error('Error clearing selected cells:', error)
+      logger.error('Error clearing selected cells:', error)
       return false
     }
   } catch (error) {
-    console.error('Error clearing table content:', error)
+    logger.error('Error clearing table content:', error)
     return false
   }
 }
@@ -214,7 +217,7 @@ export function clearAllTableContent(args: RowColumnArgs & { resetAttrs?: boolea
     }
     return false
   } catch (error) {
-    console.error('Error clearing all table content:', error)
+    logger.error('Error clearing all table content:', error)
     return false
   }
 }

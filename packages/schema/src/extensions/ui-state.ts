@@ -3,6 +3,7 @@
  * в extension storage и предоставляет команды для его изменения.
  * Порт из чанка 35aonnuqri98j (модуль 188777).
  */
+import { createLogger } from '../utils/logger.js'
 import { Extension } from '@tiptap/core'
 
 export interface UiEditorState {
@@ -31,11 +32,10 @@ export const defaultUiState: UiEditorState = {
   isDragging: false,
 }
 
-const isDevelopment = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV === true
+const logger = createLogger('UiState')
 
 function debug(event: string, metadata?: Record<string, unknown>) {
-  if (!isDevelopment) return
-  globalThis.console.debug(`[UiState] ${event}`, metadata)
+  logger.debug(event, metadata)
 }
 
 export const UiState = Extension.create<Record<string, never>, UiEditorState>({

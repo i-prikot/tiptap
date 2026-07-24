@@ -52,6 +52,7 @@
  * .table-selection-overlay-container внутри NodeView таблицы.
  * Порт TableSelectionOverlay из чанка 34p294mqk5mqb (модуль 41674).
  */
+import { createLogger } from '@i-prikot/editor-schema'
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import type { CSSProperties } from 'vue'
 import { CellSelection, cellAround, columnResizingPluginKey } from '@tiptap/pm/tables'
@@ -78,6 +79,8 @@ interface ColumnResizePluginMeta {
 function isColumnResizePluginMeta(meta: unknown): meta is ColumnResizePluginMeta {
   return typeof meta === 'object' && meta !== null
 }
+
+const logger = createLogger('TableSelectionOverlay')
 
 const props = withDefaults(defineProps<{ showResizeHandles?: boolean }>(), {
   showResizeHandles: true,
@@ -210,7 +213,7 @@ function findAnchorCell(corner: Corner): number | null {
       try {
         cellSelection = CellSelection.create(instance.state.doc, $cell.pos, $cell.pos)
       } catch (error) {
-        console.warn('Could not create single cell selection for resize:', error)
+        logger.warn('Could not create single cell selection for resize:', error)
         return null
       }
     }

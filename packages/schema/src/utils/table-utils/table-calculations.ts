@@ -1,9 +1,12 @@
+import { createLogger } from '../logger.js'
 import type { Editor } from '@tiptap/core'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import { TableMap } from '@tiptap/pm/tables'
 import type { Rect } from '@tiptap/pm/tables'
 
 import type { DomCellInfo } from './shared.js'
+
+const logger = createLogger('table-utils/table-calculations')
 
 export function isHTMLElement(value: unknown): value is HTMLElement {
   return value instanceof HTMLElement
@@ -59,7 +62,7 @@ export function getCellIndicesFromDOM(
       }
     }
   } catch (error) {
-    console.warn('Could not get cell position:', error)
+    logger.warn('Could not get cell position:', error)
   }
   return null
 }
@@ -76,7 +79,7 @@ export function getTableFromDOM(
       if (isTableNode(node)) return { node, pos: depth === 0 ? 0 : $pos.before(depth) }
     }
   } catch (error) {
-    console.warn('Could not get table from DOM:', error)
+    logger.warn('Could not get table from DOM:', error)
   }
   return null
 }

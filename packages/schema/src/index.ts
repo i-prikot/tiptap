@@ -49,6 +49,7 @@ export { TocNode, type TocNodeAttributes, type TocNodeOptions } from './nodes/to
 export * from './types/image-upload.js'
 export * from './types/toc.js'
 export * from './types/user.js'
+export { createLogger, type Logger, type LoggerOptions, type LogLevel } from './utils/logger.js'
 export * from './utils/table-utils.js'
 export { throttle, type ThrottledFunction } from './utils/throttle.js'
 export * from './utils/tiptap-utils.js'

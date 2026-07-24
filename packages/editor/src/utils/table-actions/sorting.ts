@@ -1,3 +1,4 @@
+import { createLogger } from '@i-prikot/editor-schema'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import { isExtensionAvailable } from '../tiptap-utils'
 import { getRowOrColumnCells, getTable, isCellEmpty } from '../table-utils'
@@ -5,6 +6,8 @@ import type { Orientation } from '../table-utils'
 import { HANDLE_EXTENSION } from './shared'
 import type { RowColumnArgs, SortDirection } from './shared'
 import type { EditorMessageKey } from '../../i18n/types'
+
+const logger = createLogger('table-actions/sorting')
 
 export const SORT_LABELS = {
   row: { asc: 'table.sortRowAscending', desc: 'table.sortRowDescending' },
@@ -59,7 +62,7 @@ export function sortRowColumn(args: RowColumnArgs & { direction: SortDirection }
     const tr = state.tr
     const line = getRowOrColumnCells(editor, index, orientation, tablePos)
     if (line.mergedCells.length > 0) {
-      console.warn(`Cannot sort ${orientation} ${index}: contains merged cells`)
+      logger.warn(`Cannot sort ${orientation} ${index}: contains merged cells`)
       return false
     }
     if (line.cells.length < 2) return false
@@ -110,7 +113,7 @@ export function sortRowColumn(args: RowColumnArgs & { direction: SortDirection }
     }
     return false
   } catch (error) {
-    console.error(`Error sorting table ${orientation}:`, error)
+    logger.error(`Error sorting table ${orientation}:`, error)
     return false
   }
 }

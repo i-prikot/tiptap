@@ -1,3 +1,4 @@
+import { createLogger } from '@i-prikot/editor-schema'
 import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import { NodeSelection } from '@tiptap/pm/state'
@@ -5,6 +6,8 @@ import type { Editor } from '@tiptap/vue-3'
 import { ArrowDownToLineIcon } from '../icons'
 import { isExtensionAvailable, isNodeTypeSelected } from '../utils/tiptap-utils'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
+
+const logger = createLogger('useImageDownload')
 
 export const IMAGE_DOWNLOAD_SHORTCUT_KEY = 'mod+shift+d'
 
@@ -67,7 +70,7 @@ async function downloadViaFetch(url: string, fileName: string): Promise<boolean>
     setTimeout(() => URL.revokeObjectURL(objectUrl), 0)
     return true
   } catch (error) {
-    console.warn('Fetch download failed:', error)
+    logger.warn('Fetch download failed:', error)
     return false
   }
 }
@@ -84,7 +87,7 @@ function downloadDirect(url: string, fileName: string): boolean {
     document.body.removeChild(anchor)
     return true
   } catch (error) {
-    console.warn('Direct download failed:', error)
+    logger.warn('Direct download failed:', error)
     return false
   }
 }
@@ -105,7 +108,7 @@ export function useImageDownload(editor: ComputedRef<Editor | null>) {
       window.open(attrs.src, '_blank')
       return true
     } catch (error) {
-      console.error('Failed to open image:', error)
+      logger.error('Failed to open image:', error)
       return false
     }
   }

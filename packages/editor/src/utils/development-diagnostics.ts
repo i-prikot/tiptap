@@ -1,3 +1,5 @@
+import { createLogger } from '@i-prikot/editor-schema'
+
 export type DevelopmentDiagnosticMetadata = Record<string, unknown>
 
 export interface DevelopmentDiagnostics {
@@ -15,14 +17,17 @@ export function createDevelopmentDiagnostics(
   namespace: string,
   options: DevelopmentDiagnosticsOptions = {},
 ): DevelopmentDiagnostics {
+  const logger = createLogger(namespace, {
+    minLevel: 'debug',
+    isEnabled: () => isDevelopment && (options.isEnabled?.() ?? true),
+  })
+
   return {
     debug(event, metadata) {
-      if (!isDevelopment || (options.isEnabled && !options.isEnabled())) return
-      globalThis.console.debug(`[${namespace}] ${event}`, metadata)
+      logger.debug(event, metadata)
     },
     error(event, metadata) {
-      if (!isDevelopment || (options.isEnabled && !options.isEnabled())) return
-      globalThis.console.error(`[${namespace}] ${event}`, metadata)
+      logger.error(event, metadata)
     },
   }
 }

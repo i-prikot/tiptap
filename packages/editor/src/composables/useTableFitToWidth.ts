@@ -1,3 +1,4 @@
+import { createLogger } from '@i-prikot/editor-schema'
 import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
@@ -5,6 +6,8 @@ import { MoveHorizontalIcon } from '../icons'
 import { getTable, RESIZE_MIN_WIDTH } from '../utils/table-utils'
 import { isExtensionAvailable } from '../utils/tiptap-utils'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
+
+const logger = createLogger('useTableFitToWidth')
 
 function canFitTableToWidth(editor: Editor | null): boolean {
   if (
@@ -55,7 +58,7 @@ export function useTableFitToWidth(editor: ComputedRef<Editor | null>) {
       if (tr.docChanged) instance.view.dispatch(tr)
       return true
     } catch (error) {
-      console.error('Error setting table auto width:', error)
+      logger.error('Error setting table auto width:', error)
       return false
     }
   }

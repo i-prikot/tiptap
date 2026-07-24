@@ -1,18 +1,21 @@
 /**
  * Scrolls to a block when the host supplies a decoded unique-node identifier.
  */
+import { createLogger } from '@i-prikot/editor-schema'
 import { watch } from 'vue'
 import type { ComputedRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { selectNodeAndHideFloating } from '../utils/toc-utils'
 import { useAnchorNavigation } from './useAnchorNavigation'
 
+const logger = createLogger('useScrollToHash')
+
 /** Resolves an editor extension by name. */
 export function getEditorExtension(editor: Editor | null, name: string) {
   if (!editor) return null
   const extension = editor.extensionManager.extensions.find((item) => item.name === name)
   if (!extension) {
-    console.warn(
+    logger.warn(
       `Extension "${name}" not found in the editor schema. Ensure it is included in the editor configuration.`,
     )
     return null

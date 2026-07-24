@@ -2,6 +2,7 @@
  * Выравнивание ячеек таблицы (текстовое и вертикальное).
  * Порт useTableAlignCell из чанка 2yhkpc8fmweba (модуль 489144).
  */
+import { createLogger } from '@i-prikot/editor-schema'
 import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import type { FunctionalComponent } from 'vue'
@@ -24,6 +25,8 @@ export type TableAlignmentType = 'text' | 'vertical'
 export type TableTextAlignment = 'left' | 'center' | 'right' | 'justify'
 export type TableVerticalAlignment = 'top' | 'middle' | 'bottom'
 export type TableAlignment = TableTextAlignment | TableVerticalAlignment
+
+const logger = createLogger('useTableAlignCell')
 
 const TABLE_EXTENSIONS = ['table']
 
@@ -156,7 +159,7 @@ export function useTableAlignCell(options: UseTableAlignCellOptions) {
       if (applied) onAligned?.(alignment)
       return applied
     } catch (error) {
-      console.error('Error aligning table cell:', error)
+      logger.error('Error aligning table cell:', error)
       return false
     }
   }
@@ -189,7 +192,7 @@ export function useTableAlignCell(options: UseTableAlignCellOptions) {
       }
       return false
     } catch (error) {
-      console.error(`Error aligning table ${orientation}:`, error)
+      logger.error(`Error aligning table ${orientation}:`, error)
       return false
     }
   }

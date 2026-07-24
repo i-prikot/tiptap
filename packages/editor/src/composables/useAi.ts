@@ -8,6 +8,7 @@
  * и все AI-элементы UI скрываются той же
  * логикой isExtensionAvailable(editor, 'ai'), что и в оригинале.
  */
+import { createLogger } from '@i-prikot/editor-schema'
 import { inject, provide, shallowRef, toValue, watch } from 'vue'
 import type { InjectionKey, MaybeRefOrGetter, ShallowRef } from 'vue'
 import type { AiOptions } from '../components/notion'
@@ -23,7 +24,7 @@ export async function fetchAiToken(config: AiOptions): Promise<string | null> {
     })
 
     if (!response.ok) {
-      console.error('[useAi] token fetch failed', {
+      logger.error('token fetch failed', {
         service: 'ai',
         status: response.status,
       })
@@ -38,12 +39,12 @@ export async function fetchAiToken(config: AiOptions): Promise<string | null> {
 
     if (typeof token === 'string' && token.trim()) return token
 
-    console.error('[useAi] token fetch failed', {
+    logger.error('token fetch failed', {
       service: 'ai',
       status: 'missing-token',
     })
   } catch {
-    console.error('[useAi] token fetch failed', {
+    logger.error('token fetch failed', {
       service: 'ai',
       status: 'request-failed',
     })
@@ -57,6 +58,8 @@ export interface AiContext {
   hasAi: ShallowRef<boolean>
   aiToken: ShallowRef<string | null>
 }
+
+const logger = createLogger('useAi')
 
 const aiInjectionKey: InjectionKey<AiContext> = Symbol('ai')
 
