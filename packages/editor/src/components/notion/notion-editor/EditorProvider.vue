@@ -86,8 +86,8 @@ provideEditorOverlayTarget(overlayTarget)
 
 const { user } = useUser()
 const { setTocContent } = useToc()
-const { messages } = useEditorI18n()
-const resolvedPlaceholder = computed(() => props.placeholder ?? messages.value.editor.placeholder)
+const { t } = useEditorI18n()
+const resolvedPlaceholder = computed(() => props.placeholder ?? t('editor.placeholder'))
 
 const diagnostics = createDevelopmentDiagnostics('EditorProvider', {
   isEnabled: () => props.developmentDiagnostics === true,

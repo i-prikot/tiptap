@@ -8,9 +8,9 @@
     :data-active-state="isActive ? 'on' : 'off'"
     :disabled="!canInsert"
     :data-disabled="!canInsert"
-    aria-label="Add image"
+    :aria-label="t('image.add')"
     :aria-pressed="isActive"
-    :tooltip="tooltip ?? 'Add image'"
+    :tooltip="tooltip ?? t('image.add')"
     @click="handleClick"
   >
     <slot>
@@ -26,7 +26,7 @@ import { computed } from 'vue'
 import type { FunctionalComponent } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { Button, Badge } from '../../primitives'
-import { useImageUploadButton, useTiptapEditor } from '../../../composables'
+import { useEditorI18n, useImageUploadButton, useTiptapEditor } from '../../../composables'
 import { parseShortcutKeys } from '../../../utils/tiptap-utils'
 import { ImagePlusIcon } from '../../../icons'
 
@@ -46,6 +46,7 @@ const props = withDefaults(defineProps<ImageUploadButtonProps>(), {
 })
 const emit = defineEmits<{ inserted: [] }>()
 const editor = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
 const { canInsert, isActive, isVisible, execute } = useImageUploadButton(
   editor,
   computed(() => props.hideWhenUnavailable),

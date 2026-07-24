@@ -7,7 +7,7 @@
       :data-selector="selector"
       class="tiptap-suggestion-menu"
       role="listbox"
-      aria-label="Suggestions"
+      :aria-label="t('common.suggestions')"
       @pointerdown.prevent
     >
       <slot :items="suggestionItems" :selected-index="selectedIndex" :on-select="handleSelect" />
@@ -27,7 +27,12 @@ import type { CSSProperties } from 'vue'
 import { PluginKey } from '@tiptap/pm/state'
 import { flip, offset as offsetMiddleware, shift, size, useFloating } from '@floating-ui/vue'
 import type { Editor } from '@tiptap/vue-3'
-import { useTiptapEditor, useEditorOverlayTarget, useMenuNavigation } from '../../../composables'
+import {
+  useEditorI18n,
+  useTiptapEditor,
+  useEditorOverlayTarget,
+  useMenuNavigation,
+} from '../../../composables'
 import { throttledAutoUpdate } from '../../../utils/throttle'
 import { EditorOverlayTeleport } from '../../primitives'
 
@@ -44,6 +49,7 @@ const props = withDefaults(
     decorationContent?: string
     selector?: string
     maxHeight?: number
+    itemsRefreshKey?: unknown
     items: (args: { query: string; editor: Editor }) => Item[] | Promise<Item[]>
   }>(),
   {
@@ -58,6 +64,7 @@ const props = withDefaults(
 )
 
 const editor = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
 const overlayTarget = useEditorOverlayTarget()
 const teleportTarget = computed(() => overlayTarget?.value ?? null)
 
@@ -115,6 +122,17 @@ const { selectedIndex } = useMenuNavigation<Item>({
 })
 
 let registeredKey: PluginKey | null = null
+
+watch(
+  () => props.itemsRefreshKey,
+  () => {
+    const instance = editor.value
+    if (!instance || instance.isDestroyed) return
+    instance.view.dispatch(
+      instance.state.tr.setMeta(props.pluginKey, { refresh: true }).setMeta('addToHistory', false),
+    )
+  },
+)
 
 watch(
   editor,

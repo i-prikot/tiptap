@@ -7,8 +7,8 @@
     :tabindex="-1"
     :disabled="!canAddTrigger"
     :data-disabled="!canAddTrigger"
-    aria-label="Insert slash command"
-    tooltip="Insert slash command"
+    :aria-label="t('toolbar.insertSlashCommand')"
+    :tooltip="t('toolbar.insertSlashCommand')"
     :shortcut-keys="SLASH_TRIGGER_SHORTCUT_KEY"
     v-bind="$attrs"
     @click="handleClick"
@@ -31,7 +31,7 @@ import type { Editor } from '@tiptap/vue-3'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import { Button } from '../../primitives'
 import { PlusIcon } from '../../../icons'
-import { useTiptapEditor, useEditorSelectionSignal } from '../../../composables'
+import { useEditorI18n, useTiptapEditor, useEditorSelectionSignal } from '../../../composables'
 
 import { findNodePosition, isNodeTypeSelected, isValidPosition } from '../../../utils/tiptap-utils'
 import { addSlashTrigger } from '../../../utils/trigger-utils'
@@ -51,6 +51,7 @@ const props = defineProps<{
 const emit = defineEmits<{ triggerApplied: [] }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
 const signal = useEditorSelectionSignal(editor)
 
 function canAdd(instance: Editor | null): boolean {

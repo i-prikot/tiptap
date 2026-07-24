@@ -19,7 +19,7 @@
         <nav
           class="toc-sidebar-nav"
           :class="{ 'toc-sidebar-nav--hidden': !hasItems }"
-          aria-label="Table of contents"
+          :aria-label="t('toc.title')"
         >
           <div class="toc-sidebar-popover">
             <a
@@ -51,7 +51,7 @@
  * Порт TocSidebar из чанка 094r3nrv45pwr (модуль 305472).
  */
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
-import { useToc, useAnchorNavigation } from '../../../composables'
+import { useToc, useAnchorNavigation, useEditorI18n } from '../../../composables'
 
 import { getScrollableAncestor } from '../../../utils/toc-utils'
 import type { TocItem } from '../../../types/toc'
@@ -67,6 +67,7 @@ const props = withDefaults(
 
 const { tocContent, navigateToHeading, normalizeHeadingDepths } = useToc()
 const { currentAnchor } = useAnchorNavigation()
+const { t } = useEditorI18n()
 
 const rootRef = shallowRef<HTMLElement | null>(null)
 const manualActiveId = ref<string | null>(null)

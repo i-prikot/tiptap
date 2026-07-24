@@ -1,11 +1,17 @@
+import type { EditorMessageKey } from '../i18n/types'
+
+export type ColorMessageKey = Extract<EditorMessageKey, `colors.${string}`>
+
 export interface TextColor {
-  label: string
+  label?: string
+  labelKey?: ColorMessageKey
   value: string
   border: string
 }
 
 export interface HighlightColor {
-  label: string
+  label?: string
+  labelKey?: ColorMessageKey
   value: string
   colorValue?: string
   border?: string

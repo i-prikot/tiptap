@@ -5,8 +5,8 @@
     data-appearance="default"
     role="button"
     :tabindex="-1"
-    aria-label="Highlight text"
-    tooltip="Highlight"
+    :aria-label="t('colors.highlightText')"
+    :tooltip="t('colors.highlight')"
   >
     <slot>
       <HighlighterIcon class="tiptap-button-icon" />
@@ -19,4 +19,7 @@
 // (порт ColorHighlightPopoverButton из чанка 3jdxmcvhjtoe-).
 import { Button } from '../../primitives'
 import { HighlighterIcon } from '../../../icons'
+import { useEditorI18n } from '../../../composables'
+
+const { t } = useEditorI18n()
 </script>

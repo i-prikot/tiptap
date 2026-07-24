@@ -30,7 +30,7 @@
                 variant="ghost"
                 role="button"
                 :tabindex="-1"
-                tooltip="More options"
+                :tooltip="t('toolbar.moreOptions')"
               >
                 <MoreVerticalIcon class="tiptap-button-icon" />
               </Button>
@@ -81,6 +81,7 @@ import { ColorTextPopover } from '../color'
 import { ImageNodeFloating } from '../image'
 import {
   useTiptapEditor,
+  useEditorI18n,
   useUiEditorState,
   useIsBreakpoint,
   useEditorSelectionSignal,
@@ -98,6 +99,7 @@ const props = withDefaults(defineProps<{ editor?: Editor | null; aiEnabled?: boo
 })
 
 const editor = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
 const uiState = useUiEditorState(editor, [
   'aiGenerationActive',
   'commentInputVisible',

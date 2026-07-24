@@ -32,7 +32,7 @@ import { TableAlignMenu } from '../table-align'
 
 import TableHandleMenuAction from './TableHandleMenuAction.vue'
 import TableHandleMenuActionGroup from './TableHandleMenuActionGroup.vue'
-import { useTiptapEditor, useEditorSelectionSignal } from '../../../composables'
+import { useEditorI18n, useTiptapEditor, useEditorSelectionSignal } from '../../../composables'
 
 import type { Orientation } from '../../../utils/table-utils'
 import {
@@ -95,6 +95,7 @@ const props = defineProps<{
 }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
 const signal = useEditorSelectionSignal(editor)
 
 const args = computed(() => {
@@ -115,7 +116,7 @@ const headerItems = computed<TableHandleMenuActionRecord[]>(() => {
     {
       id: 'toggle-header',
       icon: props.orientation === 'row' ? TableHeaderRowIcon : TableHeaderColumnIcon,
-      label: HEADER_LABELS[props.orientation],
+      label: t(HEADER_LABELS[props.orientation]),
       disabled: !canToggle,
       isActive: isHeaderRowColumnActive(base),
       onClick: () => toggleHeaderRowColumn(base),
@@ -141,7 +142,7 @@ const moveItems = computed<TableHandleMenuActionRecord[]>(() => {
         ? {
             id: `move-${direction}`,
             icon: MOVE_ICONS[direction],
-            label: MOVE_LABELS[props.orientation][direction],
+            label: t(MOVE_LABELS[props.orientation][direction]),
             disabled: !can,
             onClick: () => moveRowColumn({ ...base, direction }),
           }
@@ -172,7 +173,7 @@ const addItems = computed<TableHandleMenuActionRecord[]>(() => {
       return {
         id: `add-${side}`,
         icon,
-        label,
+        label: t(label),
         disabled: !can,
         onClick: () => addRowColumn({ ...base, side }),
       }
@@ -188,7 +189,7 @@ const sortItems = computed<TableHandleMenuActionRecord[]>(() => {
   return directions.map((direction) => ({
     id: `sort-${direction}`,
     icon: direction === 'asc' ? ArrowDownAZIcon : ArrowDownZAIcon,
-    label: SORT_LABELS[props.orientation][direction],
+    label: t(SORT_LABELS[props.orientation][direction]),
     disabled: !canSort,
     onClick: () => sortRowColumn({ ...base, direction }),
   }))
@@ -207,7 +208,7 @@ const clearAction = computed<TableHandleMenuActionRecord | null>(() => {
   return {
     id: 'clear-contents',
     icon: SquareXIcon,
-    label: selectionType ? CLEAR_LABELS[selectionType.orientation] : 'Clear contents',
+    label: t(selectionType ? CLEAR_LABELS[selectionType.orientation] : 'table.clearContents'),
     disabled: !can,
     onClick: () => clearRowColumnContent({ ...base, resetAttrs: true }),
   }
@@ -221,14 +222,14 @@ const footerItems = computed<TableHandleMenuActionRecord[]>(() => {
     {
       id: 'duplicate',
       icon: CopyIcon,
-      label: DUPLICATE_LABELS[props.orientation],
+      label: t(DUPLICATE_LABELS[props.orientation]),
       disabled: !canDuplicate,
       onClick: () => duplicateRowColumn(base),
     },
     {
       id: 'delete',
       icon: TrashIcon,
-      label: DELETE_LABELS[props.orientation],
+      label: t(DELETE_LABELS[props.orientation]),
       disabled: !canDelete,
       onClick: () => deleteRowColumn(base),
     },

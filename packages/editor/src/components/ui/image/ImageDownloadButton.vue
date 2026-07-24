@@ -5,8 +5,8 @@
     variant="ghost"
     role="button"
     :tabindex="-1"
-    :aria-label="download.label"
-    :tooltip="download.label"
+    :aria-label="label"
+    :tooltip="label"
     @click="download.handleDownload"
   >
     <slot>
@@ -21,10 +21,12 @@
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { Button } from '../../primitives'
-import { useTiptapEditor, useImageDownload } from '../../../composables'
+import { useEditorI18n, useTiptapEditor, useImageDownload } from '../../../composables'
 
 const props = defineProps<{ editor?: Editor | null; text?: string }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
 const download = useImageDownload(editor)
+const { t } = useEditorI18n()
+const label = computed(() => t('image.download'))
 </script>

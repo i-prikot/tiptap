@@ -7,7 +7,7 @@
     <ImageCaptionButton :editor="editor" />
     <Separator />
     <ImageDownloadButton :editor="editor" />
-    <ImageUploadButton :editor="editor" :icon="RefreshCcwIcon" tooltip="Replace" />
+    <ImageUploadButton :editor="editor" :icon="RefreshCcwIcon" :tooltip="t('image.replace')" />
     <Separator />
     <DeleteNodeButton :editor="editor" />
   </template>
@@ -24,7 +24,7 @@ import ImageCaptionButton from './ImageCaptionButton.vue'
 import ImageDownloadButton from './ImageDownloadButton.vue'
 import ImageUploadButton from './ImageUploadButton.vue'
 import { DeleteNodeButton } from '../formatting'
-import { useTiptapEditor, useEditorSelectionSignal } from '../../../composables'
+import { useEditorI18n, useTiptapEditor, useEditorSelectionSignal } from '../../../composables'
 
 import { isNodeTypeSelected } from '../../../utils/tiptap-utils'
 import { RefreshCcwIcon } from '../../../icons'
@@ -32,6 +32,7 @@ import { RefreshCcwIcon } from '../../../icons'
 const props = defineProps<{ editor?: Editor | null }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
 const signal = useEditorSelectionSignal(editor)
 
 const isImageSelected = computed(

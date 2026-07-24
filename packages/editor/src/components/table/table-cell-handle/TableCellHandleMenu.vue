@@ -4,7 +4,7 @@
       <button
         type="button"
         :class="['expandable-menu-button', open && 'menu-opened']"
-        aria-label="Table cells option"
+        :aria-label="t('table.cellsOption')"
         aria-haspopup="menu"
         :aria-expanded="open"
         @mousedown="emit('resizeStart', $event)"
@@ -18,13 +18,13 @@
           <MenuItem v-if="mergeAvailable" @select="runMergeSplit('merge')">
             <Button variant="ghost" data-active-state="off">
               <TableCellMergeIcon class="tiptap-button-icon" />
-              <span class="tiptap-button-text">{{ MERGE_SPLIT_LABELS.merge }}</span>
+              <span class="tiptap-button-text">{{ t(MERGE_SPLIT_LABELS.merge) }}</span>
             </Button>
           </MenuItem>
           <MenuItem v-if="splitAvailable" @select="runMergeSplit('split')">
             <Button variant="ghost" data-active-state="off">
               <TableCellSplitIcon class="tiptap-button-icon" />
-              <span class="tiptap-button-text">{{ MERGE_SPLIT_LABELS.split }}</span>
+              <span class="tiptap-button-text">{{ t(MERGE_SPLIT_LABELS.split) }}</span>
             </Button>
           </MenuItem>
           <Separator orientation="horizontal" />
@@ -35,7 +35,7 @@
           <MenuItem v-if="clearAvailable" @select="runClear">
             <Button variant="ghost" data-active-state="off">
               <SquareXIcon class="tiptap-button-icon" />
-              <span class="tiptap-button-text">Clear contents</span>
+              <span class="tiptap-button-text">{{ t('table.clearContents') }}</span>
             </Button>
           </MenuItem>
         </MenuGroup>
@@ -56,7 +56,7 @@ import { Menu, MenuContent, MenuGroup, MenuItem, Button, Separator } from '../..
 import { ColorMenu } from '../../ui'
 import { TableAlignMenu } from '../table-align'
 
-import { useTiptapEditor, useEditorSelectionSignal } from '../../../composables'
+import { useEditorI18n, useTiptapEditor, useEditorSelectionSignal } from '../../../composables'
 
 import {
   MERGE_SPLIT_LABELS,
@@ -72,6 +72,7 @@ import { Grip4Icon, SquareXIcon, TableCellMergeIcon, TableCellSplitIcon } from '
 const emit = defineEmits<{ openChange: [value: boolean]; resizeStart: [event: MouseEvent] }>()
 
 const editor = useTiptapEditor()
+const { t } = useEditorI18n()
 const signal = useEditorSelectionSignal(editor)
 
 const open = ref(false)

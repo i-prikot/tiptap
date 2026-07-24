@@ -17,6 +17,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
+    "validate:locales": "node scripts/validate-editor-locales.mjs",
     "prepare": "node scripts/prepare-husky.cjs",
     "precommit": "lint-staged --concurrent 1 && npm run typecheck",
     "test:e2e": "playwright test",

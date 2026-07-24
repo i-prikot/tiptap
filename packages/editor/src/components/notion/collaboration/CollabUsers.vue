@@ -1,10 +1,18 @@
 <template>
   <DropdownMenu v-if="users.length">
     <DropdownMenuTrigger>
-      <Button variant="ghost" data-appearence="subdued" style="padding: 0.25rem">
-        <AvatarGroup :max-visible="3">
+      <Button
+        variant="ghost"
+        data-appearence="subdued"
+        style="padding: 0.25rem"
+        :aria-label="collaboratorCountLabel"
+      >
+        <AvatarGroup :max-visible="3" :hidden-label="additionalCollaboratorCountLabel">
           <Avatar v-for="user in users" :key="user.id" :user-color="user.color">
-            <AvatarImage :src="getAvatar(user.name)" />
+            <AvatarImage
+              :alt="t('common.avatarLabel', { name: user.name })"
+              :src="getAvatar(user.name)"
+            />
             <AvatarFallback>{{ user.name?.toUpperCase()[0] }}</AvatarFallback>
           </Avatar>
         </AvatarGroup>
@@ -34,7 +42,7 @@
  */
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import { useTiptapEditor } from '../../../composables'
+import { useEditorI18n, useTiptapEditor } from '../../../composables'
 import { createDevelopmentDiagnostics } from '../../../utils/development-diagnostics'
 import { getAvatar } from '../../../utils/user-utils'
 import type { CaretUser } from '../../../types/user'
@@ -53,8 +61,16 @@ import {
 
 const props = defineProps<{ editor?: Editor | null }>()
 const editor = useTiptapEditor(computed(() => props.editor))
+const { t, tPlural } = useEditorI18n()
+const anonymousLabel = computed(() => t('common.anonymous'))
 const users = ref<CaretUser[]>([])
 const diagnostics = createDevelopmentDiagnostics('CollabUsers')
+const collaboratorCountLabel = computed(() =>
+  tPlural('common.collaboratorCount', users.value.length),
+)
+const additionalCollaboratorCountLabel = computed(() =>
+  tPlural('common.additionalCollaboratorCount', Math.max(users.value.length - 3, 0)),
+)
 
 function areUsersEqual(previous: CaretUser[], next: CaretUser[]): boolean {
   return (
@@ -77,7 +93,7 @@ function readUsers(instance: Editor | null) {
       : (caretStorage.users ?? []).map((user) => ({
           clientId: user.clientId as number,
           id: String(user.clientId),
-          name: (user.name as string) || 'Anonymous',
+          name: (user.name as string) || anonymousLabel.value,
           color: (user.color as string) || '#000000',
         }))
 
@@ -86,8 +102,8 @@ function readUsers(instance: Editor | null) {
 
 let unsubscribe: (() => void) | null = null
 watch(
-  editor,
-  (instance) => {
+  [editor, anonymousLabel],
+  ([instance]) => {
     unsubscribe?.()
     unsubscribe = null
     readUsers(instance)

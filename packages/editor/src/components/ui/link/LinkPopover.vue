@@ -5,9 +5,9 @@
         :disabled="!link.canSet.value"
         :data-active-state="link.isActive.value ? 'on' : 'off'"
         :data-disabled="!link.canSet.value"
-        :aria-label="link.label"
+        :aria-label="t('links.link')"
         :aria-pressed="link.isActive.value"
-        :tooltip="link.label"
+        :tooltip="t('links.link')"
       />
     </template>
     <LinkContent :editor="activeEditor" @set-link="onSetLink" />
@@ -24,7 +24,7 @@ import type { Editor } from '@tiptap/vue-3'
 import { Popover } from '../../primitives'
 import LinkButton from './LinkButton.vue'
 import LinkContent from './LinkContent.vue'
-import { useTiptapEditor, useLinkPopover } from '../../../composables'
+import { useEditorI18n, useTiptapEditor, useLinkPopover } from '../../../composables'
 
 const props = withDefaults(
   defineProps<{
@@ -38,6 +38,7 @@ const props = withDefaults(
 const emit = defineEmits<{ setLink: []; openChange: [value: boolean] }>()
 
 const editorRef = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
 const activeEditor = computed(() => editorRef.value)
 const link = useLinkPopover({ editor: editorRef, hideWhenUnavailable: props.hideWhenUnavailable })
 

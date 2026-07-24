@@ -1,5 +1,5 @@
 <template>
-  <img v-if="status === 'loaded'" alt="" :src="src" class="tiptap-avatar-image" />
+  <img v-if="status === 'loaded'" :alt="alt" :src="src" class="tiptap-avatar-image" />
 </template>
 
 <script setup lang="ts">
@@ -12,7 +12,9 @@ import { inject, ref, watch } from 'vue'
 import { avatarInjectionKey } from './avatar-context'
 import type { AvatarImageLoadingStatus } from './avatar-context'
 
-const props = defineProps<{ src?: string; referrerPolicy?: string }>()
+const props = withDefaults(defineProps<{ alt?: string; src?: string; referrerPolicy?: string }>(), {
+  alt: '',
+})
 
 const context = inject(avatarInjectionKey)
 if (!context) throw new Error('Avatar components must be used within an Avatar.Root')

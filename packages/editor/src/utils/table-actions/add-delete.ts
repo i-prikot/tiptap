@@ -27,11 +27,27 @@ import {
   safeRowIsHeader,
 } from './shared'
 import type { AddSide, RowColumnArgs } from './shared'
+import type { EditorMessageKey } from '../../i18n/types'
 
-export const DUPLICATE_LABELS: Record<Orientation, string> = {
-  row: 'Duplicate row',
-  column: 'Duplicate column',
-}
+export const DUPLICATE_LABELS = {
+  row: 'table.duplicateRow',
+  column: 'table.duplicateColumn',
+} as const satisfies Record<Orientation, EditorMessageKey>
+
+export const ADD_ROW_LABELS = {
+  above: 'table.insertRowAbove',
+  below: 'table.insertRowBelow',
+} as const satisfies Record<'above' | 'below', EditorMessageKey>
+
+export const ADD_COLUMN_LABELS = {
+  left: 'table.insertColumnLeft',
+  right: 'table.insertColumnRight',
+} as const satisfies Record<'left' | 'right', EditorMessageKey>
+
+export const DELETE_LABELS = {
+  row: 'table.deleteRow',
+  column: 'table.deleteColumn',
+} as const satisfies Record<Orientation, EditorMessageKey>
 
 export function canDuplicateRowColumn({
   editor,
@@ -121,15 +137,6 @@ export function duplicateRowColumn({
   return duplicateLine(editor, selectionType.index, selectionType.orientation, tablePos)
 }
 
-export const ADD_ROW_LABELS: Record<'above' | 'below', string> = {
-  above: 'Insert row above',
-  below: 'Insert row below',
-}
-export const ADD_COLUMN_LABELS: Record<'left' | 'right', string> = {
-  left: 'Insert column left',
-  right: 'Insert column right',
-}
-
 export function canAddRowColumn(args: RowColumnArgs & { side: AddSide }): boolean {
   const { editor, index, orientation, tablePos, side } = args
   if (!editor || !editor.isEditable || !isExtensionAvailable(editor, TABLE_EXTENSION)) return false
@@ -203,11 +210,6 @@ export function addRowColumn(args: RowColumnArgs & { side: AddSide }): boolean {
     console.error('Error adding row/column:', error)
     return false
   }
-}
-
-export const DELETE_LABELS: Record<Orientation, string> = {
-  row: 'Delete row',
-  column: 'Delete column',
 }
 
 export function canDeleteRowColumn({

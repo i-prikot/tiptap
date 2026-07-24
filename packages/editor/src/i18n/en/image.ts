@@ -1,5 +1,3 @@
-import type { EditorTranslationImageMessages } from '../types'
-
 export const image = {
   alignLeft: 'Image align left',
   alignCenter: 'Image align center',
@@ -14,4 +12,4 @@ export const image = {
   maximumFiles: 'Maximum {limit} file(s), {maxSize}MB each.',
   uploadingFiles: 'Uploading {count} files',
   clearAll: 'Clear All',
-} as const satisfies EditorTranslationImageMessages
+} as const

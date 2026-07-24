@@ -1,5 +1,3 @@
-import type { EditorTranslationTableMessages } from '../types'
-
 export const table = {
   alignment: 'Alignment',
   alignLeft: 'Align left',
@@ -43,4 +41,4 @@ export const table = {
   fitToWidth: 'Fit to width',
   mergeCells: 'Merge cells',
   splitCell: 'Split cell',
-} as const satisfies EditorTranslationTableMessages
+} as const

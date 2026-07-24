@@ -2,15 +2,18 @@ import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { selectCurrentBlockContent } from '../utils/tiptap-utils'
-import { createDevelopmentDiagnostics } from '../utils/development-diagnostics'
 import { HIGHLIGHT_COLORS, canColorHighlight } from './useColorHighlight'
 import { TEXT_COLORS } from './useColorText'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
-import { getColorByValue, useRecentColors } from './useRecentColors'
+import { useRecentColors } from './useRecentColors'
+import type { EditorI18nContext } from './useEditorI18n'
+import type { HighlightColor, TextColor } from '../types/color'
 
-const diagnostics = createDevelopmentDiagnostics('useColorMenu')
+function resolveColorLabel(color: TextColor | HighlightColor, t: EditorI18nContext['t']): string {
+  return color.labelKey ? t(color.labelKey) : (color.label ?? color.value)
+}
 
-export function useColorMenu(editor: ComputedRef<Editor | null>) {
+export function useColorMenu(editor: ComputedRef<Editor | null>, t: EditorI18nContext['t']) {
   const signal = useEditorSelectionSignal(editor)
   const { recentColors, addRecentColor, isInitialized } = useRecentColors()
   const canShow = computed(() => {
@@ -45,20 +48,16 @@ export function useColorMenu(editor: ComputedRef<Editor | null>) {
       const markType = instance.schema.marks.textStyle
       if (markType) instance.view.dispatch(instance.state.tr.removeStoredMark(markType))
     }
-    diagnostics.debug('text color selected', { colorId: label })
     setTimeout(() => {
       selectCurrentBlockContent(instance)
       const executed = instance.chain().focus().toggleMark('textStyle', { color }).run()
-      diagnostics.debug('text color command completed', { colorId: label, executed })
       if (executed) addRecentColor({ type: 'text', label, value: color })
     }, 0)
   }
   const applyBackgroundColor = (color: string, label: string) => {
     const instance = editor.value
     if (!instance) return
-    diagnostics.debug('background color selected', { colorId: label })
     const executed = instance.chain().focus().toggleNodeBackgroundColor(color).run()
-    diagnostics.debug('background color command completed', { colorId: label, executed })
     if (executed) addRecentColor({ type: 'highlight', label, value: color })
   }
   const textItems = computed(
@@ -67,7 +66,8 @@ export function useColorMenu(editor: ComputedRef<Editor | null>) {
       TEXT_COLORS.map((color) => ({
         ...color,
         isActive: isTextColorActive(color.value),
-        apply: () => applyTextColor(color.value, color.label),
+        label: resolveColorLabel(color, t),
+        apply: () => applyTextColor(color.value, resolveColorLabel(color, t)),
       }))
     ),
   )
@@ -77,7 +77,8 @@ export function useColorMenu(editor: ComputedRef<Editor | null>) {
       HIGHLIGHT_COLORS.map((color) => ({
         ...color,
         isActive: isBackgroundActive(color.value),
-        apply: () => applyBackgroundColor(color.value, color.label),
+        label: resolveColorLabel(color, t),
+        apply: () => applyBackgroundColor(color.value, resolveColorLabel(color, t)),
       }))
     ),
   )
@@ -85,21 +86,21 @@ export function useColorMenu(editor: ComputedRef<Editor | null>) {
     () => (
       signal.value,
       recentColors.value.map((recent) => {
-        const resolved = getColorByValue(
-          recent.value,
-          recent.type === 'text' ? TEXT_COLORS : HIGHLIGHT_COLORS,
+        const paletteColor = (recent.type === 'text' ? TEXT_COLORS : HIGHLIGHT_COLORS).find(
+          (color) => color.value === recent.value,
         )
+        const label = paletteColor ? resolveColorLabel(paletteColor, t) : recent.label
         return {
           ...recent,
-          label: resolved.label === resolved.value ? recent.label : resolved.label,
+          label,
           isActive:
             recent.type === 'text'
               ? isTextColorActive(recent.value)
               : isBackgroundActive(recent.value),
           apply: () =>
             recent.type === 'text'
-              ? applyTextColor(recent.value, recent.label)
-              : applyBackgroundColor(recent.value, recent.label),
+              ? applyTextColor(recent.value, label)
+              : applyBackgroundColor(recent.value, label),
         }
       })
     ),

@@ -4,8 +4,8 @@
     variant="ghost"
     role="button"
     :tabindex="-1"
-    aria-label="Link"
-    tooltip="Link"
+    :aria-label="t('links.link')"
+    :tooltip="t('links.link')"
   >
     <slot>
       <LinkIcon class="tiptap-button-icon" />
@@ -17,4 +17,7 @@
 // Кнопка-триггер ссылки (порт LinkButton из чанка 1mpndbcfk3lik).
 import { Button } from '../../primitives'
 import { LinkIcon } from '../../../icons'
+import { useEditorI18n } from '../../../composables'
+
+const { t } = useEditorI18n()
 </script>

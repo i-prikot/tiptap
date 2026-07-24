@@ -1,6 +1,4 @@
-import type { EditorTranslationEditorMessages } from '../types'
-
 export const editor = {
-  placeholder: 'Start writing...',
+  placeholder: "Write, type '/' for commands…",
   slashPlaceholder: 'Filter...',
-} as const satisfies EditorTranslationEditorMessages
+} as const

@@ -1,5 +1,3 @@
-import type { EditorTranslationMenusMessages } from '../types'
-
 export const menus = {
   groups: {
     ai: 'AI',
@@ -74,4 +72,4 @@ export const menus = {
       keywords: 'image|imageUpload|upload|img|picture|media|url',
     },
   },
-} as const satisfies EditorTranslationMenusMessages
+} as const

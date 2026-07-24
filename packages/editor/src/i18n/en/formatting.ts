@@ -1,5 +1,3 @@
-import type { EditorTranslationFormattingMessages } from '../types'
-
 export const formatting = {
   text: 'Text',
   heading1: 'Heading 1',
@@ -14,4 +12,4 @@ export const formatting = {
   blockquote: 'Blockquote',
   codeBlock: 'Code block',
   codeBlockConversion: 'Code Block',
-} as const satisfies EditorTranslationFormattingMessages
+} as const

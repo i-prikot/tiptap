@@ -13,8 +13,9 @@
               :key="color.value"
               :editor="editor"
               :highlight-color="useColorValue ? (color.colorValue ?? color.value) : color.value"
-              :tooltip="color.label"
-              :aria-label="`${color.label} highlight color`"
+              :label="colorLabel(color)"
+              :tooltip="colorLabel(color)"
+              :aria-label="t('colors.highlightColorAria', { color: colorLabel(color) })"
               :tabindex="index === selectedIndex ? 0 : -1"
               :data-highlighted="selectedIndex === index"
               :use-color-value="useColorValue"
@@ -27,8 +28,8 @@
               type="button"
               role="menuitem"
               variant="ghost"
-              aria-label="Remove highlight"
-              tooltip="Remove highlight"
+              :aria-label="t('colors.removeHighlight')"
+              :tooltip="t('colors.removeHighlight')"
               :tabindex="selectedIndex === colors.length ? 0 : -1"
               :data-highlighted="selectedIndex === colors.length"
               @click="highlight.handleRemoveHighlight"
@@ -55,6 +56,7 @@ import { CardBody, CardItemGroup, ButtonGroup, Button, Separator } from '../../p
 import ColorPopoverPanel from './ColorPopoverPanel.vue'
 import ColorHighlightButton from './ColorHighlightButton.vue'
 import {
+  useEditorI18n,
   useTiptapEditor,
   useColorHighlight,
   pickHighlightColorsByValue,
@@ -90,10 +92,18 @@ const emit = defineEmits<{
 }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
-const highlight = useColorHighlight({ editor })
+const { t } = useEditorI18n()
+const highlight = useColorHighlight({ editor, label: computed(() => t('colors.highlight')) })
 const isMobile = useIsBreakpoint()
 
-const navItems = computed(() => [...props.colors, { label: 'Remove highlight', value: 'none' }])
+function colorLabel(color: HighlightColor): string {
+  return color.labelKey ? t(color.labelKey) : (color.label ?? color.value)
+}
+
+const navItems = computed(() => [
+  ...props.colors.map((color) => ({ ...color, label: colorLabel(color) })),
+  { label: t('colors.removeHighlight'), value: 'none' },
+])
 
 function onNavigationSelect(item: unknown) {
   if (typeof item === 'object' && item !== null && 'value' in item && item.value === 'none') {

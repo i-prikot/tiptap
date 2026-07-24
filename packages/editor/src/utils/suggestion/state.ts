@@ -8,6 +8,7 @@ export interface SuggestionPluginState {
   query: string | null
   text: string | null
   composing: boolean
+  refreshId: number
   decorationId?: string | null
   dismissedRange: { from: number; to: number } | null
 }
@@ -71,6 +72,7 @@ export function createSuggestionPluginState(config: SuggestionPluginStateConfig)
       query: null,
       text: null,
       composing: false,
+      refreshId: 0,
       dismissedRange: null,
     }),
     apply(
@@ -95,6 +97,8 @@ export function createSuggestionPluginState(config: SuggestionPluginStateConfig)
         next.dismissedRange = prev.active ? { ...prev.range } : prev.dismissedRange
         return next
       }
+
+      if (meta?.refresh) next.refreshId = prev.refreshId + 1
 
       next.composing = composing
       if (transaction.docChanged && next.dismissedRange !== null) {

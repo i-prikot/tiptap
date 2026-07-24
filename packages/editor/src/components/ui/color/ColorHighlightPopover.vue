@@ -11,8 +11,8 @@
         :data-active-state="highlight.isActive.value ? 'on' : 'off'"
         :data-disabled="!highlight.canColorHighlight.value"
         :aria-pressed="highlight.isActive.value"
-        :aria-label="highlight.label"
-        :tooltip="highlight.label"
+        :aria-label="label"
+        :tooltip="label"
       >
         <component :is="highlight.Icon" class="tiptap-button-icon" />
       </Button>
@@ -36,7 +36,12 @@ import type { Editor } from '@tiptap/vue-3'
 import { Button } from '../../primitives'
 import ColorPopoverShell from './ColorPopoverShell.vue'
 import ColorHighlightPopoverContent from './ColorHighlightPopoverContent.vue'
-import { useTiptapEditor, useColorHighlight, type HighlightMode } from '../../../composables'
+import {
+  useEditorI18n,
+  useTiptapEditor,
+  useColorHighlight,
+  type HighlightMode,
+} from '../../../composables'
 
 import type { HighlightColor } from '../../../types/color'
 
@@ -55,11 +60,14 @@ const emit = defineEmits<{
 }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
 const highlight = useColorHighlight({
   editor,
+  label: computed(() => t('colors.highlight')),
   hideWhenUnavailable: props.hideWhenUnavailable,
   onApplied: (payload) => emit('applied', payload),
 })
+const label = computed(() => highlight.label.value)
 
 const colors = computed(() => props.colors)
 const useColorValue = computed(() => props.useColorValue)

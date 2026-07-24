@@ -33,7 +33,7 @@ export {
   moveRowColumn,
 } from './table-actions/movement'
 export {
-  CLEAR_ALL_LABEL,
+  CLEAR_ALL_LABEL_KEY,
   CLEAR_LABELS,
   canClearAllTableContent,
   canClearRowColumnContent,

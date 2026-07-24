@@ -4,11 +4,12 @@ import { getRowOrColumnCells, getTable, isCellEmpty } from '../table-utils'
 import type { Orientation } from '../table-utils'
 import { HANDLE_EXTENSION } from './shared'
 import type { RowColumnArgs, SortDirection } from './shared'
+import type { EditorMessageKey } from '../../i18n/types'
 
-export const SORT_LABELS: Record<Orientation, Record<SortDirection, string>> = {
-  row: { asc: 'Sort row A-Z', desc: 'Sort row Z-A' },
-  column: { asc: 'Sort column A-Z', desc: 'Sort column Z-A' },
-}
+export const SORT_LABELS = {
+  row: { asc: 'table.sortRowAscending', desc: 'table.sortRowDescending' },
+  column: { asc: 'table.sortColumnAscending', desc: 'table.sortColumnDescending' },
+} as const satisfies Record<Orientation, Record<SortDirection, EditorMessageKey>>
 
 function isHeaderCell(node: ProseMirrorNode | null | undefined): boolean {
   return (

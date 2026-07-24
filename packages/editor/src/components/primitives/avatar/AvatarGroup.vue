@@ -3,7 +3,7 @@
     <template v-for="item in keyedVisibleChildren" :key="item.key">
       <component :is="item.child" />
     </template>
-    <Avatar v-if="hiddenCount > 0">
+    <Avatar v-if="hiddenCount > 0" role="img" :aria-label="hiddenLabel">
       <AvatarFallback>+{{ hiddenCount }}</AvatarFallback>
     </Avatar>
   </div>
@@ -19,7 +19,7 @@ import type { VNode } from 'vue'
 import Avatar from './Avatar.vue'
 import AvatarFallback from './AvatarFallback.vue'
 
-const props = defineProps<{ maxVisible?: number }>()
+const props = defineProps<{ maxVisible?: number; hiddenLabel?: string }>()
 
 const slots = useSlots()
 

@@ -4,7 +4,7 @@
       <MenuItem submenu-trigger>
         <Button variant="ghost">
           <Repeat2Icon class="tiptap-button-icon" />
-          <span class="tiptap-button-text">Turn Into</span>
+          <span class="tiptap-button-text">{{ t('toolbar.turnInto') }}</span>
           <Spacer />
           <ChevronRightIcon class="tiptap-button-icon" />
         </Button>
@@ -12,7 +12,7 @@
     </template>
     <MenuContent>
       <MenuGroup>
-        <MenuGroupLabel>Turn into</MenuGroupLabel>
+        <MenuGroupLabel>{{ t('toolbar.turnInto') }}</MenuGroupLabel>
         <MenuItem
           v-for="item in items"
           :key="item.label"
@@ -37,6 +37,7 @@
 <script setup lang="ts">
 import type { TurnIntoMenuItem } from '../../../types/menu'
 import { ChevronRightIcon, Repeat2Icon } from '../../../icons'
+import { useEditorI18n } from '../../../composables'
 import {
   Button,
   Menu,
@@ -50,4 +51,6 @@ import {
 defineProps<{
   items: TurnIntoMenuItem[]
 }>()
+
+const { t } = useEditorI18n()
 </script>

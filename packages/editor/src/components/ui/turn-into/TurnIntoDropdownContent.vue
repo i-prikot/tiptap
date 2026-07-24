@@ -1,6 +1,6 @@
 <template>
   <DropdownMenuGroup>
-    <DropdownMenuLabel>Turn into</DropdownMenuLabel>
+    <DropdownMenuLabel>{{ t('toolbar.turnInto') }}</DropdownMenuLabel>
     <DropdownMenuItem v-for="item in items" :key="item.label">
       <Button
         variant="ghost"
@@ -35,13 +35,16 @@ import {
   useHeadingBlock,
   useListBlock,
   useTextBlock,
+  getTurnIntoBlockMessageKey,
   TURN_INTO_BLOCKS,
   type TurnIntoBlockType,
 } from '../../../composables'
+import { useEditorI18n } from '../../../composables/useEditorI18n'
 
 const props = defineProps<{ editor?: Editor | null; blockTypes?: TurnIntoBlockType[] }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
 
 const conversions = {
   paragraph: useTextBlock(editor),
@@ -63,7 +66,7 @@ const items = computed<TurnIntoMenuItem[]>(() =>
     const conversion = conversions[key as keyof typeof conversions]
     return {
       icon: conversion.Icon,
-      label: block.label,
+      label: t(getTurnIntoBlockMessageKey(block)),
       onClick: conversion.handleToggle,
       disabled: !conversion.canToggle.value,
       isActive: conversion.isActive.value,

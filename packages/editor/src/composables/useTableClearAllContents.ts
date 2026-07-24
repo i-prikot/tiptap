@@ -3,13 +3,15 @@ import type { ComputedRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { SquareXIcon } from '../icons'
 import {
-  CLEAR_ALL_LABEL,
+  CLEAR_ALL_LABEL_KEY,
   canClearAllTableContent,
   clearAllTableContent,
 } from '../utils/table-actions'
+import { useEditorI18n } from './useEditorI18n'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
 
 export function useTableClearAllContents(editor: ComputedRef<Editor | null>) {
+  const { t } = useEditorI18n()
   const signal = useEditorSelectionSignal(editor)
   const canClearAll = computed(
     () => (signal.value, canClearAllTableContent({ editor: editor.value })),
@@ -23,5 +25,10 @@ export function useTableClearAllContents(editor: ComputedRef<Editor | null>) {
     return cleared
   }
 
-  return { canClearAll, handleClearAll, label: CLEAR_ALL_LABEL, Icon: SquareXIcon }
+  return {
+    canClearAll,
+    handleClearAll,
+    label: computed(() => t(CLEAR_ALL_LABEL_KEY)),
+    Icon: SquareXIcon,
+  }
 }

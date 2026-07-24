@@ -42,6 +42,7 @@ import ColorPopoverShell from './ColorPopoverShell.vue'
 import ColorTextPopoverContent from './ColorTextPopoverContent.vue'
 import {
   useTiptapEditor,
+  useEditorI18n,
   useEditorSelectionSignal,
   canColorText,
   canColorHighlight,
@@ -63,8 +64,8 @@ const emit = defineEmits<{ colorChanged: [payload: RecentColor] }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
 const signal = useEditorSelectionSignal(editor)
-
-const label = 'Text color'
+const { t } = useEditorI18n()
+const label = computed(() => t('colors.textColor'))
 
 const canToggle = computed(
   () => (signal.value, canColorText(editor.value) || canColorHighlight(editor.value)),

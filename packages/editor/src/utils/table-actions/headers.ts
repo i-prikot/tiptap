@@ -8,13 +8,14 @@ import {
   selectCellsByCoords,
 } from '../table-utils'
 import type { Orientation } from '../table-utils'
+import type { EditorMessageKey } from '../../i18n/types'
 import { TABLE_EXTENSION, dispatchOf } from './shared'
 import type { RowColumnArgs } from './shared'
 
-export const HEADER_LABELS: Record<Orientation, string> = {
-  row: 'Header row',
-  column: 'Header column',
-}
+export const HEADER_LABELS = {
+  row: 'table.headerRow',
+  column: 'table.headerColumn',
+} as const satisfies Record<Orientation, EditorMessageKey>
 
 export function canToggleHeaderRowColumn({
   editor,

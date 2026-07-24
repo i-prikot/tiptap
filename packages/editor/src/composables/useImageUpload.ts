@@ -3,8 +3,16 @@ import type { ComputedRef } from 'vue'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import type { Editor } from '@tiptap/core'
 import type { ImageUploadNodeOptions } from '@i-prikot/editor-schema'
+import type { EditorMessageKey, EditorMessageValues } from '../i18n/types'
 import { focusNextNode, isValidPosition } from '../utils/tiptap-utils'
 import { createDevelopmentDiagnostics } from '../utils/development-diagnostics'
+
+export type ImageUploadErrorMessageKey = Extract<EditorMessageKey, `errors.imageUpload${string}`>
+
+export interface ImageUploadErrorMetadata {
+  key: ImageUploadErrorMessageKey
+  values?: EditorMessageValues
+}
 
 export interface ImageUploadFileItem {
   id: string
@@ -13,7 +21,7 @@ export interface ImageUploadFileItem {
   status: 'uploading' | 'success' | 'error'
   url?: string
   abortController?: AbortController
-  errorMessage?: string
+  error?: ImageUploadErrorMetadata
 }
 
 export interface UseImageUploadInput {
@@ -31,6 +39,15 @@ interface UploadedImage {
 
 type DebugMetadata = Record<string, boolean | number | string>
 
+class PackageImageUploadError extends Error {
+  readonly metadata: ImageUploadErrorMetadata
+
+  constructor(metadata: ImageUploadErrorMetadata, message: string) {
+    super(message)
+    this.metadata = metadata
+  }
+}
+
 const diagnostics = createDevelopmentDiagnostics('useImageUpload')
 
 function formatFileSize(bytes: number): string {
@@ -39,17 +56,37 @@ function formatFileSize(bytes: number): string {
   return `${parseFloat((bytes / Math.pow(1024, unit)).toFixed(2))} ${['Bytes', 'KB', 'MB', 'GB'][unit]}`
 }
 
+function createPackageImageUploadError(
+  key: ImageUploadErrorMessageKey,
+  message: string,
+  values?: EditorMessageValues,
+): PackageImageUploadError {
+  return new PackageImageUploadError({ key, values }, message)
+}
+
+function getImageUploadErrorMetadata(error: unknown): ImageUploadErrorMetadata {
+  return error instanceof PackageImageUploadError
+    ? error.metadata
+    : { key: 'errors.imageUploadFailed' }
+}
+
 function validateUploadedImageUrl(value: string): string {
   let url: URL
 
   try {
     url = new URL(value, window.location.href)
   } catch {
-    throw new Error('Upload failed: Invalid URL returned')
+    throw createPackageImageUploadError(
+      'errors.imageUploadInvalidUrl',
+      'Upload failed: Invalid URL returned',
+    )
   }
 
   if (url.protocol === 'http:' || url.protocol === 'https:') return url.href
-  throw new Error('Upload failed: Invalid URL returned')
+  throw createPackageImageUploadError(
+    'errors.imageUploadInvalidUrl',
+    'Upload failed: Invalid URL returned',
+  )
 }
 
 export function useImageUpload(input: UseImageUploadInput) {
@@ -57,6 +94,7 @@ export function useImageUpload(input: UseImageUploadInput) {
   const dragActive = ref(false)
   const dragOver = ref(false)
   const fileInputRef = shallowRef<HTMLInputElement | null>(null)
+  const selectionError = shallowRef<ImageUploadErrorMetadata>()
   const objectUrls = new Set<string>()
 
   const accept = computed(() => input.node.value.attrs.accept as string)
@@ -66,6 +104,11 @@ export function useImageUpload(input: UseImageUploadInput) {
 
   function notifyError(error: Error): void {
     input.options.value.onError?.(error)
+  }
+
+  function reportSelectionError(error: PackageImageUploadError): void {
+    selectionError.value = error.metadata
+    notifyError(error)
   }
 
   function reportUnexpectedError(event: string, error: unknown, metadata: DebugMetadata): void {
@@ -96,8 +139,12 @@ export function useImageUpload(input: UseImageUploadInput) {
   async function uploadSingleFile(file: File): Promise<UploadedImage | null> {
     const options = input.options.value
     if (file.size > options.maxSize) {
-      notifyError(
-        new Error(`File size exceeds maximum allowed (${options.maxSize / 1024 / 1024}MB)`),
+      reportSelectionError(
+        createPackageImageUploadError(
+          'errors.imageUploadFileSizeLimit',
+          `File size exceeds maximum allowed (${options.maxSize / 1024 / 1024}MB)`,
+          { maxSize: options.maxSize / 1024 / 1024 },
+        ),
       )
       return null
     }
@@ -115,7 +162,12 @@ export function useImageUpload(input: UseImageUploadInput) {
     diagnostics.debug('upload-start', { fileSize: file.size, itemId: id })
 
     try {
-      if (!options.upload) throw new Error('image upload adapter is not configured')
+      if (!options.upload) {
+        throw createPackageImageUploadError(
+          'errors.imageUploadAdapterNotConfigured',
+          'image upload adapter is not configured',
+        )
+      }
       const uploadedUrl = await options.upload(file, {
         onProgress: (event) => {
           updateFileItem(id, { progress: event.progress })
@@ -123,7 +175,12 @@ export function useImageUpload(input: UseImageUploadInput) {
         },
         abortSignal: abortController.signal,
       })
-      if (!uploadedUrl) throw new Error('Upload failed: No URL returned')
+      if (!uploadedUrl) {
+        throw createPackageImageUploadError(
+          'errors.imageUploadInvalidUrl',
+          'Upload failed: No URL returned',
+        )
+      }
       const url = validateUploadedImageUrl(uploadedUrl)
       if (abortController.signal.aborted) return null
 
@@ -133,11 +190,11 @@ export function useImageUpload(input: UseImageUploadInput) {
       return { id, file, url }
     } catch (error) {
       if (!abortController.signal.aborted) {
-        const errorMessage =
-          error instanceof Error && error.message === 'image upload adapter is not configured'
-            ? error.message
-            : 'Image upload failed'
-        updateFileItem(id, { status: 'error', progress: 0, errorMessage })
+        updateFileItem(id, {
+          status: 'error',
+          progress: 0,
+          error: getImageUploadErrorMetadata(error),
+        })
         reportUnexpectedError('upload-failed', error, {
           fileSize: file.size,
           itemId: id,
@@ -150,16 +207,23 @@ export function useImageUpload(input: UseImageUploadInput) {
   async function uploadFiles(files: File[]): Promise<UploadedImage[]> {
     const options = input.options.value
     if (files.length === 0) {
-      notifyError(new Error('No files to upload'))
+      reportSelectionError(
+        createPackageImageUploadError('errors.imageUploadEmptySelection', 'No files to upload'),
+      )
       return []
     }
     if (options.limit && files.length > options.limit) {
-      notifyError(
-        new Error(`Maximum ${options.limit} file${options.limit === 1 ? '' : 's'} allowed`),
+      reportSelectionError(
+        createPackageImageUploadError(
+          'errors.imageUploadFileLimit',
+          `Maximum ${options.limit} file${options.limit === 1 ? '' : 's'} allowed`,
+          { limit: options.limit },
+        ),
       )
       return []
     }
 
+    selectionError.value = undefined
     const results = await Promise.all(files.map((file) => uploadSingleFile(file)))
     return results.filter(
       (result): result is UploadedImage =>
@@ -252,7 +316,9 @@ export function useImageUpload(input: UseImageUploadInput) {
       void handleFiles(files)
       return
     }
-    notifyError(new Error('No file selected'))
+    reportSelectionError(
+      createPackageImageUploadError('errors.imageUploadEmptySelection', 'No file selected'),
+    )
   }
 
   onScopeDispose(clearAllFiles)
@@ -273,5 +339,6 @@ export function useImageUpload(input: UseImageUploadInput) {
     limit,
     maxSize,
     removeFileItem,
+    selectionError,
   }
 }

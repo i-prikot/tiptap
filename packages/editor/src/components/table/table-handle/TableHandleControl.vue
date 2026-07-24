@@ -39,6 +39,7 @@ import type { Placement } from '@floating-ui/vue'
 import { Menu, MenuContent } from '../../primitives'
 import { MoreVerticalIcon } from '../../../icons'
 import TableHandleMenuContent from './TableHandleMenuContent.vue'
+import { useEditorI18n } from '../../../composables'
 
 const props = defineProps<{
   orientation: 'row' | 'column'
@@ -59,7 +60,10 @@ const emit = defineEmits<{
 const placement = computed<Placement>(() =>
   props.orientation === 'row' ? 'top-start' : 'bottom-start',
 )
-const ariaLabel = computed(() => (props.orientation === 'row' ? 'Row actions' : 'Column actions'))
+const { t } = useEditorI18n()
+const ariaLabel = computed(() =>
+  props.orientation === 'row' ? t('table.rowActions') : t('table.columnActions'),
+)
 
 function onOpenChange(value: boolean) {
   emit('open-change', value)

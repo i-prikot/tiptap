@@ -25,7 +25,7 @@ export const toolbar = {
   clickForOptions: 'Нажмите для параметров',
   resetFormatting: 'Сбросить форматирование',
   duplicateNode: 'Дублировать блок',
-  copyToClipboard: 'Копировать в буфер обмена',
-  copyAnchorLink: 'Копировать ссылку на якорь',
+  copyToClipboard: 'Копировать',
+  copyAnchorLink: 'Копировать ссылку',
   insertSlashCommand: 'Вставить слэш-команду',
 } as const satisfies EditorMessageTree['toolbar']

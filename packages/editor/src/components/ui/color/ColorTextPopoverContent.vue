@@ -3,7 +3,7 @@
     <template #default="{ selectedIndex }">
       <CardBody>
         <CardItemGroup v-if="isInitialized && recentColors.length">
-          <CardGroupLabel>Recently used</CardGroupLabel>
+          <CardGroupLabel>{{ t('colors.recentlyUsed') }}</CardGroupLabel>
           <ButtonGroup orientation="horizontal">
             <template
               v-for="(recent, index) in recentColors"
@@ -34,7 +34,7 @@
         </CardItemGroup>
 
         <CardItemGroup>
-          <CardGroupLabel>Text color</CardGroupLabel>
+          <CardGroupLabel>{{ t('colors.textColor') }}</CardGroupLabel>
           <ButtonGroup
             v-for="(row, rowIndex) in textColorRows"
             :key="`text-row-${rowIndex}`"
@@ -45,9 +45,9 @@
               :key="color.value"
               :editor="editor"
               :text-color="color.value"
-              :label="color.label"
-              :tooltip="color.label"
-              :aria-label="`${color.label} text color`"
+              :label="colorLabel(color)"
+              :tooltip="colorLabel(color)"
+              :aria-label="t('colors.textColorAria', { color: colorLabel(color) })"
               :tabindex="textIndex(rowIndex, colIndex) === selectedIndex ? 0 : -1"
               :data-highlighted="textIndex(rowIndex, colIndex) === selectedIndex"
               @applied="onColorApplied('text', $event)"
@@ -56,7 +56,7 @@
         </CardItemGroup>
 
         <CardItemGroup>
-          <CardGroupLabel>Highlight color</CardGroupLabel>
+          <CardGroupLabel>{{ t('colors.highlightColor') }}</CardGroupLabel>
           <ButtonGroup
             v-for="(row, rowIndex) in highlightColorRows"
             :key="`highlight-row-${rowIndex}`"
@@ -67,9 +67,9 @@
               :key="color.value"
               :editor="editor"
               :highlight-color="color.value"
-              :label="color.label"
-              :tooltip="color.label"
-              :aria-label="`${color.label} highlight color`"
+              :label="colorLabel(color)"
+              :tooltip="colorLabel(color)"
+              :aria-label="t('colors.highlightColorAria', { color: colorLabel(color) })"
               :tabindex="highlightIndex(rowIndex, colIndex) === selectedIndex ? 0 : -1"
               :data-highlighted="highlightIndex(rowIndex, colIndex) === selectedIndex"
               @applied="onColorApplied('highlight', $event)"
@@ -96,13 +96,13 @@ import ColorTextButton from './ColorTextButton.vue'
 import ColorHighlightButton from './ColorHighlightButton.vue'
 import {
   useTiptapEditor,
+  useEditorI18n,
   TEXT_COLORS,
   HIGHLIGHT_COLORS,
   useRecentColors,
-  getColorByValue,
 } from '../../../composables'
 
-import type { RecentColor } from '../../../types/color'
+import type { HighlightColor, RecentColor, TextColor } from '../../../types/color'
 import { chunkArray } from '../../../utils/tiptap-utils'
 
 const props = withDefaults(
@@ -120,6 +120,7 @@ const props = withDefaults(
 const emit = defineEmits<{ colorChanged: [payload: RecentColor] }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
 const { recentColors, addRecentColor, isInitialized } = useRecentColors(props.maxRecentColors)
 
 const textColorRows = computed(() => chunkArray(TEXT_COLORS, props.maxColorsPerGroup))
@@ -136,8 +137,12 @@ function highlightIndex(rowIndex: number, colIndex: number): number {
 
 function recentLabel(recent: RecentColor): string {
   const palette = recent.type === 'text' ? TEXT_COLORS : HIGHLIGHT_COLORS
-  const found = getColorByValue(recent.value, palette)
-  return found.label === found.value ? recent.label : found.label
+  const paletteColor = palette.find((color) => color.value === recent.value)
+  return paletteColor ? colorLabel(paletteColor) : recent.label
+}
+
+function colorLabel(color: TextColor | HighlightColor): string {
+  return color.labelKey ? t(color.labelKey) : (color.label ?? color.value)
 }
 
 const navItems = computed<RecentColor[]>(() => {
@@ -148,9 +153,9 @@ const navItems = computed<RecentColor[]>(() => {
     }
   }
   for (const color of TEXT_COLORS)
-    items.push({ type: 'text', value: color.value, label: color.label })
+    items.push({ type: 'text', value: color.value, label: colorLabel(color) })
   for (const color of HIGHLIGHT_COLORS)
-    items.push({ type: 'highlight', value: color.value, label: color.label })
+    items.push({ type: 'highlight', value: color.value, label: colorLabel(color) })
   return items
 })
 

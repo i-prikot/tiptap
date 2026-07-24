@@ -1,13 +1,14 @@
 import type { Editor } from '@tiptap/core'
+import type { EditorMessageKey } from '../../i18n/types'
 import { mergeCells, splitCell } from '@tiptap/pm/tables'
 import { isExtensionAvailable } from '../tiptap-utils'
 import { TABLE_EXTENSION } from './shared'
 import type { MergeSplitAction } from './shared'
 
-export const MERGE_SPLIT_LABELS: Record<MergeSplitAction, string> = {
-  merge: 'Merge cells',
-  split: 'Split cell',
-}
+export const MERGE_SPLIT_LABELS = {
+  merge: 'table.mergeCells',
+  split: 'table.splitCell',
+} as const satisfies Record<MergeSplitAction, EditorMessageKey>
 
 export function canMergeCells(editor: Editor | null): boolean {
   if (!editor || !editor.isEditable || !isExtensionAvailable(editor, TABLE_EXTENSION)) return false

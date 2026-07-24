@@ -138,6 +138,47 @@ The package entry point maps to the following editor flow:
 
 The cabinet must provide compatible `vue` and `@tiptap/*` runtime versions. Incompatible or duplicated copies can create separate editor or ProseMirror instances.
 
+### Localization
+
+The editor ships complete bundled catalogs such as `en` and `ru`; the English catalog in
+`packages/editor/src/i18n/en/` defines the canonical message keys and nested shape. This is
+separate from the host-facing `messages` option: hosts may use any locale identifier and provide
+only partial overrides for that locale.
+
+```ts
+import {
+  en,
+  type EditorMessageCatalog,
+  type EditorMessageOverrides,
+  type EditorMessageTree,
+} from '@i-prikot/editor'
+
+const britishEnglish: EditorMessageOverrides = {
+  editor: { placeholder: 'Start typing...' },
+}
+
+const hostMessages: EditorMessageCatalog = {
+  'en-GB': britishEnglish,
+}
+
+const bundledBase: EditorMessageTree = en
+```
+
+To add a language that ships with the editor:
+
+1. Create `packages/editor/src/i18n/<locale>/` with the same namespace file layout as `en/`.
+2. Translate every English leaf. Keep literal inference and check every namespace against the
+   canonical tree, for example `export const common = { ... } as const satisfies
+EditorMessageTree['common']`; the locale `index.ts` must use `as const satisfies
+EditorMessageTree`.
+3. When the catalog is intended to ship, export it from `packages/editor/src/i18n/index.ts` and
+   `packages/editor/src/index.ts` alongside the existing bundled catalogs.
+4. Run `npm run validate:locales` and `npm run typecheck` before opening the pull request.
+
+Bundled locales never silently fall back to English. Missing, blank, malformed, or extra keys are
+CI failures. The validator reports only locale identifiers, key paths, and failure reasons; it
+never prints translation text or host-supplied catalogs.
+
 ### Packed Local Tarballs
 
 Use local tarballs to validate the production package boundary. This exercises the built `dist` artifacts rather than resolving workspace source files.

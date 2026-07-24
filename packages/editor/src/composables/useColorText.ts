@@ -2,7 +2,8 @@
  * Цвет текста (марка textStyle): палитра TEXT_COLORS и useColorText.
  * Порт из чанка 2mux2p9tadf0h (модули 118876/352859).
  */
-import type { ComputedRef } from 'vue'
+import { computed, toValue } from 'vue'
+import type { ComputedRef, MaybeRefOrGetter } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import {
   isMarkInSchema,
@@ -10,55 +11,62 @@ import {
   selectCurrentBlockContent,
 } from '../utils/tiptap-utils'
 import { useColorControl } from './useColorControl'
+import { useEditorI18n } from './useEditorI18n'
 import { TextColorSmallIcon } from '../icons'
-import type { TextColor } from '../types/color'
+import type { ColorMessageKey, TextColor } from '../types/color'
+
+type BuiltInTextColor = TextColor & { labelKey: ColorMessageKey }
 
 export const COLOR_TEXT_SHORTCUT_KEY = 'mod+shift+t'
 
-export const TEXT_COLORS: TextColor[] = [
-  { label: 'Default text', value: 'var(--tt-color-text)', border: 'var(--tt-color-text-contrast)' },
+export const TEXT_COLORS: BuiltInTextColor[] = [
   {
-    label: 'Gray text',
+    labelKey: 'colors.defaultText',
+    value: 'var(--tt-color-text)',
+    border: 'var(--tt-color-text-contrast)',
+  },
+  {
+    labelKey: 'colors.grayText',
     value: 'var(--tt-color-text-gray)',
     border: 'var(--tt-color-text-gray-contrast)',
   },
   {
-    label: 'Brown text',
+    labelKey: 'colors.brownText',
     value: 'var(--tt-color-text-brown)',
     border: 'var(--tt-color-text-brown-contrast)',
   },
   {
-    label: 'Orange text',
+    labelKey: 'colors.orangeText',
     value: 'var(--tt-color-text-orange)',
     border: 'var(--tt-color-text-orange-contrast)',
   },
   {
-    label: 'Yellow text',
+    labelKey: 'colors.yellowText',
     value: 'var(--tt-color-text-yellow)',
     border: 'var(--tt-color-text-yellow-contrast)',
   },
   {
-    label: 'Green text',
+    labelKey: 'colors.greenText',
     value: 'var(--tt-color-text-green)',
     border: 'var(--tt-color-text-green-contrast)',
   },
   {
-    label: 'Blue text',
+    labelKey: 'colors.blueText',
     value: 'var(--tt-color-text-blue)',
     border: 'var(--tt-color-text-blue-contrast)',
   },
   {
-    label: 'Purple text',
+    labelKey: 'colors.purpleText',
     value: 'var(--tt-color-text-purple)',
     border: 'var(--tt-color-text-purple-contrast)',
   },
   {
-    label: 'Pink text',
+    labelKey: 'colors.pinkText',
     value: 'var(--tt-color-text-pink)',
     border: 'var(--tt-color-text-pink-contrast)',
   },
   {
-    label: 'Red text',
+    labelKey: 'colors.redText',
     value: 'var(--tt-color-text-red)',
     border: 'var(--tt-color-text-red-contrast)',
   },
@@ -83,14 +91,17 @@ export function canColorText(editor: Editor | null): boolean {
 export interface UseColorTextOptions {
   editor: ComputedRef<Editor | null>
   textColor: string
-  label?: string
+  label?: MaybeRefOrGetter<string | undefined>
   hideWhenUnavailable?: boolean
   onApplied?: (payload: { color: string; label: string }) => void
 }
 
 export function useColorText(options: UseColorTextOptions) {
   const { editor, textColor, label, hideWhenUnavailable = false, onApplied } = options
-  const resolvedLabel = label || `Color text to ${textColor}`
+  const { t } = useEditorI18n()
+  const resolvedLabel = computed(
+    () => toValue(label) || t('colors.textColorAria', { color: textColor }),
+  )
   const control = useColorControl({
     editor,
     color: textColor,
@@ -112,7 +123,7 @@ export function useColorText(options: UseColorTextOptions) {
       return instance.chain().focus().toggleMark('textStyle', { color: textColor }).run()
     },
     deferApply: true,
-    onApplied: () => onApplied?.({ color: textColor, label: resolvedLabel }),
+    onApplied: () => onApplied?.({ color: textColor, label: resolvedLabel.value }),
   })
 
   return {

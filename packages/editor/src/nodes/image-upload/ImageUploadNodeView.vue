@@ -49,11 +49,17 @@
         <span class="tiptap-image-upload-subtext">
           Maximum {{ limit }} file{{ limit === 1 ? '' : 's' }}, {{ maxSize / 1024 / 1024 }}MB each.
         </span>
+        <span v-if="selectionError" class="tiptap-image-upload-subtext" role="alert">
+          {{ t(selectionError.key, selectionError.values) }}
+        </span>
       </div>
     </div>
 
     <!-- предпросмотр загружаемых файлов -->
     <div v-if="hasFiles" class="tiptap-image-upload-previews">
+      <span v-if="selectionError" class="tiptap-image-upload-subtext" role="alert">
+        {{ t(selectionError.key, selectionError.values) }}
+      </span>
       <div v-if="fileItems.length > 1" class="tiptap-image-upload-header">
         <span>Uploading {{ fileItems.length }} files</span>
         <Button type="button" variant="ghost" @click.stop="clearAllFiles">Clear All</Button>
@@ -73,7 +79,9 @@
               <span class="tiptap-image-upload-text">{{ item.file.name }}</span>
               <span class="tiptap-image-upload-subtext">{{ formatFileSize(item.file.size) }}</span>
               <span v-if="item.status === 'error'" class="tiptap-image-upload-subtext">
-                {{ item.errorMessage }}
+                {{
+                  item.error ? t(item.error.key, item.error.values) : t('errors.imageUploadFailed')
+                }}
               </span>
             </div>
           </div>
@@ -111,6 +119,7 @@
 import { computed, h } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import { Button } from '../../components/primitives'
+import { useEditorI18n } from '../../composables/useEditorI18n'
 import { useImageUpload } from '../../composables/useImageUpload'
 import type { ImageUploadNodeOptions } from './image-upload-node'
 
@@ -157,6 +166,7 @@ const CloseIcon = (props: { class?: string }) =>
   )
 
 const props = defineProps(nodeViewProps)
+const { t } = useEditorI18n()
 
 const {
   accept,
@@ -174,6 +184,7 @@ const {
   limit,
   maxSize,
   removeFileItem,
+  selectionError,
 } = useImageUpload({
   editor: props.editor,
   getPos: props.getPos,

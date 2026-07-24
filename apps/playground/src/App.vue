@@ -1,7 +1,13 @@
 <template>
   <main class="tinyfy-editor" :class="{ dark: isDarkMode }">
     <div ref="hostOverlayTarget" data-tiptap-overlay-root=""></div>
-    <NotionEditorHeader :editor="editor" :is-dark-mode="isDarkMode" @toggle-theme="toggleTheme" />
+    <NotionEditorHeader
+      :editor="editor"
+      :is-dark-mode="isDarkMode"
+      :locale="editorLocale"
+      @toggle-theme="toggleTheme"
+      @update-locale="handleLocaleChange"
+    />
     <NotionEditor
       :key="editorSessionKey"
       :document-id="documentId"
@@ -12,6 +18,7 @@
       :image-upload="imageUpload"
       :collaboration="collaboration"
       :ai="ai"
+      :locale="editorLocale"
       :development-diagnostics="isDevelopment"
       @ready="handleReady"
       @anchor-change="handleAnchorChange"
@@ -26,8 +33,10 @@ import type { Editor as CoreEditor } from '@tiptap/core'
 import type { Editor } from '@tiptap/vue-3'
 import NotionEditor, {
   provideEditorOverlayTarget,
+  defaultEditorLocale,
   type AiOptions,
   type CollaborationOptions,
+  type EditorLocale,
   type ImageUploadAdapter,
 } from '@i-prikot/editor'
 import NotionEditorHeader from './components/NotionEditorHeader.vue'
@@ -38,6 +47,20 @@ import { getDocumentId } from './utils/document-id'
 const isDevelopment = import.meta.env.DEV
 const collaborationAppId = import.meta.env.VITE_TIPTAP_COLLAB_APP_ID
 const aiAppId = import.meta.env.VITE_TIPTAP_AI_APP_ID
+const PLAYGROUND_EDITOR_LOCALE_STORAGE_KEY = 'i-prikot.playground.editor-locale'
+
+function isSupportedEditorLocale(locale: unknown): locale is 'en' | 'ru' {
+  return locale === 'en' || locale === 'ru'
+}
+
+function getStoredEditorLocale(): EditorLocale {
+  try {
+    const storedLocale = window.localStorage.getItem(PLAYGROUND_EDITOR_LOCALE_STORAGE_KEY)
+    return isSupportedEditorLocale(storedLocale) ? storedLocale : defaultEditorLocale
+  } catch {
+    return defaultEditorLocale
+  }
+}
 
 function getBaseUrlFromLocation(): string {
   return window.location.href
@@ -72,6 +95,7 @@ const baseUrl = ref(getBaseUrlFromLocation())
 const currentAnchor = ref(getAnchorFromLocation())
 const collaboration = shallowRef<CollaborationOptions | undefined>(getCollaborationOptions())
 const editorSessionKey = ref(0)
+const editorLocale = ref<EditorLocale>(getStoredEditorLocale())
 const ai: AiOptions | undefined = aiAppId
   ? {
       appId: aiAppId,
@@ -106,6 +130,18 @@ function handleSystemThemeChange(event: MediaQueryListEvent) {
 function toggleTheme() {
   hasThemeOverride.value = true
   isDarkMode.value = !isDarkMode.value
+}
+
+function handleLocaleChange(locale: EditorLocale) {
+  if (!isSupportedEditorLocale(locale)) return
+
+  editorLocale.value = locale
+
+  try {
+    window.localStorage.setItem(PLAYGROUND_EDITOR_LOCALE_STORAGE_KEY, locale)
+  } catch {
+    return
+  }
 }
 
 async function handleReady(instance: CoreEditor) {

@@ -17,7 +17,7 @@
                 <MenuItem submenu-trigger>
                   <Button variant="ghost">
                     <Repeat2Icon class="tiptap-button-icon" />
-                    <span class="tiptap-button-text">Turn into</span>
+                    <span class="tiptap-button-text">{{ t('toolbar.turnInto') }}</span>
                     <Spacer />
                     <ChevronRightIcon class="tiptap-button-icon" />
                   </Button>
@@ -25,7 +25,7 @@
               </template>
               <MenuContent>
                 <MenuGroup>
-                  <MenuGroupLabel>Turn into</MenuGroupLabel>
+                  <MenuGroupLabel>{{ t('toolbar.turnInto') }}</MenuGroupLabel>
                   <MenuItem
                     v-for="item in turnIntoItems"
                     :key="item.label"
@@ -50,7 +50,7 @@
             >
               <Button variant="ghost" data-active-state="off">
                 <component :is="resetFormatting.Icon" class="tiptap-button-icon" />
-                <span class="tiptap-button-text">Reset formatting</span>
+                <span class="tiptap-button-text">{{ t('toolbar.resetFormatting') }}</span>
               </Button>
             </MenuItem>
           </MenuGroup>
@@ -59,7 +59,7 @@
             <MenuItem :disabled="!duplicate.canDuplicate.value" @select="duplicate.handleDuplicate">
               <Button variant="ghost" :disabled="!duplicate.canDuplicate.value">
                 <component :is="duplicate.Icon" class="tiptap-button-icon" />
-                <span class="tiptap-button-text">Duplicate node</span>
+                <span class="tiptap-button-text">{{ t('toolbar.duplicateNode') }}</span>
               </Button>
             </MenuItem>
             <MenuItem
@@ -68,7 +68,7 @@
             >
               <Button variant="ghost" :disabled="!copyToClipboard.canCopyToClipboard.value">
                 <component :is="copyToClipboard.Icon" class="tiptap-button-icon" />
-                <span class="tiptap-button-text">Copy to clipboard</span>
+                <span class="tiptap-button-text">{{ t('toolbar.copyToClipboard') }}</span>
               </Button>
             </MenuItem>
             <MenuItem
@@ -77,7 +77,7 @@
             >
               <Button variant="ghost" :disabled="!copyAnchorLink.canCopyAnchorLink.value">
                 <component :is="copyAnchorLink.Icon" class="tiptap-button-icon" />
-                <span class="tiptap-button-text">Copy anchor link</span>
+                <span class="tiptap-button-text">{{ t('toolbar.copyAnchorLink') }}</span>
               </Button>
             </MenuItem>
           </MenuGroup>
@@ -89,7 +89,7 @@
             >
               <Button variant="ghost" :disabled="!deleteNode.canDeleteNode.value">
                 <component :is="deleteNode.Icon" class="tiptap-button-icon" />
-                <span class="tiptap-button-text">Delete</span>
+                <span class="tiptap-button-text">{{ t('toolbar.delete') }}</span>
               </Button>
             </MenuItem>
           </MenuGroup>
@@ -137,7 +137,7 @@
     <ToolbarSeparator />
 
     <ToolbarGroup>
-      <ImageUploadButton :editor="editor" text="Add" />
+      <ImageUploadButton :editor="editor" :text="t('image.add')" />
       <ToolbarSeparator />
     </ToolbarGroup>
   </template>
@@ -184,12 +184,15 @@ import {
   useCopyToClipboard,
   useDeleteNode,
   useDuplicate,
+  useEditorI18n,
   useEditorSelectionSignal,
   useHeadingBlock,
   useListBlock,
   useResetAllFormatting,
   useTextBlock,
   useTiptapEditor,
+  getTurnIntoBlockMessageKey,
+  TURN_INTO_BLOCKS,
 } from '../../../composables'
 import { ChevronRightIcon, MoreVerticalIcon, Repeat2Icon } from '../../../icons'
 import { getNodeDisplayName } from '../../../utils/selection-utils'
@@ -198,6 +201,7 @@ const props = defineProps<{ editor?: Editor | null }>()
 const emit = defineEmits<{ openHighlighter: []; openLink: [] }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
 const signal = useEditorSelectionSignal(editor)
 const menuOpen = ref(false)
 
@@ -234,9 +238,9 @@ const turnIntoItems = computed<TurnIntoMenuItem[]>(() => {
     blockquote,
     codeBlock,
   ]
-  const items = conversions.map((conversion) => ({
+  const items = conversions.map((conversion, index) => ({
     icon: conversion.Icon,
-    label: conversion.label,
+    label: t(getTurnIntoBlockMessageKey(TURN_INTO_BLOCKS[index]!)),
     onClick: conversion.handleToggle,
     disabled: !conversion.canToggle.value,
     isActive: conversion.isActive.value,

@@ -5,8 +5,8 @@
     variant="ghost"
     role="button"
     :tabindex="-1"
-    :aria-label="del.label"
-    tooltip="Delete"
+    :aria-label="t('toolbar.delete')"
+    :tooltip="t('toolbar.delete')"
     :disabled="!del.canDeleteNode.value"
     @click="handleClick"
   >
@@ -24,7 +24,7 @@ import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { Button, Badge } from '../../primitives'
 
-import { useTiptapEditor, useDeleteNode } from '../../../composables'
+import { useEditorI18n, useTiptapEditor, useDeleteNode } from '../../../composables'
 
 import { parseShortcutKeys } from '../../../utils/tiptap-utils'
 
@@ -41,6 +41,7 @@ const props = withDefaults(
 const emit = defineEmits<{ deleted: [] }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
 const del = useDeleteNode(editor)
 
 const isVisible = computed(() => {

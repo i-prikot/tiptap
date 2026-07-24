@@ -1,4 +1,3 @@
-import type { EditorTranslationMessages } from '../types'
 import { colors } from './colors'
 import { common } from './common'
 import { editor } from './editor'
@@ -23,4 +22,4 @@ export const en = {
   image,
   toc,
   errors,
-} as const satisfies EditorTranslationMessages
+} as const

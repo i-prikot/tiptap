@@ -11,16 +11,22 @@ import {
 import type { Orientation } from '../table-utils'
 import { HANDLE_EXTENSION, dispatchOf, safeColumnIsHeader, safeRowIsHeader } from './shared'
 import type { MoveDirection, RowColumnArgs } from './shared'
+import type { EditorMessageKey } from '../../i18n/types'
 
-export const MOVE_LABELS: Record<Orientation, Record<MoveDirection, string>> = {
-  row: { up: 'Move row up', down: 'Move row down', left: 'Move row left', right: 'Move row right' },
-  column: {
-    up: 'Move column up',
-    down: 'Move column down',
-    left: 'Move column left',
-    right: 'Move column right',
+export const MOVE_LABELS = {
+  row: {
+    up: 'table.moveRowUp',
+    down: 'table.moveRowDown',
+    left: 'table.moveRowLeft',
+    right: 'table.moveRowRight',
   },
-}
+  column: {
+    up: 'table.moveColumnUp',
+    down: 'table.moveColumnDown',
+    left: 'table.moveColumnLeft',
+    right: 'table.moveColumnRight',
+  },
+} as const satisfies Record<Orientation, Record<MoveDirection, EditorMessageKey>>
 
 export function isMoveDirectionValid(orientation: Orientation, direction: MoveDirection): boolean {
   if (orientation === 'row') return direction === 'up' || direction === 'down'

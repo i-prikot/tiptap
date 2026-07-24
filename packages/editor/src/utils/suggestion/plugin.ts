@@ -177,11 +177,13 @@ export function Suggestion<Item = unknown, SelectedProps = unknown>(
           const textChanged = prev.text !== next.text
           const rangeChanged =
             prev.range.from !== next.range.from || prev.range.to !== next.range.to
+          const refreshChanged = prev.refreshId !== next.refreshId
 
           if (!prev.active && next.active) phase = 'started'
           else if (prev.active && !next.active) phase = 'stopped'
           else {
-            if (!next.active || (!queryChanged && !textChanged && !rangeChanged)) return
+            if (!next.active || (!queryChanged && !textChanged && !rangeChanged && !refreshChanged))
+              return
             phase = 'updated'
           }
 

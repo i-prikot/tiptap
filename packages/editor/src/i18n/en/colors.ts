@@ -1,5 +1,3 @@
-import type { EditorTranslationColorsMessages } from '../types'
-
 export const colors = {
   menu: 'Color',
   textColor: 'Text color',
@@ -33,4 +31,4 @@ export const colors = {
   redBackground: 'Red background',
   textColorAria: '{color} text color',
   highlightColorAria: '{color} highlight color',
-} as const satisfies EditorTranslationColorsMessages
+} as const

@@ -4,13 +4,14 @@
  */
 import type { Editor } from '@tiptap/vue-3'
 import { NodeSelection } from '@tiptap/pm/state'
+import type { EditorMessageKey } from '../i18n/types'
 
 export type TurnIntoBlockType =
   'paragraph' | 'heading' | 'bulletList' | 'orderedList' | 'taskList' | 'blockquote' | 'codeBlock'
 
 export interface TurnIntoBlock {
   type: TurnIntoBlockType
-  label: string
+  messageKey: EditorMessageKey
   level?: number
   isActive: (editor: Editor) => boolean
 }
@@ -28,7 +29,7 @@ export const TURN_INTO_BLOCK_TYPES: TurnIntoBlockType[] = [
 export const TURN_INTO_BLOCKS: TurnIntoBlock[] = [
   {
     type: 'paragraph',
-    label: 'Text',
+    messageKey: 'menus.slash.text.title',
     isActive: (editor) =>
       editor.isActive('paragraph') &&
       !editor.isActive('heading') &&
@@ -40,36 +41,54 @@ export const TURN_INTO_BLOCKS: TurnIntoBlock[] = [
   },
   {
     type: 'heading',
-    label: 'Heading 1',
+    messageKey: 'menus.slash.heading1.title',
     level: 1,
     isActive: (editor) => editor.isActive('heading', { level: 1 }),
   },
   {
     type: 'heading',
-    label: 'Heading 2',
+    messageKey: 'menus.slash.heading2.title',
     level: 2,
     isActive: (editor) => editor.isActive('heading', { level: 2 }),
   },
   {
     type: 'heading',
-    label: 'Heading 3',
+    messageKey: 'menus.slash.heading3.title',
     level: 3,
     isActive: (editor) => editor.isActive('heading', { level: 3 }),
   },
   {
     type: 'bulletList',
-    label: 'Bulleted list',
+    messageKey: 'menus.slash.bulletList.title',
     isActive: (editor) => editor.isActive('bulletList'),
   },
   {
     type: 'orderedList',
-    label: 'Numbered list',
+    messageKey: 'menus.slash.orderedList.title',
     isActive: (editor) => editor.isActive('orderedList'),
   },
-  { type: 'taskList', label: 'To-do list', isActive: (editor) => editor.isActive('taskList') },
-  { type: 'blockquote', label: 'Blockquote', isActive: (editor) => editor.isActive('blockquote') },
-  { type: 'codeBlock', label: 'Code block', isActive: (editor) => editor.isActive('codeBlock') },
+  {
+    type: 'taskList',
+    messageKey: 'menus.slash.taskList.title',
+    isActive: (editor) => editor.isActive('taskList'),
+  },
+  {
+    type: 'blockquote',
+    messageKey: 'menus.slash.quote.title',
+    isActive: (editor) => editor.isActive('blockquote'),
+  },
+  {
+    type: 'codeBlock',
+    messageKey: 'menus.slash.codeBlock.title',
+    isActive: (editor) => editor.isActive('codeBlock'),
+  },
 ]
+
+export function getTurnIntoBlockMessageKey(
+  block: Pick<TurnIntoBlock, 'messageKey'>,
+): EditorMessageKey {
+  return block.messageKey
+}
 
 export function canTurnInto(editor: Editor | null, blockTypes?: TurnIntoBlockType[]): boolean {
   if (!editor || !editor.isEditable) return false

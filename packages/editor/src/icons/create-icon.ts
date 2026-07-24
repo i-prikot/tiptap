@@ -5,6 +5,13 @@ export type IconProps = SVGAttributes
 
 export interface IconPath {
   d: string
+
+  fill?: string
+  stroke?: string
+  strokeWidth?: number
+  strokeLinecap?: 'round' | 'butt' | 'square'
+  strokeLinejoin?: 'round' | 'miter' | 'bevel'
+
   fillRule?: 'evenodd'
   clipRule?: 'evenodd'
   fillOpacity?: string
@@ -31,7 +38,11 @@ export function createIcon(
       paths.map((p) =>
         h('path', {
           d: p.d,
-          fill: 'currentColor',
+          fill: p.fill ?? (p.stroke ? 'none' : 'currentColor'),
+          stroke: p.stroke,
+          'stroke-width': p.strokeWidth,
+          'stroke-linecap': p.strokeLinecap,
+          'stroke-linejoin': p.strokeLinejoin,
           'fill-rule': p.fillRule,
           'clip-rule': p.clipRule,
           'fill-opacity': p.fillOpacity,

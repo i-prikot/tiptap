@@ -3,74 +3,78 @@
  * палитра HIGHLIGHT_COLORS и useColorHighlight.
  * Порт из чанка 2mux2p9tadf0h (модули 254877/173753).
  */
-import type { ComputedRef } from 'vue'
+import { computed, toValue } from 'vue'
+import type { ComputedRef, MaybeRefOrGetter } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { isExtensionAvailable, isMarkInSchema, isNodeTypeSelected } from '../utils/tiptap-utils'
 import { useColorControl } from './useColorControl'
+import { useEditorI18n } from './useEditorI18n'
 import { HighlighterIcon } from '../icons'
-import type { HighlightColor } from '../types/color'
+import type { ColorMessageKey, HighlightColor } from '../types/color'
+
+type BuiltInHighlightColor = HighlightColor & { labelKey: ColorMessageKey }
 
 export type HighlightMode = 'mark' | 'node'
 
 export const COLOR_HIGHLIGHT_SHORTCUT_KEY = 'mod+shift+h'
 
-export const HIGHLIGHT_COLORS: HighlightColor[] = [
+export const HIGHLIGHT_COLORS: BuiltInHighlightColor[] = [
   {
-    label: 'Default background',
+    labelKey: 'colors.defaultBackground',
     value: 'var(--tt-bg-color)',
     colorValue: '#ffffff',
     border: 'var(--tt-bg-color-contrast)',
   },
   {
-    label: 'Gray background',
+    labelKey: 'colors.grayBackground',
     value: 'var(--tt-color-highlight-gray)',
     colorValue: '#f8f8f7',
     border: 'var(--tt-color-highlight-gray-contrast)',
   },
   {
-    label: 'Brown background',
+    labelKey: 'colors.brownBackground',
     value: 'var(--tt-color-highlight-brown)',
     colorValue: '#f4eeee',
     border: 'var(--tt-color-highlight-brown-contrast)',
   },
   {
-    label: 'Orange background',
+    labelKey: 'colors.orangeBackground',
     value: 'var(--tt-color-highlight-orange)',
     colorValue: '#fbecdd',
     border: 'var(--tt-color-highlight-orange-contrast)',
   },
   {
-    label: 'Yellow background',
+    labelKey: 'colors.yellowBackground',
     value: 'var(--tt-color-highlight-yellow)',
     colorValue: '#fef9c3',
     border: 'var(--tt-color-highlight-yellow-contrast)',
   },
   {
-    label: 'Green background',
+    labelKey: 'colors.greenBackground',
     value: 'var(--tt-color-highlight-green)',
     colorValue: '#dcfce7',
     border: 'var(--tt-color-highlight-green-contrast)',
   },
   {
-    label: 'Blue background',
+    labelKey: 'colors.blueBackground',
     value: 'var(--tt-color-highlight-blue)',
     colorValue: '#e0f2fe',
     border: 'var(--tt-color-highlight-blue-contrast)',
   },
   {
-    label: 'Purple background',
+    labelKey: 'colors.purpleBackground',
     value: 'var(--tt-color-highlight-purple)',
     colorValue: '#f3e8ff',
     border: 'var(--tt-color-highlight-purple-contrast)',
   },
   {
-    label: 'Pink background',
+    labelKey: 'colors.pinkBackground',
     value: 'var(--tt-color-highlight-pink)',
     colorValue: '#fcf1f6',
     border: 'var(--tt-color-highlight-pink-contrast)',
   },
   {
-    label: 'Red background',
+    labelKey: 'colors.redBackground',
     value: 'var(--tt-color-highlight-red)',
     colorValue: '#ffe4e6',
     border: 'var(--tt-color-highlight-red-contrast)',
@@ -82,7 +86,7 @@ export function pickHighlightColorsByValue(values: string[]): HighlightColor[] {
   const byValue = new Map(HIGHLIGHT_COLORS.map((color) => [color.value, color]))
   return values
     .map((value) => byValue.get(value))
-    .filter((color): color is HighlightColor => !!color)
+    .filter((color): color is BuiltInHighlightColor => !!color)
 }
 
 export function canColorHighlight(editor: Editor | null, mode: HighlightMode = 'mark'): boolean {
@@ -130,7 +134,7 @@ function isHighlightActive(
 export interface UseColorHighlightOptions {
   editor: ComputedRef<Editor | null>
   highlightColor?: string
-  label?: string
+  label?: MaybeRefOrGetter<string | undefined>
   hideWhenUnavailable?: boolean
   mode?: HighlightMode
   useColorValue?: boolean
@@ -147,10 +151,11 @@ export function useColorHighlight(options: UseColorHighlightOptions) {
     useColorValue = false,
     onApplied,
   } = options
+  const { t } = useEditorI18n()
   const resolvedColor = highlightColor
     ? resolveHighlightColor(highlightColor, useColorValue)
     : highlightColor
-  const resolvedLabel = label || 'Highlight'
+  const resolvedLabel = computed(() => toValue(label) || t('colors.highlight'))
   const control = useColorControl({
     editor,
     color: resolvedColor,
@@ -183,8 +188,8 @@ export function useColorHighlight(options: UseColorHighlightOptions) {
         ? instance.chain().focus().unsetMark('highlight').run()
         : instance.chain().focus().unsetNodeBackgroundColor().run(),
     deferApply: mode === 'mark',
-    onApplied: () => onApplied?.({ color: resolvedColor ?? '', label: resolvedLabel, mode }),
-    onRemoved: () => onApplied?.({ color: '', label: 'Remove highlight', mode }),
+    onApplied: () => onApplied?.({ color: resolvedColor ?? '', label: resolvedLabel.value, mode }),
+    onRemoved: () => onApplied?.({ color: '', label: t('colors.removeHighlight'), mode }),
   })
 
   return {

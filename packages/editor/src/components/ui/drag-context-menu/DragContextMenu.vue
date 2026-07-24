@@ -21,7 +21,7 @@
               :tabindex="-1"
               data-weight="small"
               :style="{ cursor: 'grab', ...(menuOpen ? { pointerEvents: 'none' } : {}) }"
-              tooltip="Click for options"
+              :tooltip="t('toolbar.clickForOptions')"
               @mousedown="handleGripMouseDown"
             >
               <GripVerticalIcon class="tiptap-button-icon" />
@@ -102,6 +102,7 @@ import { offset } from '@floating-ui/dom'
 import { DragHandle } from '@tiptap/extension-drag-handle-vue-3'
 import {
   useDragContextMenuItems,
+  useEditorI18n,
   useEditorSelectionSignal,
   useIsBreakpoint,
   useTiptapEditor,
@@ -141,6 +142,7 @@ const props = withDefaults(
 )
 
 const editor = useTiptapEditor()
+const { t } = useEditorI18n()
 const uiState = useUiEditorState(editor, ['aiGenerationActive', 'isDragging'] as const)
 const isMobile = useIsBreakpoint('max', props.mobileBreakpoint)
 const selectionSignal = useEditorSelectionSignal(editor)

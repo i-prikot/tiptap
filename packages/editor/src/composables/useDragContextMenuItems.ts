@@ -19,6 +19,8 @@ import { useResetAllFormatting } from './useResetAllFormatting'
 import { useTableClearAllContents } from './useTableClearAllContents'
 import { useTableFitToWidth } from './useTableFitToWidth'
 import { useTocShowTitle } from './useTocShowTitle'
+import { useEditorI18n } from './useEditorI18n'
+import { getTurnIntoBlockMessageKey, TURN_INTO_BLOCKS } from './useTurnInto'
 
 type NodeActionMenuItem = EditorMenuActionItem & {
   isActive: boolean
@@ -33,6 +35,7 @@ function formatShortcut(shortcutKeys: string | undefined) {
 }
 
 export function useDragContextMenuItems(editor: ComputedRef<Editor | null>) {
+  const { t } = useEditorI18n()
   const textBlock = useTextBlock(editor)
   const heading1 = useHeadingBlock(editor, 1)
   const heading2 = useHeadingBlock(editor, 2)
@@ -65,9 +68,9 @@ export function useDragContextMenuItems(editor: ComputedRef<Editor | null>) {
       blockquote,
       codeBlock,
     ]
-    const items = conversions.map((conversion) => ({
+    const items = conversions.map((conversion, index) => ({
       icon: conversion.Icon,
-      label: conversion.label,
+      label: t(getTurnIntoBlockMessageKey(TURN_INTO_BLOCKS[index]!)),
       onClick: conversion.handleToggle,
       disabled: conversion.canToggle.value === false,
       isActive: conversion.isActive.value,
@@ -80,7 +83,7 @@ export function useDragContextMenuItems(editor: ComputedRef<Editor | null>) {
       tocShowTitle.canToggle.value
         ? {
             icon: tocShowTitle.Icon,
-            label: tocShowTitle.label,
+            label: t('toc.showTitle'),
             onClick: tocShowTitle.handleToggle,
             disabled: false,
             isActive: tocShowTitle.isActive.value,
@@ -89,7 +92,7 @@ export function useDragContextMenuItems(editor: ComputedRef<Editor | null>) {
       tableFitToWidth.canFitToWidth.value
         ? {
             icon: tableFitToWidth.Icon,
-            label: tableFitToWidth.label,
+            label: t('table.fitToWidth'),
             onClick: tableFitToWidth.handleFitToWidth,
             disabled: false,
             isActive: false,
@@ -98,7 +101,7 @@ export function useDragContextMenuItems(editor: ComputedRef<Editor | null>) {
       tableClearAllContents.canClearAll.value
         ? {
             icon: tableClearAllContents.Icon,
-            label: tableClearAllContents.label,
+            label: t('table.clearAllContents'),
             onClick: tableClearAllContents.handleClearAll,
             disabled: false,
             isActive: false,
@@ -114,7 +117,7 @@ export function useDragContextMenuItems(editor: ComputedRef<Editor | null>) {
       resetFormatting.canReset.value
         ? {
             icon: resetFormatting.Icon,
-            label: resetFormatting.label,
+            label: t('toolbar.resetFormatting'),
             onClick: resetFormatting.handleResetFormatting,
             disabled: false,
             isActive: false,
@@ -123,7 +126,7 @@ export function useDragContextMenuItems(editor: ComputedRef<Editor | null>) {
       imageDownload.canDownload.value
         ? {
             icon: imageDownload.Icon,
-            label: imageDownload.label,
+            label: t('image.download'),
             onClick: imageDownload.handleDownload,
             disabled: false,
             isActive: false,
@@ -137,21 +140,21 @@ export function useDragContextMenuItems(editor: ComputedRef<Editor | null>) {
   const clipboardItems = computed<ShortcutMenuItem[]>(() => [
     {
       icon: duplicate.Icon,
-      label: duplicate.label,
+      label: t('toolbar.duplicateNode'),
       onClick: duplicate.handleDuplicate,
       disabled: duplicate.canDuplicate.value === false,
       shortcut: formatShortcut(duplicate.shortcutKeys),
     },
     {
       icon: copyToClipboard.Icon,
-      label: copyToClipboard.label,
+      label: t('toolbar.copyToClipboard'),
       onClick: copyToClipboard.handleCopyToClipboard,
       disabled: copyToClipboard.canCopyToClipboard.value === false,
       shortcut: formatShortcut(copyToClipboard.shortcutKeys),
     },
     {
       icon: copyAnchorLink.Icon,
-      label: copyAnchorLink.label,
+      label: t('toolbar.copyAnchorLink'),
       onClick: copyAnchorLink.handleCopyAnchorLink,
       disabled: copyAnchorLink.canCopyAnchorLink.value === false,
       shortcut: formatShortcut(copyAnchorLink.shortcutKeys),
@@ -160,7 +163,7 @@ export function useDragContextMenuItems(editor: ComputedRef<Editor | null>) {
 
   const deleteItem = computed<ShortcutMenuItem>(() => ({
     icon: deleteNode.Icon,
-    label: deleteNode.label,
+    label: t('toolbar.delete'),
     onClick: deleteNode.handleDeleteNode,
     disabled: deleteNode.canDeleteNode.value === false,
     shortcut: formatShortcut(deleteNode.shortcutKeys),

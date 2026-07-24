@@ -4,7 +4,7 @@
       <CardItemGroup orientation="horizontal">
         <Input
           type="url"
-          placeholder="Paste a link..."
+          :placeholder="t('links.placeholder')"
           class="tiptap-link-input"
           :value="link.url.value ?? ''"
           autofocus
@@ -17,7 +17,7 @@
         <ButtonGroup>
           <Button
             type="button"
-            title="Apply link"
+            :title="t('links.apply')"
             variant="ghost"
             :disabled="!link.url.value && !link.isActive.value"
             @click="applyLink"
@@ -29,7 +29,7 @@
         <ButtonGroup orientation="horizontal">
           <Button
             type="button"
-            title="Open in new window"
+            :title="t('links.openInNewWindow')"
             variant="ghost"
             :disabled="!link.url.value && !link.isActive.value"
             @click="link.openLink()"
@@ -38,7 +38,7 @@
           </Button>
           <Button
             type="button"
-            title="Remove link"
+            :title="t('links.remove')"
             variant="ghost"
             :disabled="!link.url.value && !link.isActive.value"
             @click="link.removeLink()"
@@ -68,7 +68,12 @@ import {
   Input,
 } from '../../primitives'
 
-import { useTiptapEditor, useLinkPopover, useIsBreakpoint } from '../../../composables'
+import {
+  useEditorI18n,
+  useTiptapEditor,
+  useLinkPopover,
+  useIsBreakpoint,
+} from '../../../composables'
 
 import { CornerDownLeftIcon, ExternalLinkIcon, TrashIcon } from '../../../icons'
 
@@ -76,6 +81,7 @@ const props = defineProps<{ editor?: Editor | null }>()
 const emit = defineEmits<{ setLink: [] }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
 const link = useLinkPopover({ editor, onSetLink: () => emit('setLink') })
 const isMobile = useIsBreakpoint()
 

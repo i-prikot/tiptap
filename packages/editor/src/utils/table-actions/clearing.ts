@@ -12,13 +12,14 @@ import {
   setCellAttr,
 } from '../table-utils'
 import type { Orientation, TableInfo } from '../table-utils'
+import type { EditorMessageKey } from '../../i18n/types'
 import { RESET_CELL_ATTRS, TABLE_EXTENSION } from './shared'
 import type { RowColumnArgs } from './shared'
 
-export const CLEAR_LABELS: Record<Orientation, string> = {
-  row: 'Clear row contents',
-  column: 'Clear column contents',
-}
+export const CLEAR_LABELS = {
+  row: 'table.clearRowContents',
+  column: 'table.clearColumnContents',
+} as const satisfies Record<Orientation, EditorMessageKey>
 
 export function canClearRowColumnContent({
   editor,
@@ -150,7 +151,7 @@ export function clearRowColumnContent(args: RowColumnArgs & { resetAttrs?: boole
   }
 }
 
-export const CLEAR_ALL_LABEL = 'Clear all contents'
+export const CLEAR_ALL_LABEL_KEY = 'table.clearAllContents' as const satisfies EditorMessageKey
 
 /**
  * Таблица под текущим выделением: либо выделенный целиком блок таблицы

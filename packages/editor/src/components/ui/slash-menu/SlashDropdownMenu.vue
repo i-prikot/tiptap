@@ -5,6 +5,7 @@
     decoration-class="tiptap-slash-decoration"
     :decoration-content="t('editor.slashPlaceholder')"
     selector="tiptap-slash-dropdown-menu"
+    :items-refresh-key="messages"
     :items="getFilteredItems"
   >
     <template #default="{ items, selectedIndex, onSelect }">
@@ -77,7 +78,7 @@ const props = withDefaults(defineProps<{ config?: SlashMenuConfig; aiEnabled?: b
 })
 
 const showGroups = props.config?.showGroups !== false
-const { t } = useEditorI18n()
+const { messages, t } = useEditorI18n()
 
 function getFilteredItems({ query, editor }: { query: string; editor: Editor }): SlashMenuEntry[] {
   return filterSuggestionItems(getSlashMenuItems(editor, t, props.config, props.aiEnabled), query)

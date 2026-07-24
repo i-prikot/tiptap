@@ -4,7 +4,7 @@
       <MenuItem submenu-trigger>
         <Button variant="ghost">
           <PaintBucketIcon class="tiptap-button-icon" />
-          <span class="tiptap-button-text">{{ label }}</span>
+          <span class="tiptap-button-text">{{ resolvedLabel }}</span>
           <Spacer />
           <ChevronRightIcon class="tiptap-button-icon" />
         </Button>
@@ -13,7 +13,7 @@
     <MenuContent>
       <div class="tiptap-combobox-list">
         <MenuGroup v-if="isInitialized && recentColors.length">
-          <MenuGroupLabel>Recent colors</MenuGroupLabel>
+          <MenuGroupLabel>{{ t('colors.recentColors') }}</MenuGroupLabel>
           <MenuItem
             v-for="recent in recentItems"
             :key="`recent-${recent.type}-${recent.value}`"
@@ -41,7 +41,7 @@
           <Separator orientation="horizontal" />
         </MenuGroup>
         <MenuGroup>
-          <MenuGroupLabel>Text color</MenuGroupLabel>
+          <MenuGroupLabel>{{ t('colors.textColor') }}</MenuGroupLabel>
           <MenuItem v-for="item in textItems" :key="item.value" @select="item.apply">
             <Button variant="ghost" :data-active-state="item.isActive ? 'on' : 'off'">
               <span class="tiptap-button-color-text" :style="{ color: item.value }">
@@ -56,7 +56,7 @@
         </MenuGroup>
         <Separator orientation="horizontal" />
         <MenuGroup>
-          <MenuGroupLabel>Background color</MenuGroupLabel>
+          <MenuGroupLabel>{{ t('colors.backgroundColor') }}</MenuGroupLabel>
           <MenuItem v-for="item in backgroundItems" :key="item.value" @select="item.apply">
             <Button variant="ghost" :data-active-state="item.isActive ? 'on' : 'off'">
               <span class="tiptap-button-highlight" :style="{ '--highlight-color': item.value }" />
@@ -82,13 +82,13 @@ import {
   Spacer,
   Separator,
 } from '../../primitives'
-import { useColorMenu, useTiptapEditor } from '../../../composables'
+import { useColorMenu, useEditorI18n, useTiptapEditor } from '../../../composables'
 import { ChevronRightIcon, PaintBucketIcon, TextColorSmallIcon } from '../../../icons'
 
-const props = withDefaults(defineProps<{ editor?: Editor | null; label?: string }>(), {
-  label: 'Color',
-})
+const props = defineProps<{ editor?: Editor | null; label?: string }>()
 const editor = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
+const resolvedLabel = computed(() => props.label ?? t('colors.menu'))
 const { canShow, isInitialized, recentColors, recentItems, textItems, backgroundItems } =
-  useColorMenu(editor)
+  useColorMenu(editor, t)
 </script>

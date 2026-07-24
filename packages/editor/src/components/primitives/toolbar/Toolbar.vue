@@ -2,7 +2,7 @@
   <div
     ref="toolbarRef"
     role="toolbar"
-    aria-label="toolbar"
+    :aria-label="t('common.toolbar')"
     :data-variant="variant"
     class="tiptap-toolbar"
   >
@@ -16,9 +16,11 @@
  * стрелками по кнопкам, data-focus-visible для фокуса с клавиатуры.
  */
 import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
-import { useMenuNavigation } from '../../../composables'
+import { useEditorI18n, useMenuNavigation } from '../../../composables'
 
 withDefaults(defineProps<{ variant?: 'floating' | 'fixed' }>(), { variant: 'fixed' })
+
+const { t } = useEditorI18n()
 
 const toolbarRef = shallowRef<HTMLElement | null>(null)
 const focusableItems = shallowRef<HTMLElement[]>([])

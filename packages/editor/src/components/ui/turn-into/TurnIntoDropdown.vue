@@ -8,10 +8,10 @@
         :tabindex="-1"
         :disabled="!canToggle"
         :data-disabled="!canToggle"
-        :aria-label="`Turn into (current: ${activeBlock.label})`"
-        tooltip="Turn into"
+        :aria-label="t('toolbar.turnIntoCurrent', { label: activeBlockLabel })"
+        :tooltip="t('toolbar.turnInto')"
       >
-        <span class="tiptap-button-text">{{ activeBlock.label }}</span>
+        <span class="tiptap-button-text">{{ activeBlockLabel }}</span>
         <ChevronDownIcon class="tiptap-button-dropdown-small" />
       </Button>
     </DropdownMenuTrigger>
@@ -36,8 +36,10 @@ import {
   useEditorSelectionSignal,
   canTurnInto,
   getActiveTurnIntoBlock,
+  getTurnIntoBlockMessageKey,
   type TurnIntoBlockType,
 } from '../../../composables'
+import { useEditorI18n } from '../../../composables/useEditorI18n'
 
 import { ChevronDownIcon } from '../../../icons'
 
@@ -53,6 +55,7 @@ const props = withDefaults(
 const emit = defineEmits<{ openChange: [value: boolean] }>()
 
 const editorRef = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
 const activeEditor = computed(() => editorRef.value)
 const signal = useEditorSelectionSignal(editorRef)
 
@@ -67,6 +70,7 @@ const canToggle = computed(() => (signal.value, canTurnInto(editorRef.value, pro
 const activeBlock = computed(
   () => (signal.value, getActiveTurnIntoBlock(editorRef.value, props.blockTypes)),
 )
+const activeBlockLabel = computed(() => t(getTurnIntoBlockMessageKey(activeBlock.value)))
 const isVisible = computed(() => {
   void signal.value
   const instance = editorRef.value

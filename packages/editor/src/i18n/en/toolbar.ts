@@ -1,5 +1,3 @@
-import type { EditorTranslationToolbarMessages } from '../types'
-
 export const toolbar = {
   bold: 'Bold',
   italic: 'Italic',
@@ -28,4 +26,4 @@ export const toolbar = {
   copyToClipboard: 'Copy to clipboard',
   copyAnchorLink: 'Copy anchor link',
   insertSlashCommand: 'Insert slash command',
-} as const satisfies EditorTranslationToolbarMessages
+} as const

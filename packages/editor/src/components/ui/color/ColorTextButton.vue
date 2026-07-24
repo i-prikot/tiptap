@@ -8,9 +8,9 @@
     :tabindex="tabindex ?? -1"
     :disabled="!color.canColorText.value"
     :data-disabled="!color.canColorText.value"
-    :aria-label="color.label"
+    :aria-label="resolvedLabel"
     :aria-pressed="color.isActive.value"
-    :tooltip="tooltip ?? color.label"
+    :tooltip="tooltip ?? resolvedLabel"
     :style="{ '--color-text-button-color': textColor }"
     @click="handleClick"
   >
@@ -34,7 +34,7 @@ import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { Button, Badge } from '../../primitives'
 
-import { useTiptapEditor, useColorText } from '../../../composables'
+import { useEditorI18n, useTiptapEditor, useColorText } from '../../../composables'
 
 import { parseShortcutKeys } from '../../../utils/tiptap-utils'
 
@@ -55,13 +55,17 @@ const props = withDefaults(
 const emit = defineEmits<{ applied: [payload: { color: string; label: string }] }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
+const { t } = useEditorI18n()
 const color = useColorText({
   editor,
   textColor: props.textColor,
-  label: props.label || props.text,
+  label: computed(
+    () => props.label || props.text || t('colors.textColorAria', { color: props.textColor }),
+  ),
   hideWhenUnavailable: props.hideWhenUnavailable,
   onApplied: (payload) => emit('applied', payload),
 })
+const resolvedLabel = computed(() => color.label.value)
 
 const shortcutText = computed(() =>
   parseShortcutKeys({ shortcutKeys: color.shortcutKeys }).join(''),

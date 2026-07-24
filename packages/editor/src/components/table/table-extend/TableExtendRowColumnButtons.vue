@@ -9,7 +9,7 @@
           'tiptap-table-row-end-add-remove',
           rowEditing && 'editing',
         ]"
-        aria-label="Add or remove rows"
+        :aria-label="t('table.addOrRemoveRows')"
         @click="onClick('row')"
         @mousedown="onMouseDown('row', $event)"
       >
@@ -25,7 +25,7 @@
           'tiptap-table-column-end-add-remove',
           colEditing && 'editing',
         ]"
-        aria-label="Add or remove columns"
+        :aria-label="t('table.addOrRemoveColumns')"
         @click="onClick('column')"
         @mousedown="onMouseDown('column', $event)"
       >
@@ -43,7 +43,12 @@
  */
 import { computed, onBeforeUnmount, shallowRef } from 'vue'
 import { TableMap } from '@tiptap/pm/tables'
-import { useTiptapEditor, useTableHandleState, useTableExtendPosition } from '../../../composables'
+import {
+  useEditorI18n,
+  useTiptapEditor,
+  useTableHandleState,
+  useTableExtendPosition,
+} from '../../../composables'
 
 import {
   EMPTY_CELL_HEIGHT,
@@ -63,6 +68,7 @@ interface DragBase {
 }
 
 const editor = useTiptapEditor()
+const { t } = useEditorI18n()
 const state = useTableHandleState(editor)
 
 const tableRect = computed(() => state.value?.referencePosTable ?? null)
