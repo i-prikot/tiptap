@@ -6,7 +6,6 @@
 /**
  * Изображение аватара: рендерится только после успешной предзагрузки,
  * статус передаётся в контекст Avatar.
- * Порт AvatarImage из чанка 34p294mqk5mqb.
  */
 import { inject, ref, watch } from 'vue'
 import { avatarInjectionKey } from './avatar-context'

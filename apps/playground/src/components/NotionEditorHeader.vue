@@ -30,7 +30,7 @@
 <script setup lang="ts">
 /**
  * Хедер редактора: undo/redo, переключатель темы, аватары участников
- * коллаборации. Порт NotionEditorHeader из чанка 3xpmbr0kqzhen.
+ * коллаборации.
  */
 import type { Editor } from '@tiptap/vue-3'
 import {

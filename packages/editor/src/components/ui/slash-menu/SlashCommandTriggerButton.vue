@@ -23,8 +23,7 @@
 <script setup lang="ts">
 /**
  * Кнопка «+»: вставляет триггер `/` (слэш-меню) в текущую позицию либо
- * после указанного узла. Порт SlashCommandTriggerButton из чанка
- * 1_-l0xapy_wlh (модуль 57280).
+ * после указанного узла.
  */
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'

@@ -1,6 +1,5 @@
 /**
  * Тоггл марок (bold/italic/underline/strike/code/superscript/subscript).
- * Порт useMark из чанка 1mpndbcfk3lik (модуль 78766).
  */
 import { computed } from 'vue'
 import type { ComputedRef } from 'vue'

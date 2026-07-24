@@ -23,7 +23,6 @@
 </template>
 
 <script setup lang="ts">
-// Кнопка цвета подсветки/фона (порт ColorHighlightButton из чанка 2mux2p9tadf0h).
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { Button, Badge } from '../../primitives'

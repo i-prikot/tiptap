@@ -20,7 +20,6 @@
 /**
  * Пункты меню ручки строки/столбца: header, move, add, sort,
  * color/alignment/clear, duplicate/delete.
- * Порт TableHandleMenuContent (чанк 3gf8l96fmxb-u, функции k/D).
  */
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'

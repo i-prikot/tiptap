@@ -12,7 +12,6 @@
 <script setup lang="ts">
 /**
  * Группа аватаров: показывает первые maxVisible и счётчик «+N».
- * Порт AvatarGroup из чанка 34p294mqk5mqb.
  */
 import { computed, useSlots } from 'vue'
 import type { VNode } from 'vue'

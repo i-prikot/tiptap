@@ -114,7 +114,6 @@
  * NodeView загрузки изображений: дропзона + input[type=file], прогресс,
  * отмена через AbortController; после загрузки узел заменяется image-узлами
  * и курсор переходит к следующему блоку.
- * Порт React-компонента из чанка 3jdxmcvhjtoe-.
  */
 import { computed, h } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'

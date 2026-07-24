@@ -29,7 +29,6 @@
 <script setup lang="ts">
 /**
  * Меню эмодзи по `:` — фильтрация по имени/шорткодам/тегам, максимум 100.
- * Порт EmojiDropdownMenu из чанка 34p294mqk5mqb (модуль 248967).
  */
 import type { Editor as CoreEditor } from '@tiptap/core'
 import type { Editor } from '@tiptap/vue-3'

@@ -14,7 +14,6 @@
 </template>
 
 <script setup lang="ts">
-// Кнопка-триггер ссылки (порт LinkButton из чанка 1mpndbcfk3lik).
 import { Button } from '../../primitives'
 import { LinkIcon } from '../../../icons'
 import { useEditorI18n } from '../../../composables'

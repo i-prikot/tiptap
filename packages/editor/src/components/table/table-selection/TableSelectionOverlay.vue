@@ -50,7 +50,6 @@
  * Рамка вокруг выделенных ячеек таблицы с угловыми точками ресайза
  * выделения и грип-меню ячейки. Телепортируется в
  * .table-selection-overlay-container внутри NodeView таблицы.
- * Порт TableSelectionOverlay из чанка 34p294mqk5mqb (модуль 41674).
  */
 import { createLogger } from '@i-prikot/editor-schema'
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'

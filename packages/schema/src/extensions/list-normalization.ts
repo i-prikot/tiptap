@@ -2,7 +2,6 @@
  * ListNormalization — Backspace на пустом абзаце, зажатом между двумя
  * списками одного типа, удаляет абзац и склеивает списки в один,
  * сохраняя позицию курсора.
- * Порт inline-расширения из чанка 3xpmbr0kqzhen (модуль 128347).
  */
 import { Extension } from '@tiptap/core'
 import { TextSelection } from '@tiptap/pm/state'

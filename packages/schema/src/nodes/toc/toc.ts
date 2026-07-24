@@ -1,7 +1,6 @@
 /**
  * TocNode — блок «Table of contents»: рендерит список заголовков документа
  * (данные приходят из расширения TableOfContents через TOC-контекст).
- * Порт из чанка 094r3nrv45pwr (модуль 40658).
  */
 import { Node, mergeAttributes } from '@tiptap/core'
 

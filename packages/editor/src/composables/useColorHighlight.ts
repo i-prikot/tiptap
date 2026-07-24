@@ -1,7 +1,6 @@
 /**
  * Подсветка текста (марка highlight) и фон блока (nodeBackground):
  * палитра HIGHLIGHT_COLORS и useColorHighlight.
- * Порт из чанка 2mux2p9tadf0h (модули 254877/173753).
  */
 import { computed, toValue } from 'vue'
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'

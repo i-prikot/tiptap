@@ -1,8 +1,6 @@
 /**
  * Позиционирование ручек строк/столбцов и extend-кнопок таблицы на
  * floating-ui с виртуальным reference по rect'ам из TableHandleState.
- * Порт useTableHandlePositioning (чанк 3gf8l96fmxb-u, модуль 783422) и
- * позиционирования extend-кнопок (чанк 34p294mqk5mqb, модуль 976237).
  */
 import { computed, shallowRef, watch } from 'vue'
 import type { ComputedRef, ShallowRef } from 'vue'

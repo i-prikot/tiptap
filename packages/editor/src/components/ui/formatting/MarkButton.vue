@@ -23,7 +23,6 @@
 </template>
 
 <script setup lang="ts">
-// Кнопка марки (порт MarkButton из чанка 1mpndbcfk3lik).
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { Button, Badge } from '../../primitives'

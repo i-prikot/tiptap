@@ -13,7 +13,6 @@
 </template>
 
 <script setup lang="ts">
-// Экран загрузки (порт LoadingSpinner из чанка 3xpmbr0kqzhen).
 import { computed } from 'vue'
 import { useEditorI18n } from '../../../composables'
 

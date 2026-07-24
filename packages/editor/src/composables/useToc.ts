@@ -1,7 +1,6 @@
 /**
  * TOC-контекст: хранит текущее содержимое оглавления и функции навигации.
- * Vue-эквивалент TocProvider/useToc из чанка 094r3nrv45pwr (модуль 891721):
- * React Context заменён на provide/inject.
+ * Использует provide/inject.
  */
 import { inject, provide, shallowRef } from 'vue'
 import type { InjectionKey, ShallowRef } from 'vue'

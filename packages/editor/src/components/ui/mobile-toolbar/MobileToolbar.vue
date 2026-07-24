@@ -25,7 +25,6 @@
 /**
  * Мобильный тулбар (≤480px), прижат к нижней границе видимой области;
  * маршрутизирует виды main/highlighter/link.
- * Порт MobileToolbar (функции et/t6/t3/t8/t5) из чанка 3xpmbr0kqzhen.
  * AI-пункты (ImproveDropdown, Ask AI) не переносятся (Tiptap Pro).
  */
 import { computed, ref, shallowRef, watch } from 'vue'

@@ -2,7 +2,6 @@
  * ImageUploadNode — блок-плейсхолдер загрузки изображений: дропзона,
  * выбор файлов, прогресс и отмена; после успешной загрузки заменяет
  * себя image-узлами.
- * Порт из чанка 3jdxmcvhjtoe- (модуль 580454).
  */
 import { Node, mergeAttributes } from '@tiptap/core'
 import type { ImageUploadAdapter } from '../../types/image-upload.js'

@@ -17,7 +17,6 @@
 <script setup lang="ts">
 /**
  * Поповер редактирования ссылки для floating тулбара.
- * Порт LinkPopover из чанка 1mpndbcfk3lik (модуль 895238).
  */
 import { computed, ref, watch } from 'vue'
 import type { Editor } from '@tiptap/vue-3'

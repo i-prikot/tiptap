@@ -1,7 +1,6 @@
 /**
  * Контекст редактора: provide/inject вместо React EditorContext.
- * Эквивалент useTiptapEditor из чанка 3q2p49kc-ifgd (модуль 303627):
- * возвращает переданный редактор либо редактор из контекста.
+ * Возвращает переданный редактор либо редактор из контекста.
  */
 import { computed, inject, provide, shallowRef } from 'vue'
 import type { ComputedRef, InjectionKey, Ref, ShallowRef } from 'vue'

@@ -24,7 +24,6 @@
 /**
  * Кнопка Undo/Redo: скрывается при hideWhenUnavailable, дизейблится,
  * когда действие невозможно (в т.ч. при выделенном image-узле).
- * Порт UndoRedoButton из чанка 3jdxmcvhjtoe-.
  */
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'

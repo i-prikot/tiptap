@@ -1,7 +1,6 @@
 /**
  * TripleClickBlockSelection — тройной клик выделяет ближайший текстовый блок
  * целиком как NodeSelection (вместо стандартного выделения текста).
- * Порт inline-расширения из чанка 3xpmbr0kqzhen (модуль 128347).
  */
 import { Extension } from '@tiptap/core'
 import { NodeSelection, Plugin, PluginKey } from '@tiptap/pm/state'

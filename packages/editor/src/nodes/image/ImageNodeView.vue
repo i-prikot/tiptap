@@ -52,7 +52,6 @@
  * NodeView изображения: клик выделяет узел, ручки по краям ресайзят
  * (для align=center дельта удваивается), подпись скрывается, когда
  * selection уходит за пределы узла и подпись пуста.
- * Порт React-компонента из чанка 34p294mqk5mqb.
  */
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { NodeSelection } from '@tiptap/pm/state'

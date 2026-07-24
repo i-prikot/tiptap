@@ -22,7 +22,6 @@
 </template>
 
 <script setup lang="ts">
-// Кнопка выравнивания (порт TextAlignButton из чанка 1mpndbcfk3lik).
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { Button } from '../../primitives'

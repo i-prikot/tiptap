@@ -1,7 +1,6 @@
 /**
  * Конфигурация пунктов слэш-меню: метаданные (заголовок, ключевые слова,
  * иконка, группа) + проверки доступности и действия.
- * Порт из чанка 1_-l0xapy_wlh (модуль 204748).
  */
 import type { Editor } from '@tiptap/core'
 import type { FunctionalComponent } from 'vue'

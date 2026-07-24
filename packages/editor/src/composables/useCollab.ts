@@ -1,11 +1,8 @@
 /**
- * Контекст коллаборации. Vue-эквивалент CollabProvider/useCollab
- * из чанка 34p294mqk5mqb (модуль 466700).
+ * Контекст коллаборации.
  *
- * Отличие от оригинала: оригинал всегда требует Tiptap Cloud
- * (жёстко зашитые appId + серверный /api/collaboration). Порт включает
- * коллаборацию только если хост передал appId и tokenUrl (или token);
- * иначе hasCollab=false и редактор работает локально с обычной историей.
+ * Коллаборация включается, только если хост передал appId и tokenUrl (или token);
+ * без конфигурации hasCollab=false и редактор работает локально с обычной историей.
  */
 import { createLogger } from '@i-prikot/editor-schema'
 import { onBeforeUnmount, provide, inject, shallowRef } from 'vue'

@@ -13,7 +13,6 @@
 <script setup lang="ts">
 /**
  * Аватар пользователя: контейнер с контекстом статуса загрузки изображения.
- * Порт Avatar из чанка 34p294mqk5mqb (модуль 993098).
  */
 import { provide, ref } from 'vue'
 import { avatarInjectionKey } from './avatar-context'

@@ -1,7 +1,6 @@
 /**
  * Image — расширенный image-узел: подпись (figure/figcaption),
  * выравнивание `data-align`, ресайз мышью/тачем через NodeView.
- * Порт из чанка 34p294mqk5mqb (модуль 703291).
  */
 import { Image as BaseImage } from '@tiptap/extension-image'
 import { NodeSelection, TextSelection } from '@tiptap/pm/state'

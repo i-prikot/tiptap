@@ -1,6 +1,5 @@
 /**
  * Перемещение текущего блока вверх/вниз.
- * Порт useMoveNode из чанка 34p294mqk5mqb (модуль 962287).
  */
 import { createLogger } from '@i-prikot/editor-schema'
 import { computed } from 'vue'

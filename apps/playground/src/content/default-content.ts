@@ -1,6 +1,5 @@
 /**
  * Дефолтный контент документа Notion-like шаблона.
- * Извлечён из чанка 3xpmbr0kqzhen (модуль 461062).
  */
 import type { JSONContent } from '@tiptap/core'
 

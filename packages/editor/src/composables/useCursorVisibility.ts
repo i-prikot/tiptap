@@ -1,7 +1,6 @@
 /**
  * Rect body + автоскролл к курсору, если его перекрывает оверлей
- * (мобильный тулбар). Порт useCursorVisibility из чанка 3jdxmcvhjtoe-
- * (модуль 987284, включая внутренний useElementRect).
+ * (мобильный тулбар).
  */
 import { onBeforeUnmount, onMounted, reactive, watch } from 'vue'
 import type { ComputedRef } from 'vue'

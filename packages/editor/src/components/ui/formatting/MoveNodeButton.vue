@@ -19,7 +19,6 @@
 </template>
 
 <script setup lang="ts">
-// Кнопка перемещения блока вверх/вниз (порт MoveNodeButton из чанка 34p294mqk5mqb).
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { Button, Badge } from '../../primitives'

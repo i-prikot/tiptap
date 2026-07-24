@@ -16,7 +16,7 @@
 <script setup lang="ts">
 /**
  * Создание редактора со всем набором расширений и предоставление его
- * дереву компонентов. Порт EditorProvider из чанка 3xpmbr0kqzhen.
+ * дереву компонентов.
  *
  * Отличия от оригинала (см. docs/ARCHITECTURE.md §8):
  * - Collaboration/CollaborationCaret подключаются только при наличии

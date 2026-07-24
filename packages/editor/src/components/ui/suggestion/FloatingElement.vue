@@ -9,8 +9,7 @@
 <script setup lang="ts">
 /**
  * Плавающий элемент, позиционируемый по rect текущего выделения.
- * Порт FloatingElement из чанка 34p294mqk5mqb (модуль 374135) +
- * useFloatingElement (3qxxh2m8wjeqx, модуль 60793) на @floating-ui/vue.
+ * Использует @floating-ui/vue для позиционирования.
  */
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import type { Editor } from '@tiptap/vue-3'

@@ -24,7 +24,6 @@
 <script setup lang="ts">
 /**
  * Дропдаун «Turn into» для floating тулбара.
- * Порт TurnIntoDropdown из чанка 34p294mqk5mqb (модуль 413941).
  */
 import { computed, ref } from 'vue'
 import type { Editor } from '@tiptap/vue-3'

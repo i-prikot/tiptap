@@ -19,8 +19,7 @@
 /**
  * Универсальное suggestion-меню: регистрирует suggestion-плагин
  * по символу-триггеру, позиционирует контент floating-ui, ведёт
- * клавиатурную навигацию. Порт SuggestionMenu из чанка 3qxxh2m8wjeqx
- * (модуль 619184).
+ * клавиатурную навигацию.
  */
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import type { CSSProperties } from 'vue'

@@ -16,8 +16,7 @@
 /**
  * Корень Notion-like редактора: цепочка провайдеров
  * EditorI18n → User → Collab(documentId) → Ai → Toc, затем контент.
- * Порт NotionEditor из чанка 3xpmbr0kqzhen (React-провайдеры заменены
- * на provide/inject через composables).
+ * React-провайдеры заменены на provide/inject через composables.
  */
 import { createLogger } from '@i-prikot/editor-schema'
 import { computed, onBeforeUnmount, shallowRef, toRef, watch } from 'vue'
@@ -29,6 +28,7 @@ import {
   provideToc,
   provideAnchorNavigation,
   provideEditorI18n,
+  provideEditorOperationError,
 } from '../../../composables'
 import { createDevelopmentDiagnostics } from '../../../utils/development-diagnostics'
 
@@ -39,6 +39,7 @@ import {
   type EditorFeatureFlags,
   type NotionEditorAnchorId,
   type NotionEditorExpose,
+  type NotionEditorOperationErrorPayload,
   type NotionEditorProps,
   type NotionEditorReadyPayload,
   type NotionEditorSetContentOptions,
@@ -60,6 +61,7 @@ const emit = defineEmits<{
   ready: [editor: NotionEditorReadyPayload]
   update: [payload: NotionEditorUpdatePayload]
   'anchor-change': [anchor: NotionEditorAnchorId]
+  'operation-error': [payload: NotionEditorOperationErrorPayload]
 }>()
 
 const editorRef = shallowRef<Editor | null>(null)
@@ -139,6 +141,10 @@ const identityPersistenceMode =
 provideEditorI18n(
   toRef(props, 'locale'),
   toRef(props, 'messages'),
+  computed(() => props.developmentDiagnostics === true),
+)
+provideEditorOperationError(
+  (payload) => emit('operation-error', payload),
   computed(() => props.developmentDiagnostics === true),
 )
 provideUser(props.identityStorage)

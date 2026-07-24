@@ -21,7 +21,6 @@
 </template>
 
 <script setup lang="ts">
-// Кнопка indent/outdent (порт IndentButton из чанка 3xpmbr0kqzhen).
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { Button, Badge } from '../../primitives'

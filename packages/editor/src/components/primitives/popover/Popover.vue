@@ -17,7 +17,6 @@
 
 <script setup lang="ts">
 /**
- * Поповер (порт Popover из чанка 3q2p49kc-ifgd): триггер + floating
  * контент, закрытие по Escape/клику снаружи.
  */
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watchEffect } from 'vue'

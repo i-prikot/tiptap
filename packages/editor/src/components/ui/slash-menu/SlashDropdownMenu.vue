@@ -60,8 +60,7 @@
 <script setup lang="ts">
 /**
  * Слэш-меню (`/`): вставка и преобразование блоков, сгруппированные по
- * категориям AI/Style/Insert/Upload. Порт SlashDropdownMenu из чанка
- * 1_-l0xapy_wlh (модуль 204748).
+ * категориям AI/Style/Insert/Upload.
  */
 import type { Editor } from '@tiptap/core'
 import { SuggestionMenu } from '../suggestion'

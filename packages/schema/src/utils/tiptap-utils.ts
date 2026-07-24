@@ -1,7 +1,5 @@
 /**
  * Общие утилиты редактора.
- * Порт `lib/tiptap-utils` и `lib/tiptap-advanced-utils` оригинального шаблона
- * (минифицированный источник: чанк 3ftd-biwbiqel, модуль 680256).
  */
 import { createLogger } from './logger.js'
 import { findParentNodeClosestToPos } from '@tiptap/core'
@@ -400,14 +398,14 @@ export function updateNodesAttr(
   return changed
 }
 
-/** Разбивает массив на подмассивы длиной size (чанк 2mux2p9tadf0h). */
+/** Разбивает массив на подмассивы длиной size. */
 export function chunkArray<T>(items: T[], size: number): T[][] {
   return Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
     items.slice(index * size, index * size + size),
   )
 }
 
-/** Атрибуты активной марки в выделении (чанк 2mux2p9tadf0h, getActiveMarkAttrs). */
+/** Атрибуты активной марки в выделении. */
 export function getActiveMarkAttrs(
   editor: Editor | null,
   markName: string,

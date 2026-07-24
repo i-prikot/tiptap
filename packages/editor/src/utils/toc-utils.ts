@@ -1,7 +1,6 @@
 /**
  * Утилиты Table of Contents: нормализация глубин заголовков,
  * поиск скроллируемого предка и переход к заголовку.
- * Порт из чанка 094r3nrv45pwr (модули 891721, 563618).
  */
 import type { Editor } from '@tiptap/core'
 import { NodeSelection } from '@tiptap/pm/state'

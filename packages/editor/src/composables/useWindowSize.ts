@@ -1,6 +1,5 @@
 /**
  * Размеры visualViewport с троттлингом 200ms.
- * Порт useWindowSize из чанка 3jdxmcvhjtoe- (модуль 660485).
  */
 import { onBeforeUnmount, onMounted, reactive } from 'vue'
 import { throttle } from '../utils/throttle'

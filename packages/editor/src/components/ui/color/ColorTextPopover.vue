@@ -32,8 +32,6 @@
 <script setup lang="ts">
 /**
  * Поповер выбора цвета текста/подсветки для floating тулбара.
- * Порт ColorTextPopover + useColorTextPopover из чанка 2mux2p9tadf0h
- * (модуль 681239/959411).
  */
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'

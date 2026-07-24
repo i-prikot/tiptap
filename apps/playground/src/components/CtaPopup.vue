@@ -96,7 +96,7 @@
 <script setup lang="ts">
 /**
  * Промо-попап шаблона: показывается только при наличии query-параметра
- * ?cta. Порт CTA-попапа из чанка 3xpmbr0kqzhen.
+ * ?cta.
  */
 import { computed, ref } from 'vue'
 import { Button, useEditorOverlayTarget } from '@i-prikot/editor'

@@ -1,6 +1,5 @@
 /**
  * Состояние link-поповера: URL, установка/удаление/открытие ссылки.
- * Порт useLinkPopover/canSetLink из чанка 1mpndbcfk3lik (модуль 705258).
  */
 import { computed, ref, watch } from 'vue'
 import type { ComputedRef } from 'vue'

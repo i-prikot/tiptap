@@ -1,6 +1,5 @@
 /**
  * Таблицы: кастомные Table/TableCell поверх @tiptap/extension-table.
- * Порт из чанка 1eb79ylai6rew (модули 621993/935917):
  * - NodeView оборачивает tableWrapper в div[data-content-type="table"] и
  *   добавляет контейнеры .table-container / .table-controls /
  *   .table-selection-overlay-container (в них телепортируются ручки,

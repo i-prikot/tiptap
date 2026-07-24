@@ -11,7 +11,6 @@
 </template>
 
 <script setup lang="ts">
-// Бейдж для шорткатов и меток (порт Badge из чанка 3q2p49kc-ifgd).
 withDefaults(
   defineProps<{
     variant?: string

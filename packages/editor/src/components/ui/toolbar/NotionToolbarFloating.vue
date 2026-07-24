@@ -63,7 +63,6 @@
 <script setup lang="ts">
 /**
  * Floating toolbar по текстовому выделению.
- * Порт NotionToolbarFloating (функции er/es) из чанка 3xpmbr0kqzhen.
  * AI ImproveDropdown не переносится (Tiptap Pro), скрыт как в оригинале
  * при отсутствии расширения `ai`.
  */

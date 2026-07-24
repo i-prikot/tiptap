@@ -46,8 +46,7 @@
 <script setup lang="ts">
 /**
  * Компактная панель подсветки (5 цветов + сброс) для floating/mobile
- * тулбара. Порт ColorHighlightPopoverContent из чанка 3jdxmcvhjtoe-
- * (модуль 102971, функция f).
+ * тулбара.
  */
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'

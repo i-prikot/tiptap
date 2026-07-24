@@ -1,7 +1,6 @@
 /**
  * Composables «Turn into»: Text / Heading / List / Blockquote / CodeBlock.
- * Порт хуков useText, useHeading, useList, useBlockquote, useCodeBlock
- * из чанка 415bw3fz4s42y (React hooks → Vue computed на сигнале выделения).
+ * Доступность преобразований вычисляется по текущему выделению.
  */
 import { computed } from 'vue'
 import type { ComputedRef } from 'vue'

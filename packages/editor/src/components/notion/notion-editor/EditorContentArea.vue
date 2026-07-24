@@ -30,7 +30,6 @@
  * завершении генерации по выделению + скролл к hash.
  * Внутри этой области монтируются выпадающие меню (slash/emoji/mention)
  * и drag-меню — они добавляются по мере переноса соответствующих модулей.
- * Порт EditorContentArea из чанка 3xpmbr0kqzhen.
  */
 import { defineAsyncComponent, ref, watch } from 'vue'
 import { EditorContent } from '@tiptap/vue-3'

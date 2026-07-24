@@ -20,7 +20,6 @@
 <script setup lang="ts">
 /**
  * Пункты «Turn into» для дропдауна floating тулбара.
- * Порт TurnIntoDropdownContent из чанка 34p294mqk5mqb (модуль 413941);
  * собран из block-conversion composables (как в DragContextMenu).
  */
 import { computed } from 'vue'

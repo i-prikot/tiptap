@@ -27,7 +27,6 @@
 /**
  * Tooltip на floating-ui: hover (только мышь) и focus, задержка открытия,
  * placement top c offset 4 / flip / shift — как в оригинальном примитиве
- * из чанка 3q2p49kc-ifgd.
  */
 import { computed, ref, shallowRef } from 'vue'
 import { flip, offset, shift, useFloating } from '@floating-ui/vue'

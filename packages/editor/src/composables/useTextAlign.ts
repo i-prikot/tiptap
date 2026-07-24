@@ -1,5 +1,5 @@
 /**
- * Выравнивание текста. Порт useTextAlign из чанка 1mpndbcfk3lik.
+ * Выравнивание текста.
  */
 import { computed } from 'vue'
 import type { ComputedRef, FunctionalComponent } from 'vue'

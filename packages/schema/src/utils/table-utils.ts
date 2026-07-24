@@ -1,6 +1,5 @@
 /**
  * Утилиты таблиц: карта ячеек, выделение строк/столбцов, DOM-поиск.
- * Дословный порт lib/tiptap-table-utils (чанк 1eb79ylai6rew, модуль 281498).
  */
 export { EMPTY_CELL_HEIGHT, EMPTY_CELL_WIDTH, RESIZE_MIN_WIDTH } from './table-utils/shared.js'
 export type {

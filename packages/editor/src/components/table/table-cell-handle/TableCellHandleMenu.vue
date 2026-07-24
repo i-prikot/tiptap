@@ -48,7 +48,6 @@
 /**
  * Грип-меню выделенных ячеек (на рамке TableSelectionOverlay):
  * merge/split, цвет, выравнивание, очистка содержимого.
- * Порт TableCellHandleMenu из чанка 34p294mqk5mqb (модуль 9148).
  */
 import { computed, ref } from 'vue'
 import { Menu, MenuContent, MenuGroup, MenuItem, Button, Separator } from '../../primitives'

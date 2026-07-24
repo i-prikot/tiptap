@@ -1,11 +1,11 @@
 /**
- * Контекст Tiptap AI. Vue-эквивалент AiProvider/useAi из чанка 3n0bpgvtdirdv.
+ * Контекст Tiptap AI.
  *
- * Отличие от оригинала: расширение Ai распространяется только через
- * платный registry Tiptap Pro и не может быть включено в порт. Контекст
- * повторяет исходный интерфейс (aiToken/hasAi): при заданных
- * tokenUrl/token токен запрашивается как в оригинале, иначе hasAi=false —
- * и все AI-элементы UI скрываются той же
+ * Ограничение: расширение Ai распространяется только через
+ * платный registry Tiptap Pro и не может быть включено в пакет. Контекст
+ * предоставляет aiToken и hasAi: при заданных
+ * tokenUrl/token запрашивается токен, иначе hasAi=false —
+ * и все AI-элементы UI скрываются
  * логикой isExtensionAvailable(editor, 'ai'), что и в оригинале.
  */
 import { createLogger } from '@i-prikot/editor-schema'

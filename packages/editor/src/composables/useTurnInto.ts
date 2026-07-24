@@ -1,6 +1,5 @@
 /**
  * Опции «Turn into» и проверка конвертируемости выделения.
- * Порт списка a/canTurnInto из чанка 34p294mqk5mqb (модуль 413941).
  */
 import type { Editor } from '@tiptap/vue-3'
 import { NodeSelection } from '@tiptap/pm/state'

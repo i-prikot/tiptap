@@ -1,7 +1,6 @@
 /**
  * NodeBackground — глобальный атрибут `backgroundColor` для блочных узлов
  * и ячеек таблиц с командами set/unset/toggle.
- * Порт из чанка 34p294mqk5mqb (модуль 661543).
  */
 import { Extension } from '@tiptap/core'
 import type { EditorState, Transaction } from '@tiptap/pm/state'

@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-// NodeView блока TOC. Порт React-компонента из чанка 094r3nrv45pwr.
+// NodeView блока TOC.
 import { computed } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import { useToc } from '../../composables'

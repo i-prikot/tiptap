@@ -39,7 +39,6 @@
 /**
  * Кнопки «+» у нижнего/правого края таблицы: клик добавляет строку или
  * столбец, перетаскивание — добавляет/убирает несколько (пустые с конца).
- * Порт TableExtendRowColumnButtons из чанка 34p294mqk5mqb (модуль 976237).
  */
 import { computed, onBeforeUnmount, shallowRef } from 'vue'
 import { TableMap } from '@tiptap/pm/tables'

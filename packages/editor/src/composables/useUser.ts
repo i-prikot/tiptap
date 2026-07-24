@@ -1,7 +1,6 @@
 /**
  * Пользователь коллаборации: случайные имя/цвет/id, сохраняемые через
  * настроенное хранилище идентичности.
- * Vue-эквивалент UserProvider/useUser из чанка 1-1gopd-oz05f.
  */
 import { inject, provide } from 'vue'
 import type { InjectionKey } from 'vue'

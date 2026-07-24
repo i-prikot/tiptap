@@ -15,7 +15,6 @@
 </template>
 
 <script setup lang="ts">
-// Группа кнопок (порт ButtonGroup из чанка 3q2p49kc-ifgd, cva-варианты orientation).
 withDefaults(defineProps<{ orientation?: 'horizontal' | 'vertical' }>(), {
   orientation: 'vertical',
 })

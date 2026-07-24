@@ -53,7 +53,6 @@
 <script setup lang="ts">
 /**
  * Подменю «Alignment» ячеек таблицы (текст + вертикаль).
- * Порт TableAlignMenu из чанка 2yhkpc8fmweba (модуль 479042).
  */
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'

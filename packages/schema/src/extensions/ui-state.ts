@@ -1,7 +1,6 @@
 /**
  * UiState — хранит UI-состояние редактора (drag, AI-генерация, комментарии)
  * в extension storage и предоставляет команды для его изменения.
- * Порт из чанка 35aonnuqri98j (модуль 188777).
  */
 import { createLogger } from '../utils/logger.js'
 import { Extension } from '@tiptap/core'

@@ -18,7 +18,6 @@
 </template>
 
 <script setup lang="ts">
-// Пункт меню эмодзи (порт EmojiMenuItem из чанка 34p294mqk5mqb).
 import { shallowRef, watch } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import type { EmojiItem } from '@tiptap/extension-emoji'

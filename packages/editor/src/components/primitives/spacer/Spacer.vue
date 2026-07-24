@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts">
-// Гибкий разделитель пространства (порт Spacer из чанка 2mux2p9tadf0h).
 import { computed } from 'vue'
 
 const props = defineProps<{

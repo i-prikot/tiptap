@@ -154,3 +154,19 @@ export interface NotionEditorExpose {
 
 /** Fixed delay used to coalesce document update events. */
 export const EDITOR_UPDATE_DEBOUNCE_MS = 300
+
+/** Identifiers for async editor operations that can produce structured errors. */
+export type NotionEditorOperation = 'image-upload' | 'image-download'
+
+/** Discriminated error code surfaced when an editor operation fails. */
+export type NotionEditorOperationErrorCode = 'IMAGE_UPLOAD_FAILED' | 'IMAGE_DOWNLOAD_FAILED'
+
+/** Runtime class of the underlying error cause. */
+export type NotionEditorOperationErrorClass = 'DOMException' | 'Error' | 'UnknownError'
+
+/** Payload emitted when a structured editor operation error is reported. */
+export interface NotionEditorOperationErrorPayload {
+  operation: NotionEditorOperation
+  errorClass: NotionEditorOperationErrorClass
+  code: NotionEditorOperationErrorCode
+}

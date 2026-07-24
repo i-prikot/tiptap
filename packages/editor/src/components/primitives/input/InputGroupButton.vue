@@ -10,7 +10,6 @@
 </template>
 
 <script setup lang="ts">
-// Кнопка внутри инпут-группы (порт InputGroupButton из чанка 2mux2p9tadf0h).
 import { Button } from '../button'
 
 withDefaults(

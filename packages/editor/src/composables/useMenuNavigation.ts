@@ -1,6 +1,5 @@
 /**
  * Клавиатурная навигация по пунктам меню (стрелки/Tab/Home/End/Enter/Escape).
- * Порт useMenuNavigation из чанка 3q2p49kc-ifgd (модуль 124248).
  */
 import { onBeforeUnmount, ref, watch } from 'vue'
 import type { ComputedRef, Ref } from 'vue'

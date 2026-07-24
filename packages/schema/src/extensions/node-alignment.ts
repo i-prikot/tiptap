@@ -1,7 +1,6 @@
 /**
  * NodeAlignment — глобальные атрибуты `nodeTextAlign`/`nodeVerticalAlign`
  * для блоков и ячеек таблиц с командами set/unset/toggle.
- * Порт из чанка 34p294mqk5mqb (модуль 109299).
  */
 import { Extension } from '@tiptap/core'
 import type { EditorState, Transaction } from '@tiptap/pm/state'

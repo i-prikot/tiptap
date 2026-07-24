@@ -12,7 +12,6 @@
 
 <script setup lang="ts">
 // Аддон инпут-группы; клик мимо кнопки фокусирует инпут
-// (порт InputGroupAddon из чанка 2mux2p9tadf0h).
 withDefaults(
   defineProps<{ align?: 'inline-start' | 'inline-end' | 'block-start' | 'block-end' }>(),
   { align: 'inline-start' },

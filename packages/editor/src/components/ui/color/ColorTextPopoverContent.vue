@@ -85,7 +85,6 @@
 /**
  * Панель выбора цвета текста/подсветки с недавними цветами и
  * клавиатурной навигацией. Порт внутреннего компонента
- * ColorTextPopover (чанк 2mux2p9tadf0h, функция j).
  */
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'

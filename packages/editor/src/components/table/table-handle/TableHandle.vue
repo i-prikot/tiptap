@@ -34,7 +34,7 @@
 /**
  * Ручки строки/столбца таблицы: позиционируются по hover-состоянию
  * TableHandleExtension, тянутся (drag&drop перестановка) и открывают
- * меню действий. Порт TableHandle из чанка 3gf8l96fmxb-u (функции O/B/I).
+ * меню действий.
  */
 import { createLogger } from '@i-prikot/editor-schema'
 import { computed, ref, watch } from 'vue'

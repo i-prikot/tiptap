@@ -38,7 +38,6 @@
 /**
  * Аватары участников коллаборации в хедере: рендерится только при
  * активном collaborationCaret (в оффлайн-режиме — ничего).
- * Порт CollabUsers из чанка 3xpmbr0kqzhen.
  */
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import type { Editor } from '@tiptap/vue-3'

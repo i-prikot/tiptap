@@ -27,8 +27,7 @@
 <script setup lang="ts">
 /**
  * Меню меншенов по `@`: демо-каталог пользователей с аватарами
- * (как в оригинале). Порт MentionDropdownMenu из чанка 34p294mqk5mqb
- * (модуль 606896).
+ * с аватарами.
  */
 import { SuggestionMenu } from '../suggestion'
 import MentionMenuItem from './MentionMenuItem.vue'

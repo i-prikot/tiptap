@@ -3,7 +3,6 @@
  * Tab/Shift-Tab, авто-outdent на Enter/Backspace и выравнивание отступа
  * после drag&drop. Внутри списков делегирует sink/liftListItem, внутри
  * таблиц не перехватывает Tab.
- * Порт inline-расширения из чанка 3xpmbr0kqzhen (модуль 128347).
  */
 import { Extension } from '@tiptap/core'
 import type { EditorState } from '@tiptap/pm/state'

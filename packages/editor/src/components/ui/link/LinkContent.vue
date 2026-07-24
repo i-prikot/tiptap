@@ -54,7 +54,6 @@
 <script setup lang="ts">
 /**
  * Панель редактирования ссылки: URL-инпут + apply/open/remove.
- * Порт LinkContent (LinkMain) из чанка 1mpndbcfk3lik.
  */
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'

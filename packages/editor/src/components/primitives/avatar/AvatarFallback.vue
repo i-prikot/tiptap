@@ -8,7 +8,7 @@
 <script setup lang="ts">
 /**
  * Фолбэк аватара (инициалы): показывается, пока изображение не загружено;
- * опциональная задержка delayMs. Порт AvatarFallback из чанка 34p294mqk5mqb.
+ * опциональная задержка delayMs.
  */
 import { inject, onMounted, ref } from 'vue'
 import { avatarInjectionKey } from './avatar-context'

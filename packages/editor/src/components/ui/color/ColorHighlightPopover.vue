@@ -29,7 +29,6 @@
 <script setup lang="ts">
 /**
  * Поповер подсветки для десктопного floating тулбара.
- * Порт ColorHighlightPopover из чанка 3jdxmcvhjtoe- (модуль 102971).
  */
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'

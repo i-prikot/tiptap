@@ -1,5 +1,5 @@
 /**
- * Хелперы выделения/позиционирования из чанков 3qxxh2m8wjeqx и 2mux2p9tadf0h.
+ * Хелперы выделения и позиционирования.
  */
 import type { Editor } from '@tiptap/core'
 import { isNodeSelection, isTextSelection, posToDOMRect } from '@tiptap/core'

@@ -1,6 +1,5 @@
 /**
- * Форк suggestion-плагина из оригинального шаблона (чанк 3qxxh2m8wjeqx,
- * модуль 957800). Отличия от @tiptap/suggestion: dismissedRange
+ * Расширенный suggestion-плагин. Отличия от @tiptap/suggestion: dismissedRange
  * (Escape скрывает меню до конца слова), inline-декорация диапазона,
  * debounce/minQueryLength для items, floating-ui `mount`-хелпер.
  */

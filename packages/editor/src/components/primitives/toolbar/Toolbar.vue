@@ -12,7 +12,6 @@
 
 <script setup lang="ts">
 /**
- * Тулбар (порт Toolbar из чанка 1mpndbcfk3lik): горизонтальная навигация
  * стрелками по кнопкам, data-focus-visible для фокуса с клавиатуры.
  */
 import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'

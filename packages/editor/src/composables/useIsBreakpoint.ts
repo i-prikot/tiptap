@@ -1,6 +1,6 @@
 /**
  * Реактивный media query: useIsBreakpoint('max', 768) → true на узких
- * экранах. Порт из чанка 3q2p49kc-ifgd (модуль 97550).
+ * экранах.
  */
 import { onBeforeUnmount, ref } from 'vue'
 import type { Ref } from 'vue'

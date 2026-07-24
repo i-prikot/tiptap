@@ -2,7 +2,6 @@
  * Видимость floating-тулбара: скрытие по мета `hideFloatingToolbar`
  * (selectNodeAndHideFloating), повторный показ по pointerdown на
  * выделенном узле, обновление по selectionUpdate.
- * Порт useFloatingToolbarVisibility из чанка 094r3nrv45pwr (модуль 563618).
  */
 import { onBeforeUnmount, ref, watch } from 'vue'
 import type { ComputedRef, Ref } from 'vue'

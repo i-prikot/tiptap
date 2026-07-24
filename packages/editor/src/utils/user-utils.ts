@@ -1,6 +1,5 @@
 /**
  * Генерация случайного пользователя и детерминированный выбор аватара.
- * Порт из чанков 1-1gopd-oz05f (имена/цвета) и 3qxxh2m8wjeqx (getAvatar).
  */
 
 import type { IdentityStorage } from './storage'

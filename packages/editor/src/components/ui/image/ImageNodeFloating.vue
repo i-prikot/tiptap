@@ -15,7 +15,6 @@
 
 <script setup lang="ts">
 // Набор кнопок для выделенного изображения в floating тулбаре
-// (порт ImageNodeFloating из чанка 34p294mqk5mqb, модуль 590748).
 import { computed } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { Separator } from '../../primitives'

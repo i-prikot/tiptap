@@ -1,7 +1,6 @@
 /**
  * Подписка на событие `tableHandleState`, которое эмитит
  * TableHandleExtension при наведении/драге по таблице.
- * Порт useTableHandleState из чанка 2yhkpc8fmweba (модуль 946302).
  */
 import { onBeforeUnmount, shallowRef, watch } from 'vue'
 import type { ComputedRef, Ref, ShallowRef } from 'vue'

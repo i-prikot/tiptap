@@ -1,6 +1,5 @@
 /**
  * Выравнивание ячеек таблицы (текстовое и вертикальное).
- * Порт useTableAlignCell из чанка 2yhkpc8fmweba (модуль 489144).
  */
 import { createLogger } from '@i-prikot/editor-schema'
 import { computed } from 'vue'

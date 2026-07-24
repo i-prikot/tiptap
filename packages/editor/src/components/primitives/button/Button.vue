@@ -34,7 +34,7 @@
 <script setup lang="ts">
 /**
  * Кнопка tiptap-ui: data-style/data-size, опциональный tooltip
- * с отображением шортката. Порт Button из чанка 3q2p49kc-ifgd.
+ * с отображением шортката.
  */
 import { computed, useAttrs } from 'vue'
 import { parseShortcutKeys } from '../../../utils/tiptap-utils'

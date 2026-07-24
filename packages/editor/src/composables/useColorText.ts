@@ -1,6 +1,5 @@
 /**
  * Цвет текста (марка textStyle): палитра TEXT_COLORS и useColorText.
- * Порт из чанка 2mux2p9tadf0h (модули 118876/352859).
  */
 import { computed, toValue } from 'vue'
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'

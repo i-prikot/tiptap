@@ -2,7 +2,6 @@
  * Общая логика «Turn into»-преобразований блоков: перед конвертацией
  * одиночный блок выделяется как NodeSelection, содержимое очищается от
  * вложенных обёрток (clearNodes), затем применяется целевой тип.
- * Порт общего паттерна из чанка 415bw3fz4s42y.
  */
 import type { Editor } from '@tiptap/vue-3'
 import type { ChainedCommands } from '@tiptap/core'

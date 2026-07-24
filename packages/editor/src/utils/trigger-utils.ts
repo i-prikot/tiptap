@@ -1,7 +1,6 @@
 /**
  * Вставка триггеров suggestion-меню (`:` эмодзи, `@` меншены) в позицию
  * курсора либо к указанному узлу.
- * Порт addEmojiTrigger/addMentionTrigger из чанка 3qxxh2m8wjeqx.
  */
 import type { Editor } from '@tiptap/core'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'

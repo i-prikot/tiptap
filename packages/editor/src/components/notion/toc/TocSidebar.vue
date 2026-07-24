@@ -48,7 +48,6 @@
  * Боковая панель оглавления: прогресс-линии + всплывающий список,
  * подсветка активного заголовка (клик фиксирует выбор на 500мс,
  * скролл сбрасывает ручной выбор).
- * Порт TocSidebar из чанка 094r3nrv45pwr (модуль 305472).
  */
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useToc, useAnchorNavigation, useEditorI18n } from '../../../composables'
