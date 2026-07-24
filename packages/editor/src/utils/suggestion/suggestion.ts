@@ -1,7 +1,11 @@
 /**
- * Расширенный suggestion-плагин. Отличия от @tiptap/suggestion: dismissedRange
- * (Escape скрывает меню до конца слова), inline-декорация диапазона,
- * debounce/minQueryLength для items, floating-ui `mount`-хелпер.
+ * Точка входа расширенного suggestion-движка для ProseMirror/Tiptap.
+ *
+ * В отличие от `@tiptap/suggestion`, модуль хранит `dismissedRange`, поэтому
+ * Escape скрывает меню только для текущего триггерного диапазона, создаёт
+ * стабильную inline-декорацию для привязки floating-ui и управляет отменяемой
+ * асинхронной загрузкой пунктов. Экспортируемые хелперы разделены по слоям:
+ * поиск совпадения, состояние плагина, декорации и DOM-позиционирование.
  */
 export { calculateStartPosition, filterSuggestionItems, findSuggestionMatch } from './matching'
 export { Suggestion, SuggestionPluginKey } from './plugin'

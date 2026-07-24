@@ -8,8 +8,13 @@
 
 <script setup lang="ts">
 /**
- * Плавающий элемент, позиционируемый по rect текущего выделения.
- * Использует @floating-ui/vue для позиционирования.
+ * Плавающий элемент для текущего ProseMirror selection.
+ *
+ * Позиция рассчитывается от virtual reference и телепортируется в overlay
+ * редактора. Штатные закрытия (Escape, drag и смена `shouldShow`) сохраняют
+ * selection: drag&drop блоков зависит от того, что ProseMirror удалит источник
+ * через `deleteSelection()` на drop. Только настоящий outside-pointer может
+ * дополнительно сбросить TextSelection при включённой опции.
  */
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
@@ -43,7 +48,12 @@ const teleportTarget = computed(() => overlayTarget?.value ?? null)
 const open = ref(false)
 const floatingRef = shallowRef<HTMLElement | null>(null)
 
-// Виртуальный reference: rect выделения пересчитывается на каждом апдейте.
+/**
+ * Virtual reference с актуальным rect selection.
+ *
+ * Пустой DOMRect — безопасный fallback для отсутствующего редактора/selection;
+ * он не означает, что floating-элемент должен быть показан.
+ */
 const virtualReference = shallowRef<VirtualElement>({
   getBoundingClientRect: () => {
     const instance = editor.value
@@ -77,7 +87,13 @@ function resetTextSelection() {
   instance.view.dispatch(tr)
 }
 
-/** Клик снаружи (не редактор, не floating-слои) — закрыть со сбросом. */
+/**
+ * Обрабатывает единственный путь закрытия, который может сбросить selection.
+ *
+ * Pointer внутри floating-элемента, DOM редактора и известных overlay-слоёв
+ * игнорируется. Это исключение предотвращает закрытие при взаимодействии с
+ * вложенными меню/tooltip и отделяет внешний dismiss от обычных закрытий.
+ */
 function handleOutsidePointerDown(event: PointerEvent) {
   if (!open.value) return
   const target = event.target as HTMLElement | null
@@ -113,7 +129,11 @@ watch(
   { flush: 'post' },
 )
 
-// Обновляем позицию при каждом изменении выделения, пока элемент виден.
+/**
+ * Cleanup владельца подписок на editor и DOM. При смене экземпляра редактора
+ * предыдущие подписки снимаются до регистрации новых, а unmount снимает и эти
+ * подписки, и document capture-listener внешнего указателя.
+ */
 let cleanups: Array<() => void> = []
 watch(
   editor,
@@ -137,7 +157,10 @@ watch(
       cleanups.push(() => dom.removeEventListener('keydown', onKeydown))
     }
 
-    // Скрываем при начале drag'а в редакторе.
+    /**
+     * Закрывает floating-слой при начале или движении native drag, но намеренно
+     * не вызывает `resetTextSelection`: selection остаётся источником drop.
+     */
     const onDrag = () => {
       if (open.value) setOpen(false)
     }

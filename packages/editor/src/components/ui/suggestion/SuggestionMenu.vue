@@ -17,9 +17,15 @@
 
 <script setup lang="ts" generic="Item extends SuggestionItem = SuggestionItem">
 /**
- * Универсальное suggestion-меню: регистрирует suggestion-плагин
- * по символу-триггеру, позиционирует контент floating-ui, ведёт
- * клавиатурную навигацию.
+ * Универсальное suggestion-меню, владеющее Vue-частью renderer-а плагина.
+ *
+ * Компонент регистрирует plugin для выбранного trigger-символа, хранит его
+ * renderer snapshot и позиционируется от virtual reference inline-декорации.
+ * `@pointerdown.prevent` в шаблоне сохраняет ProseMirror selection, пока
+ * пользователь выбирает пункт; само изменение документа остаётся обязанностью
+ * `command` из suggestion-движка. При unmount текущий plugin unregister-ится;
+ * при смене editor watcher не хранит предыдущий instance, поэтому его plugin
+ * может остаться зарегистрированным. UI не управляет этим внешним lifecycle.
  */
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import type { CSSProperties } from 'vue'
@@ -75,7 +81,13 @@ const query = ref('')
 
 const menuRef = shallowRef<HTMLElement | null>(null)
 
-// виртуальный reference для floating-ui на основе rect декорации
+/**
+ * Virtual reference на lazy clientRect активной inline-декорации.
+ *
+ * Источник задаёт suggestion-плагин: он может вернуть `null` после
+ * DOM-обновления, поэтому fallback DOMRect нужен лишь для безопасного вызова
+ * floating-ui, а не как замена реальному якорю.
+ */
 const virtualReference = computed(() => {
   const getRect = referenceRect.value
   if (!getRect) return null
@@ -104,10 +116,17 @@ const { floatingStyles: rawFloatingStyles } = useFloating(virtualReference, menu
 
 const floatingStyles = computed<CSSProperties>(() => ({ ...rawFloatingStyles.value, zIndex: 1000 }))
 
+/** Закрывает Vue-меню; plugin state завершает собственный lifecycle отдельно. */
 function close() {
   open.value = false
 }
 
+/**
+ * Закрывает визуальное меню до выполнения команды выбранного пункта.
+ *
+ * Порядок предотвращает повторный выбор при синхронной транзакции, но не
+ * очищает selection вручную: диапазон и удаление trigger-а определяет command.
+ */
 function handleSelect(item: Item) {
   close()
   commandFn.value?.(item)
@@ -122,6 +141,11 @@ const { selectedIndex } = useMenuNavigation<Item>({
 
 let registeredKey: PluginKey | null = null
 
+/**
+ * Запрашивает обновление renderer-а meta-транзакцией без записи в историю.
+ * Это не перерегистрирует plugin и безопасно игнорируется для уничтоженного
+ * редактора.
+ */
 watch(
   () => props.itemsRefreshKey,
   () => {
@@ -133,6 +157,16 @@ watch(
   },
 )
 
+/**
+ * Регистрирует suggestion-plugin для доступного текущего editor instance.
+ *
+ * При повторном запуске watcher сохранённый PluginKey снимается только с
+ * `instance`, переданного текущему callback. Предыдущий editor instance не
+ * сохраняется, поэтому этот watcher не гарантирует unregister его plugin при
+ * смене instance; ключ нового plugin остаётся для unmount cleanup текущего
+ * реактивного editor. Контракт важен для async renderer callbacks: plugin
+ * state не следует считать автоматически очищенным у заменённого instance.
+ */
 watch(
   editor,
   (instance) => {
@@ -215,6 +249,11 @@ watch(
       }),
     })
 
+    /**
+     * Копирует renderer snapshot в реактивное состояние меню.
+     * `clientRect` остаётся функцией, чтобы floating-ui читал свежую геометрию
+     * decoration в момент позиционирования, а не устаревший DOMRect.
+     */
     function applyState(state: SuggestionProps<Item, Item>) {
       referenceRect.value = state.clientRect
       commandFn.value = state.command
@@ -227,6 +266,7 @@ watch(
   { immediate: true },
 )
 
+/** Снимает зарегистрированный plugin только у ещё живого editor instance. */
 onBeforeUnmount(() => {
   const instance = editor.value
   if (registeredKey && instance && !instance.isDestroyed) instance.unregisterPlugin(registeredKey)

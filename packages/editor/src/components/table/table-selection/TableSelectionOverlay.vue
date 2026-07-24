@@ -109,11 +109,23 @@ const overlayContainer = computed(
 )
 
 const floatingRef = shallowRef<HTMLElement | null>(null)
+/**
+ * Virtual reference выделения таблицы.
+ *
+ * Геометрия приходит из реактивного `selectionRect`, а не из единственного
+ * DOM-якоря; пустой DOMRect позволяет overlay пережить промежуточное отсутствие
+ * выделения без обращения к устаревшему элементу.
+ */
 const reference = shallowRef<VirtualElement>({
   getBoundingClientRect: () => selectionRect.value ?? new DOMRect(),
 })
 const { floatingStyles, update } = useFloating(reference, floatingRef, { placement: 'top-start' })
 
+/**
+ * Пересчитывает floating-ui после рендера при смене rect или overlay-элемента.
+ * `useFloating` не может самостоятельно подписаться на реактивный virtual
+ * reference, поэтому этот watcher сохраняет позицию синхронной с resize/selection.
+ */
 watch([selectionRect, floatingRef], () => update(), { flush: 'post' })
 
 const { start: startResizeTracking, stop: stopResizeTracking } = useRafLoop(() => {

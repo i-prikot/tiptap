@@ -11,6 +11,15 @@ interface TableHandleDecorationContext {
   tablePos: number | undefined
 }
 
+/**
+ * Строит временные декорации для активной перестановки строки или столбца.
+ *
+ * Source-декорация помечает исходные ячейки только визуально и не меняет
+ * selection. Widget dropcursor добавляется лишь при отличающейся hover-цели и
+ * показывает сторону вставки относительно `originalIndex`. При отсутствии
+ * `draggingState`, индекса цели или позиции таблицы декорации намеренно не
+ * создаются.
+ */
 export function createTableHandleDecorations({
   editor,
   editorState,

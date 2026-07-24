@@ -21,8 +21,21 @@ import {
 import { createTableHandleDecorations } from './decorations.js'
 import type { TableHandleDragContext, TableHandleState } from './types.js'
 
+/**
+ * PluginKey для freeze-флага. Значение `true` удерживает геометрию ручек во
+ * время внешнего взаимодействия; `false` возвращает обычный hover-режим.
+ */
 export const tableHandlePluginKey = new PluginKey<boolean>('tableHandlePlugin')
 
+/**
+ * Event-driven bridge между ProseMirror, DOM-геометрией таблицы и Vue UI.
+ *
+ * View владеет `TableHandleState`, читает hover из DOM-событий и публикует
+ * снимки через `emitUpdate`. `menuFrozen` приостанавливает hover-пересчёт,
+ * `mouseState` отличает обычное наведение от выделения ячеек, а drag-хелперы
+ * используют этот экземпляр как context. Состояние описывает текущую таблицу и
+ * должно обновляться после каждой транзакции, меняющей DOM или её размеры.
+ */
 class TableHandleView implements TableHandleDragContext {
   editor: Editor
   editorView: EditorView
@@ -35,6 +48,14 @@ class TableHandleView implements TableHandleDragContext {
   emitUpdate: () => void
   throttledMouseMoveHandler: ThrottledFunction<[MouseEvent]>
 
+  /**
+   * Регистрирует все DOM-слушатели, которыми владеет этот view.
+   *
+   * `mousemove` обрабатывается с throttle около одного кадра, `mouseup`
+   * слушается на window для завершения выделения за пределами редактора, а
+   * `dragover`/`drop` привязаны к root (включая ShadowRoot). `destroy`
+   * обязан снять каждый из этих слушателей и отменить отложенный вызов.
+   */
   constructor(editor: Editor, view: EditorView, emit: (state: TableHandleState) => void) {
     this.editor = editor
     this.editorView = view
@@ -52,6 +73,13 @@ class TableHandleView implements TableHandleDragContext {
 
   // клик по параграфу внутри ячейки при активном CellSelection ставит
   // текстовое выделение в этот параграф
+  /**
+   * Переводит клик по параграфу внутри CellSelection в текстовое выделение.
+   *
+   * Это исключение работает только для unfocused редактора: обычный click не
+   * меняется. Переход предотвращает конкуренцию между выделением таблицы и
+   * интерактивным содержимым ячейки, но не управляет drag-state.
+   */
   viewMousedownHandler = (event: MouseEvent) => {
     this.mouseState = 'down'
     const { state, view } = this.editor
@@ -79,6 +107,7 @@ class TableHandleView implements TableHandleDragContext {
     }
   }
 
+  /** Завершает режим выбора, отменяет pending throttle и пересчитывает hover. */
   mouseUpHandler = (event: MouseEvent) => {
     this.mouseState = 'up'
     this.throttledMouseMoveHandler.cancel()
@@ -89,6 +118,13 @@ class TableHandleView implements TableHandleDragContext {
     this.handleMouseMove(event, true)
   }
 
+  /**
+   * Фильтрует hover-события до расчёта геометрии.
+   *
+   * Freeze и режим выбора полностью блокируют обновления; события вне DOM view
+   * игнорируются. В обычном режиме вход от native `mousemove` проходит через
+   * throttled обработчик, а финальный пересчёт после mouseup выполняется сразу.
+   */
   handleMouseMove(event: MouseEvent, throttled: boolean) {
     if (this.menuFrozen || this.mouseState === 'selecting') return
     const target = event.target
@@ -97,6 +133,12 @@ class TableHandleView implements TableHandleDragContext {
       else this.handleMouseMoveNow(event)
   }
 
+  /**
+   * Скрывает ручки и сбрасывает только hover-производные поля.
+   *
+   * Drag-состояние намеренно не изменяется здесь: его terminal cleanup принадлежит
+   * drag-and-drop пути, чтобы не потерять контекст активной перестановки.
+   */
   hideHandles() {
     if (this.state?.show) {
       this.state = {
@@ -112,6 +154,14 @@ class TableHandleView implements TableHandleDragContext {
     }
   }
 
+  /**
+   * Немедленно вычисляет таблицу, ячейку и DOM-якоря под указателем.
+   *
+   * При drag-выделении ячеек ручки скрываются и `mouseState` становится
+   * `selecting`. Для рамки таблицы публикуются только extend-кнопки; для
+   * ячейки — её индексы, прямоугольник и крайние add/remove-кнопки. Ранние
+   * выходы сохраняют предыдущий снимок, если DOM нельзя сопоставить с таблицей.
+   */
   handleMouseMoveNow(event: MouseEvent) {
     const cellInfo = domCellAround(event.target)
     if (cellInfo?.type === 'cell' && this.mouseState === 'down' && !this.state?.draggingState) {
@@ -199,18 +249,39 @@ class TableHandleView implements TableHandleDragContext {
     return false
   }
 
+  /** Делегирует dragover общему обработчику, сохраняя ownership view над state. */
   dragOverHandler = (event: DragEvent) => handleTableHandleDragOver(this, event)
 
+  /**
+   * Завершает throttle и передаёт подтверждение drop общему обработчику.
+   * Успешный путь применяет транзакцию и очищает drag-state; отменённый native
+   * путь дополнительно закрывается экспортируемым `dragEnd`.
+   */
   dropHandler = () => {
     this.throttledMouseMoveHandler.cancel()
     this.mouseState = 'up'
     return handleTableHandleDrop(this)
   }
 
+  /**
+   * Записывает freeze meta в транзакцию, не меняя DOM напрямую.
+   * `null` reducer сохраняет как текущее plugin-state; во view оно ведёт себя
+   * как незамороженное значение для `menuFrozen`, но предыдущее состояние не
+   * восстанавливает.
+   */
   setPluginFrozen = (value: boolean | null) => {
     this.editor.view.dispatch(this.editor.state.tr.setMeta(tableHandlePluginKey, value))
   }
 
+  /**
+   * Сверяет сохранённый UI-снимок с новым ProseMirror state и живым DOM.
+   *
+   * Метод применяет freeze meta, отменяет pending pointer work при freeze и
+   * скрывает ручки при отсоединённой/исчезнувшей таблице. После изменений
+   * структуры ограничивает индексы размерами TableMap, пересчитывает DOMRect и
+   * публикует обновление только при существенном изменении блока, индексов или
+   * геометрии.
+   */
   update(view: EditorView) {
     const frozen = tableHandlePluginKey.getState(view.state)
     if (frozen !== undefined && frozen !== this.menuFrozen) {
@@ -273,6 +344,11 @@ class TableHandleView implements TableHandleDragContext {
     }
   }
 
+  /**
+   * Освобождает throttle и все слушатели, зарегистрированные constructor-ом.
+   * Никакие новые события или UI-emits после уничтожения plugin view не должны
+   * зависеть от этого экземпляра.
+   */
   destroy() {
     this.throttledMouseMoveHandler.cancel()
     this.editorView.dom.removeEventListener('mousemove', this.mouseMoveHandler)
@@ -285,6 +361,14 @@ class TableHandleView implements TableHandleDragContext {
 
 let activeHandleView: TableHandleView | null = null
 
+/**
+ * Создаёт ProseMirror plugin табличных ручек.
+ *
+ * Plugin state содержит только freeze-флаг, а подробный `TableHandleState`
+ * остаётся во view и передаётся callback-ом. Декорации читают этот же view-state
+ * для drag-source и dropcursor; они не создают транзакции и не являются
+ * доказательством валидности drop.
+ */
 export function TableHandlePlugin(editor: Editor, emit: (state: TableHandleState) => void) {
   return new Plugin({
     key: tableHandlePluginKey,
@@ -317,6 +401,14 @@ export function TableHandlePlugin(editor: Editor, emit: (state: TableHandleState
 export const TableHandleExtension = Extension.create({
   name: 'tableHandleExtension',
 
+  /**
+   * Добавляет команды управления freeze без прямого редактирования view-state.
+   *
+   * `freezeHandles`/`unfreezeHandles` всегда возвращают `true`; при
+   * отсутствии dispatch они только подтверждают применимость команды. Реальное
+   * обновление `menuFrozen` происходит в `TableHandleView.update` после
+   * обработки meta-транзакции.
+   */
   addCommands() {
     return {
       freezeHandles:

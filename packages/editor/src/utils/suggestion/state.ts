@@ -2,6 +2,17 @@ import type { Editor } from '@tiptap/core'
 import type { EditorState, PluginKey, Transaction } from '@tiptap/pm/state'
 import type { SuggestionMatch } from './types'
 
+/**
+ * Состояние suggestion-плагина в `PluginKey`.
+ *
+ * При `active` `range`, `query`, `text` и `decorationId` описывают текущий
+ * матч. В неактивном состоянии `range` сохраняет sentinel `{ from: 0, to: 0 }`,
+ * поэтому потребители должны сначала проверять `active`.
+ * `refreshId` принудительно вызывает renderer update без смены текста, а
+ * `dismissedRange` предотвращает повторное открытие того же диапазона после
+ * Escape до выполнения правила сброса. Позиции `dismissedRange` маппятся через
+ * транзакции и не являются постоянными координатами документа.
+ */
 export interface SuggestionPluginState {
   active: boolean
   range: { from: number; to: number }
@@ -50,6 +61,15 @@ interface SuggestionPluginStateConfig {
   }) => boolean
 }
 
+/**
+ * Создаёт reducer состояния ProseMirror для одного suggestion-плагина.
+ *
+ * На каждую транзакцию рассчитывается матч около текущего selection. Плагин
+ * активен только в редактируемом редакторе с пустым selection либо во время
+ * composition; `allow` и `shouldShow` могут дополнительно отклонить матч.
+ * Meta `exit` очищает активное состояние и сохраняет текущий диапазон как
+ * `dismissedRange`, поэтому следующий расчёт не должен немедленно открыть меню.
+ */
 export function createSuggestionPluginState(config: SuggestionPluginStateConfig) {
   const {
     pluginKey,
@@ -75,6 +95,16 @@ export function createSuggestionPluginState(config: SuggestionPluginStateConfig)
       refreshId: 0,
       dismissedRange: null,
     }),
+    /**
+     * Вычисляет следующий снимок без изменения документа.
+     *
+     * Новый `decorationId` генерируется только при первом входе в активный
+     * диапазон и сохраняется при обновлениях, чтобы DOM-якорь floating-ui не
+     * менял идентичность. Если матч отсутствует, selection вышел за границы или
+     * редактор недоступен для редактирования, все поля активного состояния
+     * очищаются; подавленный диапазон очищается только после исчезновения матча
+     * либо по пользовательскому правилу.
+     */
     apply(
       transaction: Transaction,
       prev: SuggestionPluginState,

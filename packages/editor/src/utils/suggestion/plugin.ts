@@ -19,6 +19,18 @@ import type {
 
 export const SuggestionPluginKey = new PluginKey('suggestion')
 
+/**
+ * Создаёт расширенный ProseMirror suggestion-плагин.
+ *
+ * Плагин связывает reducer активного триггера, inline-декорацию, renderer и
+ * floating-ui. На поведение влияют правила поиска (`char`, пробелы, префиксы),
+ * selection/composition, `minQueryLength`, `debounce`, renderer callbacks и
+ * параметры позиционирования. Он не изменяет документ сам по себе: выбор
+ * пункта передаётся в пользовательский `command`.
+ *
+ * @remarks Renderer должен использовать cleanup от `props.mount()` и быть
+ * устойчивым к поздним асинхронным обновлениям после закрытия меню.
+ */
 export function Suggestion<Item = unknown, SelectedProps = unknown>(
   options: SuggestionOptions<Item, SelectedProps>,
 ) {
@@ -55,11 +67,25 @@ export function Suggestion<Item = unknown, SelectedProps = unknown>(
   const renderer: SuggestionRenderer<Item, SelectedProps> = render?.() ?? {}
   const effectiveAllowSpaces = allowSpaces && !allowToIncludeChar
 
+  /**
+   * Закрывает текущее предложение через meta-транзакцию.
+   *
+   * Reducer сбрасывает активные поля и запоминает диапазон как dismissed, а
+   * view lifecycle отменяет загрузку. Это не удаляет триггер и не меняет
+   * selection напрямую.
+   */
   const dispatchExit = (view: EditorView) => {
     view.dispatch(view.state.tr.setMeta(pluginKey, { exit: true }))
   }
 
-  /** Отменяемая (и опционально отложенная) загрузка items. */
+  /**
+   * Создаёт владельца единственной отменяемой и опционально отложенной загрузки.
+   *
+   * Каждый `fetch` сначала отменяет controller и debounce-таймер предыдущего
+   * запроса. Результат помечается `aborted`, если за время ожидания появился
+   * новый запрос или был вызван cleanup; ошибки источника не прерывают lifecycle
+   * плагина и возвращаются как `error` без набора items.
+   */
   function createItemsFetcher() {
     let controller: AbortController | null = null
     let timer: ReturnType<typeof setTimeout> | null = null
@@ -114,6 +140,14 @@ export function Suggestion<Item = unknown, SelectedProps = unknown>(
     floatingUi,
   })
 
+  /**
+   * Определяет, остаётся ли текущий матч скрытым после Escape.
+   *
+   * Пользовательский `shouldResetDismissed` имеет приоритет. Иначе запрос с
+   * пробелами остаётся подавленным, пока не сменится начало диапазона; запрос
+   * без пробелов снова разрешается после изменения, вставляющего пробел. Такая
+   * проверка намеренно зависит от шагов транзакции, а не только от текста.
+   */
   function shouldKeepDismissed(args: {
     match: SuggestionMatch
     dismissedRange: { from: number; to: number }
@@ -153,10 +187,20 @@ export function Suggestion<Item = unknown, SelectedProps = unknown>(
   return new Plugin<SuggestionPluginState>({
     key: pluginKey,
 
+    /**
+     * Владеет renderer-снимком, загрузчиком items и cleanup при уничтожении
+     * plugin view. Асинхронные результаты сверяются с последним plugin state:
+     * после выхода или отмены они не передаются renderer-у.
+     */
     view() {
       let currentProps: SuggestionProps<Item, SelectedProps> | undefined
       const fetcher = createItemsFetcher()
 
+      /**
+       * Передаёт renderer-у только определённые переходы lifecycle.
+       * `stopped` использует предыдущий снимок, поскольку новое состояние уже
+       * очищено reducer-ом и не содержит диапазон закрываемого меню.
+       */
       const emit = (
         phase: 'started' | 'updated' | 'stopped',
         props: SuggestionProps<Item, SelectedProps>,
@@ -167,6 +211,15 @@ export function Suggestion<Item = unknown, SelectedProps = unknown>(
       }
 
       return {
+        /**
+         * Синхронизирует renderer с изменением plugin state.
+         *
+         * Обновление запускается при смене активности, запроса, текста,
+         * диапазона либо `refreshId`. Для короткого запроса декорация остаётся
+         * активной, но загрузчик отменяется. Геометрия берётся из декорации или
+         * fallback курсора и может вернуть `null`; renderer не должен считать
+         * DOM-якорь постоянным между транзакциями.
+         */
         update: async (view, prevState) => {
           const prev = pluginKey.getState(prevState) as SuggestionPluginState | undefined
           const next = pluginKey.getState(view.state) as SuggestionPluginState | undefined

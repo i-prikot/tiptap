@@ -11,6 +11,14 @@ interface SuggestionDecorationsConfig {
   decorationContent: string
 }
 
+/**
+ * Создаёт поставщик inline-декорации активного suggestion-диапазона.
+ *
+ * `data-decoration-id` связывает DOM-элемент с плавающим меню и сохраняется
+ * reducer-ом на протяжении одного активного диапазона. Декорация отсутствует
+ * при неактивном плагине; потребители геометрии не должны считать её DOM-узел
+ * гарантированно существующим во время обновления view.
+ */
 export function createSuggestionDecorations(config: SuggestionDecorationsConfig) {
   const { pluginKey, decorationTag, decorationClass, decorationEmptyClass, decorationContent } =
     config

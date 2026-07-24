@@ -34,6 +34,12 @@ interface SuggestionMountConfig {
   onExit: () => void
 }
 
+/**
+ * Возвращает контейнер для detached floating-элемента.
+ *
+ * Строковый selector проверяется через `querySelector`; невалидный selector и
+ * отсутствие найденного элемента намеренно приводят к `document.body`.
+ */
 function resolveContainer(container: HTMLElement | string | undefined): HTMLElement {
   if (container instanceof HTMLElement) return container
   if (typeof container === 'string') {
@@ -47,6 +53,13 @@ function resolveContainer(container: HTMLElement | string | undefined): HTMLElem
   return document.body
 }
 
+/**
+ * Формирует базовую конфигурацию floating-ui для suggestion-меню.
+ *
+ * Базовый `offset` всегда идёт первым, `flip` добавляется только при включённой
+ * опции, а пользовательский middleware следует за ними. Это определяет порядок
+ * вычислений и не заменяет параметры placement/strategy, переданные движком.
+ */
 export function createSuggestionFloatingUiConfig(
   options: FloatingUiOptions,
 ): SuggestionFloatingUiConfig {
@@ -62,6 +75,15 @@ export function createSuggestionFloatingUiConfig(
   }
 }
 
+/**
+ * Создаёт ленивый источник прямоугольника для virtual reference.
+ *
+ * Если при создании отсутствует DOM-декорация, координаты берутся от текущего
+ * anchor selection с безопасным fallback `null` при недоступном DOMRect. Если
+ * декорация была найдена, её узел повторно ищется по стабильному id при каждом
+ * вызове; после DOM-обновления отсутствие узла также возвращает `null`, а не
+ * устаревшую геометрию.
+ */
 export function createSuggestionClientRect(
   config: SuggestionClientRectConfig,
 ): () => DOMRect | null {
@@ -86,6 +108,16 @@ export function createSuggestionClientRect(
   }
 }
 
+/**
+ * Создаёт `mount` для внешнего renderer-а floating suggestion-меню.
+ *
+ * Виртуальная reference использует актуальный прямоугольник триггера и DOM
+ * редактора как context element. Detached элемент временно добавляется в
+ * настроенный контейнер для измерения; без `onPosition` он скрыт до первого
+ * расчёта. Возвращённый cleanup обязательно останавливает auto-update, снимает
+ * capture-listener внешнего pointerdown и удаляет только самостоятельно
+ * смонтированный элемент.
+ */
 export function createSuggestionMount(config: SuggestionMountConfig): SuggestionProps['mount'] {
   const { getReferenceRect, contextElement, floatingUi, container, dismissOnOutsideClick, onExit } =
     config
@@ -128,6 +160,11 @@ export function createSuggestionMount(config: SuggestionMountConfig): Suggestion
       mountOptions.autoUpdate,
     )
     if (dismissOnOutsideClick) {
+      /**
+       * Закрывает меню только по указателю вне floating-элемента и редактора.
+       * Capture-фаза нужна, чтобы закрытие не зависело от остановки всплытия
+       * внутри пользовательского renderer-а.
+       */
       outsideHandler = (event) => {
         const target = event.target
         if (

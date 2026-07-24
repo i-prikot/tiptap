@@ -2,7 +2,14 @@ import { escapeForRegEx } from '@tiptap/core'
 import type { SuggestionItem } from '../../types/suggestion'
 import type { FindSuggestionMatchConfig, SuggestionMatch } from './types'
 
-/** Ищет активный триггер (`/query`) перед курсором. */
+/**
+ * Ищет активный триггер (например, `/query`) в текстовом узле перед курсором.
+ *
+ * Регулярное выражение учитывает `char`, политики пробелов и повторного
+ * включения триггера, а затем проверяет допустимый префикс или начало строки.
+ * Возвращается только совпадение, пересекающее позицию курсора; совпадения из
+ * другого узла, после недопустимого префикса или вне selection игнорируются.
+ */
 export function findSuggestionMatch(config: FindSuggestionMatchConfig): SuggestionMatch | null {
   const {
     char,
@@ -48,7 +55,13 @@ export function findSuggestionMatch(config: FindSuggestionMatchConfig): Suggesti
   return null
 }
 
-/** Начальная позиция триггера в тексте перед курсором (для удаления). */
+/**
+ * Находит начало последнего триггера в тексте перед курсором для удаления.
+ *
+ * Это упрощённый хелпер: он не применяет правила `allowedPrefixes`, пробелов и
+ * границ matching-движка, поэтому его результат нельзя использовать как замену
+ * `findSuggestionMatch` для показа меню.
+ */
 export function calculateStartPosition(
   pos: number,
   nodeBefore: { text?: string | null } | null | undefined,
@@ -60,7 +73,13 @@ export function calculateStartPosition(
   return index === -1 ? pos : pos - text.substring(index).length
 }
 
-/** Фильтрация + сортировка пунктов по запросу (точное совпадение, префикс). */
+/**
+ * Фильтрует и стабильно приоритизирует готовый набор пунктов по запросу.
+ *
+ * Поиск выполняется по title, subtext и keywords без изменения исходного
+ * массива. Точное совпадение title и затем совпадение по префиксу получают
+ * приоритет; одинаково релевантные элементы сохраняют исходный порядок.
+ */
 export function filterSuggestionItems<Context, T extends SuggestionItem<Context>>(
   items: T[],
   query: string,

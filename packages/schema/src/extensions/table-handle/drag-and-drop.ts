@@ -11,8 +11,16 @@ import {
 import { isValidPosition } from '../../utils/tiptap-utils.js'
 import type { DraggedCellOrientation, TableHandleDragContext } from './types.js'
 
+/**
+ * Контекст последнего созданного TableHandleView для обработчиков drag ручек.
+ *
+ * DOM-обработчики начала drag не получают view напрямую, поэтому используют этот
+ * bridge. Он предназначен для одного активного редактора/ручек и не хранит
+ * переносимое содержимое документа.
+ */
 let activeHandleContext: TableHandleDragContext | null = null
 
+/** Связывает drag-хелперы с актуальным TableHandleView при создании plugin view. */
 export function setActiveTableHandleContext(context: TableHandleDragContext) {
   activeHandleContext = context
 }
@@ -61,6 +69,13 @@ const CLONED_STYLE_PROPS = [
 
 const toKebab = (value: string) => value.replace(/[A-Z]/g, (char) => '-' + char.toLowerCase())
 
+/**
+ * Клонирует DOM для drag preview и переносит ограниченный набор computed styles.
+ *
+ * Клон нужен только браузерному drag image: он не синхронизируется обратно в
+ * редактор, а нормализация переполнения и пробелов предотвращает разрастание
+ * превью за границы исходной строки/столбца.
+ */
 function cloneWithStyles(source: HTMLElement): HTMLElement {
   const clone = source.cloneNode(true) as HTMLElement
   const queue: Array<{ src: Element; dst: Element }> = [{ src: source, dst: clone }]
@@ -102,6 +117,10 @@ function copyCellWidth(source: HTMLElement, target: HTMLElement) {
   }
 }
 
+/**
+ * Собирает изолированное preview выбранной строки с ширинами исходных ячеек.
+ * Возвращает `null`, если DOM таблицы или индекс больше не валидны.
+ */
 function buildRowPreview(table: HTMLElement, rowIndex: number): HTMLTableElement | null {
   const tbody = (table as HTMLTableElement).tBodies?.[0] ?? table.querySelector('tbody')
   if (!tbody) return null
@@ -121,6 +140,10 @@ function buildRowPreview(table: HTMLElement, rowIndex: number): HTMLTableElement
   return previewTable
 }
 
+/**
+ * Собирает изолированное preview выбранного столбца с фиксированной шириной.
+ * Возвращает `null`, если индекс нельзя сопоставить DOM-ячейкам.
+ */
 function buildColumnPreview(table: HTMLElement, colIndex: number): HTMLTableElement | null {
   const tbody = (table as HTMLTableElement).tBodies?.[0] ?? table.querySelector('tbody')
   if (!tbody) return null
@@ -149,6 +172,14 @@ function buildColumnPreview(table: HTMLElement, colIndex: number): HTMLTableElem
   return previewTable
 }
 
+/**
+ * Создаёт временный off-screen DOM-элемент для native drag image.
+ *
+ * Превью ограничено шириной редактора, добавляется в `document.body` только
+ * для измерения/передачи браузеру и удаляется слушателями `drop`/`dragend`,
+ * зарегистрированными при старте drag. Отсутствие DOM таблицы не блокирует drag:
+ * возвращается пустой контейнер с тем же cleanup-контрактом.
+ */
 function createDragImage(
   context: TableHandleDragContext,
   orientation: DraggedCellOrientation,
@@ -198,6 +229,14 @@ function createDragImage(
   return container
 }
 
+/**
+ * Инициализирует native drag строки или столбца из текущей hover-ручки.
+ *
+ * Источник определяется только по shared context и текущему индексу; без них
+ * операция недопустима. При CellSelection сначала устанавливается TextSelection,
+ * затем создаётся preview, фиксируются `originalIndex`, координата указателя и
+ * начальное смещение. Freeze удерживает обычный hover-пересчёт до завершения.
+ */
 function startDrag(orientation: DraggedCellOrientation, event: DragEvent) {
   if (!activeHandleContext?.state) {
     throw new Error(`Attempted to drag table ${orientation}, but no table block was hovered prior.`)
@@ -246,6 +285,13 @@ function startDrag(orientation: DraggedCellOrientation, event: DragEvent) {
 export const colDragStart = (event: DragEvent) => startDrag('col', event)
 export const rowDragStart = (event: DragEvent) => startDrag('row', event)
 
+/**
+ * Завершает native drag без предположения об успешном drop.
+ *
+ * Это terminal cleanup для отменённого и завершённого браузером пути: он всегда
+ * очищает `draggingState`, уведомляет UI и снимает freeze, если общий контекст
+ * ещё содержит состояние.
+ */
 export function dragEnd() {
   if (!activeHandleContext || activeHandleContext.state === undefined) return
   activeHandleContext.state = { ...activeHandleContext.state, draggingState: undefined }
@@ -253,6 +299,14 @@ export function dragEnd() {
   activeHandleContext.setPluginFrozen(null)
 }
 
+/**
+ * Обновляет hover-цель активной перестановки по позиции указателя.
+ *
+ * Координаты ограничиваются границами `tbody`, чтобы `elementsFromPoint` не
+ * выбрал элемент вне таблицы. Функция не перемещает документ: она обновляет
+ * индексы, геометрию и `mousePos` для UI/декораций, скрывает штатный
+ * ProseMirror dropcursor и сохраняет freeze при смене цели.
+ */
 export function handleTableHandleDragOver(context: TableHandleDragContext, event: DragEvent) {
   if (context.state?.draggingState === undefined) return
   event.preventDefault()
@@ -295,6 +349,15 @@ export function handleTableHandleDragOver(context: TableHandleDragContext, event
   if (newIndex !== previousIndex) context.setPluginFrozen(true)
 }
 
+/**
+ * Подтверждает drop и применяет перестановку через команды таблицы.
+ *
+ * До транзакции проверяются наличие drag-состояния, валидность `blockPos`,
+ * целевого индекса и координат исходной строки/столбца. Команда создаёт новое
+ * выделение и dispatch-ит transaction; только успешный путь очищает
+ * `draggingState` и снимает freeze. Остальные terminal browser-пути очищает
+ * `dragEnd`, поэтому UI не должен очищать состояние самостоятельно.
+ */
 export function handleTableHandleDrop(context: TableHandleDragContext) {
   const state = context.state
   if (!state?.draggingState) return false
