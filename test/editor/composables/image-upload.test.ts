@@ -141,10 +141,46 @@ describe('useImageUpload', () => {
 
     await vi.waitFor(() => expect(onError).toHaveBeenCalledOnce())
 
-    expect(onError).toHaveBeenCalledWith(new Error('Upload failed: Invalid URL returned'))
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Upload failed: Invalid URL returned' }),
+    )
     expect(upload.fileItems.value).toMatchObject([
-      { errorMessage: 'Image upload failed', status: 'error' },
+      { error: { key: 'errors.imageUploadInvalidUrl' }, status: 'error' },
     ])
     expect(editor.state.doc.firstChild?.type.name).toBe('imageUpload')
+  })
+
+  it('aborts a removed upload and ignores its late success result', async () => {
+    let resolveUpload: ((url: string) => void) | undefined
+    let abortSignal: AbortSignal | undefined
+    const editor = createEditor()
+    const replacementChain = createReplacementChain()
+    vi.spyOn(editor, 'chain').mockReturnValue(replacementChain as never)
+    const upload = useUpload(editor, {
+      type: 'image',
+      accept: 'image/*',
+      limit: 1,
+      maxSize: 1_000,
+      upload: vi.fn((_file, callbacks) => {
+        abortSignal = callbacks.abortSignal
+        return new Promise<string>((resolve) => {
+          resolveUpload = resolve
+        })
+      }),
+      HTMLAttributes: {},
+    })
+
+    upload.handleFileInputChange(
+      selectFile(new File(['photo'], 'photo.png', { type: 'image/png' })),
+    )
+    await vi.waitFor(() => expect(upload.fileItems.value).toHaveLength(1))
+
+    upload.removeFileItem(upload.fileItems.value[0].id)
+    resolveUpload?.('/uploads/photo.png')
+    await Promise.resolve()
+
+    expect(abortSignal?.aborted).toBe(true)
+    expect(upload.fileItems.value).toEqual([])
+    expect(replacementChain.run).not.toHaveBeenCalled()
   })
 })

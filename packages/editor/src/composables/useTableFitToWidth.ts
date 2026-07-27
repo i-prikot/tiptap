@@ -35,11 +35,33 @@ export function useTableFitToWidth(editor: ComputedRef<Editor | null>) {
     try {
       const table = getTable(instance)
       if (!table) return false
-      const dom = instance.view.dom
-      const style = getComputedStyle(dom)
-      const paddingLeft = parseFloat(style.paddingLeft) || 0
-      const paddingRight = parseFloat(style.paddingRight) || 0
-      const available = dom.clientWidth - paddingLeft - paddingRight
+
+      // Measure the actual content area of the tableWrapper — not the editor root.
+      // The .tableWrapper has padding-inline (1rem left + 1.5rem right) that the
+      // editor root clientWidth does not account for, causing the table to overflow.
+      //
+      // nodeDOM(table.pos) returns the blockContainer (div[data-content-type='table'])
+      // because NotionTableView reassigns this.dom to blockContainer in setupDOMStructure().
+      // .tableWrapper is a CHILD of blockContainer, so use querySelector (not closest).
+      const tableDomNode = instance.view.nodeDOM(table.pos) as HTMLElement | null
+      const tableWrapper = tableDomNode?.querySelector?.('.tableWrapper') as HTMLElement | null
+
+      let available: number
+      if (tableWrapper) {
+        const wStyle = getComputedStyle(tableWrapper)
+        const wPL = parseFloat(wStyle.paddingLeft) || 0
+        const wPR = parseFloat(wStyle.paddingRight) || 0
+        available = tableWrapper.clientWidth - wPL - wPR
+      } else {
+        // Fallback: editor root minus its own padding
+        const dom = instance.view.dom
+        const style = getComputedStyle(dom)
+        available =
+          dom.clientWidth -
+          (parseFloat(style.paddingLeft) || 0) -
+          (parseFloat(style.paddingRight) || 0)
+      }
+
       const columns = table.map.width
       if (columns === 0) return false
       const rawWidth = Math.floor((available - columns - 8) / columns)

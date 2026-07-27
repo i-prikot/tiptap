@@ -6,6 +6,28 @@ import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import type { FunctionalComponent } from 'vue'
+import { BlockquoteIcon, CodeBlockIcon, TypeIcon } from '../../icons'
+import {
+  BLOCKQUOTE_SHORTCUT_KEY,
+  CODE_BLOCK_SHORTCUT_KEY,
+  HEADING_SHORTCUT_KEYS,
+  headingIcons,
+  LIST_LABELS,
+  LIST_SHORTCUT_KEYS,
+  listIcons,
+  TEXT_SHORTCUT_KEY,
+  type ListType,
+} from './block-conversion-definitions'
+export {
+  BLOCKQUOTE_SHORTCUT_KEY,
+  CODE_BLOCK_SHORTCUT_KEY,
+  HEADING_SHORTCUT_KEYS,
+  headingIcons,
+  LIST_SHORTCUT_KEYS,
+  listIcons,
+  TEXT_SHORTCUT_KEY,
+  type ListType,
+} from './block-conversion-definitions'
 import {
   isNodeInSchema,
   isNodeTypeSelected,
@@ -13,20 +35,6 @@ import {
 } from '../../utils/tiptap-utils'
 import { CONVERTIBLE_TYPES, convertSelectedBlock } from './block-conversion'
 import { useEditorSelectionSignal } from '../useEditorSelectionSignal'
-import {
-  BlockquoteIcon,
-  CodeBlockIcon,
-  HeadingFiveIcon,
-  HeadingFourIcon,
-  HeadingOneIcon,
-  HeadingSixIcon,
-  HeadingThreeIcon,
-  HeadingTwoIcon,
-  ListIcon,
-  ListOrderedIcon,
-  ListTodoIcon,
-  TypeIcon,
-} from '../../icons'
 
 export interface BlockConversionApi {
   isActive: ComputedRef<boolean>
@@ -35,46 +43,6 @@ export interface BlockConversionApi {
   label: string
   shortcutKeys?: string
   Icon: FunctionalComponent
-}
-
-export const TEXT_SHORTCUT_KEY = 'mod+alt+0'
-export const HEADING_SHORTCUT_KEYS: Record<number, string> = {
-  1: 'ctrl+alt+1',
-  2: 'ctrl+alt+2',
-  3: 'ctrl+alt+3',
-  4: 'ctrl+alt+4',
-  5: 'ctrl+alt+5',
-  6: 'ctrl+alt+6',
-}
-export const LIST_SHORTCUT_KEYS: Record<ListType, string> = {
-  bulletList: 'mod+shift+8',
-  orderedList: 'mod+shift+7',
-  taskList: 'mod+shift+9',
-}
-export const BLOCKQUOTE_SHORTCUT_KEY = 'mod+shift+b'
-export const CODE_BLOCK_SHORTCUT_KEY = 'mod+alt+c'
-
-export const headingIcons: Record<number, FunctionalComponent> = {
-  1: HeadingOneIcon,
-  2: HeadingTwoIcon,
-  3: HeadingThreeIcon,
-  4: HeadingFourIcon,
-  5: HeadingFiveIcon,
-  6: HeadingSixIcon,
-}
-
-export type ListType = 'bulletList' | 'orderedList' | 'taskList'
-
-export const listIcons: Record<ListType, FunctionalComponent> = {
-  bulletList: ListIcon,
-  orderedList: ListOrderedIcon,
-  taskList: ListTodoIcon,
-}
-
-const LIST_LABELS: Record<ListType, string> = {
-  bulletList: 'Bullet List',
-  orderedList: 'Numbered List',
-  taskList: 'To-do list',
 }
 
 export function canToggleText(editor: Editor | null, turnInto = true): boolean {

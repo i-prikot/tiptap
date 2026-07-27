@@ -101,6 +101,14 @@ function mountOverlay(editor: Editor, showResizeHandles = true) {
   return wrapper
 }
 
+function getSelectionBorder(): HTMLElement {
+  const border = document.querySelector<HTMLElement>(
+    '.tiptap-table-selection-overlay > div:nth-child(2)',
+  )
+  if (!border) throw new Error('Expected selection border')
+  return border
+}
+
 afterEach(() => {
   while (wrappers.length) wrappers.pop()?.unmount()
   while (editors.length) editors.pop()?.destroy()
@@ -139,5 +147,22 @@ describe('table selection overlay', () => {
 
     expect(document.querySelector('.tiptap-table-selection-overlay')).not.toBeNull()
     expect(document.querySelectorAll('[style*="cursor"]')).toHaveLength(0)
+  })
+
+  it('refreshes an active selection after a non-resize document transaction', async () => {
+    const fixture = createTableFixture()
+    mountOverlay(fixture.editor)
+    await nextTick()
+    await nextTick()
+
+    expect(getSelectionBorder().style.width).toBe('240px')
+    setRect(fixture.cells[0]![1]!, 120, 0, 180, 40)
+    setRect(fixture.cells[1]![1]!, 120, 40, 180, 40)
+    fixture.editor.view.dispatch(
+      fixture.editor.state.tr.setNodeMarkup(fixture.tablePos, undefined, fixture.table.attrs),
+    )
+    await nextTick()
+
+    expect(getSelectionBorder().style.width).toBe('300px')
   })
 })

@@ -53,31 +53,19 @@
  */
 import { createLogger } from '@i-prikot/editor-schema'
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
-import type { CSSProperties } from 'vue'
 import { CellSelection, cellAround, columnResizingPluginKey } from '@tiptap/pm/tables'
+import { isColumnResizePluginMeta, type ColumnResizeTransactionPayload } from './column-resize-meta'
 import { useFloating } from '@floating-ui/vue'
 import type { VirtualElement } from '@floating-ui/vue'
 import { TableCellHandleMenu } from '../table-cell-handle'
+import {
+  getTableSelectionHandleStyle,
+  tableSelectionCorners,
+  type TableSelectionCorner,
+} from './selection-overlay-handles'
 import { useRafLoop, useTableSelectionRect, useTiptapEditor } from '../../../composables'
 import { domCellAround } from '../../../utils/table-utils'
 import { createDevelopmentDiagnostics } from '../../../utils/development-diagnostics'
-
-type Corner = 'tl' | 'tr' | 'bl' | 'br'
-
-interface ColumnResizeTransactionPayload {
-  transaction: {
-    getMeta(key: typeof columnResizingPluginKey): unknown
-  }
-}
-
-interface ColumnResizePluginMeta {
-  setDragging?: unknown | null
-  setHandle?: unknown | null
-}
-
-function isColumnResizePluginMeta(meta: unknown): meta is ColumnResizePluginMeta {
-  return typeof meta === 'object' && meta !== null
-}
 
 const logger = createLogger('TableSelectionOverlay')
 
@@ -95,14 +83,14 @@ const {
   tableDom,
   refresh: refreshTableSelection,
 } = useTableSelectionRect(editor)
-const activeCorner = ref<Corner | null>(null)
+const activeCorner = ref<TableSelectionCorner | null>(null)
 const menuOpen = ref(false)
 const anchorCellPos = ref<number | null>(null)
 let stopCornerResize: (() => void) | null = null
 
 const diagnostics = createDevelopmentDiagnostics('TableSelectionOverlay')
 
-const corners: Corner[] = ['tl', 'tr', 'bl', 'br']
+const corners = tableSelectionCorners
 
 const overlayContainer = computed(
   () => tableDom.value?.querySelector<HTMLElement>('.table-selection-overlay-container') ?? null,
@@ -152,15 +140,24 @@ watch(
     const onSelectionUpdate = () => refreshTableSelection()
     const onTransaction = ({ transaction }: ColumnResizeTransactionPayload) => {
       const meta = transaction.getMeta(columnResizingPluginKey)
-      if (!isColumnResizePluginMeta(meta)) return
+      if (isColumnResizePluginMeta(meta)) {
+        const hasDraggingUpdate = Object.prototype.hasOwnProperty.call(meta, 'setDragging')
+        const hasHandleUpdate = Object.prototype.hasOwnProperty.call(meta, 'setHandle')
+        if (!hasDraggingUpdate && !hasHandleUpdate) return
 
-      const hasDraggingUpdate = Object.prototype.hasOwnProperty.call(meta, 'setDragging')
-      const hasHandleUpdate = Object.prototype.hasOwnProperty.call(meta, 'setHandle')
-      if (!hasDraggingUpdate && !hasHandleUpdate) return
+        if (hasDraggingUpdate && meta.setDragging) startResizeTracking()
+        if (hasDraggingUpdate && meta.setDragging == null) stopResizeTracking()
+        refreshTableSelection()
+        return
+      }
 
-      if (hasDraggingUpdate && meta.setDragging) startResizeTracking()
-      if (hasDraggingUpdate && meta.setDragging == null) stopResizeTracking()
-      refreshTableSelection()
+      // Non-resize doc changes (e.g. fit-to-width rewrites colwidth without
+      // going through the resize plugin) also need an overlay geometry refresh.
+      // Guard on selectionRect to avoid the getBoundingClientRect cost on
+      // every keystroke when no table selection is active.
+      if (transaction.docChanged && selectionRect.value !== null) {
+        refreshTableSelection()
+      }
     }
     instance.on('selectionUpdate', onSelectionUpdate)
     instance.on('transaction', onTransaction as never)
@@ -183,35 +180,12 @@ onBeforeUnmount(() => {
 })
 
 // -------- угловые точки: ресайз выделения перетаскиванием
-function cornerStyle(corner: Corner): CSSProperties {
-  const base: CSSProperties = {
-    position: 'absolute',
-    width: '15px',
-    height: '15px',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'transparent',
-    zIndex: 10,
-  }
-  const positions: Record<Corner, CSSProperties> = {
-    tl: { top: '-7.5px', left: '-7.5px', cursor: menuOpen.value ? 'default' : 'nwse-resize' },
-    tr: { top: '-7.5px', right: '-7.5px', cursor: menuOpen.value ? 'default' : 'nesw-resize' },
-    bl: { bottom: '-7.5px', left: '-7.5px', cursor: menuOpen.value ? 'default' : 'nesw-resize' },
-    br: { bottom: '-7.5px', right: '-7.5px', cursor: menuOpen.value ? 'default' : 'nwse-resize' },
-  }
-  const highlighted = !activeCorner.value || activeCorner.value === corner
-  return {
-    ...base,
-    ...positions[corner],
-    opacity: menuOpen.value ? 0.3 : highlighted ? 1 : 0.5,
-    pointerEvents: menuOpen.value ? 'none' : 'auto',
-  }
+function cornerStyle(corner: TableSelectionCorner) {
+  return getTableSelectionHandleStyle(corner, activeCorner.value, menuOpen.value)
 }
 
 /** Позиция противоположного угла выделения — якорь при ресайзе. */
-function findAnchorCell(corner: Corner): number | null {
+function findAnchorCell(corner: TableSelectionCorner): number | null {
   const instance = editor.value
   const rect = selectionRect.value
   if (!instance || !rect) return null
@@ -249,7 +223,7 @@ function findAnchorCell(corner: Corner): number | null {
     if (near(cellRect.right, rect.right) && near(cellRect.bottom, rect.bottom))
       cornersFound.bottomRight = pos
   })
-  const opposite: Record<Corner, string> = {
+  const opposite: Record<TableSelectionCorner, string> = {
     tl: 'bottomRight',
     tr: 'bottomLeft',
     bl: 'topRight',
@@ -258,7 +232,7 @@ function findAnchorCell(corner: Corner): number | null {
   return cornersFound[opposite[corner]]
 }
 
-function startResize(corner: Corner, event: MouseEvent) {
+function startResize(corner: TableSelectionCorner, event: MouseEvent) {
   const instance = editor.value
   if (!instance || !selectionRect.value || menuOpen.value || !props.showResizeHandles) return
   stopCornerResize?.()

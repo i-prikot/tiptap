@@ -211,5 +211,25 @@ export default [
     },
   },
 
+  {
+    name: 'project/source-size-policy',
+    files: [
+      'apps/**/*.{ts,vue,js,cjs,mjs}',
+      'packages/**/*.{ts,vue,js,cjs,mjs}',
+      'test/**/*.{ts,vue,js,cjs,mjs}',
+      'e2e/**/*.{ts,vue,js,cjs,mjs}',
+      'scripts/**/*.{ts,vue,js,cjs,mjs}',
+      '*.{config,setup}.{js,ts,cjs,mjs}',
+      'eslint.config.js',
+    ],
+    rules: {
+      'max-lines': ['error', { max: 300, skipBlankLines: false, skipComments: false }],
+      'max-lines-per-function': [
+        'error',
+        { max: 100, skipBlankLines: true, skipComments: false, IIFEs: true },
+      ],
+    },
+  },
+
   eslintConfigPrettier,
 ]
