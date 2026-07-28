@@ -6,6 +6,7 @@
       :data-style="variant"
       :data-size="size"
       v-bind="attrsWithoutClass"
+      :aria-label="accessibleName"
     >
       <slot />
     </button>
@@ -26,6 +27,7 @@
     :data-style="variant"
     :data-size="size"
     v-bind="attrsWithoutClass"
+    :aria-label="accessibleName"
   >
     <slot />
   </button>
@@ -58,4 +60,10 @@ const attrsWithoutClass = computed(() => {
   const { class: _class, ...rest } = attrs
   return rest
 })
+const accessibleName = computed(
+  () =>
+    (attrs['aria-label'] as string | undefined) ??
+    props.tooltip ??
+    (attrs.title as string | undefined),
+)
 </script>

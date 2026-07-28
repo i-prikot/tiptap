@@ -8,7 +8,7 @@
     :items-refresh-key="messages"
     :items="getFilteredItems"
   >
-    <template #default="{ items, selectedIndex, onSelect }">
+    <template #default="{ items, selectedIndex, optionId, onSelect }">
       <Card
         v-if="items.length"
         class="tiptap-slash-card"
@@ -28,6 +28,7 @@
                   :key="`item-${entry.index}-${entry.item.title}`"
                   :item="entry.item"
                   :is-selected="entry.index === selectedIndex"
+                  :option-id="optionId(entry.index)"
                   @select="onSelect(entry.item)"
                 />
               </CardItemGroup>
@@ -37,6 +38,7 @@
                   :key="`item-${entry.index}-${entry.item.title}`"
                   :item="entry.item"
                   :is-selected="entry.index === selectedIndex"
+                  :option-id="optionId(entry.index)"
                   @select="onSelect(entry.item)"
                 />
               </template>
@@ -48,6 +50,7 @@
               :key="`item-${index}-${item.title}`"
               :item="item"
               :is-selected="index === selectedIndex"
+              :option-id="optionId(index)"
               @select="onSelect(item)"
             />
           </template>

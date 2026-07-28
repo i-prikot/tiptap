@@ -1,9 +1,12 @@
 <template>
   <Button
     v-if="emoji"
+    :id="optionId"
     ref="buttonRef"
     variant="ghost"
     :data-active-state="isSelected ? 'on' : 'off'"
+    role="option"
+    :aria-selected="isSelected"
     @click="emit('select')"
   >
     <img
@@ -24,7 +27,12 @@ import type { EmojiItem } from '@tiptap/extension-emoji'
 import { Button } from '../../primitives'
 import { getElementOverflowPosition } from '../../../utils/selection-utils'
 
-const props = defineProps<{ emoji: EmojiItem; isSelected: boolean; selector: string }>()
+const props = defineProps<{
+  emoji: EmojiItem
+  isSelected: boolean
+  selector: string
+  optionId?: string
+}>()
 const emit = defineEmits<{ select: [] }>()
 
 const buttonRef = shallowRef<ComponentPublicInstance | null>(null)

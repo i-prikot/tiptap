@@ -83,6 +83,34 @@ describe('DropdownMenu', () => {
     expect(onOpenChange).toHaveBeenNthCalledWith(2, false)
   })
 
+  it('returns focus to the keyboard trigger after Escape and outside dismissal', async () => {
+    const firstCase = mountInDocument(DropdownFixture, {
+      props: { closeOnSelect: true, onOpenChange: vi.fn(), onSelect: vi.fn() },
+    })
+    const firstTrigger = firstCase.get('#dropdown-trigger').element
+
+    await firstCase.get('#dropdown-trigger').trigger('keydown', { key: 'ArrowDown' })
+    await settleTeleportUpdates()
+    expect(document.activeElement).toBe(requireDocumentElement('#dropdown-item'))
+
+    dispatchDocumentKeydown('Escape')
+    await settleTeleportUpdates()
+    expect(document.activeElement).toBe(firstTrigger)
+
+    const secondCase = mountInDocument(DropdownFixture, {
+      props: { closeOnSelect: true, onOpenChange: vi.fn(), onSelect: vi.fn() },
+    })
+    const secondTrigger = secondCase.get('#dropdown-trigger').element
+
+    await secondCase.get('#dropdown-trigger').trigger('keydown', { key: 'ArrowDown' })
+    await settleTeleportUpdates()
+    expect(document.activeElement).toBe(requireDocumentElement('#dropdown-item'))
+
+    dispatchDocumentPointerDown()
+    await settleTeleportUpdates()
+    expect(document.activeElement).toBe(secondTrigger)
+  })
+
   it('closes an open menu on outside document pointerdown', async () => {
     const { onOpenChange } = await openDropdown()
 

@@ -3,7 +3,10 @@ import { defineComponent, h, ref, type Ref } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 import { useMenuNavigation } from '../../../src/editor/composables/useMenuNavigation'
 
-function createNavigation(orientation: 'vertical' | 'horizontal' | 'both' = 'both') {
+function createNavigation(
+  orientation: 'vertical' | 'horizontal' | 'both' = 'both',
+  shouldHandleEvent?: (event: KeyboardEvent) => boolean,
+) {
   const host = document.createElement('div')
   document.body.append(host)
   const items = ref(['first', 'second', 'third'])
@@ -24,6 +27,7 @@ function createNavigation(orientation: 'vertical' | 'horizontal' | 'both' = 'bot
           onSelect: (item) => selected.push(item),
           orientation,
           query,
+          shouldHandleEvent,
         })
         selectedIndex = navigation.selectedIndex
         setSelectedIndex = navigation.setSelectedIndex
@@ -69,6 +73,27 @@ describe('useMenuNavigation', () => {
     navigation.trigger('Unknown')
     expect(navigation.selectedIndex.value).toBe(0)
 
+    navigation.wrapper.unmount()
+    navigation.host.remove()
+  })
+
+  it('skips navigation for events rejected by the consumer predicate', () => {
+    const navigation = createNavigation(
+      'horizontal',
+      (event) => !(event.target instanceof HTMLInputElement),
+    )
+    const input = document.createElement('input')
+    navigation.host.append(input)
+    const event = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowRight',
+    })
+
+    input.dispatchEvent(event)
+
+    expect(event.defaultPrevented).toBe(false)
+    expect(navigation.selectedIndex.value).toBe(0)
     navigation.wrapper.unmount()
     navigation.host.remove()
   })

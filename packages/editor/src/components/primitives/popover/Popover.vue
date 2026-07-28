@@ -9,19 +9,34 @@
     :wrapper-style="{ minWidth: 'max-content', zIndex: 50 }"
     data-radix-popper-content-wrapper=""
   >
-    <div class="tiptap-popover" data-state="open" :data-side="resolvedPlacement">
+    <div
+      :id="overlay.contentId"
+      class="tiptap-popover"
+      :role="role"
+      :aria-label="ariaLabel"
+      :aria-labelledby="ariaLabelledby"
+      data-state="open"
+      :data-side="resolvedPlacement"
+    >
       <slot />
     </div>
   </FloatingPositioningWrapper>
 </template>
 
 <script setup lang="ts">
-/**
- * контент, закрытие по Escape/клику снаружи.
- */
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watchEffect } from 'vue'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  shallowRef,
+  watch,
+  watchEffect,
+} from 'vue'
 import { flip, offset as offsetMiddleware, shift, size, useFloating } from '@floating-ui/vue'
 import type { Placement } from '@floating-ui/vue'
+import { useOverlayAccessibility } from '../../../composables'
 import { throttledAutoUpdate } from '../../../utils/throttle'
 import { FloatingPositioningWrapper } from '../floating-positioning-wrapper'
 
@@ -32,8 +47,21 @@ const props = withDefaults(
     align?: 'start' | 'center' | 'end'
     sideOffset?: number
     alignOffset?: number
+    role?: 'dialog' | 'menu' | 'listbox' | 'group'
+    ariaLabel?: string
+    ariaLabelledby?: string
+    initialFocusSelector?: string
+    returnFocus?: boolean
   }>(),
-  { open: undefined, side: 'bottom', align: 'center', sideOffset: 4, alignOffset: 0 },
+  {
+    open: undefined,
+    side: 'bottom',
+    align: 'center',
+    sideOffset: 4,
+    alignOffset: 0,
+    role: 'group',
+    returnFocus: true,
+  },
 )
 
 const emit = defineEmits<{ 'update:open': [value: boolean] }>()
@@ -47,6 +75,11 @@ const open = computed({
   },
 })
 
+const triggerWrapperRef = shallowRef<HTMLElement | null>(null)
+const reference = shallowRef<HTMLElement | null>(null)
+const floatingRef = shallowRef<HTMLElement | null>(null)
+const overlay = useOverlayAccessibility({ component: 'popover' })
+
 function setOpen(value: boolean) {
   open.value = value
 }
@@ -55,13 +88,27 @@ function toggle() {
   setOpen(!open.value)
 }
 
-const triggerWrapperRef = shallowRef<HTMLElement | null>(null)
-const reference = shallowRef<HTMLElement | null>(null)
-const floatingRef = shallowRef<HTMLElement | null>(null)
+function getPopupType() {
+  if (props.role === 'menu' || props.role === 'listbox') return props.role
+  return 'dialog'
+}
+
+function syncTriggerAttributes() {
+  const trigger = reference.value
+  if (!trigger) return
+
+  overlay.setTrigger(trigger)
+  trigger.setAttribute('aria-haspopup', getPopupType())
+  trigger.setAttribute('aria-expanded', String(open.value))
+  trigger.setAttribute('aria-controls', overlay.contentId)
+}
 
 onMounted(() => {
   reference.value = (triggerWrapperRef.value?.firstElementChild as HTMLElement | null) ?? null
+  syncTriggerAttributes()
 })
+
+watch([reference, open], syncTriggerAttributes, { flush: 'post' })
 
 const placement = computed<Placement>(() =>
   props.align === 'center' ? props.side : (`${props.side}-${props.align}` as Placement),
@@ -91,34 +138,47 @@ const { floatingStyles, placement: resolvedPlacement } = useFloating(reference, 
   ],
 })
 
-// transform-origin у края, прилегающего к триггеру (как в Radix)
 watchEffect(
   () => {
     const [resolvedSide, resolvedAlign] = resolvedPlacement.value.split('-')
-    let origin: string
-    if (resolvedSide === 'top' || resolvedSide === 'bottom') {
-      const x = resolvedAlign === 'start' ? 'left' : resolvedAlign === 'end' ? 'right' : 'center'
-      origin = `${x} ${resolvedSide === 'top' ? 'bottom' : 'top'}`
-    } else {
-      const y = resolvedAlign === 'start' ? 'top' : resolvedAlign === 'end' ? 'bottom' : 'center'
-      origin = `${resolvedSide === 'left' ? 'right' : 'left'} ${y}`
-    }
+    const origin =
+      resolvedSide === 'top' || resolvedSide === 'bottom'
+        ? `${resolvedAlign === 'start' ? 'left' : resolvedAlign === 'end' ? 'right' : 'center'} ${
+            resolvedSide === 'top' ? 'bottom' : 'top'
+          }`
+        : `${resolvedSide === 'left' ? 'right' : 'left'} ${
+            resolvedAlign === 'start' ? 'top' : resolvedAlign === 'end' ? 'bottom' : 'center'
+          }`
     floatingRef.value?.style.setProperty('--radix-popover-content-transform-origin', origin)
   },
   { flush: 'post' },
 )
 
+function focusInitialElement() {
+  const selector = props.initialFocusSelector
+  if (!selector) return
+  nextTick(() => floatingRef.value?.querySelector<HTMLElement>(selector)?.focus())
+}
+
+watch(open, async (isOpen, wasOpen) => {
+  if (isOpen) {
+    focusInitialElement()
+  } else if (wasOpen && props.returnFocus) {
+    await overlay.restoreTriggerFocus(floatingRef.value)
+  }
+})
+
 function handleOutsidePointerDown(event: PointerEvent) {
   if (!open.value) return
   const target = event.target as Node | null
-  if (!target) return
-  if (floatingRef.value?.contains(target)) return
-  if (reference.value?.contains(target)) return
+  if (!target || floatingRef.value?.contains(target) || reference.value?.contains(target)) return
   setOpen(false)
 }
 
 function handleKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape' && open.value) setOpen(false)
+  if (event.key !== 'Escape' || !open.value) return
+  event.preventDefault()
+  setOpen(false)
 }
 
 onMounted(() => {

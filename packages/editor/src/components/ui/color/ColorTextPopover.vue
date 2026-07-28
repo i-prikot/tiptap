@@ -1,5 +1,5 @@
 <template>
-  <ColorPopoverShell :visible="isVisible">
+  <ColorPopoverShell :visible="isVisible" :aria-label="label">
     <template #trigger>
       <Button
         type="button"

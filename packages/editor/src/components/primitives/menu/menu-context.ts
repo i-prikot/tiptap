@@ -1,20 +1,22 @@
-// Контекст меню (ariakit Menu → Vue): состояние открытия + reference.
 import type { InjectionKey, Ref, ShallowRef } from 'vue'
 import type { Placement } from '@floating-ui/vue'
+import type { OverlayFocusTarget } from '../../../composables'
 
 export interface MenuContext {
   open: Ref<boolean>
   setOpen: (value: boolean) => void
   reference: ShallowRef<HTMLElement | null>
+  content: ShallowRef<HTMLElement | null>
+  setContent: (element: HTMLElement | null) => void
+  contentId: string
   placement: Placement
-  /** Закрыть всю цепочку меню (включая родительские). */
   closeAll: () => void
-  /** Является ли данное меню подменю (вложенным в другое меню). */
   isSubmenu: boolean
-  /** Сбросить отложенное закрытие подменю по наведению. */
   cancelClose: () => void
-  /** Запланировать закрытие подменю с задержкой после ухода курсора. */
   scheduleClose: () => void
+  openFromKeyboard: (event: KeyboardEvent, target: OverlayFocusTarget) => void
+  consumeFocusTarget: () => OverlayFocusTarget | null
+  restoreTriggerFocus: () => Promise<boolean>
 }
 
 export const menuInjectionKey: InjectionKey<MenuContext> = Symbol('menu')

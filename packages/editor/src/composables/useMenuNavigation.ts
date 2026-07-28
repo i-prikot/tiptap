@@ -4,6 +4,7 @@
 import { onBeforeUnmount, ref, watch } from 'vue'
 import type { ComputedRef, Ref } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
+import { getNextRovingIndex } from './useOverlayAccessibility'
 
 export interface UseMenuNavigationOptions<Item> {
   editor: ComputedRef<Editor | null> | Ref<Editor | null>
@@ -14,6 +15,8 @@ export interface UseMenuNavigationOptions<Item> {
   onClose?: () => void
   orientation?: 'vertical' | 'horizontal' | 'both'
   autoSelectFirstItem?: boolean
+  handleTab?: boolean
+  shouldHandleEvent?: (event: KeyboardEvent) => boolean
 }
 
 export function useMenuNavigation<Item>(options: UseMenuNavigationOptions<Item>) {
@@ -26,22 +29,23 @@ export function useMenuNavigation<Item>(options: UseMenuNavigationOptions<Item>)
     onClose,
     orientation = 'vertical',
     autoSelectFirstItem = true,
+    handleTab = true,
+    shouldHandleEvent,
   } = options
 
   const selectedIndex = ref(autoSelectFirstItem ? 0 : -1)
 
   const handleKeydown = (event: KeyboardEvent): boolean => {
+    if (shouldHandleEvent && !shouldHandleEvent(event)) return false
+
     const list = items.value
     if (!list.length) return false
 
     const moveNext = () => {
-      selectedIndex.value = selectedIndex.value === -1 ? 0 : (selectedIndex.value + 1) % list.length
+      selectedIndex.value = getNextRovingIndex(selectedIndex.value, list.length, 'next')
     }
     const movePrev = () => {
-      selectedIndex.value =
-        selectedIndex.value === -1
-          ? list.length - 1
-          : (selectedIndex.value - 1 + list.length) % list.length
+      selectedIndex.value = getNextRovingIndex(selectedIndex.value, list.length, 'previous')
     }
 
     switch (event.key) {
@@ -66,17 +70,18 @@ export function useMenuNavigation<Item>(options: UseMenuNavigationOptions<Item>)
         moveNext()
         return true
       case 'Tab':
+        if (!handleTab) return false
         event.preventDefault()
         if (event.shiftKey) movePrev()
         else moveNext()
         return true
       case 'Home':
         event.preventDefault()
-        selectedIndex.value = 0
+        selectedIndex.value = getNextRovingIndex(selectedIndex.value, list.length, 'first')
         return true
       case 'End':
         event.preventDefault()
-        selectedIndex.value = list.length - 1
+        selectedIndex.value = getNextRovingIndex(selectedIndex.value, list.length, 'last')
         return true
       case 'Enter': {
         if (event.isComposing) return false

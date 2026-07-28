@@ -3,19 +3,12 @@
 </template>
 
 <script setup lang="ts">
-/**
- * Примитив для компактного одноуровневого селектора, принадлежащего явному
- * DropdownMenuTrigger: например, TurnIntoDropdown и список участников.
- * DropdownMenuContent настраивает side/align/sideOffset. Для контекстных
- * действий и вложенных подменю с placement, задаваемым владеющим Menu,
- * hover-таймингом и
- * closeAll по родительской цепочке используйте Menu; не подменяйте примитивы
- * только потому, что оба рендерят позиционируемое меню.
- */
+/** A trigger-owned, single-level menu with keyboard focus management. */
 import { computed, provide, ref, shallowRef } from 'vue'
+import { useOverlayAccessibility, type OverlayFocusTarget } from '../../../composables'
 import { dropdownMenuInjectionKey } from './dropdown-menu-context'
 
-const props = defineProps<{ open?: boolean }>()
+const props = withDefaults(defineProps<{ open?: boolean }>(), { open: undefined })
 const emit = defineEmits<{ 'update:open': [value: boolean] }>()
 
 const uncontrolledOpen = ref(props.open ?? false)
@@ -27,10 +20,35 @@ const open = computed({
   },
 })
 const reference = shallowRef<HTMLElement | null>(null)
+const overlay = useOverlayAccessibility({ component: 'dropdown-menu' })
+let focusTarget: OverlayFocusTarget | null = null
+
+function setOpen(value: boolean) {
+  open.value = value
+}
+
+function openFromKeyboard(event: KeyboardEvent, target: OverlayFocusTarget) {
+  overlay.recordOpenEvent(event)
+  focusTarget = target
+  setOpen(true)
+}
+
+function consumeFocusTarget() {
+  const target = focusTarget
+  focusTarget = null
+  return target
+}
 
 provide(dropdownMenuInjectionKey, {
   open,
-  setOpen: (value) => (open.value = value),
+  setOpen,
   reference,
+  setTrigger: overlay.setTrigger,
+  contentId: overlay.contentId,
+  openFromKeyboard,
+  recordOpenEvent: overlay.recordOpenEvent,
+  focusContent: overlay.focusContent,
+  restoreTriggerFocus: overlay.restoreTriggerFocus,
+  consumeFocusTarget,
 })
 </script>

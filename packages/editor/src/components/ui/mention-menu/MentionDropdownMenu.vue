@@ -6,7 +6,7 @@
     selector="tiptap-mention-dropdown-menu"
     :items="getMentionItems"
   >
-    <template #default="{ items, selectedIndex, onSelect }">
+    <template #default="{ items, selectedIndex, optionId, onSelect }">
       <Card v-if="items.length" :style="{ maxHeight: 'var(--suggestion-menu-max-height)' }">
         <CardBody>
           <CardItemGroup>
@@ -15,6 +15,7 @@
               :key="(item.context as MentionUser)?.id ?? item.title"
               :item="item"
               :is-selected="index === selectedIndex"
+              :option-id="optionId(index)"
               @select="onSelect(item)"
             />
           </CardItemGroup>

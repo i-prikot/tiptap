@@ -1,5 +1,12 @@
 <template>
-  <Popover v-if="link.isVisible.value" :open="open" @update:open="onOpenChange">
+  <Popover
+    v-if="link.isVisible.value"
+    :open="open"
+    role="dialog"
+    :aria-label="t('links.link')"
+    initial-focus-selector=".tiptap-link-input"
+    @update:open="onOpenChange"
+  >
     <template #trigger>
       <LinkButton
         :disabled="!link.canSet.value"

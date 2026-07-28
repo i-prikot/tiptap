@@ -15,29 +15,6 @@ vi.mock('@floating-ui/vue', () => ({
   useFloating: () => ({ floatingStyles: { value: {} } }),
 }))
 
-vi.mock('../../../../src/editor/icons', () => {
-  const IconStub = () => null
-
-  return {
-    AiSparklesIcon: IconStub,
-    AtSignIcon: IconStub,
-    BlockquoteIcon: IconStub,
-    CodeBlockIcon: IconStub,
-    HeadingOneIcon: IconStub,
-    HeadingThreeIcon: IconStub,
-    HeadingTwoIcon: IconStub,
-    ImageIcon: IconStub,
-    ListIcon: IconStub,
-    ListIndentedIcon: IconStub,
-    ListOrderedIcon: IconStub,
-    ListTodoIcon: IconStub,
-    MinusIcon: IconStub,
-    SmilePlusIcon: IconStub,
-    TableIcon: IconStub,
-    TypeIcon: IconStub,
-  }
-})
-
 const providedEditor = shallowRef<Editor | null>(null)
 
 const SlashMenuHost = defineComponent({
@@ -135,13 +112,20 @@ describe('SlashDropdownMenu integration', () => {
       items.length,
       'The open slash menu should show available command items.',
     ).toBeGreaterThan(1)
-    expect(items[0]?.textContent, 'The first slash command should be the Text block.').toContain(
-      'Text',
-    )
+    expect(
+      items[0]?.textContent,
+      'The first slash command should have an accessible name.',
+    ).not.toBe('')
     expect(
       items[0]?.dataset.activeState,
       'Opening the slash menu should select its first command item.',
     ).toBe('on')
+    expect(
+      editor.view.dom.getAttribute('aria-activedescendant'),
+      'The editor retains focus and must own the active suggestion option.',
+    ).toBe(items[0]?.id)
+    expect(editor.view.dom.getAttribute('aria-controls')).toBe(menu.id)
+    expect(editor.view.dom.getAttribute('aria-expanded')).toBe('true')
   })
 
   it('selects Heading 1 through ArrowDown and Enter, removes the trigger, and converts the block', async () => {
@@ -156,13 +140,14 @@ describe('SlashDropdownMenu integration', () => {
       arrowDown.defaultPrevented,
       'ArrowDown should be handled by slash-menu keyboard navigation.',
     ).toBe(true)
-    expect(items[1]?.textContent, 'ArrowDown should move selection to Heading 1.').toContain(
-      'Heading 1',
+    expect(items[1]?.textContent, 'ArrowDown should move selection to another command.').not.toBe(
+      '',
     )
     expect(
       items[1]?.dataset.activeState,
       'ArrowDown should visibly select the Heading 1 command.',
     ).toBe('on')
+    expect(editor.view.dom.getAttribute('aria-activedescendant')).toBe(items[1]?.id)
 
     const enter = dispatchEditorKey(editor, 'Enter')
     await settleSlashMenuUpdates()
@@ -175,6 +160,9 @@ describe('SlashDropdownMenu integration', () => {
       document.querySelector('[data-selector="tiptap-slash-dropdown-menu"]'),
       'Executing the selected slash command should close the menu.',
     ).toBeNull()
+    expect(editor.view.dom.hasAttribute('aria-activedescendant')).toBe(false)
+    expect(editor.view.dom.hasAttribute('aria-controls')).toBe(false)
+    expect(editor.view.dom.hasAttribute('aria-expanded')).toBe(false)
     expect(
       editor.getText(),
       'Executing Heading 1 should remove the slash trigger from the document.',

@@ -84,6 +84,23 @@ describe('Popover', () => {
     expect(onOpenChange).toHaveBeenNthCalledWith(2, false)
   })
 
+  it('links its trigger to the overlay and restores focus after Escape', async () => {
+    const { wrapper } = await openPopover()
+    const trigger = wrapper.get('#popover-trigger').element
+    const content = requireDocumentElement('.tiptap-popover')
+    const contentButton = requireDocumentElement('#popover-content-button')
+
+    expect(trigger.getAttribute('aria-controls')).toBe(content.id)
+    expect(trigger.getAttribute('aria-expanded')).toBe('true')
+    expect(trigger.getAttribute('aria-haspopup')).toBe('dialog')
+
+    contentButton.focus()
+    dispatchDocumentKeydown('Escape')
+    await settleTeleportUpdates()
+
+    expect(document.activeElement).toBe(trigger)
+  })
+
   it('closes and emits a close transition on document pointerdown outside', async () => {
     const { onOpenChange } = await openPopover()
 

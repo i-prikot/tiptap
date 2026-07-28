@@ -37,6 +37,14 @@ function collectItems() {
 
 let observer: MutationObserver | null = null
 
+function shouldHandleToolbarEvent(event: KeyboardEvent) {
+  const target = event.target
+  return !(
+    target instanceof HTMLElement &&
+    target.matches('input, textarea, select, [contenteditable="true"]')
+  )
+}
+
 const { selectedIndex } = useMenuNavigation<HTMLElement>({
   editor: shallowRef(null),
   containerRef: toolbarRef,
@@ -45,6 +53,8 @@ const { selectedIndex } = useMenuNavigation<HTMLElement>({
   orientation: 'horizontal',
   onSelect: (item) => item.click(),
   autoSelectFirstItem: false,
+  handleTab: false,
+  shouldHandleEvent: shouldHandleToolbarEvent,
 })
 
 function handleFocusIn(event: FocusEvent) {

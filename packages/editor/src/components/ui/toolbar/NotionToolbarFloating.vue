@@ -23,7 +23,7 @@
       <template v-if="moreOptionsVisible">
         <ToolbarSeparator />
         <ToolbarGroup>
-          <Popover>
+          <Popover role="dialog" :aria-label="t('toolbar.moreOptions')">
             <template #trigger>
               <Button
                 type="button"

@@ -1,13 +1,27 @@
-<template>
-  <div class="tiptap-dropdown-menu-item" role="menuitem" tabindex="-1">
-    <slot />
-  </div>
-</template>
+<script lang="ts">
+import { cloneVNode, defineComponent, h, type VNode } from 'vue'
 
-<script setup lang="ts">
-/**
- * Пункт одноуровневого DropdownMenu: клик по menuitem закрывает собственный
- * DropdownMenuContent при closeOnSelect. Компонент не эмитит @select и не
- * управляет submenu-цепочкой; для этого контракта используйте MenuItem.
- */
+function firstElementVNode(children: VNode[]): VNode | undefined {
+  return children.find((child) => typeof child.type === 'string' || typeof child.type === 'object')
+}
+
+export default defineComponent({
+  name: 'DropdownMenuItem',
+  setup(_, { attrs, slots }) {
+    return () => {
+      const children = slots.default?.() ?? []
+      const item = firstElementVNode(children)
+      const itemAttributes = {
+        ...attrs,
+        role: 'menuitem',
+        'data-menu-item': '',
+        tabindex: -1,
+      }
+
+      return item
+        ? cloneVNode(item, itemAttributes)
+        : h('button', { ...itemAttributes, type: 'button' }, children)
+    }
+  },
+})
 </script>

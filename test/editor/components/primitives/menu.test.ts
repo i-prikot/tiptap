@@ -40,7 +40,9 @@ const NestedMenuFixture = defineComponent({
       <template #trigger><button id="root-menu-trigger" type="button">Open root menu</button></template>
       <MenuContent :close-on-select="closeOnSelect">
         <TiptapMenu>
-          <template #trigger><button id="submenu-trigger" type="button">Open submenu</button></template>
+          <template #trigger>
+            <MenuItem submenu-trigger><button id="submenu-trigger" type="button">Open submenu</button></MenuItem>
+          </template>
           <MenuContent :close-on-select="closeOnSelect">
             <MenuItem id="submenu-terminal-item" @select="onSelect">Nested action</MenuItem>
           </MenuContent>
@@ -87,7 +89,7 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-describe('Menu', () => {
+describe('Menu root interactions', () => {
   it('toggles its root teleported menu from the trigger', async () => {
     const { onOpenChange, wrapper } = await openRootMenu()
 
@@ -115,6 +117,53 @@ describe('Menu', () => {
 
     expect(document.querySelector('[role="menu"]')).toBeNull()
     expect(outsideCase.onOpenChange).toHaveBeenNthCalledWith(2, false)
+  })
+
+  it('links its trigger to the menu and restores focus after keyboard dismissal', async () => {
+    const onOpenChange = vi.fn()
+    const onSelect = vi.fn()
+    const wrapper = mountInDocument(RootMenuFixture, { props: { onOpenChange, onSelect } })
+    const trigger = wrapper.get('#menu-trigger').element
+
+    expect(trigger.getAttribute('aria-haspopup')).toBe('menu')
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
+
+    await wrapper.get('#menu-trigger').trigger('keydown', { key: 'ArrowDown' })
+    await settleTeleportUpdates()
+
+    const menu = requireDocumentElement('[role="menu"]')
+    expect(trigger.getAttribute('aria-expanded')).toBe('true')
+    expect(trigger.getAttribute('aria-controls')).toBe(menu.id)
+    expect(document.activeElement).toBe(requireDocumentElement('#menu-terminal-item'))
+
+    dispatchDocumentKeydown('Escape')
+    await settleTeleportUpdates()
+
+    expect(document.activeElement).toBe(trigger)
+  })
+})
+
+describe('Menu nested interactions', () => {
+  it('opens and closes nested menus with ArrowRight and ArrowLeft', async () => {
+    const { wrapper } = await openNestedMenu()
+    const rootTrigger = wrapper.get('#root-menu-trigger')
+
+    await rootTrigger.trigger('keydown', { key: 'ArrowDown' })
+    await settleTeleportUpdates()
+    expect(document.activeElement).toBe(requireDocumentElement('#submenu-trigger'))
+
+    requireDocumentElement('#submenu-trigger').dispatchEvent(
+      new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'ArrowRight' }),
+    )
+    await settleTeleportUpdates()
+    expect(document.activeElement).toBe(requireDocumentElement('#submenu-terminal-item'))
+
+    requireDocumentElement('#submenu-terminal-item').dispatchEvent(
+      new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'ArrowLeft' }),
+    )
+    await settleTeleportUpdates()
+    expect(document.querySelectorAll('[role="menu"]')).toHaveLength(1)
+    expect(document.activeElement).toBe(requireDocumentElement('#submenu-trigger'))
   })
 
   it('closes the complete parent chain when a nested terminal item is selected', async () => {

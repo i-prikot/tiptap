@@ -7,7 +7,7 @@
     selector="tiptap-emoji-dropdown-menu"
     :items="getEmojiItems"
   >
-    <template #default="{ items, selectedIndex, onSelect }">
+    <template #default="{ items, selectedIndex, optionId, onSelect }">
       <Card v-if="items.length" :style="{ maxHeight: 'var(--suggestion-menu-max-height)' }">
         <CardBody>
           <CardItemGroup>
@@ -16,6 +16,7 @@
               :key="item.title"
               :emoji="item.context"
               :is-selected="index === selectedIndex"
+              :option-id="optionId(index)"
               selector="[data-selector='tiptap-emoji-dropdown-menu']"
               @select="onSelect(item)"
             />

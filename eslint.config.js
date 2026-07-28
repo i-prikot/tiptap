@@ -191,6 +191,7 @@ export default [
             './packages/editor/tsconfig.json',
             './apps/playground/tsconfig.json',
           ],
+          noWarnOnMultipleProjects: true,
         },
       },
     },

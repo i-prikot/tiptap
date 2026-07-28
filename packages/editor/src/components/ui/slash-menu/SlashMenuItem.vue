@@ -1,8 +1,11 @@
 <template>
   <Button
+    :id="optionId"
     ref="buttonRef"
     variant="ghost"
     :data-active-state="isSelected ? 'on' : 'off'"
+    role="option"
+    :aria-selected="isSelected"
     @click="emit('select')"
   >
     <component :is="item.badge" v-if="item.badge" class="tiptap-button-icon" />
@@ -21,7 +24,7 @@ import { Button } from '../../primitives'
 import { getElementOverflowPosition } from '../../../utils/selection-utils'
 import type { SuggestionItem } from '../../../types/suggestion'
 
-const props = defineProps<{ item: SuggestionItem; isSelected: boolean }>()
+const props = defineProps<{ item: SuggestionItem; isSelected: boolean; optionId?: string }>()
 const emit = defineEmits<{ select: [] }>()
 
 const buttonRef = shallowRef<ComponentPublicInstance | null>(null)

@@ -2,6 +2,7 @@
   <EditorOverlayTeleport :target="teleportTarget">
     <div
       v-if="open && editor"
+      :id="listboxId"
       ref="menuRef"
       :style="floatingStyles"
       :data-selector="selector"
@@ -10,23 +11,17 @@
       :aria-label="t('common.suggestions')"
       @pointerdown.prevent
     >
-      <slot :items="suggestionItems" :selected-index="selectedIndex" :on-select="handleSelect" />
+      <slot
+        :items="suggestionItems"
+        :selected-index="selectedIndex"
+        :option-id="getOptionId"
+        :on-select="handleSelect"
+      />
     </div>
   </EditorOverlayTeleport>
 </template>
 
 <script setup lang="ts" generic="Item extends SuggestionItem = SuggestionItem">
-/**
- * Универсальное suggestion-меню, владеющее Vue-частью renderer-а плагина.
- *
- * Компонент регистрирует plugin для выбранного trigger-символа, хранит его
- * renderer snapshot и позиционируется от virtual reference inline-декорации.
- * `@pointerdown.prevent` в шаблоне сохраняет ProseMirror selection, пока
- * пользователь выбирает пункт; само изменение документа остаётся обязанностью
- * `command` из suggestion-движка. При unmount текущий plugin unregister-ится;
- * при смене editor watcher не хранит предыдущий instance, поэтому его plugin
- * может остаться зарегистрированным. UI не управляет этим внешним lifecycle.
- */
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import type { CSSProperties } from 'vue'
 import { PluginKey } from '@tiptap/pm/state'
@@ -37,6 +32,7 @@ import {
   useTiptapEditor,
   useEditorOverlayTarget,
   useMenuNavigation,
+  createOverlayContentId,
 } from '../../../composables'
 import { throttledAutoUpdate } from '../../../utils/throttle'
 import { EditorOverlayTeleport } from '../../primitives'
@@ -80,14 +76,12 @@ const suggestionItems = shallowRef<Item[]>([])
 const query = ref('')
 
 const menuRef = shallowRef<HTMLElement | null>(null)
+const listboxId = createOverlayContentId('tiptap-suggestion-listbox')
 
-/**
- * Virtual reference на lazy clientRect активной inline-декорации.
- *
- * Источник задаёт suggestion-плагин: он может вернуть `null` после
- * DOM-обновления, поэтому fallback DOMRect нужен лишь для безопасного вызова
- * floating-ui, а не как замена реальному якорю.
- */
+function getOptionId(index: number): string {
+  return [listboxId, 'option', index].join('-')
+}
+
 const virtualReference = computed(() => {
   const getRect = referenceRect.value
   if (!getRect) return null
@@ -116,17 +110,10 @@ const { floatingStyles: rawFloatingStyles } = useFloating(virtualReference, menu
 
 const floatingStyles = computed<CSSProperties>(() => ({ ...rawFloatingStyles.value, zIndex: 1000 }))
 
-/** Закрывает Vue-меню; plugin state завершает собственный lifecycle отдельно. */
 function close() {
   open.value = false
 }
 
-/**
- * Закрывает визуальное меню до выполнения команды выбранного пункта.
- *
- * Порядок предотвращает повторный выбор при синхронной транзакции, но не
- * очищает selection вручную: диапазон и удаление trigger-а определяет command.
- */
 function handleSelect(item: Item) {
   close()
   commandFn.value?.(item)
@@ -139,13 +126,64 @@ const { selectedIndex } = useMenuNavigation<Item>({
   onSelect: handleSelect,
 })
 
+const activeOptionId = computed(() =>
+  selectedIndex.value >= 0 && selectedIndex.value < suggestionItems.value.length
+    ? getOptionId(selectedIndex.value)
+    : undefined,
+)
+
+const editorSuggestionAriaAttributes = [
+  'aria-activedescendant',
+  'aria-controls',
+  'aria-expanded',
+] as const
+type EditorSuggestionAriaAttribute = (typeof editorSuggestionAriaAttributes)[number]
+
+let ariaOwner: HTMLElement | null = null
+let savedEditorAria: Record<EditorSuggestionAriaAttribute, string | null> | null = null
+
+function restoreEditorSuggestionAria() {
+  if (!ariaOwner || !savedEditorAria) return
+
+  for (const attribute of editorSuggestionAriaAttributes) {
+    const value = savedEditorAria[attribute]
+    if (value === null) ariaOwner.removeAttribute(attribute)
+    else ariaOwner.setAttribute(attribute, value)
+  }
+
+  ariaOwner = null
+  savedEditorAria = null
+}
+
+function syncEditorSuggestionAria() {
+  const editorElement = editor.value?.view.dom
+  if (ariaOwner && ariaOwner !== editorElement) restoreEditorSuggestionAria()
+  if (!editorElement || !open.value) {
+    restoreEditorSuggestionAria()
+    return
+  }
+
+  if (ariaOwner !== editorElement) {
+    ariaOwner = editorElement
+    savedEditorAria = Object.fromEntries(
+      editorSuggestionAriaAttributes.map((attribute) => [
+        attribute,
+        editorElement.getAttribute(attribute),
+      ]),
+    ) as Record<EditorSuggestionAriaAttribute, string | null>
+  }
+
+  editorElement.setAttribute('aria-controls', listboxId)
+  editorElement.setAttribute('aria-expanded', 'true')
+  if (activeOptionId.value)
+    editorElement.setAttribute('aria-activedescendant', activeOptionId.value)
+  else editorElement.removeAttribute('aria-activedescendant')
+}
+
+watch([editor, open, activeOptionId], syncEditorSuggestionAria, { flush: 'post', immediate: true })
+
 let registeredKey: PluginKey | null = null
 
-/**
- * Запрашивает обновление renderer-а meta-транзакцией без записи в историю.
- * Это не перерегистрирует plugin и безопасно игнорируется для уничтоженного
- * редактора.
- */
 watch(
   () => props.itemsRefreshKey,
   () => {
@@ -157,16 +195,6 @@ watch(
   },
 )
 
-/**
- * Регистрирует suggestion-plugin для доступного текущего editor instance.
- *
- * При повторном запуске watcher сохранённый PluginKey снимается только с
- * `instance`, переданного текущему callback. Предыдущий editor instance не
- * сохраняется, поэтому этот watcher не гарантирует unregister его plugin при
- * смене instance; ключ нового plugin остаётся для unmount cleanup текущего
- * реактивного editor. Контракт важен для async renderer callbacks: plugin
- * state не следует считать автоматически очищенным у заменённого instance.
- */
 watch(
   editor,
   (instance) => {
@@ -249,11 +277,6 @@ watch(
       }),
     })
 
-    /**
-     * Копирует renderer snapshot в реактивное состояние меню.
-     * `clientRect` остаётся функцией, чтобы floating-ui читал свежую геометрию
-     * decoration в момент позиционирования, а не устаревший DOMRect.
-     */
     function applyState(state: SuggestionProps<Item, Item>) {
       referenceRect.value = state.clientRect
       commandFn.value = state.command
@@ -266,8 +289,8 @@ watch(
   { immediate: true },
 )
 
-/** Снимает зарегистрированный plugin только у ещё живого editor instance. */
 onBeforeUnmount(() => {
+  restoreEditorSuggestionAria()
   const instance = editor.value
   if (registeredKey && instance && !instance.isDestroyed) instance.unregisterPlugin(registeredKey)
 })
