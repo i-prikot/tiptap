@@ -8,12 +8,14 @@ CI result, and any Changeset together form the review and release record.
 
 The scheduled `.github/workflows/renovate.yml` workflow runs self-hosted
 Renovate on weekdays and can be started manually with `workflow_dispatch`.
-It is restricted to `i-prikot/tiptap` and uses the ephemeral
-`GITHUB_TOKEN` with only `contents`, `pull-requests`, and `issues` write
-access. Those permissions let it create update branches and pull requests and
-maintain the Dependency Dashboard without administration, workflow-write, or
-custom-token access. Renovate also sets `ignoreScripts: true`, so package
-lifecycle scripts do not run during its dependency analysis.
+It is restricted to `i-prikot/tiptap` and uses a dedicated GitHub App
+installation token for Renovate's write operations. The workflow's own
+`GITHUB_TOKEN` remains read-only and is never used to create or approve pull
+requests. The app receives only `contents`, `pull requests`, and `issues`
+write access, which lets Renovate create update branches and pull requests and
+maintain the Dependency Dashboard without administration, Actions, workflow,
+or branch-protection-bypass access. Renovate also sets `ignoreScripts: true`,
+so package lifecycle scripts do not run during its dependency analysis.
 
 ## GitHub Actions activation requirements
 
@@ -23,21 +25,27 @@ complete and record the following activation checks on the default branch:
 1. Commit and push `renovate.json`,
    `.github/workflows/renovate.yml`, and
    `scripts/renovate-workflow-config.json`.
-2. In **Settings → Actions → General → Workflow permissions**, enable
-   **Allow GitHub Actions to create and approve pull requests**. If this
-   setting is controlled by an organization or enterprise policy, the effective
-   policy must allow it for `i-prikot/tiptap`.
-3. Start **Renovate** with `workflow_dispatch`, then verify that the run is
+2. Create a dedicated GitHub App installation for dependency updates and
+   install it only on `i-prikot/tiptap`. Grant only repository `Contents`,
+   `Pull requests`, and `Issues` read/write permissions; do not grant
+   administration, Actions/workflow, or branch-protection-bypass permissions.
+   Store its ID in the repository Actions variable `RENOVATE_APP_ID` and its
+   PEM private key in the repository Actions secret `RENOVATE_APP_PRIVATE_KEY`.
+3. Keep **Settings → Actions → General → Workflow permissions → Allow GitHub
+   Actions to create and approve pull requests** disabled. The workflow's
+   read-only `GITHUB_TOKEN` does not need that repository-wide setting.
+4. Require an independent human or CODEOWNER approval in the default-branch
+   protection rule or ruleset, and do not grant the Renovate App any bypass.
+   The author of a Renovate pull request cannot satisfy that approval.
+5. Start **Renovate** with `workflow_dispatch`, then verify that the run is
    successful and that it creates or updates the **Dependency Dashboard**.
 
-The workflow's explicit token permissions do not override the repository or
-organization setting in step 2. In addition, CI workflows triggered from a
-pull request created with `GITHUB_TOKEN` require explicit maintainer approval
-before their checks run. A maintainer must approve each resulting Renovate PR
-run before treating its CI status as a merge gate. If unattended CI is
-required, replace the `GITHUB_TOKEN` authentication model with a GitHub App or
-appropriately scoped PAT and document the associated secret-management and
-permission changes before enabling it.
+GitHub App-created pull requests run the existing `pull_request` CI workflow,
+including the release-verifier job for the `dependencies` label. This avoids
+the `GITHUB_TOKEN` event-suppression behavior while keeping approval authority
+outside the Renovate workflow. A failed token-creation step normally means the
+app ID, private key, installation scope, or app permissions are incorrect;
+resolve that configuration before merging dependency updates.
 
 ## Renovate workflow
 
