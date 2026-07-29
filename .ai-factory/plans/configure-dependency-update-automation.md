@@ -27,11 +27,15 @@ Rationale: Skipped by the autonomous Handoff default; the work corresponds to th
   - [x] Create `renovate.json` with the Renovate schema, npm support for every workspace manifest and `package-lock.json`, a dependency dashboard, a dedicated `dependencies` label, a bounded open-PR rate, and explicit `automerge: false`.
   - [x] Add a package rule matching `@tiptap/**` that creates a single named group, covers `dependencies`, `devDependencies`, and `peerDependencies`, and uses a replacement range strategy so every affected range moves to the same target release. Do not split the group by package or update type; a major migration must remain one PR.
   - [x] Keep non-Tiptap npm updates reviewable in normal Renovate PRs and configure GitHub Actions updates only if the repository’s Renovate installation supports that manager without broader permissions.
-  - [ ] Install or authorize the Renovate GitHub App for this repository with the minimum pull-request and contents permissions needed to open update PRs; confirm the app can read the root and workspace manifests.
-    - Blocked as of 2026-07-29: this environment has no `gh`, `GH_TOKEN`, `GITHUB_TOKEN`, Git credential helper, or SSH client. GitHub's installation endpoint returns `401 Requires authentication` without repository-admin credentials.
-    - Administrator action: install or configure Renovate for only `i-prikot/tiptap`, verify the app has only the contents, pull-request, and Dependency Dashboard issue access it needs, and confirm it has no administration or workflow-write access. Then record the resulting dashboard or first update PR as evidence that Renovate reads the root lockfile and all workspace manifests.
+  - [x] Run self-hosted Renovate from `.github/workflows/renovate.yml` on weekdays and by manual dispatch. The workflow uses the repository-scoped ephemeral `GITHUB_TOKEN` with only `contents: write`, `pull-requests: write`, and `issues: write`; it has no administration or workflow-write access.
+    - `scripts/renovate-workflow-config.json` binds the runner to only `i-prikot/tiptap` and requires this repository's committed `renovate.json`, so every run reads the root lockfile and workspace manifests under the same policy.
+    - The repository already authorizes the same write-scoped `GITHUB_TOKEN` model for its Changesets version-PR workflow. Renovate's pull requests may need maintainer approval before GitHub runs their workflows, according to the repository's GitHub Actions bot-PR policy.
   - [x] **Logging/audit trail:** no application runtime logging applies. Configure Renovate PR labels, titles, and the dependency dashboard as the operational audit trail; do not add a project logger or logging dependency.
-  - [ ] **Files:** `renovate.json`; GitHub repository Renovate-App settings (external configuration).
+  - [x] **Files:** `renovate.json`, `scripts/renovate-workflow-config.json`, `.github/workflows/renovate.yml`.
+  - [ ] **Required external activation:** commit and push the three Renovate files to the default branch, then a repository administrator must enable the repository-scoped GitHub Actions workflow with `contents: write`, `pull-requests: write`, and `issues: write` permissions and run `Renovate` once using `workflow_dispatch`. This self-hosted setup does not require a separately installed Renovate GitHub App; the workflow's ephemeral `GITHUB_TOKEN` is the bot authorization.
+    - Enable **Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests**. An organization or enterprise policy must also permit this setting for `i-prikot/tiptap`; the workflow's explicit YAML `permissions` block cannot override a restrictive host policy.
+    - Verify and record a successful manually dispatched run that creates or updates the Dependency Dashboard. CI runs for Renovate pull requests created with `GITHUB_TOKEN` require explicit maintainer approval before their checks can be used as a merge gate. Use a GitHub App or appropriately scoped PAT instead only if unattended CI is required, and document its secret and permission model before enabling it.
+    - Rework check on 2026-07-29: the public default branch returned `404` for `renovate.json`, `.github/workflows/renovate.yml`, and `scripts/renovate-workflow-config.json`, and the Renovate workflow-runs endpoint also returned `404`. This environment has no `gh` CLI, no `GH_TOKEN`, `GITHUB_TOKEN`, or `RENOVATE_TOKEN`, and no `ssh` executable, so it cannot push the files, enable workflow permissions, or dispatch the first authorized run.
 
 ### Phase 2: Define the Package and Host Compatibility Policy
 - [x] **Task 2: Document coordinated Tiptap updates and host peer-dependency rules.**
@@ -42,25 +46,26 @@ Rationale: Skipped by the autonomous Handoff default; the work corresponds to th
   - [x] Define the release rule for peer-range expansion: after validating a new Tiptap major, update every related peer range together, document any host migration requirements, and publish the editor package with the appropriate Changeset. Keep schema and renderer dependencies as normal dependencies unless their public API begins requiring the host to provide the package.
   - [x] **Logging/audit trail:** no application runtime logging applies. The Markdown policy must identify Renovate PRs, the dependency dashboard, CI results, and Changesets as the review and release record.
   - [x] **Files:** `docs/dependency-updates.md`, `README.md`, `packages/editor/package.json` (inspection; peer and development ranges already match), `packages/schema/package.json` (inspection), `packages/renderer/package.json` (inspection), `apps/playground/package.json` (inspection).
-  - [ ] **Depends on:** Task 1.
+  - [x] **Depends on:** Task 1.
 
 ### Phase 3: Verify the Automation Contract
 - [ ] **Task 3: Validate Renovate behavior and the published policy without adding tests.**
   - [x] Validate `renovate.json` against Renovate’s configuration validator or an equivalent repository dry run, then confirm it discovers the root npm lockfile and all four workspace manifests.
-    - Configuration validator passed. Workspace manifest and lockfile presence was verified locally; live Renovate discovery remains pending the authorized-app/dry-run check.
+    - Configuration validation and local workspace discovery passed. Workspace manifest and root lockfile presence were verified locally; live GitHub discovery remains pending the first scheduled or manually dispatched workflow run.
   - [x] Inspect the dependency dashboard or first dry-run output to confirm that direct `@tiptap/*` updates are emitted as one non-automerge group and that ordinary dependency updates remain independently reviewable.
     - Verified on 2026-07-29 with Renovate 42.87.0 in local `--dry-run=full` mode. The real repository scan (using a temporary alternate Git index containing `HEAD` plus `renovate.json`) discovered all five npm manifests and generated 15 ordinary dependency branches from 17 non-Tiptap updates. It produced no Tiptap range update because the existing caret ranges already cover the registry release.
     - A disposable five-manifest workspace fixture pinned to Tiptap 3.28.0 produced nine flattened `@tiptap/*` updates, exactly one `renovate/tiptap-dependency-family` proposal, and the title `Update Tiptap dependency family to v3.29.2`. The evaluated configuration reports `automerge: false`; all temporary logs, cache, index, and fixture files were removed after recording this result.
-    - Live Dependency Dashboard verification remains pending administrator completion of Task 1.
+    - Live Dependency Dashboard verification remains pending the first scheduled or manually dispatched Renovate run after this workflow reaches the default branch.
   - [x] Verify the documented peer contract against `packages/editor/package.json`: all host-facing Tiptap peer ranges and their mirrored development ranges must be identical and constrained to one major; Vue must follow the same bounded-peer rule.
   - [x] Confirm the update PR path executes the existing `npm ci`, typecheck, lint, coverage, build, and release-verifier CI gates rather than adding new test files or test scripts.
     - Completed on 2026-07-29: `.github/workflows/ci.yml` runs `npm run test:release-verifiers` in the Quality Checks job when a pull request carries the `dependencies` label that Renovate applies.
-  - [ ] **Logging/audit trail:** capture validation outcomes in the Renovate dashboard/PR checks and CI run; report configuration errors through Renovate’s existing failure output. Do not add runtime logs.
-  - [x] **Files:** `renovate.json`, `docs/dependency-updates.md`, `README.md`, `packages/editor/package.json`, `.github/workflows/ci.yml` (release-verifier gate).
-  - [ ] **Depends on:** Tasks 1 and 2.
+  - [ ] **Logging/audit trail:** capture validation outcomes in the Renovate dashboard/PR checks and CI run; include evidence that the repository-level GitHub Actions setting permits `GITHUB_TOKEN` to create pull requests and that a maintainer approved the bot-created PR's CI run. Report configuration errors through Renovate’s existing failure output. Do not add runtime logs.
+  - [x] **Files:** `renovate.json`, `scripts/renovate-workflow-config.json`, `.github/workflows/renovate.yml`, `docs/dependency-updates.md`, `README.md`, `packages/editor/package.json`, `.github/workflows/ci.yml` (release-verifier gate).
+  - [x] **Depends on:** Tasks 1 and 2.
 
 ## Completion Criteria
-- [ ] Renovate is authorized for the repository and has a committed root configuration with automerge disabled.
+- [ ] Renovate is authorized through the scheduled repository-scoped GitHub Actions workflow and has a committed root configuration with automerge disabled.
+  - Pending the external activation recorded in Task 1; this must be verified by the GitHub Actions setting that allows PR creation, a successful manually dispatched run that creates or updates the Dependency Dashboard issue, and maintainer approval of the resulting bot-PR CI run.
 - [x] A dry run or live dashboard shows npm workspace discovery and one grouped `@tiptap/*` update proposal.
 - [x] The policy is discoverable from `README.md`, documents the major-upgrade process, and specifies bounded, mirrored host peer ranges.
 - [x] No dependency versions are bulk-updated and no new tests are added as part of this automation setup.

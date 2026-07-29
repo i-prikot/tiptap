@@ -6,6 +6,39 @@ workspace manifest, and the root `package-lock.json`. It creates the
 Automerge is disabled for every update: the dashboard, Renovate pull request,
 CI result, and any Changeset together form the review and release record.
 
+The scheduled `.github/workflows/renovate.yml` workflow runs self-hosted
+Renovate on weekdays and can be started manually with `workflow_dispatch`.
+It is restricted to `i-prikot/tiptap` and uses the ephemeral
+`GITHUB_TOKEN` with only `contents`, `pull-requests`, and `issues` write
+access. Those permissions let it create update branches and pull requests and
+maintain the Dependency Dashboard without administration, workflow-write, or
+custom-token access. Renovate also sets `ignoreScripts: true`, so package
+lifecycle scripts do not run during its dependency analysis.
+
+## GitHub Actions activation requirements
+
+Before dispatching the first Renovate run, a repository administrator must
+complete and record the following activation checks on the default branch:
+
+1. Commit and push `renovate.json`,
+   `.github/workflows/renovate.yml`, and
+   `scripts/renovate-workflow-config.json`.
+2. In **Settings → Actions → General → Workflow permissions**, enable
+   **Allow GitHub Actions to create and approve pull requests**. If this
+   setting is controlled by an organization or enterprise policy, the effective
+   policy must allow it for `i-prikot/tiptap`.
+3. Start **Renovate** with `workflow_dispatch`, then verify that the run is
+   successful and that it creates or updates the **Dependency Dashboard**.
+
+The workflow's explicit token permissions do not override the repository or
+organization setting in step 2. In addition, CI workflows triggered from a
+pull request created with `GITHUB_TOKEN` require explicit maintainer approval
+before their checks run. A maintainer must approve each resulting Renovate PR
+run before treating its CI status as a merge gate. If unattended CI is
+required, replace the `GITHUB_TOKEN` authentication model with a GitHub App or
+appropriately scoped PAT and document the associated secret-management and
+permission changes before enabling it.
+
 ## Renovate workflow
 
 1. The maintainer responsible for dependency maintenance triages the
