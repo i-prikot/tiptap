@@ -1,0 +1,23 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "enabledManagers": ["npm"],
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "Dependency Dashboard",
+  "labels": ["dependencies"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "automerge": false,
+  "packageRules": [
+    {
+      "description": "Keep every direct Tiptap dependency on one reviewed release line.",
+      "matchManagers": ["npm"],
+      "matchPackageNames": ["@tiptap/**"],
+      "matchDepTypes": ["dependencies", "devDependencies", "peerDependencies"],
+      "groupName": "Tiptap dependency family",
+      "groupSlug": "tiptap-dependency-family",
+      "rangeStrategy": "replace",
+      "automerge": false
+    }
+  ]
+}

@@ -269,3 +269,4 @@ To verify the alias workflow, start the cabinet dev server, edit an editor sourc
 - Static JWT variables are intended only for local development because Vite embeds `VITE_` values into the frontend bundle.
 - The AI token context mirrors the original template's flow, but the paid Tiptap AI extension itself is not included in this port.
 - There is no client router; the document id is the final URL path segment or `default`.
+- Review [the dependency update policy](docs/dependency-updates.md) before merging Renovate pull requests or expanding editor peer ranges.

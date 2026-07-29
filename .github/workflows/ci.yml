@@ -47,6 +47,10 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Run release verifiers for dependency updates
+        if: contains(github.event.pull_request.labels.*.name, 'dependencies')
+        run: npm run test:release-verifiers
+
   e2e:
     name: E2E Smoke
     needs: quality
