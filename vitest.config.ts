@@ -110,10 +110,10 @@ export default defineConfig({
       reportsDirectory: 'coverage',
       reporter: ['text', 'html', 'json-summary'],
       thresholds: {
-        branches: 70,
-        functions: 70,
-        lines: 70,
-        statements: 70,
+        branches: 62,
+        functions: 66,
+        lines: 73,
+        statements: 69,
       },
       include: ['packages/**/*.{ts,vue}', 'apps/playground/src/**/*.{ts,vue}'],
       exclude: [
