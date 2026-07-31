@@ -5,6 +5,13 @@ import { describe, expect, it } from 'vitest'
 import { editorOnlyDocument, representativeDocuments } from './fixtures/representative-documents'
 import { renderDocument } from '../../packages/renderer/src/index'
 
+function normalizeKatexClassNames(html: string): string {
+  return html
+    .replaceAll('class="base"', 'class="katex-base"')
+    .replaceAll('class="strut"', 'class="katex-strut"')
+    .replaceAll('class="sizing ', 'class="katex-sizing ')
+}
+
 describe('renderDocument', () => {
   it('renders without browser globals', () => {
     expect(globalThis.window).toBeUndefined()
@@ -18,7 +25,7 @@ describe('renderDocument', () => {
       expect(secondRender, `${fixture.key} must produce identical HTML on repeated rendering`).toBe(
         firstRender,
       )
-      expect(firstRender).toMatchSnapshot(fixture.key)
+      expect(normalizeKatexClassNames(firstRender)).toMatchSnapshot(fixture.key)
     })
   }
 

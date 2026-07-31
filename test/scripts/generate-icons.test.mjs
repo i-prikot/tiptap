@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { spawnSync } from 'node:child_process'
 import process from 'node:process'
 import {
@@ -12,7 +13,7 @@ import {
 } from 'node:fs'
 import { join, resolve } from 'node:path'
 import assert from 'node:assert/strict'
-import { afterEach, describe, it } from 'node:test'
+import { afterEach, describe, it } from 'vitest'
 
 const projectRoot = process.cwd()
 const temporaryDirectories = []
@@ -106,7 +107,7 @@ describe('generate icons script', () => {
     assert.equal(readFileSync(linkedFilePath, 'utf8'), linkedFileContents)
   })
 
-  it('refuses an icon directory reached through a symbolic-link ancestor', (t) => {
+  it('refuses an icon directory reached through a symbolic-link ancestor', () => {
     const { fixtureRoot } = createFixtureProject()
     const sourceDirectory = join(fixtureRoot, 'packages/editor/src')
     const redirectedSourceDirectory = join(fixtureRoot, 'redirected-src')
@@ -115,17 +116,11 @@ describe('generate icons script', () => {
     cpSync(sourceDirectory, redirectedSourceDirectory, { recursive: true })
     const redirectedBarrelContents = readFileSync(redirectedBarrelPath, 'utf8')
     rmSync(sourceDirectory, { force: true, recursive: true })
-    try {
-      symlinkSync(redirectedSourceDirectory, sourceDirectory, 'dir')
-    } catch (error) {
-      if (error && typeof error === 'object' && error.code === 'EPERM') {
-        t.skip(
-          'Creating directory symlinks requires Windows developer mode or elevated privileges.',
-        )
-        return
-      }
-      throw error
-    }
+    symlinkSync(
+      redirectedSourceDirectory,
+      sourceDirectory,
+      process.platform === 'win32' ? 'junction' : 'dir',
+    )
 
     const result = runIconGenerator(fixtureRoot)
 

@@ -1,9 +1,10 @@
+// @vitest-environment node
 import { spawnSync } from 'node:child_process'
 import process from 'node:process'
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import assert from 'node:assert/strict'
-import { afterEach, describe, it } from 'node:test'
+import { afterEach, describe, it } from 'vitest'
 
 const projectRoot = process.cwd()
 const temporaryDirectories = []
