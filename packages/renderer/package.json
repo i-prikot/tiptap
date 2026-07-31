@@ -29,6 +29,6 @@
     "@i-prikot/editor-schema": "0.1.0",
     "@tiptap/html": "^3.28.0",
     "happy-dom": "^20.10.6",
-    "katex": "^0.16.47"
+    "katex": "^0.18.0"
   }
 }
