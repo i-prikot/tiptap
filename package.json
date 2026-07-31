@@ -31,7 +31,7 @@
     "@changesets/cli": "^2.31.1",
     "@eslint/js": "^9.17.0",
     "@playwright/test": "^1.61.1",
-    "@vitejs/plugin-vue": "^5.2.1",
+    "@vitejs/plugin-vue": "^6.0.0",
     "@vitest/coverage-v8": "^4.1.10",
     "@vue/test-utils": "^2.4.11",
     "@vue/tsconfig": "^0.7.0",
