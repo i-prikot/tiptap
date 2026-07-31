@@ -3,13 +3,17 @@ import type { ComputedRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { isExtensionAvailable } from '../utils/tiptap-utils'
 import { createDevelopmentDiagnostics } from '../utils/development-diagnostics'
+import { useEditorHotkeys } from './useEditorHotkeys'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
+
+export const IMAGE_UPLOAD_SHORTCUT_KEY = 'mod+shift+i'
 
 const diagnostics = createDevelopmentDiagnostics('useImageUploadButton')
 
 export function useImageUploadButton(
   editor: ComputedRef<Editor | null>,
   hideWhenUnavailable: ComputedRef<boolean>,
+  onInserted?: () => void,
 ) {
   const signal = useEditorSelectionSignal(editor)
   const canInsert = computed(() => {
@@ -46,12 +50,21 @@ export function useImageUploadButton(
       diagnostics.debug('command attempted')
       const executed = instance.chain().focus().insertContent({ type: 'imageUpload' }).run()
       diagnostics.debug('command completed', { executed })
+      if (executed) onInserted?.()
       return executed
     } catch {
       diagnostics.debug('command failed', { failureCategory: 'unexpected-editor-command-error' })
       return false
     }
   }
+
+  useEditorHotkeys(editor, [
+    {
+      shortcut: IMAGE_UPLOAD_SHORTCUT_KEY,
+      isEnabled: () => isVisible.value && canInsert.value,
+      execute,
+    },
+  ])
 
   return { canInsert, isActive, isVisible, execute }
 }

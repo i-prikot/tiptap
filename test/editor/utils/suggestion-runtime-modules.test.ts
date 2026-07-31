@@ -125,6 +125,77 @@ describe('extracted suggestion runtime modules', () => {
     }
   })
 
+  it('preserves decoration identity and increments refresh for an eligible match', () => {
+    const editor = createEditor()
+    const pluginKey = new PluginKey('suggestion-runtime-refresh')
+    const stateField = createSuggestionPluginState({
+      pluginKey,
+      editor,
+      char: '@',
+      allowSpaces: false,
+      allowToIncludeChar: false,
+      allowedPrefixes: [' '],
+      startOfLine: false,
+      findSuggestionMatch: () => ({ range: { from: 1, to: 5 }, query: 'item', text: '@item' }),
+      allow: () => true,
+      shouldKeepDismissed: () => false,
+    })
+
+    try {
+      const previous = {
+        ...stateField.init(),
+        active: true,
+        decorationId: 'persistent-decoration',
+        query: 'item',
+        range: { from: 1, to: 5 },
+        text: '@item',
+      }
+      const transaction = editor.state.tr.setMeta(pluginKey, { refresh: true })
+      const next = stateField.apply(transaction, previous, editor.state, editor.state)
+
+      expect(next).toMatchObject({
+        active: true,
+        decorationId: 'persistent-decoration',
+        query: 'item',
+        range: { from: 1, to: 5 },
+        refreshId: 1,
+      })
+    } finally {
+      editor.destroy()
+    }
+  })
+
+  it('maps dismissed ranges through document changes before normalizing inactive state', () => {
+    const editor = createEditor()
+    const pluginKey = new PluginKey('suggestion-runtime-dismissed-range')
+    const stateField = createSuggestionPluginState({
+      pluginKey,
+      editor,
+      char: '@',
+      allowSpaces: false,
+      allowToIncludeChar: false,
+      allowedPrefixes: [' '],
+      startOfLine: false,
+      findSuggestionMatch: () => ({ range: { from: 1, to: 5 }, query: 'item', text: '@item' }),
+      allow: () => true,
+      shouldKeepDismissed: () => true,
+    })
+
+    try {
+      const previous = { ...stateField.init(), dismissedRange: { from: 1, to: 5 } }
+      const transaction = editor.state.tr.insertText('x', 1)
+      const next = stateField.apply(transaction, previous, editor.state, editor.state)
+
+      expect(next).toMatchObject({
+        active: false,
+        dismissedRange: { from: 2, to: 6 },
+        range: { from: 0, to: 0 },
+      })
+    } finally {
+      editor.destroy()
+    }
+  })
+
   it('positions detached mounts, dismisses outside clicks, and cleans up listeners', async () => {
     const container = document.createElement('div')
     const contextElement = document.createElement('div')

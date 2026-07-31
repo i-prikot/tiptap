@@ -61,6 +61,102 @@ interface SuggestionPluginStateConfig {
   }) => boolean
 }
 
+function createInitialSuggestionState(): SuggestionPluginState {
+  return {
+    active: false,
+    range: { from: 0, to: 0 },
+    query: null,
+    text: null,
+    composing: false,
+    refreshId: 0,
+    dismissedRange: null,
+  }
+}
+
+function createExitedSuggestionState(prev: SuggestionPluginState): SuggestionPluginState {
+  return {
+    ...prev,
+    active: false,
+    decorationId: null,
+    range: { from: 0, to: 0 },
+    query: null,
+    text: null,
+    dismissedRange: prev.active ? { ...prev.range } : prev.dismissedRange,
+  }
+}
+
+function mapDismissedRange(
+  state: SuggestionPluginState,
+  transaction: Transaction,
+): SuggestionPluginState {
+  if (!transaction.docChanged || state.dismissedRange === null) return state
+  return {
+    ...state,
+    dismissedRange: {
+      from: transaction.mapping.map(state.dismissedRange.from),
+      to: transaction.mapping.map(state.dismissedRange.to),
+    },
+  }
+}
+
+function deactivateSuggestionState(state: SuggestionPluginState): SuggestionPluginState {
+  return { ...state, active: false }
+}
+
+function normalizeInactiveSuggestionState(state: SuggestionPluginState): SuggestionPluginState {
+  if (state.active) return state
+  return {
+    ...state,
+    decorationId: null,
+    range: { from: 0, to: 0 },
+    query: null,
+    text: null,
+  }
+}
+
+function isEligibleSuggestionMatch(
+  config: SuggestionPluginStateConfig,
+  match: SuggestionMatch,
+  transaction: Transaction,
+  state: EditorState,
+  isActive: boolean,
+): boolean {
+  if (!config.allow({ editor: config.editor, state, range: match.range, isActive })) return false
+  return (
+    !config.shouldShow ||
+    config.shouldShow({
+      editor: config.editor,
+      range: match.range,
+      query: match.query,
+      text: match.text,
+      transaction,
+    })
+  )
+}
+function applySuggestionMatch(
+  prev: SuggestionPluginState,
+  state: SuggestionPluginState,
+  match: SuggestionMatch,
+  config: SuggestionPluginStateConfig,
+  transaction: Transaction,
+  editorState: EditorState,
+): SuggestionPluginState {
+  const dismissedRange = state.dismissedRange
+  const shouldClearDismissal =
+    dismissedRange !== null &&
+    !config.shouldKeepDismissed({ match, dismissedRange, state: editorState, transaction })
+  const next = shouldClearDismissal ? { ...state, dismissedRange: null } : state
+  if (next.dismissedRange !== null) return deactivateSuggestionState(next)
+  return {
+    ...next,
+    active: true,
+    decorationId: prev.decorationId || `id_${Math.floor(Math.random() * 0xffffffff)}`,
+    range: match.range,
+    query: match.query,
+    text: match.text,
+  }
+}
+
 /**
  * Создаёт reducer состояния ProseMirror для одного suggestion-плагина.
  *
@@ -71,134 +167,50 @@ interface SuggestionPluginStateConfig {
  * `dismissedRange`, поэтому следующий расчёт не должен немедленно открыть меню.
  */
 export function createSuggestionPluginState(config: SuggestionPluginStateConfig) {
-  const {
-    pluginKey,
-    editor,
-    char,
-    allowSpaces,
-    allowToIncludeChar,
-    allowedPrefixes,
-    startOfLine,
-    findSuggestionMatch,
-    allow,
-    shouldShow,
-    shouldKeepDismissed,
-  } = config
+  const { pluginKey, editor } = config
 
   return {
-    init: (): SuggestionPluginState => ({
-      active: false,
-      range: { from: 0, to: 0 },
-      query: null,
-      text: null,
-      composing: false,
-      refreshId: 0,
-      dismissedRange: null,
-    }),
-    /**
-     * Вычисляет следующий снимок без изменения документа.
-     *
-     * Новый `decorationId` генерируется только при первом входе в активный
-     * диапазон и сохраняется при обновлениях, чтобы DOM-якорь floating-ui не
-     * менял идентичность. Если матч отсутствует, selection вышел за границы или
-     * редактор недоступен для редактирования, все поля активного состояния
-     * очищаются; подавленный диапазон очищается только после исчезновения матча
-     * либо по пользовательскому правилу.
-     */
+    init: createInitialSuggestionState,
     apply(
       transaction: Transaction,
       prev: SuggestionPluginState,
       _oldState: EditorState,
       state: EditorState,
     ): SuggestionPluginState {
-      const { isEditable } = editor
-      const { composing } = editor.view
-      const { selection } = transaction
-      const { empty, from } = selection
-      const next: SuggestionPluginState = { ...prev }
-
       const meta = transaction.getMeta(pluginKey)
-      if (meta && meta.exit) {
-        next.active = false
-        next.decorationId = null
-        next.range = { from: 0, to: 0 }
-        next.query = null
-        next.text = null
-        next.dismissedRange = prev.active ? { ...prev.range } : prev.dismissedRange
-        return next
+      if (meta?.exit) return createExitedSuggestionState(prev)
+
+      const composing = editor.view.composing
+      let next = mapDismissedRange(
+        {
+          ...prev,
+          refreshId: meta?.refresh ? prev.refreshId + 1 : prev.refreshId,
+          composing,
+        },
+        transaction,
+      )
+      const { empty, from } = transaction.selection
+      if (!editor.isEditable || (!empty && !composing))
+        return normalizeInactiveSuggestionState(next)
+      if ((from < prev.range.from || from > prev.range.to) && !composing && !prev.composing) {
+        next = deactivateSuggestionState(next)
       }
 
-      if (meta?.refresh) next.refreshId = prev.refreshId + 1
-
-      next.composing = composing
-      if (transaction.docChanged && next.dismissedRange !== null) {
-        next.dismissedRange = {
-          from: transaction.mapping.map(next.dismissedRange.from),
-          to: transaction.mapping.map(next.dismissedRange.to),
-        }
+      const match = config.findSuggestionMatch({
+        char: config.char,
+        allowSpaces: config.allowSpaces,
+        allowToIncludeChar: config.allowToIncludeChar,
+        allowedPrefixes: config.allowedPrefixes,
+        startOfLine: config.startOfLine,
+        $position: transaction.selection.$from,
+      })
+      if (match && isEligibleSuggestionMatch(config, match, transaction, state, prev.active)) {
+        return normalizeInactiveSuggestionState(
+          applySuggestionMatch(prev, next, match, config, transaction, state),
+        )
       }
-
-      if (isEditable && (empty || editor.view.composing)) {
-        if ((from < prev.range.from || from > prev.range.to) && !composing && !prev.composing) {
-          next.active = false
-        }
-        const match = findSuggestionMatch({
-          char,
-          allowSpaces,
-          allowToIncludeChar,
-          allowedPrefixes,
-          startOfLine,
-          $position: selection.$from,
-        })
-        const decorationId = `id_${Math.floor(Math.random() * 0xffffffff)}`
-
-        if (
-          match &&
-          allow({ editor, state, range: match.range, isActive: prev.active }) &&
-          (!shouldShow ||
-            shouldShow({
-              editor,
-              range: match.range,
-              query: match.query,
-              text: match.text,
-              transaction,
-            }))
-        ) {
-          if (
-            next.dismissedRange !== null &&
-            !shouldKeepDismissed({
-              match,
-              dismissedRange: next.dismissedRange,
-              state,
-              transaction,
-            })
-          ) {
-            next.dismissedRange = null
-          }
-          if (next.dismissedRange === null) {
-            next.active = true
-            next.decorationId = prev.decorationId || decorationId
-            next.range = match.range
-            next.query = match.query
-            next.text = match.text
-          } else {
-            next.active = false
-          }
-        } else {
-          if (!match) next.dismissedRange = null
-          next.active = false
-        }
-      } else {
-        next.active = false
-      }
-
-      if (!next.active) {
-        next.decorationId = null
-        next.range = { from: 0, to: 0 }
-        next.query = null
-        next.text = null
-      }
-      return next
+      if (!match) next = { ...next, dismissedRange: null }
+      return normalizeInactiveSuggestionState(deactivateSuggestionState(next))
     },
   }
 }

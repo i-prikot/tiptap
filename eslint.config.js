@@ -1,7 +1,7 @@
 import js from '@eslint/js'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
-import importPlugin from 'eslint-plugin-import'
+import importPlugin from 'eslint-plugin-import-x'
 import vue from 'eslint-plugin-vue'
 import vueParser from 'vue-eslint-parser'
 import eslintConfigPrettier from 'eslint-config-prettier/flat'
@@ -229,6 +229,22 @@ export default [
         'error',
         { max: 100, skipBlankLines: true, skipComments: false, IIFEs: true },
       ],
+    },
+  },
+
+  {
+    name: 'project/test-files',
+    files: ['test/**/*.{ts,vue,js,cjs,mjs}', 'e2e/**/*.{ts,vue,js,cjs,mjs}'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
+    rules: {
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'vue/one-component-per-file': 'off',
     },
   },
 

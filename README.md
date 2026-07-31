@@ -51,6 +51,8 @@ npm run build
 
 `npm run build` first runs `vue-tsc --noEmit`, then builds the Vite app.
 
+Maintained contributor utilities live in the repository-owned [development scripts guide](docs/development-scripts.md), including icon-barrel generation and Playwright smoke-test commands.
+
 ## Runtime Modes
 
 The editor works without collaboration or AI configuration. In that local mode, content is edited in the browser with the normal Tiptap history stack.
@@ -90,6 +92,7 @@ Leave `APP_ID` values empty to run fully locally.
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `package.json`                      | npm package metadata and scripts for dev, type checking, and build.                                                                                             |
 | `vite.config.ts`                    | Vite configuration with the Vue plugin.                                                                                                                         |
+| `scripts/`                          | Repository-owned maintenance utilities; see [Development Scripts](docs/development-scripts.md).                                                                 |
 | `src/main.ts`                       | Browser entrypoint; imports global editor styles and mounts `App.vue`.                                                                                          |
 | `src/App.vue`                       | Demo app shell; derives the document room from the URL and renders `NotionEditor`.                                                                              |
 | `src/editor/components/notion/`     | Main editor shell, provider wiring, header, content area, setup/error states, theme toggle, and TOC sidebar.                                                    |

@@ -26,6 +26,7 @@ import { computed } from 'vue'
 import type { FunctionalComponent } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { Button, Badge } from '../../primitives'
+import { IMAGE_UPLOAD_SHORTCUT_KEY } from '../../../composables/useImageUploadButton'
 import { useEditorI18n, useImageUploadButton, useTiptapEditor } from '../../../composables'
 import { parseShortcutKeys } from '../../../utils/tiptap-utils'
 import { ImagePlusIcon } from '../../../icons'
@@ -39,7 +40,6 @@ export interface ImageUploadButtonProps {
   showShortcut?: boolean
 }
 
-const imageUploadShortcutKey = 'mod+shift+i'
 const props = withDefaults(defineProps<ImageUploadButtonProps>(), {
   hideWhenUnavailable: false,
   showShortcut: false,
@@ -50,12 +50,13 @@ const { t } = useEditorI18n()
 const { canInsert, isActive, isVisible, execute } = useImageUploadButton(
   editor,
   computed(() => props.hideWhenUnavailable),
+  () => emit('inserted'),
 )
 const shortcutText = computed(() =>
-  parseShortcutKeys({ shortcutKeys: imageUploadShortcutKey }).join(''),
+  parseShortcutKeys({ shortcutKeys: IMAGE_UPLOAD_SHORTCUT_KEY }).join(''),
 )
 
 function handleClick() {
-  if (execute()) emit('inserted')
+  execute()
 }
 </script>

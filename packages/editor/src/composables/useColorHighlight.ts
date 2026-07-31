@@ -8,6 +8,7 @@ import type { Editor } from '@tiptap/vue-3'
 import { isExtensionAvailable, isMarkInSchema, isNodeTypeSelected } from '../utils/tiptap-utils'
 import { useColorControl } from './useColorControl'
 import { useEditorI18n } from './useEditorI18n'
+import { useEditorHotkeys } from './useEditorHotkeys'
 import { HighlighterIcon } from '../icons'
 import type { ColorMessageKey, HighlightColor } from '../types/color'
 
@@ -190,6 +191,15 @@ export function useColorHighlight(options: UseColorHighlightOptions) {
     onApplied: () => onApplied?.({ color: resolvedColor ?? '', label: resolvedLabel.value, mode }),
     onRemoved: () => onApplied?.({ color: '', label: t('colors.removeHighlight'), mode }),
   })
+
+  useEditorHotkeys(editor, [
+    {
+      shortcut: COLOR_HIGHLIGHT_SHORTCUT_KEY,
+      isEnabled: () =>
+        Boolean(resolvedColor) && control.isVisible.value && control.canApplyColor.value,
+      execute: control.handleApply,
+    },
+  ])
 
   return {
     isVisible: control.isVisible,

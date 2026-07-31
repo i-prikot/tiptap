@@ -1,5 +1,5 @@
 <template>
-  <template v-if="isActivated">
+  <template v-if="isActivated && !isMobile">
     <TableExtendRowColumnButtons :ref="registerTableOverlay" />
     <TableHandle :ref="registerTableOverlay" />
     <TableSelectionOverlay :ref="registerTableOverlay" :show-resize-handles="true" />
@@ -10,10 +10,13 @@
 import { defineAsyncComponent, onBeforeUnmount, ref, watch } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import type { Editor } from '@tiptap/core'
-import { useTiptapEditor } from '../../../composables'
+import { useIsBreakpoint, useTiptapEditor } from '../../../composables'
 import type { TableHandleState } from '../../../extensions/table-handle'
+import { createDevelopmentDiagnostics } from '../../../utils/development-diagnostics'
 
 const editor = useTiptapEditor()
+const isMobile = useIsBreakpoint('max', 481)
+const diagnostics = createDevelopmentDiagnostics('TableOverlays')
 const isActivated = ref(false)
 
 const TableExtendRowColumnButtons = defineAsyncComponent(
@@ -51,13 +54,16 @@ function activate() {
 }
 
 function replayPendingTableHandleState() {
-  if (!pendingTableHandleState || mountedTableOverlays.size < 3) return
+  if (isMobile.value || !pendingTableHandleState || mountedTableOverlays.size < 3) return
 
   const tableHandleState = pendingTableHandleState
   pendingTableHandleState = null
   removeTableHandleStateListener?.()
   removeTableHandleStateListener = undefined
   editor.value?.emit('tableHandleState', tableHandleState)
+  diagnostics.debug('desktop table overlays received pending handle state', {
+    mountedOverlayCount: mountedTableOverlays.size,
+  })
 }
 
 function captureTableHandleState(tableHandleState: TableHandleState) {
@@ -72,6 +78,25 @@ function registerTableOverlay(reference: Element | ComponentPublicInstance | nul
   mountedTableOverlays.add(reference)
   replayPendingTableHandleState()
 }
+
+watch(
+  isMobile,
+  (mobile) => {
+    if (mobile) {
+      mountedTableOverlays.clear()
+      diagnostics.debug('desktop table overlays suspended for narrow viewport', {
+        breakpoint: 'max-480',
+      })
+      return
+    }
+
+    diagnostics.debug('desktop table overlays enabled for wide viewport', {
+      breakpoint: 'max-480',
+    })
+    replayPendingTableHandleState()
+  },
+  { immediate: true },
+)
 
 watch(
   editor,

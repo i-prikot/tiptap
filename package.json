@@ -21,7 +21,11 @@
     "prepare": "node scripts/prepare-husky.cjs",
     "precommit": "lint-staged --concurrent 1 && npm run typecheck",
     "test:e2e": "playwright test",
-    "test:release-verifiers": "node --experimental-strip-types --import ./scripts/register-release-verifier-test-loader.mjs scripts/run-release-verifier-tests.mjs test/scripts/verify-publish-tag.test.ts test/scripts/verify-publish-artifacts.test.ts test/scripts/verify-release-authorization.test.ts"
+    "test:release-verifiers": "node --experimental-strip-types --import ./scripts/register-release-verifier-test-loader.mjs scripts/run-release-verifier-tests.mjs test/scripts/verify-publish-tag.test.ts test/scripts/verify-publish-artifacts.test.ts test/scripts/verify-release-authorization.test.ts",
+    "icons:generate": "node scripts/generate-icons.mjs",
+    "icons:check": "node scripts/generate-icons.mjs --check",
+    "test:smoke": "node scripts/run-smoke-test.mjs",
+    "test:scripts": "node --test test/scripts/generate-icons.test.mjs test/scripts/run-smoke-test.test.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.1",
@@ -31,11 +35,11 @@
     "@vitest/coverage-v8": "^4.1.10",
     "@vue/test-utils": "^2.4.11",
     "@vue/tsconfig": "^0.7.0",
-    "eslint": "^9.17.0",
+    "eslint": "^10.8.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.5",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-vue": "^9.32.0",
+    "eslint-plugin-import-x": "^4.17.1",
+    "eslint-plugin-vue": "^10.10.0",
     "globals": "^15.14.0",
     "happy-dom": "20.10.6",
     "husky": "^9.1.7",
@@ -46,11 +50,12 @@
     "typescript-eslint": "^8.18.2",
     "vite": "^6.0.3",
     "vitest": "^4.1.10",
-    "vue-eslint-parser": "^9.4.3",
-    "vue-tsc": "^2.1.10"
+    "vue-eslint-parser": "^10.4.1",
+    "vue-tsc": "^3.3.8"
   },
   "overrides": {
-    "glob": "13.0.6"
+    "glob": "13.0.6",
+    "js-beautify": "2.0.3"
   },
   "workspaces": [
     "packages/*",

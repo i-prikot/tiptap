@@ -1,4 +1,3 @@
-/* eslint-disable vue/one-component-per-file */
 import { Editor } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import { mount, type VueWrapper } from '@vue/test-utils'

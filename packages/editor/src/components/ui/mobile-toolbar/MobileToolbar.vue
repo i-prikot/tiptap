@@ -51,7 +51,7 @@ const props = defineProps<{ editor?: Editor | null }>()
 const editor = useTiptapEditor(computed(() => props.editor))
 const overlayTarget = useEditorOverlayTarget()
 const teleportTarget = computed(() => overlayTarget?.value ?? null)
-const isMobile = useIsBreakpoint('max', 480)
+const isMobile = useIsBreakpoint('max', 481)
 const viewId = ref<MobileToolbarView>('main')
 
 watch(isMobile, (mobile) => {

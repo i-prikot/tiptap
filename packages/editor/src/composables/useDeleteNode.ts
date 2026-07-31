@@ -4,6 +4,7 @@ import { NodeSelection } from '@tiptap/pm/state'
 import type { Editor } from '@tiptap/vue-3'
 import { TrashIcon } from '../icons'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
+import { useEditorHotkeys } from './useEditorHotkeys'
 
 export const DELETE_NODE_SHORTCUT_KEY = 'backspace'
 
@@ -29,9 +30,14 @@ function deleteNodeRange(editor: Editor, from: number, size: number): boolean {
   )
 }
 
-export function useDeleteNode(editor: ComputedRef<Editor | null>) {
+export function useDeleteNode(editor: ComputedRef<Editor | null>, onDeleted?: () => void) {
   const signal = useEditorSelectionSignal(editor)
   const canDeleteNode = computed(() => (signal.value, canDeleteCurrentNode(editor.value)))
+
+  const reportDeletion = (deleted: boolean): boolean => {
+    if (deleted) onDeleted?.()
+    return deleted
+  }
 
   const handleDeleteNode = (): boolean => {
     const instance = editor.value
@@ -41,7 +47,7 @@ export function useDeleteNode(editor: ComputedRef<Editor | null>) {
       if (selection instanceof NodeSelection) {
         const node = selection.node
         if (!node) return false
-        return deleteNodeRange(instance, selection.from, node.nodeSize)
+        return reportDeletion(deleteNodeRange(instance, selection.from, node.nodeSize))
       }
       const $from = selection.$from
       for (let depth = $from.depth; depth > 0; depth--) {
@@ -54,7 +60,7 @@ export function useDeleteNode(editor: ComputedRef<Editor | null>) {
           node.type.name !== 'tableHeader' &&
           node.type.name !== 'tableCell'
         ) {
-          return deleteNodeRange(instance, before, node.nodeSize)
+          return reportDeletion(deleteNodeRange(instance, before, node.nodeSize))
         }
       }
       return false
@@ -62,6 +68,19 @@ export function useDeleteNode(editor: ComputedRef<Editor | null>) {
       return false
     }
   }
+
+  useEditorHotkeys(editor, [
+    {
+      shortcut: DELETE_NODE_SHORTCUT_KEY,
+      isEnabled: () => {
+        const instance = editor.value
+        return (
+          !!instance && instance.state.selection instanceof NodeSelection && canDeleteNode.value
+        )
+      },
+      execute: handleDeleteNode,
+    },
+  ])
 
   return {
     canDeleteNode,

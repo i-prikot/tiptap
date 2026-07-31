@@ -41,7 +41,7 @@ const emit = defineEmits<{ deleted: [] }>()
 
 const editor = useTiptapEditor(computed(() => props.editor))
 const { t } = useEditorI18n()
-const del = useDeleteNode(editor)
+const del = useDeleteNode(editor, () => emit('deleted'))
 
 const isVisible = computed(() => {
   const instance = editor.value
@@ -53,6 +53,6 @@ const isVisible = computed(() => {
 const shortcutText = computed(() => parseShortcutKeys({ shortcutKeys: del.shortcutKeys }).join(''))
 
 function handleClick() {
-  if (del.handleDeleteNode()) emit('deleted')
+  del.handleDeleteNode()
 }
 </script>

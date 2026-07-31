@@ -86,14 +86,6 @@
   line-height: normal;
 }
 
-.tiptap-separator {
-  --tt-link-border-color: var(--tt-gray-light-a-200);
-}
-
-.tinyfy-editor.dark .tiptap-separator {
-  --tt-link-border-color: var(--tt-gray-dark-a-200);
-}
-
 .tiptap-menu-separator {
   background-color: var(--tt-link-border-color);
   flex-shrink: 0;

@@ -14,7 +14,7 @@ export function useImageUpload(input: UseImageUploadInput) {
   const operations = new ImageUploadOperations(input)
   const dragActive = ref(false)
   const dragOver = ref(false)
-  const fileInputRef = shallowRef<HTMLInputElement | null>(null)
+  const fileInputRef = input.fileInputRef ?? shallowRef<HTMLInputElement | null>(null)
   const accept = computed(() => input.node.value.attrs.accept as string)
   const limit = computed(() => input.node.value.attrs.limit as number)
   const maxSize = computed(() => input.node.value.attrs.maxSize as number)
@@ -27,7 +27,6 @@ export function useImageUpload(input: UseImageUploadInput) {
     clearAllFiles: () => operations.clearAllFiles(),
     dragActive,
     dragOver,
-    fileInputRef,
     fileItems: operations.fileItems,
     formatFileSize,
     handleDragLeave: (event: DragEvent) => operations.handleDragLeave(event, dragActive, dragOver),

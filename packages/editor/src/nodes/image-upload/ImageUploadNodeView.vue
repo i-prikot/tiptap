@@ -98,7 +98,7 @@
     </div>
 
     <input
-      ref="fileInputRef"
+      ref="fileInput"
       name="file"
       :accept="accept"
       type="file"
@@ -115,7 +115,7 @@
  * отмена через AbortController; после загрузки узел заменяется image-узлами
  * и курсор переходит к следующему блоку.
  */
-import { computed, h } from 'vue'
+import { computed, h, useTemplateRef } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import { Button } from '../../components/primitives'
 import { useEditorI18n } from '../../composables/useEditorI18n'
@@ -166,13 +166,13 @@ const CloseIcon = (props: { class?: string }) =>
 
 const props = defineProps(nodeViewProps)
 const { t } = useEditorI18n()
+const fileInputRef = useTemplateRef<HTMLInputElement>('fileInput')
 
 const {
   accept,
   clearAllFiles,
   dragActive,
   dragOver,
-  fileInputRef,
   fileItems,
   formatFileSize,
   handleDragLeave,
@@ -189,5 +189,6 @@ const {
   getPos: props.getPos,
   node: computed(() => props.node),
   options: computed(() => props.extension.options as ImageUploadNodeOptions),
+  fileInputRef,
 })
 </script>

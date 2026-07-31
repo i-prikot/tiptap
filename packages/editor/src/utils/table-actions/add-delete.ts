@@ -7,8 +7,6 @@ import {
   addColumnBefore,
   addRowAfter,
   addRowBefore,
-  deleteColumn,
-  deleteRow,
 } from '@tiptap/pm/tables'
 import { isExtensionAvailable } from '../tiptap-utils'
 import {
@@ -23,6 +21,7 @@ import type { Orientation } from '../table-utils'
 import {
   HANDLE_EXTENSION,
   TABLE_EXTENSION,
+  deleteResolvedTableLine,
   dispatchOf,
   safeColumnIsHeader,
   safeRowIsHeader,
@@ -235,20 +234,13 @@ export function deleteRowColumn({ editor, index, orientation, tablePos }: RowCol
     const selectionType = getTableSelectionType(editor, index, orientation)
     if (!selectionType) return false
     const { orientation: resolvedOrientation, index: resolvedIndex } = selectionType
-    const isRow = resolvedOrientation === 'row'
-    const dispatch = dispatchOf(editor)
-    const command = isRow ? deleteRow : deleteColumn
-    if (editor.state.selection instanceof CellSelection) return command(editor.state, dispatch)
     const table = getTable(editor, tablePos)
     if (!table) return false
-    const state = selectCellsByCoords(
-      editor,
-      table.pos,
-      [isRow ? { row: resolvedIndex, col: 0 } : { row: 0, col: resolvedIndex }],
-      { mode: 'state' },
-    )
-    if (!state) return false
-    return command(state as EditorState, dispatch)
+    logger.debug('delete-resolved-table-line', {
+      orientation: resolvedOrientation,
+      index: resolvedIndex,
+    })
+    return deleteResolvedTableLine(editor, table, resolvedOrientation, resolvedIndex)
   } catch (error) {
     logger.error('Error deleting table row/column:', error)
     return false

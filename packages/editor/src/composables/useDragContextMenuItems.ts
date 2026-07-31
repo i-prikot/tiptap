@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import type { ComputedRef } from 'vue'
+import type { ComputedRef, FunctionalComponent } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import type { EditorMenuActionItem, TurnIntoMenuItem } from '../types/menu'
 import { parseShortcutKeys } from '../utils/tiptap-utils'
@@ -30,114 +30,112 @@ type ShortcutMenuItem = EditorMenuActionItem & {
   shortcut: string
 }
 
+type Translate = ReturnType<typeof useEditorI18n>['t']
+
+type BlockConversion = {
+  Icon: FunctionalComponent
+  canToggle: ComputedRef<boolean>
+  handleToggle: () => void
+  isActive: ComputedRef<boolean>
+}
+
 function formatShortcut(shortcutKeys: string | undefined) {
   return parseShortcutKeys({ shortcutKeys }).join('')
 }
 
-export function useDragContextMenuItems(editor: ComputedRef<Editor | null>) {
-  const { t } = useEditorI18n()
-  const textBlock = useTextBlock(editor)
-  const heading1 = useHeadingBlock(editor, 1)
-  const heading2 = useHeadingBlock(editor, 2)
-  const heading3 = useHeadingBlock(editor, 3)
-  const bulletList = useListBlock(editor, 'bulletList')
-  const orderedList = useListBlock(editor, 'orderedList')
-  const taskList = useListBlock(editor, 'taskList')
-  const blockquote = useBlockquoteBlock(editor)
-  const codeBlock = useCodeBlockBlock(editor)
+function createTurnIntoItems(t: Translate, conversions: BlockConversion[]): TurnIntoMenuItem[] {
+  const items = conversions.map((conversion, index) => ({
+    icon: conversion.Icon,
+    label: t(getTurnIntoBlockMessageKey(TURN_INTO_BLOCKS[index]!)),
+    onClick: conversion.handleToggle,
+    disabled: conversion.canToggle.value === false,
+    isActive: conversion.isActive.value,
+  }))
+  return items.every((item) => item.disabled) ? [] : items
+}
 
-  const tocShowTitle = useTocShowTitle(editor)
-  const tableFitToWidth = useTableFitToWidth(editor)
-  const tableClearAllContents = useTableClearAllContents(editor)
-  const resetFormatting = useResetAllFormatting(editor, ['inlineThread'])
-  const imageDownload = useImageDownload(editor)
-  const duplicate = useDuplicate(editor)
-  const copyToClipboard = useCopyToClipboard(editor)
-  const copyAnchorLink = useCopyAnchorLink(editor)
-  const deleteNode = useDeleteNode(editor)
+function createPreSubmenuNodeActionItems(
+  t: Translate,
+  actions: {
+    tocShowTitle: ReturnType<typeof useTocShowTitle>
+    tableFitToWidth: ReturnType<typeof useTableFitToWidth>
+    tableClearAllContents: ReturnType<typeof useTableClearAllContents>
+  },
+): NodeActionMenuItem[] {
+  const { tocShowTitle, tableFitToWidth, tableClearAllContents } = actions
+  const items: Array<NodeActionMenuItem | null> = [
+    tocShowTitle.canToggle.value
+      ? {
+          icon: tocShowTitle.Icon,
+          label: t('toc.showTitle'),
+          onClick: tocShowTitle.handleToggle,
+          disabled: false,
+          isActive: tocShowTitle.isActive.value,
+        }
+      : null,
+    tableFitToWidth.canFitToWidth.value
+      ? {
+          icon: tableFitToWidth.Icon,
+          label: t('table.fitToWidth'),
+          onClick: tableFitToWidth.handleFitToWidth,
+          disabled: false,
+          isActive: false,
+        }
+      : null,
+    tableClearAllContents.canClearAll.value
+      ? {
+          icon: tableClearAllContents.Icon,
+          label: t('table.clearAllContents'),
+          onClick: tableClearAllContents.handleClearAll,
+          disabled: false,
+          isActive: false,
+        }
+      : null,
+  ]
+  return items.filter((item): item is NodeActionMenuItem => item !== null)
+}
 
-  const turnIntoItems = computed<TurnIntoMenuItem[]>(() => {
-    const conversions = [
-      textBlock,
-      heading1,
-      heading2,
-      heading3,
-      bulletList,
-      orderedList,
-      taskList,
-      blockquote,
-      codeBlock,
-    ]
-    const items = conversions.map((conversion, index) => ({
-      icon: conversion.Icon,
-      label: t(getTurnIntoBlockMessageKey(TURN_INTO_BLOCKS[index]!)),
-      onClick: conversion.handleToggle,
-      disabled: conversion.canToggle.value === false,
-      isActive: conversion.isActive.value,
-    }))
-    return items.every((item) => item.disabled) ? [] : items
-  })
+function createPostSubmenuNodeActionItems(
+  t: Translate,
+  actions: {
+    resetFormatting: ReturnType<typeof useResetAllFormatting>
+    imageDownload: ReturnType<typeof useImageDownload>
+  },
+): NodeActionMenuItem[] {
+  const { resetFormatting, imageDownload } = actions
+  const items: Array<NodeActionMenuItem | null> = [
+    resetFormatting.canReset.value
+      ? {
+          icon: resetFormatting.Icon,
+          label: t('toolbar.resetFormatting'),
+          onClick: resetFormatting.handleResetFormatting,
+          disabled: false,
+          isActive: false,
+        }
+      : null,
+    imageDownload.canDownload.value
+      ? {
+          icon: imageDownload.Icon,
+          label: t('image.download'),
+          onClick: imageDownload.handleDownload,
+          disabled: false,
+          isActive: false,
+        }
+      : null,
+  ]
+  return items.filter((item): item is NodeActionMenuItem => item !== null)
+}
 
-  const preSubmenuNodeActionItems = computed<NodeActionMenuItem[]>(() => {
-    const items: Array<NodeActionMenuItem | null> = [
-      tocShowTitle.canToggle.value
-        ? {
-            icon: tocShowTitle.Icon,
-            label: t('toc.showTitle'),
-            onClick: tocShowTitle.handleToggle,
-            disabled: false,
-            isActive: tocShowTitle.isActive.value,
-          }
-        : null,
-      tableFitToWidth.canFitToWidth.value
-        ? {
-            icon: tableFitToWidth.Icon,
-            label: t('table.fitToWidth'),
-            onClick: tableFitToWidth.handleFitToWidth,
-            disabled: false,
-            isActive: false,
-          }
-        : null,
-      tableClearAllContents.canClearAll.value
-        ? {
-            icon: tableClearAllContents.Icon,
-            label: t('table.clearAllContents'),
-            onClick: tableClearAllContents.handleClearAll,
-            disabled: false,
-            isActive: false,
-          }
-        : null,
-    ]
-
-    return items.filter((item): item is NodeActionMenuItem => item !== null)
-  })
-
-  const postSubmenuNodeActionItems = computed<NodeActionMenuItem[]>(() => {
-    const items: Array<NodeActionMenuItem | null> = [
-      resetFormatting.canReset.value
-        ? {
-            icon: resetFormatting.Icon,
-            label: t('toolbar.resetFormatting'),
-            onClick: resetFormatting.handleResetFormatting,
-            disabled: false,
-            isActive: false,
-          }
-        : null,
-      imageDownload.canDownload.value
-        ? {
-            icon: imageDownload.Icon,
-            label: t('image.download'),
-            onClick: imageDownload.handleDownload,
-            disabled: false,
-            isActive: false,
-          }
-        : null,
-    ]
-
-    return items.filter((item): item is NodeActionMenuItem => item !== null)
-  })
-
-  const clipboardItems = computed<ShortcutMenuItem[]>(() => [
+function createClipboardItems(
+  t: Translate,
+  actions: {
+    duplicate: ReturnType<typeof useDuplicate>
+    copyToClipboard: ReturnType<typeof useCopyToClipboard>
+    copyAnchorLink: ReturnType<typeof useCopyAnchorLink>
+  },
+): ShortcutMenuItem[] {
+  const { duplicate, copyToClipboard, copyAnchorLink } = actions
+  return [
     {
       icon: duplicate.Icon,
       label: t('toolbar.duplicateNode'),
@@ -159,21 +157,52 @@ export function useDragContextMenuItems(editor: ComputedRef<Editor | null>) {
       disabled: copyAnchorLink.canCopyAnchorLink.value === false,
       shortcut: formatShortcut(copyAnchorLink.shortcutKeys),
     },
-  ])
+  ]
+}
 
-  const deleteItem = computed<ShortcutMenuItem>(() => ({
+function createDeleteItem(
+  t: Translate,
+  deleteNode: ReturnType<typeof useDeleteNode>,
+): ShortcutMenuItem {
+  return {
     icon: deleteNode.Icon,
     label: t('toolbar.delete'),
     onClick: deleteNode.handleDeleteNode,
     disabled: deleteNode.canDeleteNode.value === false,
     shortcut: formatShortcut(deleteNode.shortcutKeys),
-  }))
+  }
+}
+
+export function useDragContextMenuItems(editor: ComputedRef<Editor | null>) {
+  const { t } = useEditorI18n()
+  const conversions = [
+    useTextBlock(editor),
+    useHeadingBlock(editor, 1),
+    useHeadingBlock(editor, 2),
+    useHeadingBlock(editor, 3),
+    useListBlock(editor, 'bulletList'),
+    useListBlock(editor, 'orderedList'),
+    useListBlock(editor, 'taskList'),
+    useBlockquoteBlock(editor),
+    useCodeBlockBlock(editor),
+  ]
+  const actions = {
+    tocShowTitle: useTocShowTitle(editor),
+    tableFitToWidth: useTableFitToWidth(editor),
+    tableClearAllContents: useTableClearAllContents(editor),
+    resetFormatting: useResetAllFormatting(editor, ['inlineThread']),
+    imageDownload: useImageDownload(editor),
+    duplicate: useDuplicate(editor),
+    copyToClipboard: useCopyToClipboard(editor),
+    copyAnchorLink: useCopyAnchorLink(editor),
+    deleteNode: useDeleteNode(editor),
+  }
 
   return {
-    preSubmenuNodeActionItems,
-    postSubmenuNodeActionItems,
-    turnIntoItems,
-    clipboardItems,
-    deleteItem,
+    turnIntoItems: computed(() => createTurnIntoItems(t, conversions)),
+    preSubmenuNodeActionItems: computed(() => createPreSubmenuNodeActionItems(t, actions)),
+    postSubmenuNodeActionItems: computed(() => createPostSubmenuNodeActionItems(t, actions)),
+    clipboardItems: computed(() => createClipboardItems(t, actions)),
+    deleteItem: computed(() => createDeleteItem(t, actions.deleteNode)),
   }
 }

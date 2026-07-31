@@ -1,7 +1,7 @@
 import type { Editor } from '@tiptap/core'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import type { ImageUploadNodeOptions } from '@i-prikot/editor-schema'
-import type { ComputedRef } from 'vue'
+import type { ComputedRef, ShallowRef } from 'vue'
 import type { EditorMessageKey, EditorMessageValues } from '../i18n/types'
 
 export type ImageUploadErrorMessageKey = Extract<EditorMessageKey, `errors.imageUpload${string}`>
@@ -23,6 +23,7 @@ export interface ImageUploadFileItem {
 
 export interface UseImageUploadInput {
   editor: Editor
+  fileInputRef?: Readonly<ShallowRef<HTMLInputElement | null>>
   getPos: () => number | undefined
   node: ComputedRef<ProseMirrorNode>
   options: ComputedRef<ImageUploadNodeOptions>

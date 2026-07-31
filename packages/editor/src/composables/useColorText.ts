@@ -11,6 +11,7 @@ import {
 } from '../utils/tiptap-utils'
 import { useColorControl } from './useColorControl'
 import { useEditorI18n } from './useEditorI18n'
+import { useEditorHotkeys } from './useEditorHotkeys'
 import { TextColorSmallIcon } from '../icons'
 import type { ColorMessageKey, TextColor } from '../types/color'
 
@@ -124,6 +125,14 @@ export function useColorText(options: UseColorTextOptions) {
     deferApply: true,
     onApplied: () => onApplied?.({ color: textColor, label: resolvedLabel.value }),
   })
+
+  useEditorHotkeys(editor, [
+    {
+      shortcut: COLOR_TEXT_SHORTCUT_KEY,
+      isEnabled: () => control.isVisible.value && control.canApplyColor.value,
+      execute: control.handleApply,
+    },
+  ])
 
   return {
     isVisible: control.isVisible,

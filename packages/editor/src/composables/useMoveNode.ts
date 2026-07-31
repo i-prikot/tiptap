@@ -7,6 +7,8 @@ import type { ComputedRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
 import { TextSelection } from '@tiptap/pm/state'
 import { useEditorSelectionSignal } from './useEditorSelectionSignal'
+import { useEditorHotkeys } from './useEditorHotkeys'
+import type { EditorHotkeyShortcut } from './useEditorHotkeys'
 import { getAnchorNodeAndPos } from './useNodeActions'
 import { AlignBottomIcon, AlignTopIcon } from '../icons'
 
@@ -14,7 +16,9 @@ export type MoveDirection = 'up' | 'down'
 
 const logger = createLogger('useMoveNode')
 
-export const MOVE_NODE_SHORTCUT_KEYS: Record<MoveDirection, string> = {
+type MoveNodeShortcut = Extract<EditorHotkeyShortcut, 'mod+shift+ArrowUp' | 'mod+shift+ArrowDown'>
+
+export const MOVE_NODE_SHORTCUT_KEYS: Record<MoveDirection, MoveNodeShortcut> = {
   up: 'mod+shift+ArrowUp',
   down: 'mod+shift+ArrowDown',
 }
@@ -93,6 +97,14 @@ export function useMoveNode(
     if (moved) onMoved?.(direction)
     return moved
   }
+
+  useEditorHotkeys(editor, [
+    {
+      shortcut: MOVE_NODE_SHORTCUT_KEYS[direction],
+      isEnabled: () => canMove.value,
+      execute: handleMoveNode,
+    },
+  ])
 
   return {
     isVisible,

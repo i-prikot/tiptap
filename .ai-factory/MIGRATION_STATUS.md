@@ -131,8 +131,9 @@
 - `SuggestionMenu.vue` (generic) + **SlashDropdownMenu** (все 17 пунктов
   с группами AI/Style/Insert/Upload; AI-пункты скрыты без расширения),
   **EmojiDropdownMenu**, **MentionDropdownMenu** (демо-каталог 20 юзеров).
-- `icons/index.ts` — все 96 иконок сгенерированы из чанков
-  (scratchpad/extract-icons.mjs + generate-icons.mjs).
+- `icons/index.ts` — все 97 иконок сгенерированы из чанков; поддерживаемая
+  регенерация и проверка barrel выполняется через `npm run icons:generate` и
+  `npm run icons:check`.
 - Проверено в headless Edge: `/` открывает меню (фильтрация, Enter
   вставляет блок), `:smile` — эмодзи, `@emi` — меншен вставляется.
 
@@ -216,7 +217,8 @@
 - Глобальные хоткеи tiptap-ui кнопок (mod+shift+H/T/I, mod+shift+стрелки,
   backspace в useDeleteNode) не привязаны — в оригинале react-hotkeys;
   действия работают по клику.
-- Иконки: переносить в `src/editor/icons/index.ts` по мере надобности.
+- Иконки: добавлять модули в `packages/editor/src/icons/`, затем обновлять
+  barrel через `npm run icons:generate`.
 
 ## Как проверять
 
@@ -226,4 +228,5 @@ npm run dev        # http://127.0.0.1:5173
 npm run build      # vue-tsc + vite build
 ```
 
-Смоук-тест: `scratchpad/smoke-test.mjs` (puppeteer-core + headless Edge).
+Смоук-тест: `npm run test:smoke` (Playwright Chromium; перед первым запуском
+установить браузер через `npx playwright install chromium`).

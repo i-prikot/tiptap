@@ -47,8 +47,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Run release verifiers for dependency updates
-        if: contains(github.event.pull_request.labels.*.name, 'dependencies')
+      - name: Run release verifiers
         run: npm run test:release-verifiers
 
   e2e:

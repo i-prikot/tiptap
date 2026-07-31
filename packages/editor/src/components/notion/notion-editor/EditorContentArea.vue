@@ -58,7 +58,7 @@ const uiState = useUiEditorState(editor, [
   'aiGenerationIsLoading',
   'aiGenerationIsSelection',
 ] as const)
-const isMobile = useIsBreakpoint('max', 480)
+const isMobile = useIsBreakpoint('max', 481)
 const isDragContextMenuMobile = useIsBreakpoint('max', 768)
 const isMobileToolbarActivated = ref(false)
 const isDragContextMenuActivated = ref(false)

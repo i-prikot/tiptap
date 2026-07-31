@@ -18,6 +18,7 @@
   position: relative;
 }
 .tiptap.ProseMirror {
+  min-height: 520px;
   white-space: pre-wrap;
   caret-color: var(--tt-cursor-color);
   outline: none;
