@@ -1,5 +1,5 @@
 import { statSync } from 'node:fs'
-import { dirname, relative, resolve } from 'node:path'
+import { dirname, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
@@ -24,7 +24,7 @@ function resolveLegacySourcePath(source: string, importer?: string) {
   if (!importer || !source.startsWith('.')) return undefined
 
   const requestedPath = resolve(dirname(importer), source)
-  const legacyPath = relative(legacySourceRoot, requestedPath)
+  const legacyPath = relative(legacySourceRoot, requestedPath).split(sep).join('/')
   if (legacyPath.startsWith('..') || legacyPath === '') return undefined
 
   let workspaceSourcePath: string | undefined

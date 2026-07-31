@@ -204,6 +204,7 @@ describe('focused UI branch behavior', () => {
     vi.useFakeTimers()
     const { chain, editor, transaction } = createColorEditor({ canText: false, canHighlight: true })
     const wrapper = mount(ColorMenu, {
+      attachTo: document.body,
       props: { editor: editor as never, label: 'Formatting colors' },
     })
 

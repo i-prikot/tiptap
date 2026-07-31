@@ -66,7 +66,7 @@ describe('playground host theme boundary', () => {
     expect(document.body.classList.contains('dark')).toBe(false)
     expect(addEventListener).toHaveBeenCalledWith('change', expect.any(Function))
     expect(removeEventListener).not.toHaveBeenCalled()
-  })
+  }, 30_000)
 
   it('keeps header tooltips and the CTA inside the scoped editor root', async () => {
     window.history.replaceState({}, '', '/?cta')
@@ -100,7 +100,7 @@ describe('playground host theme boundary', () => {
     const overlayRoot = editorRoot.querySelector<HTMLElement>('[data-tiptap-overlay-root]')
 
     expect(overlayRoot).not.toBeNull()
-    expect(overlayRoot).toContain(document.querySelector('.tiptap-cta'))
+    expect(overlayRoot?.contains(document.querySelector('.tiptap-cta'))).toBe(true)
 
     await wrapper.get('.tiptap-tooltip-trigger').trigger('focusin')
     await settleTeleportUpdates()

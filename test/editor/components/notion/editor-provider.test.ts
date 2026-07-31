@@ -54,12 +54,19 @@ const testState = vi.hoisted(() => ({
   editorRef: null as unknown,
   setTocContent: vi.fn(),
   provideTiptapEditor: vi.fn(),
-  useEditor: vi.fn(),
 }))
 
 vi.mock('@tiptap/vue-3', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tiptap/vue-3')>()
-  return { ...actual, useEditor: testState.useEditor }
+  return {
+    ...actual,
+    Editor: class {
+      constructor(options: CapturedEditorOptions) {
+        testState.editorOptions = options
+        return (testState.editorRef as { value: object }).value
+      }
+    },
+  }
 })
 
 vi.mock('../../../../src/editor/composables/useUser', () => ({
@@ -105,6 +112,7 @@ const visualStubs = {
   TocSidebar: true,
   LoadingSpinner: true,
   TableHandle: true,
+  TableOverlays: true,
   TableSelectionOverlay: true,
   TableExtendRowColumnButtons: true,
 }
@@ -187,7 +195,7 @@ function getExtension(name: string) {
   return extension
 }
 
-function mountEditorProvider(
+async function mountEditorProvider(
   options: {
     editor?: EditorHarness
     provider?: FakeProvider | null
@@ -213,6 +221,8 @@ function mountEditorProvider(
     global: { stubs: visualStubs },
   })
 
+  await vi.dynamicImportSettled()
+
   return { editor, editorRef, wrapper, ydoc }
 }
 
@@ -231,10 +241,6 @@ beforeEach(() => {
   testState.documentId = 'editor-provider-test-document'
   testState.editorOptions = null
   testState.editorRef = null
-  testState.useEditor.mockImplementation((options: CapturedEditorOptions) => {
-    testState.editorOptions = options
-    return testState.editorRef
-  })
 })
 
 afterEach(() => {
@@ -244,19 +250,19 @@ afterEach(() => {
 })
 
 describe('EditorProvider', () => {
-  it('mounts the ready shell and publishes the editor ref through the provider harness', () => {
-    const { editorRef, wrapper, ydoc } = mountEditorProvider()
+  it('mounts the ready shell and publishes the editor ref through the provider harness', async () => {
+    const { wrapper, ydoc } = await mountEditorProvider()
 
     expect(wrapper.find('.notion-like-editor-wrapper').exists()).toBe(true)
     expect(wrapper.findComponent({ name: 'LoadingSpinner' }).exists()).toBe(false)
-    expect(testState.provideTiptapEditor).toHaveBeenCalledWith(editorRef)
-    expect(testState.useEditor).toHaveBeenCalledOnce()
+    expect(testState.provideTiptapEditor).toHaveBeenCalledOnce()
+    expect(testState.editorOptions).not.toBeNull()
 
     ydoc.destroy()
   })
 
-  it('uses the complete local extension assembly with the supplied visual configuration', () => {
-    const { ydoc } = mountEditorProvider({ placeholder: 'Write this document' })
+  it('uses the complete local extension assembly with the supplied visual configuration', async () => {
+    const { ydoc } = await mountEditorProvider({ placeholder: 'Write this document' })
 
     expect(getEditorOptions().editorProps).toEqual({
       attributes: { class: 'notion-like-editor' },
@@ -346,7 +352,7 @@ describe('EditorProvider', () => {
 
   it('delegates image uploads to an adapter provided after mount', async () => {
     const replacementUpload = vi.fn(async () => 'https://example.test/replacement.png')
-    const { wrapper, ydoc } = mountEditorProvider()
+    const { wrapper, ydoc } = await mountEditorProvider()
     const upload = getExtension('imageUpload').options.upload as ImageUploadAdapter
     const file = new File(['image'], 'replacement.png', { type: 'image/png' })
     const callbacks = { onProgress: vi.fn(), abortSignal: new AbortController().signal }
@@ -361,9 +367,9 @@ describe('EditorProvider', () => {
     ydoc.destroy()
   })
 
-  it('adds Yjs collaboration extensions and disables local history when a provider is supplied', () => {
+  it('adds Yjs collaboration extensions and disables local history when a provider is supplied', async () => {
     const providerHarness = createProviderHarness(true)
-    const { ydoc } = mountEditorProvider({ provider: providerHarness.provider })
+    const { ydoc } = await mountEditorProvider({ provider: providerHarness.provider })
 
     expect(extensionNames()).toContain('collaboration')
     expect(extensionNames()).toContain('collaborationCaret')
@@ -380,8 +386,8 @@ describe('EditorProvider', () => {
     ydoc.destroy()
   })
 
-  it('leaves an empty local document untouched when the host supplies no content', () => {
-    const { editor, ydoc } = mountEditorProvider()
+  it('leaves an empty local document untouched when the host supplies no content', async () => {
+    const { editor, ydoc } = await mountEditorProvider()
 
     invokeCreation(editor.editor)
 
@@ -390,10 +396,10 @@ describe('EditorProvider', () => {
     ydoc.destroy()
   })
 
-  it('waits for collaboration sync before ready without mutating an empty document', () => {
+  it('waits for collaboration sync before ready without mutating an empty document', async () => {
     const providerHarness = createProviderHarness(false)
     const onReady = vi.fn()
-    const { editor, ydoc } = mountEditorProvider({
+    const { editor, ydoc } = await mountEditorProvider({
       provider: providerHarness.provider,
       onReady,
     })
@@ -411,10 +417,10 @@ describe('EditorProvider', () => {
     ydoc.destroy()
   })
 
-  it('immediately marks an already-synced empty document ready without mutation', () => {
+  it('immediately marks an already-synced empty document ready without mutation', async () => {
     const providerHarness = createProviderHarness(true)
     const onReady = vi.fn()
-    const { editor, ydoc } = mountEditorProvider({
+    const { editor, ydoc } = await mountEditorProvider({
       provider: providerHarness.provider,
       onReady,
     })

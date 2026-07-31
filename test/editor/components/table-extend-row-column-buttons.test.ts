@@ -112,8 +112,8 @@ describe('TableExtendRowColumnButtons branch behavior', () => {
 
     await nextTick()
 
-    getButton(container, 'Add or remove rows').click()
-    getButton(container, 'Add or remove columns').click()
+    getButton(container, 'Добавить или удалить строки').click()
+    getButton(container, 'Добавить или удалить столбцы').click()
 
     expect(mocks.selectLastCell).toHaveBeenNthCalledWith(1, editor, expect.anything(), 1, 'row')
     expect(mocks.selectLastCell).toHaveBeenNthCalledWith(2, editor, expect.anything(), 1, 'column')
@@ -125,7 +125,7 @@ describe('TableExtendRowColumnButtons branch behavior', () => {
     mount(TableExtendRowColumnButtons, { global: { stubs: { Teleport: false } } })
     await nextTick()
     await nextTick()
-    const button = getButton(container, 'Add or remove rows')
+    const button = getButton(container, 'Добавить или удалить строки')
 
     button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientY: 100 }))
     window.dispatchEvent(new MouseEvent('mousemove', { clientY: 140 }))
@@ -149,7 +149,7 @@ describe('TableExtendRowColumnButtons branch behavior', () => {
     const wrapper = mount(TableExtendRowColumnButtons, { global: { stubs: { Teleport: false } } })
     await nextTick()
     await nextTick()
-    const button = getButton(container, 'Add or remove columns')
+    const button = getButton(container, 'Добавить или удалить столбцы')
 
     button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 100 }))
     window.dispatchEvent(new MouseEvent('mousemove', { clientX: 240 }))

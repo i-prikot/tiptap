@@ -1,5 +1,5 @@
 <template>
-  <Teleport v-if="shouldRender && visible" :to="teleportTarget">
+  <Teleport v-if="shouldRender && visible && teleportTarget" :to="teleportTarget">
     <div class="tiptap-cta" role="dialog" aria-modal="true" aria-label="Notion-like Template">
       <Button variant="ghost" class="tiptap-cta__close" aria-label="Close" @click="close">
         <svg
@@ -102,7 +102,7 @@ import { computed, ref } from 'vue'
 import { Button, useEditorOverlayTarget } from '@i-prikot/editor'
 
 const overlayTarget = useEditorOverlayTarget()
-const teleportTarget = computed(() => overlayTarget?.value ?? 'body')
+const teleportTarget = computed(() => overlayTarget?.value ?? null)
 
 const shouldRender =
   typeof document !== 'undefined' && new URLSearchParams(window.location.search).has('cta')

@@ -4,12 +4,15 @@ import { Editor } from '@tiptap/vue-3'
 import { type Mark } from '@tiptap/pm/model'
 import { mount, type VueWrapper } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { defineComponent, h, nextTick, shallowRef } from 'vue'
+import { computed, defineComponent, h, nextTick, shallowRef } from 'vue'
 import ColorHighlightButton from '../../../../src/editor/components/ui/color/ColorHighlightButton.vue'
 import ColorHighlightPopoverContent from '../../../../src/editor/components/ui/color/ColorHighlightPopoverContent.vue'
 import LinkPopover from '../../../../src/editor/components/ui/link/LinkPopover.vue'
 import MarkButton from '../../../../src/editor/components/ui/formatting/MarkButton.vue'
 import { provideTiptapEditor } from '../../../../src/editor/composables/useTiptapEditor'
+import { provideAnchorNavigation } from '../../../../src/editor/composables/useAnchorNavigation'
+import { provideEditorI18n } from '../../../../src/editor/composables/useEditorI18n'
+import { provideEditorOverlayTarget } from '../../../../src/editor/composables/useEditorOverlayTarget'
 import type { HighlightColor } from '../../../../src/editor/types/color'
 
 vi.mock('@floating-ui/vue', () => ({
@@ -36,6 +39,13 @@ const FormattingHost = defineComponent({
   name: 'TextFormattingIntegrationHost',
   setup() {
     provideTiptapEditor(providedEditor)
+    provideEditorI18n('en', undefined)
+    provideEditorOverlayTarget(shallowRef(null))
+    provideAnchorNavigation(
+      computed(() => 'https://example.test/formatting-test'),
+      computed(() => undefined),
+      () => {},
+    )
 
     return () =>
       h('div', { 'data-testid': 'text-formatting-controls' }, [

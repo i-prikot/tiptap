@@ -37,6 +37,7 @@ vi.mock('../../../packages/editor/src/extensions/extension-kit', () => ({
 
 vi.mock('@i-prikot/editor-schema', () => ({
   CURRENT_SCHEMA_VERSION: 1,
+  createLogger: () => state.diagnostics,
 }))
 
 vi.mock('../../../packages/editor/src/composables', async () => {
@@ -47,6 +48,7 @@ vi.mock('../../../packages/editor/src/composables', async () => {
     provideTiptapEditor: vi.fn(),
     useToc: () => ({ setTocContent: vi.fn() }),
     useUser: () => ({ user: { id: 'test-user', name: 'Test User', color: '#000000' } }),
+    useEditorI18n: () => ({ t: (key: string) => key }),
     useTiptapEditor: () => ref(null),
   }
 })

@@ -93,11 +93,11 @@ afterEach(() => {
 })
 
 describe('useDemoDocumentSeed', () => {
-  it('seeds an empty, uninteracted document without history and focuses its start', () => {
+  it('seeds an empty, uninteracted document without history and focuses its start', async () => {
     const { editor, chainCalls } = createEditorHarness()
     const { initializeDemoDocumentSeed } = useDemoDocumentSeed(documentId)
 
-    initializeDemoDocumentSeed(editor)
+    await initializeDemoDocumentSeed(editor)
 
     expectSeededDefaultContent(chainCalls)
     expect(localStorage.getItem(`hasInteracted-${documentId}`)).toBeNull()
@@ -116,11 +116,11 @@ describe('useDemoDocumentSeed', () => {
     expect(chainCalls).toEqual([])
   })
 
-  it('stores the interaction key after a later non-empty update', () => {
+  it('stores the interaction key after a later non-empty update', async () => {
     const { editor, emitUpdate } = createEditorHarness()
     const { initializeDemoDocumentSeed } = useDemoDocumentSeed(documentId)
 
-    initializeDemoDocumentSeed(editor)
+    await initializeDemoDocumentSeed(editor)
     expect(localStorage.getItem(`hasInteracted-${documentId}`)).toBeNull()
 
     emitUpdate()

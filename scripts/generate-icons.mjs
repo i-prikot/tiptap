@@ -2,6 +2,10 @@ import { constants } from 'node:fs'
 import { lstat, open, readdir, readFile, realpath } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import {
+  getIconDirectoryPath,
+  resolveWindowsIconSourceDirectory,
+} from './resolve-windows-icon-source-directory.mjs'
 
 const logLevels = Object.freeze({ debug: 10, info: 20, error: 30, silent: Infinity })
 const configuredLevel = (process.env.LOG_LEVEL ?? 'info').toLowerCase()
@@ -80,6 +84,10 @@ function assertSameDirectory(expectedStats, actualStats, description) {
 }
 
 async function resolveIconSourceDirectory() {
+  if (directoryOpenFlags === null) {
+    return resolveWindowsIconSourceDirectory(repositoryRoot)
+  }
+
   const canonicalRepositoryRoot = await realpath(repositoryRoot)
   const repositoryHandle = await openDirectory(canonicalRepositoryRoot, 'Repository root')
   const handles = [repositoryHandle]
@@ -106,16 +114,16 @@ async function resolveIconSourceDirectory() {
       parentHandle = directoryHandle
     }
 
-    return { iconDirectoryHandle: parentHandle, handles }
+    return { iconDirectory: parentHandle, handles }
   } catch (error) {
     await closeHandles(handles)
     throw error
   }
 }
 
-async function openBarrelOutput(iconDirectoryHandle, check) {
+async function openBarrelOutput(iconDirectory, check) {
   const outputPath = barrelPath
-  const descriptorRelativeOutputPath = getDescriptorRelativePath(iconDirectoryHandle, 'index.ts')
+  const descriptorRelativeOutputPath = join(getIconDirectoryPath(iconDirectory), 'index.ts')
   const outputStats = await lstat(descriptorRelativeOutputPath)
   assertRegularBarrelFile(outputStats, 'Icon barrel output path')
 
@@ -183,10 +191,11 @@ function extractNamedExports(moduleName, source) {
   return exportNames
 }
 
-async function discoverIconExports(iconDirectoryHandle) {
+async function discoverIconExports(iconDirectory) {
   log('debug', 'Discovering committed icon modules.', { iconsDirectory })
 
-  const entries = await readdir(getDescriptorRelativePath(iconDirectoryHandle), {
+  const iconDirectoryPath = getIconDirectoryPath(iconDirectory)
+  const entries = await readdir(iconDirectoryPath, {
     withFileTypes: true,
   })
   const moduleNames = []
@@ -212,10 +221,7 @@ async function discoverIconExports(iconDirectoryHandle) {
   const seenExportNames = new Map()
 
   for (const moduleName of moduleNames) {
-    const source = await readFile(
-      getDescriptorRelativePath(iconDirectoryHandle, moduleName),
-      'utf8',
-    )
+    const source = await readFile(join(iconDirectoryPath, moduleName), 'utf8')
 
     for (const exportName of extractNamedExports(moduleName, source)) {
       const previousModuleName = seenExportNames.get(exportName)
@@ -240,13 +246,13 @@ function renderBarrel(iconExports) {
 }
 
 async function generateIcons({ check }) {
-  const { handles, iconDirectoryHandle } = await resolveIconSourceDirectory()
+  const { handles, iconDirectory } = await resolveIconSourceDirectory()
 
   try {
-    const { outputPath, barrelHandle } = await openBarrelOutput(iconDirectoryHandle, check)
+    const { outputPath, barrelHandle } = await openBarrelOutput(iconDirectory, check)
 
     try {
-      const iconExports = await discoverIconExports(iconDirectoryHandle)
+      const iconExports = await discoverIconExports(iconDirectory)
       const expectedBarrel = renderBarrel(iconExports)
       const existingBarrel = await barrelHandle.readFile('utf8')
 

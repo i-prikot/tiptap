@@ -74,13 +74,13 @@ describe('image and indentation command composables', () => {
     )
 
     expect(indent.canIndent.value).toBe(true)
-    expect(indent.label.value).toBe('Increase indent')
+    expect(indent.label.value).toBe('Увеличить отступ')
     expect(indent.shortcutKeys.value).toBe('Tab')
     expect(indent.execute()).toBe(true)
     expect(editor.state.doc.firstChild?.attrs.indent).toBe(1)
 
     action.value = 'outdent'
-    expect(indent.label.value).toBe('Decrease indent')
+    expect(indent.label.value).toBe('Уменьшить отступ')
     expect(indent.shortcutKeys.value).toBe('Shift-Tab')
     expect(indent.execute()).toBe(true)
     expect(editor.state.doc.firstChild?.attrs.indent).toBe(0)

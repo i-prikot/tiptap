@@ -78,7 +78,7 @@ describe('TableHandleControl', () => {
       'data-placement': 'top-start',
     })
     expect(wrapper.get('button').attributes()).toMatchObject({
-      'aria-label': 'Row actions',
+      'aria-label': 'Действия со строкой',
       'aria-expanded': 'true',
       draggable: 'true',
     })
@@ -99,7 +99,7 @@ describe('TableHandleControl', () => {
     const wrapper = mountControl('column', false, { onDragEnd, onDragStart, onOpenChange })
 
     expect(wrapper.get('[data-testid="menu"]').attributes('data-placement')).toBe('bottom-start')
-    expect(wrapper.get('button').attributes('aria-label')).toBe('Column actions')
+    expect(wrapper.get('button').attributes('aria-label')).toBe('Действия со столбцом')
 
     wrapper.get('button').element.dispatchEvent(new Event('dragstart', { bubbles: true }))
     wrapper.get('button').element.dispatchEvent(new Event('dragend', { bubbles: true }))

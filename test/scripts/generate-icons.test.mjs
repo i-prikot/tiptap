@@ -28,6 +28,10 @@ function createFixtureProject() {
     resolve(projectRoot, 'scripts/generate-icons.mjs'),
     join(fixtureRoot, 'scripts/generate-icons.mjs'),
   )
+  cpSync(
+    resolve(projectRoot, 'scripts/resolve-windows-icon-source-directory.mjs'),
+    join(fixtureRoot, 'scripts/resolve-windows-icon-source-directory.mjs'),
+  )
   writeFileSync(
     join(fixtureIconsDirectory, 'create-icon.ts'),
     'export const createIcon = () => null\n',
@@ -102,7 +106,7 @@ describe('generate icons script', () => {
     assert.equal(readFileSync(linkedFilePath, 'utf8'), linkedFileContents)
   })
 
-  it('refuses an icon directory reached through a symbolic-link ancestor', () => {
+  it('refuses an icon directory reached through a symbolic-link ancestor', (t) => {
     const { fixtureRoot } = createFixtureProject()
     const sourceDirectory = join(fixtureRoot, 'packages/editor/src')
     const redirectedSourceDirectory = join(fixtureRoot, 'redirected-src')
@@ -111,7 +115,17 @@ describe('generate icons script', () => {
     cpSync(sourceDirectory, redirectedSourceDirectory, { recursive: true })
     const redirectedBarrelContents = readFileSync(redirectedBarrelPath, 'utf8')
     rmSync(sourceDirectory, { force: true, recursive: true })
-    symlinkSync(redirectedSourceDirectory, sourceDirectory, 'dir')
+    try {
+      symlinkSync(redirectedSourceDirectory, sourceDirectory, 'dir')
+    } catch (error) {
+      if (error && typeof error === 'object' && error.code === 'EPERM') {
+        t.skip(
+          'Creating directory symlinks requires Windows developer mode or elevated privileges.',
+        )
+        return
+      }
+      throw error
+    }
 
     const result = runIconGenerator(fixtureRoot)
 

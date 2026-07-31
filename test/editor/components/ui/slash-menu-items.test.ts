@@ -4,6 +4,7 @@ import {
   getSlashMenuItems,
   type SlashMenuItemKey,
 } from '../../../../src/editor/components/ui/slash-menu'
+import { defaultEditorMessageCatalog } from '../../../../src/editor/components/notion/notion-editor/public-api'
 
 const keys: SlashMenuItemKey[] = [
   'continue_writing',
@@ -24,6 +25,13 @@ const keys: SlashMenuItemKey[] = [
   'table',
   'image',
 ]
+
+function englishT(key: string): string {
+  return key.split('.').reduce<unknown>((message, segment) => {
+    if (!message || typeof message !== 'object') return undefined
+    return (message as Record<string, unknown>)[segment]
+  }, defaultEditorMessageCatalog.en) as string
+}
 
 function createEditor({ available = true }: { available?: boolean } = {}) {
   const commands: string[] = []
@@ -80,7 +88,7 @@ afterEach(() => {
 describe('slash menu items', () => {
   it('excludes AI items by default even when requested', () => {
     const { editor } = createEditor()
-    const items = getSlashMenuItems(editor, { enabledItems: keys })
+    const items = getSlashMenuItems(editor, englishT, { enabledItems: keys })
 
     expect(items).toHaveLength(keys.length - 2)
     expect(items.map((item) => item.title)).not.toContain('Ask AI')
@@ -90,7 +98,7 @@ describe('slash menu items', () => {
 
   it('creates and executes every available editor command item when AI is enabled', () => {
     const { commands, editor } = createEditor()
-    const items = getSlashMenuItems(editor, { enabledItems: keys }, true)
+    const items = getSlashMenuItems(editor, englishT, { enabledItems: keys }, true)
 
     expect(items).toHaveLength(keys.length)
     expect(items.map((item) => item.group)).toEqual([
@@ -144,7 +152,7 @@ describe('slash menu items', () => {
       title: 'Custom',
     }
 
-    const items = getSlashMenuItems(unavailable.editor, {
+    const items = getSlashMenuItems(unavailable.editor, englishT, {
       customItems: [customItem],
       enabledItems: ['text', 'mention'],
       itemGroups: { text: 'Overridden' },

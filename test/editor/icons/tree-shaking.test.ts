@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 const projectRoot = resolve(fileURLToPath(new URL('../../..', import.meta.url)))
 const editorDirectory = resolve(projectRoot, 'packages/editor')
 const iconSourceDirectory = join(editorDirectory, 'src/icons')
+const normalizedIconSourceDirectory = iconSourceDirectory.replaceAll('\\', '/')
 const iconBarrelPath = join(iconSourceDirectory, 'index.ts')
 const consumerDirectories: string[] = []
 
@@ -24,7 +25,8 @@ function transpileIconSource(): Plugin {
       return extname(modulePath) ? modulePath : `${modulePath}.ts`
     },
     async load(id) {
-      if (!id.startsWith(`${iconSourceDirectory}/`) || extname(id) !== '.ts') {
+      const normalizedId = id.replaceAll('\\', '/')
+      if (!normalizedId.startsWith(`${normalizedIconSourceDirectory}/`) || extname(id) !== '.ts') {
         return null
       }
 

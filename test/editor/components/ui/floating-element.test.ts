@@ -68,6 +68,7 @@ describe('FloatingElement branch behavior', () => {
   it('closes for Escape, dragging, and outside dismissal while preserving guarded targets', async () => {
     const fixture = createEditor()
     const wrapper = mount(FloatingElement, {
+      attachTo: document.body,
       attrs: { 'data-floating-element': 'test' },
       props: { editor: fixture.editor as never, shouldShow: true },
       slots: { default: 'Floating controls' },
@@ -115,6 +116,7 @@ describe('FloatingElement branch behavior', () => {
   it('honors disabled Escape handling and skips selection reset when configured', async () => {
     const fixture = createEditor()
     const wrapper = mount(FloatingElement, {
+      attachTo: document.body,
       attrs: { 'data-floating-element': 'test' },
       props: {
         closeOnEscape: false,

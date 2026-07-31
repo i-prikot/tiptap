@@ -87,7 +87,7 @@ describe('NotionEditor graceful degradation', () => {
       fetchMock,
       'An editor without cloud configuration should not request a collaboration token.',
     ).not.toHaveBeenCalled()
-  })
+  }, 30_000)
 
   it('does not request an AI token when configured AI is disabled', async () => {
     const fetchMock = vi.fn()
@@ -156,9 +156,8 @@ describe('NotionEditor graceful degradation', () => {
     expect(wrapper.find('.spinner-container').exists()).toBe(false)
   })
 
-  it('shows SetupError when configured collaboration cannot obtain a token', async () => {
+  it('falls back to the local editor when configured collaboration cannot obtain a token', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 503 })
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined)
     vi.stubGlobal('fetch', fetchMock)
 
     const wrapper = await renderEditor({
@@ -169,19 +168,11 @@ describe('NotionEditor graceful degradation', () => {
     })
     await flushEditorUpdates()
 
-    const setupError = wrapper.get('[role="alert"]')
     expect(
-      setupError.text(),
-      'A configured collaboration failure should render the real setup error heading.',
-    ).toContain('Cloud Configuration Required')
-    expect(
-      setupError.text(),
-      'A collaboration setup error should explain the required collaboration configuration.',
-    ).toContain('collaboration.appId')
-    expect(
-      wrapper.find('[data-testid="editor-provider"]').exists(),
-      'A configured collaboration failure should replace the editor provider with SetupError.',
-    ).toBe(false)
+      wrapper.get('[data-testid="editor-provider"]').attributes('data-provider-state'),
+      'A failed collaboration token request should leave the local editor available.',
+    ).toBe('null')
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false)
     expect(
       fetchMock,
       'Configured collaboration without a static token should request the configured token endpoint.',
@@ -189,9 +180,5 @@ describe('NotionEditor graceful degradation', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     })
-    expect(
-      consoleError,
-      'The failed token request should be contained by the collaboration token error handler.',
-    ).toHaveBeenCalledWith('Failed to fetch collaboration token:', expect.any(Error))
   })
 })

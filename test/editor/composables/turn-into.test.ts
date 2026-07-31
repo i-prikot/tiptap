@@ -51,12 +51,14 @@ describe('turn into options', () => {
 
   it('filters configured menu options while retaining all options by default', () => {
     expect(filterTurnIntoBlocks()).toBe(TURN_INTO_BLOCKS)
-    expect(filterTurnIntoBlocks(['heading', 'codeBlock']).map((block) => block.label)).toEqual([
-      'Heading 1',
-      'Heading 2',
-      'Heading 3',
-      'Code block',
-    ])
+    expect(filterTurnIntoBlocks(['heading', 'codeBlock']).map((block) => block.messageKey)).toEqual(
+      [
+        'menus.slash.heading1.title',
+        'menus.slash.heading2.title',
+        'menus.slash.heading3.title',
+        'menus.slash.codeBlock.title',
+      ],
+    )
   })
 
   it('matches active options against the editor state', () => {
@@ -66,16 +68,26 @@ describe('turn into options', () => {
     })
     const editor = { isActive } as unknown as Editor
 
-    expect(TURN_INTO_BLOCKS.find((block) => block.label === 'Heading 2')?.isActive(editor)).toBe(
-      true,
-    )
     expect(
-      TURN_INTO_BLOCKS.find((block) => block.label === 'Bulleted list')?.isActive(editor),
+      TURN_INTO_BLOCKS.find((block) => block.messageKey === 'menus.slash.heading2.title')?.isActive(
+        editor,
+      ),
     ).toBe(true)
-    expect(TURN_INTO_BLOCKS.find((block) => block.label === 'Heading 1')?.isActive(editor)).toBe(
-      false,
-    )
-    expect(TURN_INTO_BLOCKS.find((block) => block.label === 'Text')?.isActive(editor)).toBe(false)
+    expect(
+      TURN_INTO_BLOCKS.find(
+        (block) => block.messageKey === 'menus.slash.bulletList.title',
+      )?.isActive(editor),
+    ).toBe(true)
+    expect(
+      TURN_INTO_BLOCKS.find((block) => block.messageKey === 'menus.slash.heading1.title')?.isActive(
+        editor,
+      ),
+    ).toBe(false)
+    expect(
+      TURN_INTO_BLOCKS.find((block) => block.messageKey === 'menus.slash.text.title')?.isActive(
+        editor,
+      ),
+    ).toBe(false)
   })
 
   it('recognizes a paragraph only when no alternate block type is active', () => {
@@ -118,10 +130,12 @@ describe('turn into options', () => {
     } as unknown as Editor
     const inactiveEditor = { isActive: vi.fn(() => false) } as unknown as Editor
 
-    expect(getActiveTurnIntoBlock(headingEditor).label).toBe('Heading 3')
-    expect(getActiveTurnIntoBlock(inactiveEditor, ['codeBlock', 'blockquote']).label).toBe(
-      'Blockquote',
+    expect(getActiveTurnIntoBlock(headingEditor).messageKey).toBe('menus.slash.heading3.title')
+    expect(getActiveTurnIntoBlock(inactiveEditor, ['codeBlock', 'blockquote']).messageKey).toBe(
+      'menus.slash.quote.title',
     )
-    expect(getActiveTurnIntoBlock(null, ['orderedList']).label).toBe('Numbered list')
+    expect(getActiveTurnIntoBlock(null, ['orderedList']).messageKey).toBe(
+      'menus.slash.orderedList.title',
+    )
   })
 })

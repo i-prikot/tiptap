@@ -14,7 +14,7 @@ function requireFloatingElement(selector: string) {
 }
 
 describe('FloatingPositioningWrapper', () => {
-  it('teleports to body and updates the floating element model as open changes', async () => {
+  it('renders in place and updates the floating element model when no overlay target is provided', async () => {
     const updateFloatingElement = vi.fn()
     const wrapper = mountInDocument(FloatingPositioningWrapper, {
       props: {
@@ -32,7 +32,7 @@ describe('FloatingPositioningWrapper', () => {
     await settleTeleportUpdates()
 
     const floatingElement = requireFloatingElement('[data-testid="body-floating-wrapper"]')
-    expect(floatingElement.parentElement).toBe(document.body)
+    expect(floatingElement.parentElement).not.toBe(document.body)
     expect(updateFloatingElement).toHaveBeenLastCalledWith(floatingElement)
 
     await wrapper.setProps({ open: false })

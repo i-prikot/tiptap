@@ -2,6 +2,9 @@ import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { defineComponent, h, shallowRef } from 'vue'
+import { provideAnchorNavigation } from '../../../src/editor/composables/useAnchorNavigation'
+import { provideEditorOverlayTarget } from '../../../src/editor/composables/useEditorOverlayTarget'
 
 const state = vi.hoisted(() => ({
   editor: null as Editor | null,
@@ -87,8 +90,16 @@ const clickable = (testId: string, event = 'click') => ({
 })
 
 function mountToolbar() {
-  return mount(MobileToolbar, {
-    shallow: true,
+  const Harness = defineComponent({
+    setup() {
+      provideEditorOverlayTarget(shallowRef(document.body))
+      provideAnchorNavigation(shallowRef('https://example.test/editor'), shallowRef(), vi.fn())
+      return () => h(MobileToolbar)
+    },
+  })
+
+  return mount(Harness, {
+    shallow: false,
     attachTo: document.body,
     global: {
       stubs: {
@@ -96,6 +107,7 @@ function mountToolbar() {
         ColorHighlightPopoverButton: clickable('highlighter'),
         ColorHighlightPopoverContent: { template: '<div data-test="highlight-content" />' },
         ColorMenu: passThrough,
+        EditorOverlayTeleport: passThrough,
         ImageNodeFloating: passThrough,
         ImageUploadButton: passThrough,
         IndentButton: passThrough,
@@ -112,7 +124,7 @@ function mountToolbar() {
         SlashCommandTriggerButton: passThrough,
         Spacer: passThrough,
         TextAlignButton: passThrough,
-        Toolbar: passThrough,
+        Toolbar: { template: '<div class="tiptap-toolbar"><slot /></div>' },
         ToolbarGroup: passThrough,
         ToolbarSeparator: passThrough,
         Teleport: true,

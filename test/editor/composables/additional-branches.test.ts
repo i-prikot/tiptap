@@ -83,7 +83,7 @@ describe('additional composable branch behavior', () => {
 
   it('loads, deduplicates, limits, and safely falls back for recent colors', async () => {
     localStorage.setItem(
-      'tiptapRecentlyUsedColors',
+      'notion-like-editor-vue:tiptapRecentlyUsedColors',
       JSON.stringify([
         { type: 'text', value: '#111', label: '#111' },
         { type: 'highlight', value: '#222', label: '#222' },

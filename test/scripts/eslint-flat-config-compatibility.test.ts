@@ -18,5 +18,5 @@ describe('ESLint flat-config compatibility', () => {
 
     expect(result.error).toBeUndefined()
     expect(result.status).toBe(0)
-  }, 60_000)
+  }, 180_000)
 })

@@ -111,8 +111,6 @@ function renderMathPlaceholders(html: string): string {
         throwOnError: false,
         trust: false,
       })
-      placeholder.removeAttribute('data-latex')
-      placeholder.removeAttribute('data-type')
     }
 
     return document.body.innerHTML

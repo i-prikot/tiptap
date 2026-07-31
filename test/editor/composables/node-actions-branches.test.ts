@@ -15,6 +15,7 @@ import {
   useTableFitToWidth,
   useTocShowTitle,
 } from '../../../src/editor/composables/useNodeActions'
+import { provideAnchorNavigation } from '../../../src/editor/composables/useAnchorNavigation'
 
 const editors: Editor[] = []
 const wrappers: Array<{ unmount: () => void }> = []
@@ -29,13 +30,23 @@ function createEditor(content: string, extensions: Extensions = [StarterKit]) {
 
 function useAction<T>(editor: Editor, factory: (editorRef: ComputedRef<Editor | null>) => T) {
   let action: T | undefined
-  const Host = defineComponent({
+  const ActionHost = defineComponent({
     setup() {
       action = factory(computed(() => editor))
       return () => h('div')
     },
   })
-  wrappers.push(mount(Host))
+  const ProviderHost = defineComponent({
+    setup() {
+      provideAnchorNavigation(
+        computed(() => 'https://example.test/editor'),
+        computed(() => undefined),
+        vi.fn(),
+      )
+      return () => h(ActionHost)
+    },
+  })
+  wrappers.push(mount(ProviderHost))
   if (!action) throw new Error('Expected action to initialize')
   return action
 }

@@ -18,5 +18,5 @@ dist/
 packages/editor/.bundle-analysis/
 *.tsbuildinfo
 .tmp-verify-publish-tag-*
-
+.tmp-generate-icons-*
 apps/playground/.bundle-analysis/

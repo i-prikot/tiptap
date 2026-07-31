@@ -257,9 +257,7 @@ describe('TableHandleMenuContent', () => {
       const wrapper = mountMenu(locale)
       const base = { editor: mocks.editor.value, index: 0, orientation: 'row', tablePos: 7 }
 
-      expect(
-        actionByLabel(wrapper, rowLabels[0]!).get('button').attributes('data-active-state'),
-      ).toBe('on')
+      expect(actionByLabel(wrapper, rowLabels[0]!).attributes('data-active-state')).toBe('on')
 
       for (const label of rowLabels) {
         await selectAction(wrapper, label)

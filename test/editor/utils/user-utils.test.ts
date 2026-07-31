@@ -50,7 +50,7 @@ describe('user utilities', () => {
   })
 
   it('returns stored values without calling the factory', () => {
-    window.localStorage.setItem('user-id', 'stored-user')
+    window.localStorage.setItem('notion-like-editor-vue:user-id', 'stored-user')
     const createUser = vi.fn(() => 'created-user')
 
     expect(getStoredOrCreate('user-id', createUser)).toBe('stored-user')

@@ -2,13 +2,13 @@
   --m: #5b6472;
   --l: #1d4ed8;
   --b: #d9dee7;
-  --s: 1.25rem;
+  --tinyfy-public-space: 1.25rem;
   color: #18212f;
   line-height: 1.65;
 }
 
 .tinyfy-public-document :is(p, ul, ol, blockquote, pre, figure, table, hr, .katex-display) {
-  margin-block: var(--s);
+  margin-block: var(--tinyfy-public-space);
 }
 
 .tinyfy-public-document > :first-child {
@@ -21,7 +21,7 @@
 .tinyfy-public-document :is(h1, h2, h3, h4, h5, h6) {
   font-weight: 700;
   line-height: 1.2;
-  margin: calc(var(--s) * 1.6) 0 0.65em;
+  margin: calc(var(--tinyfy-public-space) * 1.6) 0 0.65em;
 }
 
 .tinyfy-public-document h1 {
@@ -152,7 +152,7 @@
 
 .tinyfy-public-document :is(math[display='block'], .katex-display) {
   display: block;
-  margin-block: var(--s);
+  margin-block: var(--tinyfy-public-space);
   max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;

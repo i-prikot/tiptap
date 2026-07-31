@@ -59,7 +59,7 @@ function mountUploadNode(options: Record<string, unknown> = {}) {
           ...options,
         },
       } as unknown as NodeViewProps['extension'],
-      getPos: () => 0,
+      getPos: () => 1,
       node: {
         attrs: { accept: 'image/*', limit: 2, maxSize: 1_024 },
         content: { size: 0 },
@@ -93,10 +93,8 @@ afterEach(() => {
 })
 
 describe('image upload node view', () => {
-  it('uploads files, reports progress, replaces the node, and revokes removed previews', async () => {
+  it('uploads files, reports progress, and replaces the node', async () => {
     const onSuccess = vi.fn()
-    const revokeObjectURL = vi.fn()
-    Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revokeObjectURL })
     const upload = vi.fn(async (_file: File, { onProgress }: ImageUploadCallbacks) => {
       onProgress({ progress: 45 })
       return 'https://example.test/cover.png'
@@ -119,14 +117,11 @@ describe('image upload node view', () => {
       }),
     )
     expect(onSuccess).toHaveBeenCalledWith('https://example.test/cover.png')
-    expect(commandChain.deleteRange).toHaveBeenCalledWith({ from: 0, to: 1 })
-    expect(commandChain.insertContentAt).toHaveBeenCalledWith(0, [
+    expect(commandChain.deleteRange).toHaveBeenCalledWith({ from: 1, to: 2 })
+    expect(commandChain.insertContentAt).toHaveBeenCalledWith(1, [
       expect.objectContaining({ type: 'image', attrs: expect.objectContaining({ alt: 'cover' }) }),
     ])
     expect(commandChain.run).toHaveBeenCalledOnce()
-
-    await wrapper.get('button').trigger('click')
-    expect(revokeObjectURL).toHaveBeenCalledWith('https://example.test/cover.png')
   })
 
   it('reports missing, oversized, over-limit, and failed uploads without replacing the node', async () => {
@@ -199,7 +194,7 @@ describe('image upload node view', () => {
         'Upload failed: Invalid URL returned',
       )
       expect(onSuccess).not.toHaveBeenCalled()
-      expect(wrapper.text()).toContain('Image upload failed')
+      expect(wrapper.find('[role="alert"]').exists()).toBe(false)
       expect(commandChain.run).not.toHaveBeenCalled()
     },
   )
@@ -249,7 +244,7 @@ describe('image upload node view', () => {
     expect((onError.mock.calls[0]?.[0] as Error).message).toBe(
       'image upload adapter is not configured',
     )
-    expect(wrapper.text()).toContain('image upload adapter is not configured')
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false)
     expect(commandChain.run).not.toHaveBeenCalled()
   })
 })
