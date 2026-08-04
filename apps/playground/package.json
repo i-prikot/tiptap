@@ -11,8 +11,8 @@
     "analyze": "vue-tsc -p tsconfig.json --noEmit && vite build --mode analyze"
   },
   "dependencies": {
-    "@i-prikot/editor": "0.1.0",
-    "@i-prikot/editor-schema": "0.1.0",
+    "@i-prikot/editor": "0.2.0",
+    "@i-prikot/editor-schema": "0.2.0",
     "@tiptap/core": "^3.27.1",
     "@tiptap/vue-3": "^3.27.1",
     "vue": "^3.5.13"
