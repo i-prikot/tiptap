@@ -6,6 +6,7 @@
     :features="resolvedFeatures"
     :toc-sidebar-sticky-top-offset="props.tocSidebarStickyTopOffset"
     :image-upload="props.imageUpload"
+    :block-roles="props.blockRoles"
     :development-diagnostics="props.developmentDiagnostics"
     @ready="handleReady"
     @update="emit('update', $event)"

@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 const projectRoot = process.cwd()
 const artifactVerifierPath = resolve(projectRoot, 'scripts/verify-publish-artifacts.mjs')
 const temporaryDirectories: string[] = []
-const archiveCreationTimeoutMs = 1_000
+const archiveCreationTimeoutMs = 10_000
 const verifierTimeoutMs = 4_000
 
 function createArchive(

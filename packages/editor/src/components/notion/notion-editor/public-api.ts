@@ -1,9 +1,11 @@
 import type { Editor, JSONContent } from '@tiptap/core'
+import type { BlockRoleOption } from '@i-prikot/editor-schema'
 import { en, ru } from '../../../i18n'
 import type { EditorLocale, EditorMessageCatalog, EditorMessageTree } from '../../../i18n/types'
 import type { ImageUploadAdapter } from '../../../types/image-upload'
 
 export type { ImageUploadAdapter, ImageUploadCallbacks } from '../../../types/image-upload'
+export type { BlockRoleOption } from '@i-prikot/editor-schema'
 
 export type {
   EditorLocale,
@@ -118,6 +120,11 @@ export interface NotionEditorProps {
   /** Sticky top offset for the optional table-of-contents sidebar, in pixels. */
   tocSidebarStickyTopOffset?: number
   imageUpload?: ImageUploadAdapter
+  /**
+   * Roles shown in the block actions menu. Labels and persisted values are
+   * host-defined. This configuration is applied when the editor is initialized.
+   */
+  blockRoles?: readonly BlockRoleOption[]
   /**
    * Persistence for collaboration identity. Defaults to namespaced browser
    * localStorage; set to `false` to generate an in-memory identity per mount.

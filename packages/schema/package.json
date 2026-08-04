@@ -25,7 +25,6 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@tiptap/core": "^3.27.1",
     "@tiptap/extension-collaboration": "^3.27.1",
     "@tiptap/extension-collaboration-caret": "^3.27.1",
     "@tiptap/extension-emoji": "^3.27.1",
@@ -43,8 +42,15 @@
     "@tiptap/extension-typography": "^3.27.1",
     "@tiptap/extension-unique-id": "^3.27.1",
     "@tiptap/extensions": "^3.27.1",
-    "@tiptap/pm": "^3.27.1",
     "@tiptap/starter-kit": "^3.27.1",
     "yjs": "^13.6.31"
+  },
+  "peerDependencies": {
+    "@tiptap/core": "^3.27.1",
+    "@tiptap/pm": "^3.27.1"
+  },
+  "devDependencies": {
+    "@tiptap/core": "^3.27.1",
+    "@tiptap/pm": "^3.27.1"
   }
 }

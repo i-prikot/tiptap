@@ -1,9 +1,10 @@
 import { mount } from '@vue/test-utils'
-import { shallowRef } from 'vue'
+import { nextTick, shallowRef } from 'vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as Y from 'yjs'
-import EditorProvider from '../../../../src/editor/components/notion/notion-editor/EditorProvider.vue'
-import type { ImageUploadAdapter } from '../../../../src/editor/types'
+import type { BlockRoleOption } from '@i-prikot/editor-schema'
+import EditorProvider from '../../../../packages/editor/src/components/notion/notion-editor/EditorProvider.vue'
+import type { ImageUploadAdapter } from '../../../../packages/editor/src/types'
 
 interface ChainCall {
   method: 'setMeta' | 'setContent' | 'focus'
@@ -48,18 +49,32 @@ interface ProviderHarness {
   triggerSynced: () => void
 }
 
+interface ExtensionKitInput {
+  provider: FakeProvider | null
+  ydoc: Y.Doc
+  placeholder: () => string
+  user: { id: string; name: string; color: string }
+  imageUpload: ImageUploadAdapter
+}
+
 const testState = vi.hoisted(() => ({
   documentId: 'editor-provider-test-document',
   editorOptions: null as CapturedEditorOptions | null,
   editorRef: null as unknown,
+  editorContentAreaProps: null as { blockRoles?: readonly BlockRoleOption[] } | null,
+  createExtensionKit: vi.fn(),
+  diagnostics: { debug: vi.fn(), error: vi.fn() },
   setTocContent: vi.fn(),
   provideTiptapEditor: vi.fn(),
 }))
 
-vi.mock('@tiptap/vue-3', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@tiptap/vue-3')>()
+vi.mock('@i-prikot/editor-schema', () => ({
+  CURRENT_SCHEMA_VERSION: 1,
+  createLogger: () => testState.diagnostics,
+}))
+
+vi.mock('@tiptap/vue-3', () => {
   return {
-    ...actual,
     Editor: class {
       constructor(options: CapturedEditorOptions) {
         testState.editorOptions = options
@@ -69,52 +84,80 @@ vi.mock('@tiptap/vue-3', async (importOriginal) => {
   }
 })
 
-vi.mock('../../../../src/editor/composables/useUser', () => ({
-  useUser: () => ({
-    user: { id: 'test-user', name: 'Test User', color: '#2563eb' },
-  }),
+vi.mock('../../../../packages/editor/src/extensions/extension-kit', () => ({
+  createExtensionKit: testState.createExtensionKit,
 }))
 
-vi.mock('../../../../src/editor/composables/useToc', () => ({
-  useToc: () => ({ setTocContent: testState.setTocContent }),
-}))
-
-vi.mock('../../../../src/editor/composables/useTiptapEditor', () => ({
+vi.mock('../../../../packages/editor/src/composables', () => ({
+  provideEditorOverlayTarget: vi.fn(),
   provideTiptapEditor: testState.provideTiptapEditor,
+  useEditorI18n: () => ({ t: (key: string) => key }),
+  useToc: () => ({ setTocContent: testState.setTocContent }),
+  useUser: () => ({ user: { id: 'test-user', name: 'Test User', color: '#2563eb' } }),
 }))
 
-vi.mock('../../../../src/editor/components/notion/notion-editor/EditorContentArea.vue', () => ({
-  default: { render: () => null },
+vi.mock('../../../../packages/editor/src/utils/development-diagnostics', () => ({
+  createDevelopmentDiagnostics: () => testState.diagnostics,
 }))
-vi.mock('../../../../src/editor/components/notion/toc/TocSidebar.vue', () => ({
-  default: { render: () => null },
-}))
-vi.mock('../../../../src/editor/components/notion/feedback/LoadingSpinner.vue', () => ({
-  default: { render: () => null },
-}))
-vi.mock('../../../../src/editor/components/table/table-handle/TableHandle.vue', () => ({
-  default: { render: () => null },
-}))
+
 vi.mock(
-  '../../../../src/editor/components/table/table-selection/TableSelectionOverlay.vue',
+  '../../../../packages/editor/src/components/notion/notion-editor/EditorContentArea.vue',
   () => ({
-    default: { render: () => null },
+    default: {
+      name: 'EditorContentArea',
+      props: { blockRoles: { type: Array, default: undefined } },
+      setup(props: { blockRoles?: readonly BlockRoleOption[] }) {
+        testState.editorContentAreaProps = props
+        return () => null
+      },
+    },
   }),
 )
+vi.mock('../../../../packages/editor/src/components/notion/toc', () => ({
+  TocSidebar: { render: () => null },
+}))
+vi.mock('../../../../packages/editor/src/components/notion/feedback', () => ({
+  LoadingSpinner: { render: () => null },
+}))
 vi.mock(
-  '../../../../src/editor/components/table/table-extend/TableExtendRowColumnButtons.vue',
+  '../../../../packages/editor/src/components/table/table-overlays/TableOverlays.vue',
   () => ({
     default: { render: () => null },
   }),
 )
 const visualStubs = {
-  EditorContentArea: true,
   TocSidebar: true,
   LoadingSpinner: true,
   TableHandle: true,
   TableOverlays: true,
   TableSelectionOverlay: true,
   TableExtendRowColumnButtons: true,
+}
+
+function createExtensionKitResult(options: ExtensionKitInput) {
+  const collaborationExtensions = options.provider
+    ? [
+        { name: 'collaboration', options: { document: options.ydoc } },
+        {
+          name: 'collaborationCaret',
+          options: { provider: options.provider, user: options.user },
+        },
+      ]
+    : []
+
+  return [
+    {
+      name: 'starterKit',
+      options: { undoRedo: options.provider ? false : undefined },
+    },
+    ...collaborationExtensions,
+    {
+      name: 'placeholder',
+      options: { placeholder: options.placeholder },
+    },
+    { name: 'imageUpload', options: { upload: options.imageUpload } },
+    { name: 'blockRole', options: { roles: options.blockRoles ?? [] } },
+  ]
 }
 
 function createEditorHarness(isEmpty = true): EditorHarness {
@@ -201,6 +244,7 @@ async function mountEditorProvider(
     provider?: FakeProvider | null
     placeholder?: string
     imageUpload?: ImageUploadAdapter
+    blockRoles?: readonly BlockRoleOption[]
     onReady?: () => void
   } = {},
 ) {
@@ -216,6 +260,7 @@ async function mountEditorProvider(
       ydoc,
       placeholder: options.placeholder ?? 'Document-specific placeholder',
       imageUpload: options.imageUpload,
+      blockRoles: options.blockRoles,
       onReady: options.onReady,
     },
     global: { stubs: visualStubs },
@@ -237,10 +282,14 @@ function extensionNames() {
 beforeEach(() => {
   vi.useFakeTimers()
   vi.clearAllMocks()
+  testState.createExtensionKit.mockImplementation(async (options: ExtensionKitInput) =>
+    createExtensionKitResult(options),
+  )
   localStorage.clear()
   testState.documentId = 'editor-provider-test-document'
   testState.editorOptions = null
   testState.editorRef = null
+  testState.editorContentAreaProps = null
 })
 
 afterEach(() => {
@@ -261,91 +310,44 @@ describe('EditorProvider', () => {
     ydoc.destroy()
   })
 
-  it('uses the complete local extension assembly with the supplied visual configuration', async () => {
+  it('passes visual and lifecycle configuration to the local extension kit', async () => {
     const { ydoc } = await mountEditorProvider({ placeholder: 'Write this document' })
 
     expect(getEditorOptions().editorProps).toEqual({
       attributes: { class: 'notion-like-editor' },
     })
-    expect(extensionNames()).toEqual([
-      'starterKit',
-      'horizontalRule',
-      'textAlign',
-      'placeholder',
-      'mention',
-      'emoji',
-      'tableKit',
-      'nodeBackground',
-      'nodeAlignment',
-      'textStyle',
-      'Mathematics',
-      'superscript',
-      'subscript',
-      'indent',
-      'color',
-      'taskList',
-      'taskItem',
-      'highlight',
-      'selection',
-      'image',
-      'tableOfContents',
-      'tableHandleExtension',
-      'listNormalization',
-      'tripleClickBlockSelection',
-      'imageUpload',
-      'uniqueID',
-      'typography',
-      'uiState',
-      'tocNode',
-    ])
+    expect(extensionNames()).toEqual(['starterKit', 'placeholder', 'imageUpload', 'blockRole'])
     expect(extensionNames()).not.toContain('collaboration')
     expect(extensionNames()).not.toContain('collaborationCaret')
-    expect(getExtension('starterKit').options).toMatchObject({
-      horizontalRule: false,
-      dropcursor: { width: 2 },
-      link: { openOnClick: false },
-    })
+    expect(testState.createExtensionKit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        provider: null,
+        ydoc,
+        user: { id: 'test-user', name: 'Test User', color: '#2563eb' },
+        imageUpload: expect.any(Function),
+        onImageUploadError: expect.any(Function),
+        onTableOfContentsUpdate: testState.setTocContent,
+      }),
+    )
+    const extensionKitInput = testState.createExtensionKit.mock.calls[0]?.[0] as ExtensionKitInput
+    expect(extensionKitInput.placeholder()).toBe('Write this document')
     expect(getExtension('starterKit').options.undoRedo).toBeUndefined()
-    const placeholder = getExtension('placeholder').options.placeholder as () => string
-    expect(placeholder()).toBe('Write this document')
-    expect(getExtension('placeholder').options).toMatchObject({
-      emptyNodeClass: 'is-empty with-slash',
-    })
-    expect(getExtension('tableKit').options).toMatchObject({
-      table: { resizable: true, cellMinWidth: 120 },
-    })
-    expect(getExtension('nodeBackground').options.types).toEqual([
-      'paragraph',
-      'heading',
-      'blockquote',
-      'taskList',
-      'bulletList',
-      'orderedList',
-      'tableCell',
-      'tableHeader',
-      'tocNode',
-    ])
-    expect(getExtension('imageUpload').options).toMatchObject({
-      accept: 'image/*',
-      maxSize: 5 * 1024 * 1024,
-      limit: 3,
-    })
-    expect(getExtension('tableOfContents').options).toMatchObject({
-      getIndex: expect.any(Function),
-      onUpdate: expect.any(Function),
-    })
-    expect(getExtension('uniqueID').options.types).toEqual([
-      'table',
-      'paragraph',
-      'bulletList',
-      'orderedList',
-      'taskList',
-      'heading',
-      'blockquote',
-      'codeBlock',
-      'tocNode',
-    ])
-    expect(getExtension('tocNode').options.topOffset).toBe(48)
+    expect(getExtension('blockRole').options.roles).toEqual([])
+
+    ydoc.destroy()
+  })
+
+  it('snapshots initial menu roles so later prop changes cannot diverge from the editor', async () => {
+    const initialRoles = [{ label: 'Pricing', value: 'pricing' }] as const
+    const { wrapper, ydoc } = await mountEditorProvider({ blockRoles: initialRoles })
+
+    expect(getExtension('blockRole').options.roles).toEqual(['pricing'])
+    expect(testState.editorContentAreaProps?.blockRoles).toEqual(initialRoles)
+
+    await wrapper.setProps({ blockRoles: [{ label: 'Call to action', value: 'cta' }] })
+    await nextTick()
+
+    expect(testState.editorContentAreaProps?.blockRoles).toEqual(initialRoles)
 
     ydoc.destroy()
   })

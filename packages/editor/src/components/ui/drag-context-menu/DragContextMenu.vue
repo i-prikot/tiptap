@@ -56,6 +56,11 @@
                     <span class="tiptap-button-text">{{ item.label }}</span>
                   </Button>
                 </MenuItem>
+
+                <template v-if="blockRoleItems.length">
+                  <Separator orientation="horizontal" />
+                  <DragContextMenuBlockRole :items="blockRoleItems" />
+                </template>
               </MenuGroup>
 
               <Separator orientation="horizontal" />
@@ -98,6 +103,7 @@
 import { computed, ref, shallowRef, watch } from 'vue'
 import type { CSSProperties } from 'vue'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
+import type { BlockRoleOption } from '@i-prikot/editor-schema'
 import { offset } from '@floating-ui/dom'
 import { DragHandle } from '@tiptap/extension-drag-handle-vue-3'
 import {
@@ -124,6 +130,7 @@ import {
 } from '../../primitives'
 
 import { ColorMenu } from '../color'
+import DragContextMenuBlockRole from './DragContextMenuBlockRole.vue'
 import DragContextMenuTurnInto from './DragContextMenuTurnInto.vue'
 import { SlashCommandTriggerButton } from '../slash-menu'
 import { TableAlignMenu } from '../../table'
@@ -133,6 +140,7 @@ const props = withDefaults(
     withSlashCommandTrigger?: boolean
     mobileBreakpoint?: number
     aiEnabled?: boolean
+    blockRoles?: readonly BlockRoleOption[]
   }>(),
   {
     withSlashCommandTrigger: true,
@@ -146,17 +154,19 @@ const { t } = useEditorI18n()
 const uiState = useUiEditorState(editor, ['aiGenerationActive', 'isDragging'] as const)
 const isMobile = useIsBreakpoint('max', props.mobileBreakpoint)
 const selectionSignal = useEditorSelectionSignal(editor)
+const blockRoles = computed(() => props.blockRoles ?? [])
+const currentNode = shallowRef<ProseMirrorNode | null>(null)
+const currentNodePos = ref(-1)
 const {
+  blockRoleItems,
   clipboardItems,
   deleteItem,
   postSubmenuNodeActionItems,
   preSubmenuNodeActionItems,
   turnIntoItems,
-} = useDragContextMenuItems(editor)
+} = useDragContextMenuItems(editor, blockRoles, currentNodePos)
 
 const menuOpen = ref(false)
-const currentNode = shallowRef<ProseMirrorNode | null>(null)
-const currentNodePos = ref(-1)
 
 watch(menuOpen, (isOpen) => {
   const instance = editor.value

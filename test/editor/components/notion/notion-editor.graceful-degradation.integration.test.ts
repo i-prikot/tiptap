@@ -1,27 +1,27 @@
 import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
-import { defineComponent, nextTick } from 'vue'
+import { nextTick } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type {
   AiOptions,
   CollaborationOptions,
   EditorFeatureFlags,
 } from '../../../../src/editor/components/notion/notion-editor/public-api'
-
-const editorProviderModule =
-  '../../../../src/editor/components/notion/notion-editor/EditorProvider.vue'
+import NotionEditor from '../../../../src/editor/components/notion/notion-editor/NotionEditor.vue'
 const wrappers: VueWrapper[] = []
 
-const EditorProviderStub = defineComponent({
-  name: 'EditorProviderStub',
-  props: {
-    provider: {
-      type: Object,
-      default: null,
+vi.mock('../../../../src/editor/components/notion/notion-editor/EditorProvider.vue', () => ({
+  default: {
+    name: 'EditorProviderStub',
+    props: {
+      provider: {
+        type: Object,
+        default: null,
+      },
     },
+    template:
+      '<div data-testid="editor-provider" :data-provider-state="provider === null ? \'null\' : \'configured\'"></div>',
   },
-  template:
-    '<div data-testid="editor-provider" :data-provider-state="provider === null ? \'null\' : \'configured\'"></div>',
-})
+}))
 
 interface RenderEditorOptions {
   ai?: AiOptions
@@ -30,10 +30,6 @@ interface RenderEditorOptions {
 }
 
 async function renderEditor({ ai, collaboration, features }: RenderEditorOptions = {}) {
-  vi.doMock(editorProviderModule, () => ({ default: EditorProviderStub }))
-
-  const { default: NotionEditor } =
-    await import('../../../../src/editor/components/notion/notion-editor/NotionEditor.vue')
   const wrapper = mount(NotionEditor, {
     props: {
       documentId: 'graceful-degradation-document',
@@ -59,7 +55,6 @@ afterEach(() => {
     wrappers.pop()?.unmount()
   }
 
-  vi.doUnmock(editorProviderModule)
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
 })

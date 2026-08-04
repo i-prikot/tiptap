@@ -53,6 +53,10 @@ npm run build
 
 Maintained contributor utilities live in the repository-owned [development scripts guide](docs/development-scripts.md), including icon-barrel generation and Playwright smoke-test commands.
 
+The portable document-level `BlockRole` contract, including installation,
+extension order, peer dependencies, and renderer scope, is documented in
+[BlockRole Contract](docs/block-role.md).
+
 ## Runtime Modes
 
 The editor works without collaboration or AI configuration. In that local mode, content is edited in the browser with the normal Tiptap history stack.

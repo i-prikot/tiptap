@@ -3,7 +3,7 @@ import type * as Y from 'yjs'
 import StarterKit from '@tiptap/starter-kit'
 import { Placeholder, Selection } from '@tiptap/extensions'
 import { TextAlign } from '@tiptap/extension-text-align'
-import Collaboration, { isChangeOrigin } from '@tiptap/extension-collaboration'
+import Collaboration from '@tiptap/extension-collaboration'
 import {
   CollaborationCaret,
   type CollaborationCaretOptions,
@@ -20,10 +20,11 @@ import {
   getHierarchicalIndexes,
   type TableOfContentData,
 } from '@tiptap/extension-table-of-contents'
-import { UniqueID } from '@tiptap/extension-unique-id'
 import { Typography } from '@tiptap/extension-typography'
 
 import { HorizontalRule } from './horizontal-rule.js'
+import { BlockId } from './block-id.js'
+import { BlockRole } from './block-role.js'
 import { Indent } from './indent.js'
 import { ListNormalization } from './list-normalization.js'
 import { Mathematics } from './mathematics.js'
@@ -52,18 +53,6 @@ const nodeBackgroundTypes = [
   'tocNode',
 ]
 
-const uniqueIdTypes = [
-  'table',
-  'paragraph',
-  'bulletList',
-  'orderedList',
-  'taskList',
-  'heading',
-  'blockquote',
-  'codeBlock',
-  'tocNode',
-]
-
 export interface ExtensionKitFeatureFlags {
   tocSidebar: boolean
   floatingMenus: boolean
@@ -89,6 +78,7 @@ export interface ExtensionKitOptions {
   user: CollabUser
   features: ExtensionKitFeatureFlags
   imageUpload: ImageUploadAdapter
+  blockRoles?: readonly string[]
   onImageUploadError: (error: Error) => void
   onTableOfContentsUpdate: (content: TableOfContentData) => void
 }
@@ -133,9 +123,9 @@ export function createRendererExtensionKitWithEmoji(emojiExtension: AnyExtension
       maxSize: MAX_FILE_SIZE,
       limit: 3,
     }),
-    UniqueID.configure({ types: uniqueIdTypes }),
-    Typography,
     TocNode.configure({ topOffset: 48 }),
+    BlockId,
+    Typography,
   ]
 }
 
@@ -200,12 +190,10 @@ export async function createExtensionKit(
       upload: options.imageUpload,
       onError: options.onImageUploadError,
     }),
-    UniqueID.configure({
-      types: uniqueIdTypes,
-      filterTransaction: (transaction) => !isChangeOrigin(transaction),
-    }),
+    (nodeOverrides.toc ?? TocNode).configure({ topOffset: 48 }),
+    BlockId,
+    BlockRole.configure({ roles: options.blockRoles ?? [] }),
     Typography,
     UiState,
-    (nodeOverrides.toc ?? TocNode).configure({ topOffset: 48 }),
   ]
 }

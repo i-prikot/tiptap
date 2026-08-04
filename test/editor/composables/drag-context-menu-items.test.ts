@@ -1,6 +1,9 @@
-import { computed } from 'vue'
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import { computed, ref } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
-import { useDragContextMenuItems } from '../../../src/editor/composables/useDragContextMenuItems'
+import { BlockId, BlockRole } from '@i-prikot/editor-schema'
+import { useDragContextMenuItems } from '../../../packages/editor/src/composables/useDragContextMenuItems'
 
 const actions = vi.hoisted(() => {
   const createConversion = (key: string, canToggle = true, isActive = false) => ({
@@ -75,10 +78,19 @@ const actions = vi.hoisted(() => {
   }
 })
 
-vi.mock('../../../src/editor/composables/useEditorI18n', () => ({
+const blockRoleActions = vi.hoisted(() => ({
+  setBlockRoleAtPos: vi.fn(),
+}))
+
+vi.mock('@i-prikot/editor-schema', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@i-prikot/editor-schema')>()),
+  setBlockRoleAtPos: blockRoleActions.setBlockRoleAtPos,
+}))
+
+vi.mock('../../../packages/editor/src/composables/useEditorI18n', () => ({
   useEditorI18n: () => ({ t: (key: string) => `translated:${key}` }),
 }))
-vi.mock('../../../src/editor/composables/blocks/useBlockConversions', () => ({
+vi.mock('../../../packages/editor/src/composables/blocks/useBlockConversions', () => ({
   useTextBlock: () => actions.conversions[0],
   useHeadingBlock: (_editor: unknown, level: number) => actions.conversions[level],
   useListBlock: (_editor: unknown, type: string) =>
@@ -86,40 +98,47 @@ vi.mock('../../../src/editor/composables/blocks/useBlockConversions', () => ({
   useBlockquoteBlock: () => actions.conversions[7],
   useCodeBlockBlock: () => actions.conversions[8],
 }))
-vi.mock('../../../src/editor/composables/useTocShowTitle', () => ({
+vi.mock('../../../packages/editor/src/composables/useTocShowTitle', () => ({
   useTocShowTitle: () => actions.tocShowTitle,
 }))
-vi.mock('../../../src/editor/composables/useTableFitToWidth', () => ({
+vi.mock('../../../packages/editor/src/composables/useTableFitToWidth', () => ({
   useTableFitToWidth: () => actions.tableFitToWidth,
 }))
-vi.mock('../../../src/editor/composables/useTableClearAllContents', () => ({
+vi.mock('../../../packages/editor/src/composables/useTableClearAllContents', () => ({
   useTableClearAllContents: () => actions.tableClearAllContents,
 }))
-vi.mock('../../../src/editor/composables/useResetAllFormatting', () => ({
+vi.mock('../../../packages/editor/src/composables/useResetAllFormatting', () => ({
   useResetAllFormatting: () => actions.resetFormatting,
 }))
-vi.mock('../../../src/editor/composables/useImageDownload', () => ({
+vi.mock('../../../packages/editor/src/composables/useImageDownload', () => ({
   useImageDownload: () => actions.imageDownload,
 }))
-vi.mock('../../../src/editor/composables/useDuplicate', () => ({
+vi.mock('../../../packages/editor/src/composables/useDuplicate', () => ({
   useDuplicate: () => actions.duplicate,
 }))
-vi.mock('../../../src/editor/composables/useCopyToClipboard', () => ({
+vi.mock('../../../packages/editor/src/composables/useCopyToClipboard', () => ({
   useCopyToClipboard: () => actions.copyToClipboard,
 }))
-vi.mock('../../../src/editor/composables/useCopyAnchorLink', () => ({
+vi.mock('../../../packages/editor/src/composables/useCopyAnchorLink', () => ({
   useCopyAnchorLink: () => actions.copyAnchorLink,
 }))
-vi.mock('../../../src/editor/composables/useDeleteNode', () => ({
+vi.mock('../../../packages/editor/src/composables/useDeleteNode', () => ({
   useDeleteNode: () => actions.deleteNode,
 }))
-vi.mock('../../../src/editor/utils/tiptap-utils', () => ({
+vi.mock('../../../packages/editor/src/utils/tiptap-utils', () => ({
   parseShortcutKeys: ({ shortcutKeys }: { shortcutKeys?: string }) => [`<${shortcutKeys}>`],
 }))
 
 describe('useDragContextMenuItems', () => {
   it('keeps menu group ordering, availability, shortcuts, and handlers intact', () => {
-    const menu = useDragContextMenuItems(computed(() => null))
+    const menu = useDragContextMenuItems(
+      computed(() => null),
+      computed(() => [
+        { label: 'Pricing', value: 'pricing' },
+        { label: 'Call to action', value: 'cta' },
+      ]),
+      ref(1),
+    )
 
     expect(menu.turnIntoItems.value.slice(0, 2)).toMatchObject([
       { label: 'translated:menus.slash.text.title', disabled: false },
@@ -132,6 +151,10 @@ describe('useDragContextMenuItems', () => {
     expect(menu.preSubmenuNodeActionItems.value[0]).toMatchObject({ isActive: true })
     expect(menu.postSubmenuNodeActionItems.value.map((item) => item.label)).toEqual([
       'translated:toolbar.resetFormatting',
+    ])
+    expect(menu.blockRoleItems.value).toMatchObject([
+      { label: 'Pricing', disabled: true, isActive: false },
+      { label: 'Call to action', disabled: true, isActive: false },
     ])
     expect(menu.clipboardItems.value).toMatchObject([
       { label: 'translated:toolbar.duplicateNode', disabled: true, shortcut: '<Mod-Shift-D>' },
@@ -153,5 +176,64 @@ describe('useDragContextMenuItems', () => {
     expect(actions.tableClearAllContents.handleClearAll).toHaveBeenCalledOnce()
     expect(actions.copyToClipboard.handleCopyToClipboard).toHaveBeenCalledOnce()
     expect(actions.deleteNode.handleDeleteNode).toHaveBeenCalledOnce()
+  })
+
+  it('passes the selected role and direct-doc node position to the schema helper', () => {
+    const editor = new Editor({
+      extensions: [StarterKit, BlockId, BlockRole.configure({ roles: ['pricing'] })],
+      content: {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text: 'Pricing' }],
+          },
+        ],
+      },
+    })
+    try {
+      const menu = useDragContextMenuItems(
+        computed(() => editor),
+        computed(() => [{ label: 'Pricing', value: 'pricing' }]),
+        ref(0),
+      )
+
+      menu.blockRoleItems.value[0]?.onClick()
+
+      expect(blockRoleActions.setBlockRoleAtPos).toHaveBeenCalledOnce()
+      expect(blockRoleActions.setBlockRoleAtPos).toHaveBeenCalledWith(editor, 0, 'pricing')
+    } finally {
+      editor.destroy()
+    }
+  })
+
+  it('clears the role when the active role is selected again', () => {
+    const editor = new Editor({
+      extensions: [StarterKit, BlockId, BlockRole.configure({ roles: ['pricing'] })],
+      content: {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            attrs: { blockRole: 'pricing' },
+            content: [{ type: 'text', text: 'Pricing' }],
+          },
+        ],
+      },
+    })
+    try {
+      const menu = useDragContextMenuItems(
+        computed(() => editor),
+        computed(() => [{ label: 'Pricing', value: 'pricing' }]),
+        ref(0),
+      )
+
+      menu.blockRoleItems.value[0]?.onClick()
+
+      expect(menu.blockRoleItems.value[0]).toMatchObject({ isActive: true })
+      expect(blockRoleActions.setBlockRoleAtPos).toHaveBeenLastCalledWith(editor, 0, null)
+    } finally {
+      editor.destroy()
+    }
   })
 })

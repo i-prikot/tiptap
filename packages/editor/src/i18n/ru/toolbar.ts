@@ -23,6 +23,7 @@ export const toolbar = {
   turnIntoCurrent: 'Преобразовать в (текущий: {label})',
   moreOptions: 'Дополнительные параметры',
   clickForOptions: 'Нажмите для параметров',
+  blockRole: 'Роль блока',
   resetFormatting: 'Сбросить форматирование',
   duplicateNode: 'Дублировать блок',
   copyToClipboard: 'Копировать',

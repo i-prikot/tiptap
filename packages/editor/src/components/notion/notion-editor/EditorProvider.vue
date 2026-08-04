@@ -1,7 +1,7 @@
 <template>
   <div v-if="editor" class="notion-like-editor-wrapper">
     <div class="notion-like-editor-layout">
-      <EditorContentArea :features="props.features" />
+      <EditorContentArea :features="props.features" :block-roles="initialBlockRoles" />
       <TocSidebar
         v-if="props.features.tocSidebar"
         :sticky-top-offset="props.tocSidebarStickyTopOffset"
@@ -28,6 +28,7 @@ import { createLogger } from '@i-prikot/editor-schema'
 import { computed, onBeforeUnmount, shallowRef, watch } from 'vue'
 import { Editor as TiptapEditor } from '@tiptap/vue-3'
 import type { JSONContent } from '@tiptap/core'
+import type { BlockRoleOption } from '@i-prikot/editor-schema'
 import type { TiptapCollabProvider } from '@hocuspocus/provider'
 import type * as Y from 'yjs'
 import { createExtensionKit } from '../../../extensions/extension-kit'
@@ -64,6 +65,7 @@ const props = withDefaults(
     features?: EditorFeatureFlags
     tocSidebarStickyTopOffset?: number
     imageUpload?: ImageUploadAdapter
+    blockRoles?: readonly BlockRoleOption[]
     aiToken?: string | null
     developmentDiagnostics?: boolean
   }>(),
@@ -111,6 +113,7 @@ const uploadImage: ImageUploadAdapter = (file, callbacks) => {
 diagnostics.debug('image-upload-config', { configured: Boolean(props.imageUpload) })
 
 const editor = shallowRef<TiptapEditor>()
+const initialBlockRoles = props.blockRoles?.map((role) => ({ ...role }))
 let hasStartedEditorInitialization = false
 
 function initializeEditor() {
@@ -128,6 +131,7 @@ function initializeEditor() {
     user,
     features: props.features,
     imageUpload: uploadImage,
+    blockRoles: initialBlockRoles?.map((role) => role.value),
     onImageUploadError: () => logger.error('image upload failed'),
     onTableOfContentsUpdate: setTocContent,
   })

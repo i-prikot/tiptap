@@ -5,12 +5,50 @@ const NotionEditorStub = {
   template: '<div data-notion-editor-stub=""></div>',
 }
 
+function mockEditorPublicApi() {
+  vi.doMock('@i-prikot/editor', async () => {
+    const { defineComponent } = await import('vue')
+    const overlayTargetApi =
+      await import('../../packages/editor/src/composables/useEditorOverlayTarget')
+
+    return {
+      default: NotionEditorStub,
+      Button: defineComponent({ template: '<button type="button"><slot /></button>' }),
+      defaultEditorLocale: 'ru',
+      ...overlayTargetApi,
+    }
+  })
+}
+
+async function createOverlayHeaderProbe() {
+  const { computed, defineComponent, ref } = await import('vue')
+  const { useEditorOverlayTarget } =
+    await import('../../packages/editor/src/composables/useEditorOverlayTarget')
+
+  return defineComponent({
+    setup() {
+      const overlayTarget = useEditorOverlayTarget()
+      const tooltipOpen = ref(false)
+      const teleportTarget = computed(() => overlayTarget?.value ?? null)
+
+      return { teleportTarget, tooltipOpen }
+    },
+    template: `
+      <button type="button" class="tiptap-tooltip-trigger" @focusin="tooltipOpen = true">Undo</button>
+      <Teleport v-if="tooltipOpen && teleportTarget" :to="teleportTarget">
+        <div role="tooltip">Undo the last change</div>
+      </Teleport>
+    `,
+  })
+}
+
 const originalUrl = window.location.href
 const originalDocumentElementClass = document.documentElement.className
 const originalBodyClass = document.body.className
 
 afterEach(() => {
   vi.resetModules()
+  vi.doUnmock('../../src/playground/components/CtaPopup.vue')
   vi.unstubAllGlobals()
   window.history.replaceState({}, '', originalUrl)
   document.documentElement.className = originalDocumentElementClass
@@ -32,6 +70,10 @@ describe('playground host theme boundary', () => {
     document.documentElement.className = 'host-document-theme'
     document.body.className = 'host-page-theme'
     vi.resetModules()
+    mockEditorPublicApi()
+    vi.doMock('../../src/playground/components/CtaPopup.vue', () => ({
+      default: { template: '<div data-cta-popup-stub=""></div>' },
+    }))
 
     const HeaderProbe = {
       emits: ['toggleTheme'],
@@ -71,18 +113,9 @@ describe('playground host theme boundary', () => {
   it('keeps header tooltips and the CTA inside the scoped editor root', async () => {
     window.history.replaceState({}, '', '/?cta')
     vi.resetModules()
+    mockEditorPublicApi()
 
-    const { default: Tooltip } =
-      await import('../../src/editor/components/primitives/tooltip/Tooltip.vue')
-    const HeaderProbe = {
-      components: { Tooltip },
-      template: `
-        <Tooltip :delay="0">
-          <button type="button">Undo</button>
-          <template #content>Undo the last change</template>
-        </Tooltip>
-      `,
-    }
+    const HeaderProbe = await createOverlayHeaderProbe()
 
     vi.doMock('../../src/playground/components/NotionEditorHeader.vue', () => ({
       default: HeaderProbe,

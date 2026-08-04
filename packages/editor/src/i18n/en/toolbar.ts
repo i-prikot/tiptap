@@ -21,6 +21,7 @@ export const toolbar = {
   turnIntoCurrent: 'Turn into (current: {label})',
   moreOptions: 'More options',
   clickForOptions: 'Click for options',
+  blockRole: 'Block role',
   resetFormatting: 'Reset formatting',
   duplicateNode: 'Duplicate node',
   copyToClipboard: 'Copy to clipboard',

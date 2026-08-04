@@ -45,8 +45,6 @@ const isExternalDependency = (id: string) =>
   id === 'y-prosemirror' ||
   id === 'y-protocols' ||
   id === 'yjs'
-const editorSourceDirectory = fileURLToPath(new URL('./src/', import.meta.url))
-
 export default defineConfig(({ mode }) => {
   const isBundleAnalysis = mode === 'bundle-analysis'
   const bundleAnalysisDirectory = fileURLToPath(new URL('./.bundle-analysis/', import.meta.url))
@@ -125,8 +123,6 @@ export default defineConfig(({ mode }) => {
         external: isExternalDependency,
         output: {
           entryFileNames: '[name].js',
-          preserveModules: true,
-          preserveModulesRoot: editorSourceDirectory,
         },
       },
     },

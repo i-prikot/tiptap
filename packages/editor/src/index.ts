@@ -1,5 +1,24 @@
 import './styles.css'
 
+export {
+  BLOCK_ID_ATTRIBUTE,
+  BlockId,
+  BlockRole,
+  BLOCK_ROLE_ATTRIBUTE,
+  BLOCK_ROLE_META,
+  isValidBlockRole,
+  normalizeBlockRole,
+  setBlockRoleAtPos,
+  TOP_LEVEL_BLOCK_ID_NODE_TYPES,
+  type BlockRoleOption,
+  type BlockRoleOptions,
+  type BlockRoleRejectionReason,
+  type BlockRoleValue,
+  type SetBlockRoleRejection,
+  type SetBlockRoleResult,
+  type SetBlockRoleSuccess,
+} from '@i-prikot/editor-schema'
+
 export { default, default as NotionEditor } from './components/notion'
 export { UndoRedoButton } from './components/ui'
 export { MarkButton } from './components/ui'

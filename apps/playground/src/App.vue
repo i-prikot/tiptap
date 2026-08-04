@@ -16,6 +16,7 @@
       :features="{ tocSidebar: true }"
       :toc-sidebar-sticky-top-offset="130"
       :image-upload="imageUpload"
+      :block-roles="blockRoles"
       :collaboration="collaboration"
       :ai="ai"
       :locale="editorLocale"
@@ -23,7 +24,7 @@
       @ready="handleReady"
       @anchor-change="handleAnchorChange"
     />
-    <CtaPopup />
+    <CtaPopup v-if="hostOverlayTarget" />
   </main>
 </template>
 
@@ -102,6 +103,11 @@ const ai: AiOptions | undefined = aiAppId
       tokenUrl: import.meta.env.VITE_TIPTAP_AI_TOKEN_URL || undefined,
     }
   : undefined
+const blockRoles = [
+  { label: 'Цена', value: 'pricing' },
+  { label: 'Призыв к действию', value: 'cta' },
+  { label: 'Кейсы', value: 'cases' },
+] as const
 const PLAYGROUND_IMAGE_UPLOAD_DELAY_MS = 500
 const PLAYGROUND_IMAGE_URL = '/images/tiptap-ui-placeholder-image.jpg'
 const imageUpload: ImageUploadAdapter = async (_file, { onProgress, abortSignal }) => {

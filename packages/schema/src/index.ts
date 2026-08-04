@@ -16,6 +16,26 @@ export {
   type ExtensionKitOptions,
   type ExtensionKitPlaceholder,
 } from './extensions/extension-kit.js'
+export {
+  BLOCK_ID_ATTRIBUTE,
+  BlockId,
+  TOP_LEVEL_BLOCK_ID_NODE_TYPES,
+} from './extensions/block-id.js'
+export {
+  BlockRole,
+  BLOCK_ROLE_ATTRIBUTE,
+  BLOCK_ROLE_META,
+  isValidBlockRole,
+  normalizeBlockRole,
+  setBlockRoleAtPos,
+  type BlockRoleOption,
+  type BlockRoleOptions,
+  type BlockRoleRejectionReason,
+  type BlockRoleValue,
+  type SetBlockRoleRejection,
+  type SetBlockRoleResult,
+  type SetBlockRoleSuccess,
+} from './extensions/block-role.js'
 export { HorizontalRule } from './extensions/horizontal-rule.js'
 export { Indent } from './extensions/indent.js'
 export { ListNormalization } from './extensions/list-normalization.js'

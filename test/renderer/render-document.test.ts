@@ -38,6 +38,21 @@ describe('renderDocument', () => {
     expect(html).not.toContain('pending-upload.png')
   })
 
+  it('keeps block roles out of renderer HTML', () => {
+    const html = renderDocument({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { blockRole: 'pricing' },
+          content: [{ type: 'text', text: 'Pricing' }],
+        },
+      ],
+    })
+
+    expect(html).not.toContain('data-block-role')
+  })
+
   it('propagates errors for unsupported JSON nodes', () => {
     const unsupportedDocument = {
       type: 'doc',

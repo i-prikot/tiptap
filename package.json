@@ -12,6 +12,7 @@
     "typecheck": "echo '[workspace] typecheck' && vue-tsc --build",
     "lint": "npm run lint --workspaces --if-present && eslint test e2e",
     "test": "vitest run",
+    "test:package-public-api": "node --test --test-concurrency=1 test/package-public-api.mjs",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint:fix": "eslint . --fix",

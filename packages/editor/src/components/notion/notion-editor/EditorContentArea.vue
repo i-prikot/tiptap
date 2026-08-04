@@ -11,7 +11,11 @@
     />
     <!-- выпадающие меню телепортируются в body, здесь только их setup -->
     <template v-if="props.features.floatingMenus">
-      <DragContextMenu v-if="isDragContextMenuActivated" :ai-enabled="props.features.ai" />
+      <DragContextMenu
+        v-if="isDragContextMenuActivated"
+        :ai-enabled="props.features.ai"
+        :block-roles="props.blockRoles"
+      />
       <EmojiDropdownMenu />
       <MentionDropdownMenu />
       <SlashDropdownMenu :ai-enabled="props.features.ai" />
@@ -33,6 +37,7 @@
  */
 import { defineAsyncComponent, ref, watch } from 'vue'
 import { EditorContent } from '@tiptap/vue-3'
+import type { BlockRoleOption } from '@i-prikot/editor-schema'
 import {
   useTiptapEditor,
   useUiEditorState,
@@ -47,9 +52,12 @@ import NotionToolbarFloating from '../../ui/toolbar/NotionToolbarFloating.vue'
 
 import { defaultEditorFeatureFlags, type EditorFeatureFlags } from './public-api'
 
-const props = withDefaults(defineProps<{ features?: EditorFeatureFlags }>(), {
-  features: () => ({ ...defaultEditorFeatureFlags }),
-})
+const props = withDefaults(
+  defineProps<{ features?: EditorFeatureFlags; blockRoles?: readonly BlockRoleOption[] }>(),
+  {
+    features: () => ({ ...defaultEditorFeatureFlags }),
+  },
+)
 
 const editor = useTiptapEditor()
 const uiState = useUiEditorState(editor, [

@@ -1,8 +1,10 @@
-import { computed } from 'vue'
-import type { ComputedRef, FunctionalComponent } from 'vue'
+import { computed, ref } from 'vue'
+import type { ComputedRef, FunctionalComponent, Ref } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
+import { setBlockRoleAtPos, type BlockRoleOption } from '@i-prikot/editor-schema'
 import type { EditorMenuActionItem, TurnIntoMenuItem } from '../types/menu'
 import { parseShortcutKeys } from '../utils/tiptap-utils'
+import { TypeIcon } from '../icons'
 import {
   useBlockquoteBlock,
   useCodeBlockBlock,
@@ -28,6 +30,11 @@ type NodeActionMenuItem = EditorMenuActionItem & {
 
 type ShortcutMenuItem = EditorMenuActionItem & {
   shortcut: string
+}
+
+type BlockRoleMenuItem = EditorMenuActionItem & {
+  isActive: boolean
+  value: BlockRoleOption['value']
 }
 
 type Translate = ReturnType<typeof useEditorI18n>['t']
@@ -173,7 +180,34 @@ function createDeleteItem(
   }
 }
 
-export function useDragContextMenuItems(editor: ComputedRef<Editor | null>) {
+function createBlockRoleItems(
+  editor: Editor | null,
+  blockRoles: readonly BlockRoleOption[],
+  pos: number,
+): BlockRoleMenuItem[] {
+  if (blockRoles.length === 0) return []
+
+  const currentRole = pos >= 0 ? editor?.state.doc.nodeAt(pos)?.attrs.blockRole : null
+  return blockRoles.map((role) => {
+    const isActive = currentRole === role.value
+    return {
+      icon: TypeIcon,
+      label: role.label,
+      value: role.value,
+      onClick: () => {
+        if (editor) setBlockRoleAtPos(editor, pos, isActive ? null : role.value)
+      },
+      disabled: !editor || pos < 0,
+      isActive,
+    }
+  })
+}
+
+export function useDragContextMenuItems(
+  editor: ComputedRef<Editor | null>,
+  blockRoles: ComputedRef<readonly BlockRoleOption[]> = computed(() => []),
+  nodePos: Ref<number> = ref(-1),
+) {
   const { t } = useEditorI18n()
   const conversions = [
     useTextBlock(editor),
@@ -202,6 +236,9 @@ export function useDragContextMenuItems(editor: ComputedRef<Editor | null>) {
     turnIntoItems: computed(() => createTurnIntoItems(t, conversions)),
     preSubmenuNodeActionItems: computed(() => createPreSubmenuNodeActionItems(t, actions)),
     postSubmenuNodeActionItems: computed(() => createPostSubmenuNodeActionItems(t, actions)),
+    blockRoleItems: computed(() =>
+      createBlockRoleItems(editor.value, blockRoles.value, nodePos.value),
+    ),
     clipboardItems: computed(() => createClipboardItems(t, actions)),
     deleteItem: computed(() => createDeleteItem(t, actions.deleteNode)),
   }

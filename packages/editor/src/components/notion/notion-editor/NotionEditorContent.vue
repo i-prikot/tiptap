@@ -9,6 +9,7 @@
     :features="props.features"
     :toc-sidebar-sticky-top-offset="props.tocSidebarStickyTopOffset"
     :image-upload="props.imageUpload"
+    :block-roles="props.blockRoles"
     :ai-token="aiToken"
     :development-diagnostics="props.developmentDiagnostics"
     @ready="emit('ready', $event)"
@@ -29,6 +30,7 @@ import { computed } from 'vue'
 import { useCollab, useAi } from '../../../composables'
 
 import type { JSONContent } from '@tiptap/core'
+import type { BlockRoleOption } from '@i-prikot/editor-schema'
 import EditorProvider from './EditorProvider.vue'
 import { LoadingSpinner } from '../feedback'
 import type {
@@ -45,6 +47,7 @@ const props = defineProps<{
   features: EditorFeatureFlags
   tocSidebarStickyTopOffset?: number
   imageUpload?: ImageUploadAdapter
+  blockRoles?: readonly BlockRoleOption[]
   developmentDiagnostics?: boolean
 }>()
 
