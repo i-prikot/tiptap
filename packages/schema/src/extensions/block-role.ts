@@ -2,6 +2,7 @@ import { Extension, type Editor } from '@tiptap/core'
 import type { ResolvedPos } from '@tiptap/pm/model'
 import { Plugin, PluginKey, type EditorState, type Transaction } from '@tiptap/pm/state'
 import { TOP_LEVEL_BLOCK_ID_NODE_TYPES } from './block-id.js'
+import { createLogger } from '../utils/logger.js'
 
 export const BLOCK_ROLE_ATTRIBUTE = 'blockRole'
 export const BLOCK_ROLE_META = 'blockRole:normalized'
@@ -40,6 +41,7 @@ export type SetBlockRoleResult = SetBlockRoleSuccess | SetBlockRoleRejection
 
 const supportedNodeTypes = new Set<string>(TOP_LEVEL_BLOCK_ID_NODE_TYPES)
 const blockRolePluginKey = new PluginKey('blockRole')
+const logger = createLogger('BlockRole')
 
 export function isValidBlockRole(value: unknown, roles?: readonly string[]): value is string {
   return (
@@ -115,6 +117,11 @@ function dispatchNormalization(
   const normalization = createNormalizationTransaction(editor.state, roles)
   if (!normalization) return
   editor.view.dispatch(normalization.transaction)
+  logger.debug('normalize document', {
+    clearedInvalid: normalization.clearedInvalid,
+    strippedNested: normalization.strippedNested,
+    topLevelBlocks: normalization.topLevelBlocks,
+  })
 }
 
 function scheduleNormalization(editor: Editor, roles: readonly string[]): void {
@@ -208,6 +215,13 @@ export function setBlockRoleAtPos(
     nextRole,
   }
 
+  logger.info('role changed from menu', {
+    nodeType: result.nodeType,
+    pos: result.pos,
+    previousRole: result.previousRole,
+    nextRole: result.nextRole,
+  })
+
   return result
 }
 
@@ -252,6 +266,12 @@ export const BlockRole = Extension.create({
           if (transactions.some((transaction) => transaction.getMeta(BLOCK_ROLE_META))) return null
           const normalization = createNormalizationTransaction(newState, roles)
           if (!normalization) return null
+
+          logger.debug('normalize document', {
+            clearedInvalid: normalization.clearedInvalid,
+            strippedNested: normalization.strippedNested,
+            topLevelBlocks: normalization.topLevelBlocks,
+          })
 
           return normalization.transaction
         },
