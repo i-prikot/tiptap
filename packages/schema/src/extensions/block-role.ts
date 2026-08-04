@@ -41,7 +41,7 @@ export type SetBlockRoleResult = SetBlockRoleSuccess | SetBlockRoleRejection
 
 const supportedNodeTypes = new Set<string>(TOP_LEVEL_BLOCK_ID_NODE_TYPES)
 const blockRolePluginKey = new PluginKey('blockRole')
-const logger = createLogger('BlockRole')
+const logger = createLogger('BlockRole', { minLevel: 'debug' })
 
 export function isValidBlockRole(value: unknown, roles?: readonly string[]): value is string {
   return (
