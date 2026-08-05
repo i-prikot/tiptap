@@ -1,5 +1,14 @@
 # @i-prikot/editor
 
+## 0.2.1
+
+### Patch Changes
+
+- e0cac79: Fix published CSS exports and ensure Vite owns the package JavaScript output.
+- 0.2.1
+- Updated dependencies
+  - @i-prikot/editor-schema@0.2.1
+
 ## 0.2.0
 
 ### Minor Changes
