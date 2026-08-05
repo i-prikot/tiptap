@@ -9,7 +9,7 @@
     "version:packages": "changeset version && npm install --package-lock-only --ignore-scripts",
     "dev": "echo '[workspace:@i-prikot/playground] dev' && npm run dev --workspace=@i-prikot/playground",
     "build": "echo '[workspace:@i-prikot/editor-schema] build' && npm run build --workspace=@i-prikot/editor-schema && echo '[workspace:@i-prikot/editor] build' && npm run build --workspace=@i-prikot/editor && echo '[workspace:@i-prikot/editor-renderer] build' && npm run build --workspace=@i-prikot/editor-renderer && echo '[workspace:@i-prikot/playground] build' && npm run build --workspace=@i-prikot/playground",
-    "typecheck": "echo '[workspace:@i-prikot/editor-schema] declaration build' && tsc -b packages/schema/tsconfig.json --force --emitDeclarationOnly && echo '[workspace:@i-prikot/editor] typecheck' && vue-tsc -p packages/editor/tsconfig.json --noEmit && echo '[workspace:@i-prikot/playground] typecheck' && vue-tsc -p apps/playground/tsconfig.json --noEmit",
+    "typecheck": "echo '[workspace:@i-prikot/editor-schema] declaration build' && tsc -b packages/schema/tsconfig.json --force --emitDeclarationOnly && echo '[workspace:@i-prikot/editor] typecheck' && vue-tsc -p packages/editor/tsconfig.json --noEmit && echo '[workspace:@i-prikot/editor] declaration build' && vue-tsc -b packages/editor/tsconfig.build.json --force && echo '[workspace:@i-prikot/playground] typecheck' && vue-tsc -p apps/playground/tsconfig.json --noEmit",
     "lint": "npm run lint --workspaces --if-present && eslint test e2e",
     "test": "vitest run",
     "test:package-public-api": "node --test --test-concurrency=1 test/package-public-api.mjs",
