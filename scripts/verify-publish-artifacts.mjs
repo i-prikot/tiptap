@@ -64,7 +64,50 @@ async function readArchiveManifest(archivePath) {
     return JSON.parse(stdout)
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    throw new Error(`Unable to read package/package.json from ${archivePath}: ${message}`)
+    throw new Error(`Unable to read package/package.json from ${archivePath}: ${message}`, {
+      cause: error,
+    })
+  }
+}
+
+async function listArchiveFiles(archivePath) {
+  log('debug', 'Listing release archive files.', { archivePath })
+
+  try {
+    const { stdout } = await execFileAsync('tar', ['--list', '--file', archivePath])
+    return new Set(
+      stdout
+        .split(/\r?\n/)
+        .filter(Boolean)
+        .map((path) => path.replaceAll('\\', '/')),
+    )
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`Unable to list files in ${archivePath}: ${message}`, { cause: error })
+  }
+}
+
+function collectExportTargets(exportValue) {
+  if (typeof exportValue === 'string') return [exportValue]
+  if (!exportValue || typeof exportValue !== 'object' || Array.isArray(exportValue)) return []
+
+  return Object.values(exportValue).flatMap(collectExportTargets)
+}
+
+function verifyExportTargets(archiveName, manifest, archiveFiles) {
+  const exportTargets = collectExportTargets(manifest.exports)
+
+  for (const exportTarget of exportTargets) {
+    if (!exportTarget.startsWith('./')) {
+      throw new Error(`Package ${manifest.name} has an invalid export target: ${exportTarget}.`)
+    }
+
+    const archivePath = `package/${exportTarget.slice(2)}`
+    if (!archiveFiles.has(archivePath)) {
+      throw new Error(
+        `Package ${manifest.name} export target ${exportTarget} is missing from ${archiveName}.`,
+      )
+    }
   }
 }
 
@@ -86,6 +129,7 @@ async function verifyPublishArtifacts(artifactDirectory, tag) {
     const archiveName = `${expectedPackage.archivePrefix}${version}.tgz`
     const archivePath = resolve(artifactDirectory, archiveName)
     const manifest = await readArchiveManifest(archivePath)
+    const archiveFiles = await listArchiveFiles(archivePath)
 
     log('debug', 'Comparing release archive metadata.', {
       archiveName,
@@ -116,6 +160,8 @@ async function verifyPublishArtifacts(artifactDirectory, tag) {
     if (manifest.publishConfig?.registry !== registry) {
       throw new Error(`Package ${expectedPackage.name} must publish to ${registry}.`)
     }
+
+    verifyExportTargets(archiveName, manifest, archiveFiles)
   }
 
   log('info', 'Trusted release artifact verification completed.', { tag, version })

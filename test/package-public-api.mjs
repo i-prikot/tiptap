@@ -1,10 +1,20 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, resolve } from 'node:path'
 import test from 'node:test'
 
 const repositoryRoot = resolve(import.meta.dirname, '..')
+const consumerVerifierPath = resolve(repositoryRoot, 'scripts/verify-editor-consumer-build.mjs')
+
+test('editor CSS aliases resolve to the Vite library stylesheet', () => {
+  const manifest = JSON.parse(
+    readFileSync(resolve(repositoryRoot, 'packages/editor/package.json'), 'utf8'),
+  )
+
+  assert.equal(manifest.exports['./style.css'], './dist/index.css')
+  assert.equal(manifest.exports['./styles.css'], './dist/index.css')
+})
 
 function buildFreshPackageArtifacts() {
   for (const workspace of ['schema', 'editor']) {
@@ -75,7 +85,12 @@ test('packed schema and editor entrypoints expose the BlockRole contract to a cl
   assert(schemaFiles.has('dist/extensions/block-id.d.ts'))
   assert(schemaFiles.has('dist/extensions/block-role.d.ts'))
   assert(editorFiles.has('dist/index.js'))
-  assert(editorFiles.has('dist/index.d.ts'))
+  assert(editorFiles.has('dist/index.css'))
+  assert(editorFiles.has('dist/types/index.d.ts'))
+  assert.equal(
+    [...editorFiles].some((path) => path.endsWith('.vue.js')),
+    false,
+  )
   assert.equal(
     [...editorFiles].some((path) => path.includes('.build-deps')),
     false,
@@ -182,6 +197,11 @@ reloadedEditor.destroy()
 
     const schemaArchive = packWorkspace('@i-prikot/editor-schema', consumerDirectory)
     const editorArchive = packWorkspace('@i-prikot/editor', consumerDirectory)
+    execFileSync(process.execPath, [consumerVerifierPath, consumerDirectory], {
+      cwd: repositoryRoot,
+      stdio: 'inherit',
+      timeout: 180_000,
+    })
     installConsumerPackages(consumerDirectory, [
       '@tiptap/starter-kit@^3.27.1',
       'happy-dom@20.10.6',

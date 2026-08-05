@@ -117,7 +117,7 @@ export default defineConfig(({ mode }) => {
         },
         formats: ['es'],
         fileName: 'index',
-        cssFileName: 'styles',
+        cssFileName: 'index',
       },
       rollupOptions: {
         external: isExternalDependency,

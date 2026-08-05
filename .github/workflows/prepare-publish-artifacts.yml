@@ -101,6 +101,17 @@ jobs:
             echo "[ERROR] Expected three release archives, found ${archive_count}." >&2
             exit 1
           fi
+
+          if ! LOG_LEVEL=debug node scripts/verify-publish-artifacts.mjs \
+            "${artifact_dir}" "${GITHUB_REF_NAME}"; then
+            echo '[ERROR] Packed export verification failed.' >&2
+            exit 1
+          fi
+
+          if ! LOG_LEVEL=debug node scripts/verify-editor-consumer-build.mjs "${artifact_dir}"; then
+            echo '[ERROR] Vite consumer build verification failed.' >&2
+            exit 1
+          fi
           echo '[INFO] Prepared three release archives.'
 
       - name: 'INFO: Upload release artifacts'

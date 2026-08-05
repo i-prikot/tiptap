@@ -15,6 +15,7 @@ function createArchive(
   archiveName: string,
   packageName: string,
   version = '1.2.3',
+  manifestFields: Record<string, unknown> = {},
 ) {
   const fixtureRoot = mkdtempSync(resolve(projectRoot, '.tmp-verify-publish-artifacts-'))
   temporaryDirectories.push(fixtureRoot)
@@ -27,6 +28,7 @@ function createArchive(
         name: packageName,
         version,
         publishConfig: { registry: 'https://npm.pkg.github.com' },
+        ...manifestFields,
       },
       null,
       2,
@@ -122,5 +124,23 @@ describe('verify publish artifacts script', () => {
 
     expect(result.status).toBe(1)
     expect(result.stderr).toContain('expected @i-prikot/editor, received @tinyfy/editor')
+  })
+
+  it('rejects an archive when an exported file is not packed', () => {
+    const artifactDirectory = createArtifactDirectory([
+      '@i-prikot/editor-schema',
+      '@i-prikot/editor',
+      '@i-prikot/editor-renderer',
+    ])
+    createArchive(artifactDirectory, 'i-prikot-editor-1.2.3.tgz', '@i-prikot/editor', '1.2.3', {
+      exports: { './style.css': './dist/index.css' },
+    })
+
+    const result = runArtifactVerifier(artifactDirectory)
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain(
+      'Package @i-prikot/editor export target ./dist/index.css is missing',
+    )
   })
 })

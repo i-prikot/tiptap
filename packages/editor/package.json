@@ -7,20 +7,20 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./style.css": "./dist/styles.css",
-    "./styles.css": "./dist/styles.css"
+    "./style.css": "./dist/index.css",
+    "./styles.css": "./dist/index.css"
   },
-  "types": "./dist/index.d.ts",
+  "types": "./dist/types/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
     "prebuild": "node ./scripts/clean-stale-css.mjs",
-    "build": "vue-tsc -p tsconfig.json --declaration --emitDeclarationOnly --outDir dist && vite build",
-    "analyze": "echo '[workspace:@i-prikot/editor] analyze (bundle-analysis)' && node ./scripts/clean-stale-css.mjs && vue-tsc -p tsconfig.json --declaration --emitDeclarationOnly --outDir dist && vite build --mode bundle-analysis",
+    "build": "vue-tsc -p tsconfig.build.json && vite build",
+    "analyze": "echo '[workspace:@i-prikot/editor] analyze (bundle-analysis)' && node ./scripts/clean-stale-css.mjs && vue-tsc -p tsconfig.build.json && vite build --mode bundle-analysis",
     "typecheck": "vue-tsc -p tsconfig.json --noEmit",
     "lint": "eslint src"
   },

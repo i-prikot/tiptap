@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "emitDeclarationOnly": true,
+    "outDir": "./dist/types",
+    "tsBuildInfoFile": "./dist/types/tsconfig.tsbuildinfo",
+    "paths": {
+      "@i-prikot/editor-schema": ["packages/schema/dist/index.d.ts"]
+    }
+  },
+  "references": [
+    {
+      "path": "../schema"
+    }
+  ]
+}
