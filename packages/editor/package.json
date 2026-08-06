@@ -29,7 +29,7 @@
   "dependencies": {
     "@floating-ui/dom": "^1.7.4",
     "@floating-ui/vue": "^1.1.9",
-    "@hocuspocus/provider": "^2.15.3",
+    "@hocuspocus/provider": "^4.0.0",
     "@i-prikot/editor-schema": "0.4.0",
     "katex": "^0.18.0",
     "y-prosemirror": "^1.3.7",
