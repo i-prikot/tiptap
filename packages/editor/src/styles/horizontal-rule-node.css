@@ -1,9 +1,3 @@
-.tiptap.ProseMirror {
-  --horizontal-rule-color: var(--tt-gray-light-a-200);
-}
-.tinyfy-editor.dark .tiptap.ProseMirror {
-  --horizontal-rule-color: var(--tt-gray-dark-a-200);
-}
 .tiptap.ProseMirror hr {
   background-color: var(--horizontal-rule-color);
   border: none;

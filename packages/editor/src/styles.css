@@ -9,7 +9,6 @@
 @import './styles/card.css';
 @import './styles/code-node.css';
 @import './styles/combobox.css';
-@import './styles/design-tokens.css';
 @import './styles/drag-handle.css';
 @import './styles/dropdown-menu.css';
 @import './styles/emoji-input.css';
@@ -20,6 +19,7 @@
 @import './styles/image-node.css';
 @import './styles/image-upload-node.css';
 @import './styles/input.css';
+@import './styles/keyframes.css';
 @import './styles/link-input.css';
 @import './styles/list-node.css';
 @import './styles/menu.css';

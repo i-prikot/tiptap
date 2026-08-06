@@ -94,14 +94,14 @@ describe('playground host theme boundary', () => {
     await settleTeleportUpdates()
 
     const editorRoot = wrapper.get('.tinyfy-editor')
-    expect(editorRoot.classes()).not.toContain('dark')
+    expect(editorRoot.attributes('data-tiptap-theme')).toBe('light')
     expect(document.documentElement.classList.contains('host-document-theme')).toBe(true)
     expect(document.body.classList.contains('host-page-theme')).toBe(true)
 
     await wrapper.get('[data-theme-toggle]').trigger('click')
     await settleTeleportUpdates()
 
-    expect(editorRoot.classes()).toContain('dark')
+    expect(editorRoot.attributes('data-tiptap-theme')).toBe('dark')
     expect(document.documentElement.classList.contains('host-document-theme')).toBe(true)
     expect(document.documentElement.classList.contains('dark')).toBe(false)
     expect(document.body.classList.contains('host-page-theme')).toBe(true)

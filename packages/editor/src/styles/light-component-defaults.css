@@ -1,0 +1,403 @@
+/* Theme-specific component defaults. Kept outside the base stylesheet. */
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tiptap-ai-prompt-input-content-placeholder: var(--tt-gray-light-a-400);
+  --tiptap-ai-prompt-input-bg-color: var(--white);
+  --tiptap-ai-prompt-input-border-color: var(--tt-gray-light-a-200);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper [data-active-state='off'] {
+  --tiptap-ai-prompt-input-text-color: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light']
+  .notion-like-editor-wrapper
+  [data-active-state='off'].tiptap-ai-prompt-input:hover {
+  --tiptap-ai-prompt-input-border-color: var(--tt-gray-light-a-300);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tiptap-ai-prompt-border-color: var(--tt-gray-light-a-200);
+  --tiptap-ai-loading-background-color: var(--tt-gray-light-a-200);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tiptap-avatar-border-color: var(--white);
+  --tiptap-avatar-fallback-bg-color: var(--tt-gray-light-200);
+  --tiptap-avatar-item-bg-color: var(--tt-gray-light-200);
+  --tiptap-avatar-fallback-text-color: var(--tt-gray-light-a-600);
+}
+
+[data-tiptap-theme='light'] .tiptap-badge {
+  --tt-badge-border-color: var(--tt-gray-light-a-200);
+  --tt-badge-border-color-subdued: var(--tt-gray-light-a-200);
+  --tt-badge-border-color-emphasized: var(--tt-gray-light-a-600);
+  --tt-badge-text-color: var(--tt-gray-light-a-500);
+  --tt-badge-text-color-subdued: var(--tt-gray-light-a-400);
+  --tt-badge-text-color-emphasized: var(--tt-gray-light-a-600);
+  --tt-badge-bg-color: var(--white);
+  --tt-badge-bg-color-subdued: var(--white);
+  --tt-badge-bg-color-emphasized: var(--white);
+  --tt-badge-icon-color: var(--tt-gray-light-a-500);
+  --tt-badge-icon-color-subdued: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .tiptap-badge[data-style='ghost'] {
+  --tt-badge-border-color: var(--tt-gray-light-a-200);
+  --tt-badge-border-color-subdued: var(--tt-gray-light-a-200);
+  --tt-badge-border-color-emphasized: var(--tt-gray-light-a-600);
+  --tt-badge-text-color: var(--tt-gray-light-a-500);
+  --tt-badge-text-color-subdued: var(--tt-gray-light-a-400);
+  --tt-badge-text-color-emphasized: var(--tt-gray-light-a-600);
+  --tt-badge-bg-color: var(--transparent);
+  --tt-badge-bg-color-subdued: var(--transparent);
+  --tt-badge-bg-color-emphasized: var(--transparent);
+  --tt-badge-icon-color: var(--tt-gray-light-a-500);
+  --tt-badge-icon-color-subdued: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .tiptap-badge[data-style='gray'] {
+  --tt-badge-border-color: var(--tt-gray-light-a-200);
+  --tt-badge-border-color-subdued: var(--tt-gray-light-a-200);
+  --tt-badge-border-color-emphasized: var(--tt-gray-light-a-500);
+  --tt-badge-text-color: var(--tt-gray-light-a-500);
+  --tt-badge-text-color-subdued: var(--tt-gray-light-a-400);
+  --tt-badge-text-color-emphasized: var(--white);
+  --tt-badge-bg-color: var(--tt-gray-light-a-100);
+  --tt-badge-bg-color-subdued: var(--tt-gray-light-a-50);
+  --tt-badge-bg-color-emphasized: var(--tt-gray-light-a-700);
+  --tt-badge-icon-color: var(--tt-gray-light-a-500);
+  --tt-badge-icon-color-subdued: var(--tt-gray-light-a-400);
+  --tt-badge-icon-color-emphasized: var(--white);
+}
+
+[data-tiptap-theme='light'] .tiptap.ProseMirror {
+  --blockquote-bg-color: var(--tt-gray-light-900);
+}
+
+[data-tiptap-theme='light'] .tiptap-tooltip {
+  --tt-tooltip-bg: var(--tt-gray-light-900);
+  --tt-tooltip-text: var(--white);
+}
+
+[data-tiptap-theme='light'] .tiptap-button {
+  --tt-button-default-bg-color: var(--tt-gray-light-a-100);
+  --tt-button-hover-bg-color: var(--tt-gray-light-200);
+  --tt-button-active-bg-color: var(--tt-gray-light-a-200);
+  --tt-button-active-bg-color-subdued: var(--tt-gray-light-a-200);
+  --tt-button-active-hover-bg-color: var(--tt-gray-light-300);
+  --tt-button-active-hover-bg-color-subdued: var(--tt-gray-light-a-300);
+  --tt-button-disabled-bg-color: var(--tt-gray-light-a-50);
+}
+
+[data-tiptap-theme='light'] .tiptap-button {
+  --tt-button-default-text-color: var(--tt-gray-light-a-600);
+  --tt-button-hover-text-color: var(--tt-gray-light-a-900);
+  --tt-button-active-text-color: var(--tt-gray-light-a-900);
+  --tt-button-active-text-color-emphasized: var(--tt-gray-light-a-900);
+  --tt-button-active-text-color-subdued: var(--tt-gray-light-a-900);
+  --tt-button-disabled-text-color: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .tiptap-button {
+  --tt-button-default-icon-color: var(--tt-gray-light-a-600);
+  --tt-button-hover-icon-color: var(--tt-gray-light-a-900);
+  --tt-button-active-icon-color-subdued: var(--tt-gray-light-a-900);
+  --tt-button-disabled-icon-color: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .tiptap-button {
+  --tt-button-default-icon-sub-color: var(--tt-gray-light-a-400);
+  --tt-button-hover-icon-sub-color: var(--tt-gray-light-a-500);
+  --tt-button-active-icon-sub-color: var(--tt-gray-light-a-400);
+  --tt-button-active-icon-sub-color-emphasized: var(--tt-gray-light-a-500);
+  --tt-button-active-icon-sub-color-subdued: var(--tt-gray-light-a-400);
+  --tt-button-disabled-icon-sub-color: var(--tt-gray-light-a-100);
+}
+
+[data-tiptap-theme='light'] .tiptap-button {
+  --tt-button-default-dropdown-arrows-color: var(--tt-gray-light-a-600);
+  --tt-button-hover-dropdown-arrows-color: var(--tt-gray-light-a-700);
+  --tt-button-active-dropdown-arrows-color: var(--tt-gray-light-a-600);
+  --tt-button-active-dropdown-arrows-color-emphasized: var(--tt-gray-light-a-700);
+  --tt-button-active-dropdown-arrows-color-subdued: var(--tt-gray-light-a-600);
+  --tt-button-disabled-dropdown-arrows-color: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .tiptap-button[data-style='ghost'] {
+  --tt-button-default-bg-color: var(--transparent);
+  --tt-button-hover-bg-color: var(--tt-gray-light-200);
+  --tt-button-active-bg-color: var(--tt-gray-light-a-100);
+  --tt-button-active-bg-color-subdued: var(--tt-gray-light-a-100);
+  --tt-button-active-hover-bg-color: var(--tt-gray-light-200);
+  --tt-button-active-hover-bg-color-subdued: var(--tt-gray-light-a-200);
+  --tt-button-disabled-bg-color: var(--transparent);
+}
+
+[data-tiptap-theme='light'] .tiptap-button[data-style='ghost'] {
+  --tt-button-default-text-color: var(--tt-gray-light-a-600);
+  --tt-button-hover-text-color: var(--tt-gray-light-a-900);
+  --tt-button-active-text-color: var(--tt-gray-light-a-900);
+  --tt-button-active-text-color-emphasized: var(--tt-gray-light-a-900);
+  --tt-button-active-text-color-subdued: var(--tt-gray-light-a-900);
+  --tt-button-disabled-text-color: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .tiptap-button[data-style='ghost'] {
+  --tt-button-default-icon-color: var(--tt-gray-light-a-600);
+  --tt-button-hover-icon-color: var(--tt-gray-light-a-900);
+  --tt-button-active-icon-color-subdued: var(--tt-gray-light-a-900);
+  --tt-button-disabled-icon-color: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .tiptap-button[data-style='ghost'] {
+  --tt-button-default-icon-sub-color: var(--tt-gray-light-a-400);
+  --tt-button-hover-icon-sub-color: var(--tt-gray-light-a-500);
+  --tt-button-active-icon-sub-color: var(--tt-gray-light-a-400);
+  --tt-button-active-icon-sub-color-emphasized: var(--tt-gray-light-a-500);
+  --tt-button-active-icon-sub-color-subdued: var(--tt-gray-light-a-400);
+  --tt-button-disabled-icon-sub-color: var(--tt-gray-light-a-100);
+}
+
+[data-tiptap-theme='light'] .tiptap-button[data-style='ghost'] {
+  --tt-button-default-dropdown-arrows-color: var(--tt-gray-light-a-600);
+  --tt-button-hover-dropdown-arrows-color: var(--tt-gray-light-a-700);
+  --tt-button-active-dropdown-arrows-color: var(--tt-gray-light-a-600);
+  --tt-button-active-dropdown-arrows-color-emphasized: var(--tt-gray-light-a-700);
+  --tt-button-active-dropdown-arrows-color-subdued: var(--tt-gray-light-a-600);
+  --tt-button-disabled-dropdown-arrows-color: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .tiptap-button[data-style='primary'] {
+  --tt-button-disabled-bg-color: var(--tt-gray-light-a-100);
+}
+
+[data-tiptap-theme='light'] .tiptap-button[data-style='primary'] {
+  --tt-button-default-text-color: var(--white);
+  --tt-button-hover-text-color: var(--white);
+  --tt-button-active-text-color: var(--tt-gray-light-a-900);
+  --tt-button-active-text-color-emphasized: var(--tt-gray-light-a-900);
+  --tt-button-active-text-color-subdued: var(--tt-gray-light-a-900);
+  --tt-button-disabled-text-color: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .tiptap-button[data-style='primary'] {
+  --tt-button-default-icon-color: var(--white);
+  --tt-button-hover-icon-color: var(--white);
+  --tt-button-disabled-icon-color: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .tiptap-button[data-style='primary'] {
+  --tt-button-active-icon-sub-color: var(--tt-gray-light-a-500);
+  --tt-button-active-icon-sub-color-emphasized: var(--tt-gray-light-a-500);
+  --tt-button-active-icon-sub-color-subdued: var(--tt-gray-light-a-500);
+  --tt-button-disabled-icon-sub-color: var(--tt-gray-light-a-100);
+}
+
+[data-tiptap-theme='light'] .tiptap-button[data-style='primary'] {
+  --tt-button-default-dropdown-arrows-color: var(--white);
+  --tt-button-hover-dropdown-arrows-color: var(--white);
+  --tt-button-active-dropdown-arrows-color: var(--tt-gray-light-a-700);
+  --tt-button-active-dropdown-arrows-color-emphasized: var(--tt-gray-light-a-700);
+  --tt-button-active-dropdown-arrows-color-subdued: var(--tt-gray-light-a-700);
+  --tt-button-disabled-dropdown-arrows-color: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tiptap-card-bg-color: var(--white);
+  --tiptap-card-border-color: var(--tt-gray-light-a-100);
+  --tiptap-card-group-label-color: var(--tt-gray-light-a-800);
+}
+
+[data-tiptap-theme='light'] .tiptap.ProseMirror {
+  --tt-inline-code-bg-color: var(--tt-gray-light-a-100);
+  --tt-inline-code-text-color: var(--tt-gray-light-a-700);
+  --tt-inline-code-border-color: var(--tt-gray-light-a-200);
+  --tt-codeblock-bg: var(--tt-gray-light-a-50);
+  --tt-codeblock-text: var(--tt-gray-light-a-800);
+  --tt-codeblock-border: var(--tt-gray-light-a-200);
+}
+
+[data-tiptap-theme='light'] .tiptap-combobox-popover {
+  --tt-combobox-bg-color: var(--white);
+  --tt-combobox-border-color: var(--tt-gray-light-a-100);
+  --tt-combobox-text-color: var(--tt-gray-light-a-600);
+}
+
+[data-tiptap-theme='light'] .tiptap-combobox-group-label {
+  --tt-label-color: var(--tt-gray-light-a-800);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tt-dropdown-menu-bg-color: var(--white);
+  --tt-dropdown-menu-text-color: var(--tt-gray-light-a-600);
+  --tt-dropdown-menu-label-color: var(--tt-gray-light-a-800);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --emoji-input-bg-color: var(--white);
+  --emoji-input-border-color: var(--tt-gray-light-a-100);
+}
+
+[data-tiptap-theme='light'] .tiptap.ProseMirror {
+  --horizontal-rule-color: var(--tt-gray-light-a-200);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tiptap-image-upload-text-color: var(--tt-gray-light-a-700);
+  --tiptap-image-upload-subtext-color: var(--tt-gray-light-a-400);
+  --tiptap-image-upload-border: var(--tt-gray-light-a-300);
+  --tiptap-image-upload-border-hover: var(--tt-gray-light-a-400);
+  --tiptap-image-upload-icon-doc-bg: var(--tt-gray-light-a-200);
+  --tiptap-image-upload-icon-doc-border: var(--tt-gray-light-300);
+  --tiptap-image-upload-icon-color: var(--white);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tt-input-placeholder: var(--tt-gray-light-a-400);
+  --tt-input-border: var(--tt-gray-light-a-200);
+  --tt-input-border-focus: var(--tt-gray-light-a-300);
+}
+
+[data-tiptap-theme='light'] .tiptap.ProseMirror {
+  --tt-checklist-bg-color: var(--tt-gray-light-a-100);
+  --tt-checklist-bg-active-color: var(--tt-gray-light-a-900);
+  --tt-checklist-border-color: var(--tt-gray-light-a-200);
+  --tt-checklist-border-active-color: var(--tt-gray-light-a-900);
+  --tt-checklist-check-icon-color: var(--white);
+  --tt-checklist-text-active: var(--tt-gray-light-a-500);
+}
+
+[data-tiptap-theme='light'] .tiptap-menu-content {
+  --tt-combobox-bg-color: var(--white);
+  --tt-combobox-border-color: var(--tt-gray-light-a-100);
+  --tt-combobox-text-color: var(--tt-gray-light-a-600);
+}
+
+[data-tiptap-theme='light'] .tiptap-menu-group-label {
+  --tt-label-color: var(--tt-gray-light-a-800);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tt-theme-text: var(--tt-gray-light-900);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tiptap-ouline-fallback-color: var(--tt-gray-light-a-200);
+}
+
+[data-tiptap-theme='light'] .tiptap-popover {
+  --tt-popover-bg-color: var(--white);
+  --tt-popover-border-color: var(--tt-gray-light-a-100);
+  --tt-popover-text-color: var(--tt-gray-light-a-600);
+}
+
+[data-tiptap-theme='light'] .tiptap.ProseMirror {
+  --tt-collaboration-carets-label: var(--tt-gray-light-900);
+  --thread-text: var(--tt-gray-light-900);
+  --placeholder-color: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .tiptap-separator {
+  --tt-link-border-color: var(--tt-gray-light-a-200);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tt-slash-decoration-bg-color: var(--tt-gray-light-a-100);
+  --tt-slash-decoration-color: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tt-table-handle-bg-color: var(--tt-gray-light-a-100);
+  --tt-table-extend-icon-color: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tt-table-handle-bg-color: var(--tt-gray-light-a-100);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tt-table-border-color: var(--tt-gray-light-a-300);
+  --tt-table-selected-bg: #c3bdff66;
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tt-textarea-placeholder: var(--tt-gray-light-a-400);
+  --tt-textarea-border: var(--tt-gray-light-a-200);
+  --tt-textarea-border-focus: var(--tt-gray-light-a-300);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tt-ig-placeholder: var(--tt-gray-light-a-400);
+  --tt-ig-border: var(--tt-gray-light-a-200);
+  --tt-ig-border-focus: var(--tt-gray-light-a-300);
+  --tt-ig-addon-color: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .tiptap-table-of-contents-node {
+  --tt-toc-node-text-color: var(--tt-gray-light-a-600);
+  --tt-toc-node-text-hover-color: var(--tt-gray-light-a-800);
+  --tt-toc-node-bg-hover-color: var(--tt-gray-light-a-100);
+  --tt-toc-node-underline-color: var(--tt-gray-light-a-300);
+  --tt-toc-node-underline-hover-color: var(--tt-gray-light-a-400);
+}
+
+[data-tiptap-theme='light'] .toc-sidebar {
+  --tt-toc-sidebar-line-bg: var(--tt-gray-light-200);
+  --tt-toc-sidebar-line-bg-active: var(--tt-gray-light-900);
+  --tt-toc-sidebar-bg: var(--white);
+  --tt-toc-sidebar-border-color: var(--tt-gray-light-a-100);
+  --tt-toc-sidebar-text-color: var(--tt-gray-light-a-600);
+  --tt-toc-sidebar-text-hover-color: var(--tt-gray-light-a-800);
+  --tt-toc-sidebar-bg-hover-color: var(--tt-gray-light-a-100);
+}
+
+[data-tiptap-theme='light'] .notion-like-editor-wrapper {
+  --tt-toolbar-bg-color: var(--white);
+  --tt-toolbar-border-color: var(--tt-gray-light-a-100);
+}
+
+[data-tiptap-theme='light'] .tiptap-tooltip {
+  --tt-kbd: var(--tt-gray-dark-a-400);
+}
+
+[data-tiptap-theme='light'] .tiptap-button {
+  --tt-button-active-bg-color-emphasized: var(--tt-brand-color-100);
+  --tt-button-active-hover-bg-color-emphasized: var(--tt-brand-color-200);
+}
+
+[data-tiptap-theme='light'] .tiptap-button {
+  --tt-button-active-icon-color: var(--tt-brand-color-500);
+  --tt-button-active-icon-color-emphasized: var(--tt-brand-color-600);
+}
+
+[data-tiptap-theme='light'] .tiptap-button[data-style='ghost'] {
+  --tt-button-active-bg-color-emphasized: var(--tt-brand-color-100);
+  --tt-button-active-hover-bg-color-emphasized: var(--tt-brand-color-200);
+}
+
+[data-tiptap-theme='light'] .tiptap-button[data-style='ghost'] {
+  --tt-button-active-icon-color: var(--tt-brand-color-500);
+  --tt-button-active-icon-color-emphasized: var(--tt-brand-color-600);
+}
+
+[data-tiptap-theme='light'] .tiptap-button[data-style='primary'] {
+  --tt-button-default-bg-color: var(--tt-brand-color-500);
+  --tt-button-hover-bg-color: var(--tt-brand-color-600);
+  --tt-button-active-bg-color: var(--tt-brand-color-100);
+  --tt-button-active-bg-color-emphasized: var(--tt-brand-color-100);
+  --tt-button-active-bg-color-subdued: var(--tt-brand-color-100);
+  --tt-button-active-hover-bg-color: var(--tt-brand-color-200);
+  --tt-button-active-hover-bg-color-emphasized: var(--tt-brand-color-200);
+  --tt-button-active-hover-bg-color-subdued: var(--tt-brand-color-200);
+}
+
+[data-tiptap-theme='light'] .tiptap-button[data-style='primary'] {
+  --tt-button-active-icon-color: var(--tt-brand-color-600);
+  --tt-button-active-icon-color-emphasized: var(--tt-brand-color-600);
+  --tt-button-active-icon-color-subdued: var(--tt-brand-color-600);
+}
+
+[data-tiptap-theme='light'] .tiptap-button[data-style='primary'] {
+  --tt-button-default-icon-sub-color: var(--tt-gray-dark-a-500);
+  --tt-button-hover-icon-sub-color: var(--tt-gray-dark-a-500);
+}

@@ -1,14 +1,4 @@
 .tiptap-combobox-popover {
-  --tt-combobox-bg-color: var(--white);
-  --tt-combobox-border-color: var(--tt-gray-light-a-100);
-  --tt-combobox-text-color: var(--tt-gray-light-a-600);
-}
-.tinyfy-editor.dark .tiptap-combobox-popover {
-  --tt-combobox-border-color: var(--tt-gray-dark-a-50);
-  --tt-combobox-bg-color: var(--tt-gray-dark-50);
-  --tt-combobox-text-color: var(--tt-gray-dark-a-600);
-}
-.tiptap-combobox-popover {
   --padding: 0.375rem;
   --border-width: 1px;
   isolation: isolate;
@@ -66,12 +56,6 @@ input:disabled ~ .tiptap-combobox-label {
 }
 :is(.tiptap-combobox-group:has([role='menuitem']), .tiptap-combobox-group:has([role='option'])) {
   display: block;
-}
-.tiptap-combobox-group-label {
-  --tt-label-color: var(--tt-gray-light-a-800);
-}
-.tinyfy-editor.dark .tiptap-combobox-group-label {
-  --tt-label-color: var(--tt-gray-dark-a-800);
 }
 .tiptap-combobox-group-label {
   color: var(--tt-label-color);

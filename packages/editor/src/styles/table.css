@@ -1,7 +1,5 @@
-.tinyfy-editor {
+.notion-like-editor-wrapper {
   --default-cell-min-width: 120px;
-  --tt-table-border-color: var(--tt-gray-light-a-300);
-  --tt-table-selected-bg: #c3bdff66;
   --tt-table-selected-stroke: var(--tt-brand-color-400);
   --tt-table-column-resize-handle-bg: var(--tt-brand-color-400);
   --tt-table-cell-padding: 0.5rem;
@@ -12,22 +10,15 @@
   --tt-table-pad-inline-end: 1.5rem;
 }
 
-.tinyfy-editor.dark {
-  --tt-table-border-color: var(--tt-gray-dark-a-300);
-  --tt-table-selected-bg: #c3bdff33;
-  --tt-table-selected-stroke: var(--tt-brand-color-400);
-  --tt-table-column-resize-handle-bg: var(--tt-brand-color-400);
-}
-
-.tinyfy-editor .ProseMirror .tableWrapper {
+.notion-like-editor-wrapper .ProseMirror .tableWrapper {
   overflow-x: auto;
 }
 
-.tinyfy-editor .tiptap [data-content-type='table'] {
+.notion-like-editor-wrapper .tiptap [data-content-type='table'] {
   margin-block: var(--tt-table-margin-block);
 }
 
-.tinyfy-editor .tiptap [data-content-type='table'] .tableWrapper {
+.notion-like-editor-wrapper .tiptap [data-content-type='table'] .tableWrapper {
   width: 100%;
   margin-left: -1rem;
   padding-block-start: var(--tt-table-pad-block-start);
@@ -38,12 +29,12 @@
   overflow-y: hidden;
 }
 
-.tinyfy-editor .tiptap [data-content-type='table'] .table-container {
+.notion-like-editor-wrapper .tiptap [data-content-type='table'] .table-container {
   position: relative;
   width: max-content;
 }
 
-.tinyfy-editor .tiptap table {
+.notion-like-editor-wrapper .tiptap table {
   border-collapse: collapse;
   table-layout: fixed;
   word-break: break-word;
@@ -51,42 +42,38 @@
   overflow: hidden;
 }
 
-.tinyfy-editor .tiptap th,
-.tinyfy-editor .tiptap td,
-.tinyfy-editor .ProseMirror td,
-.tinyfy-editor .ProseMirror th {
+.notion-like-editor-wrapper .tiptap th,
+.notion-like-editor-wrapper .tiptap td,
+.notion-like-editor-wrapper .ProseMirror td,
+.notion-like-editor-wrapper .ProseMirror th {
   vertical-align: top;
   box-sizing: border-box;
   position: relative;
 }
 
-.tinyfy-editor .tiptap th,
-.tinyfy-editor .tiptap td {
+.notion-like-editor-wrapper .tiptap th,
+.notion-like-editor-wrapper .tiptap td {
   border: 1px solid var(--tt-table-border-color);
   padding: var(--tt-table-cell-padding);
 }
 
-.tinyfy-editor .tiptap table th {
+.notion-like-editor-wrapper .tiptap table th {
   background-color: var(--tt-gray-light-a-100);
   text-align: left;
   font-weight: 700;
 }
 
-.tinyfy-editor.dark .tiptap table th {
-  background-color: var(--tt-gray-dark-a-100);
-}
-
-.tinyfy-editor .ProseMirror td,
-.tinyfy-editor .ProseMirror th {
+.notion-like-editor-wrapper .ProseMirror td,
+.notion-like-editor-wrapper .ProseMirror th {
   min-width: auto !important;
 }
 
-.tinyfy-editor .ProseMirror td:not([colwidth]):not(.column-resize-dragging),
-.tinyfy-editor .ProseMirror th:not([colwidth]):not(.column-resize-dragging) {
+.notion-like-editor-wrapper .ProseMirror td:not([colwidth]):not(.column-resize-dragging),
+.notion-like-editor-wrapper .ProseMirror th:not([colwidth]):not(.column-resize-dragging) {
   min-width: var(--default-cell-min-width) !important;
 }
 
-.tinyfy-editor .ProseMirror .selectedCell::after {
+.notion-like-editor-wrapper .ProseMirror .selectedCell::after {
   z-index: 2;
   content: '';
   pointer-events: none;
@@ -95,7 +82,7 @@
   inset: 0;
 }
 
-.tinyfy-editor .ProseMirror .column-resize-handle {
+.notion-like-editor-wrapper .ProseMirror .column-resize-handle {
   margin-inline-start: -1px;
   background: var(--tt-table-column-resize-handle-bg);
   cursor: col-resize;
@@ -110,57 +97,57 @@
   right: 0;
 }
 
-.tinyfy-editor .ProseMirror.resize-cursor,
-.tinyfy-editor .tiptap.ProseMirror.resize-cursor {
+.notion-like-editor-wrapper .ProseMirror.resize-cursor,
+.notion-like-editor-wrapper .tiptap.ProseMirror.resize-cursor {
   cursor: ew-resize;
   cursor: col-resize;
 }
 
-.tinyfy-editor .tiptap-table-dropcursor {
+.notion-like-editor-wrapper .tiptap-table-dropcursor {
   z-index: 20;
   background-color: var(--tt-table-column-resize-handle-bg);
   pointer-events: none;
   position: absolute;
 }
 
-.tinyfy-editor .table-cell-dragging-source {
+.notion-like-editor-wrapper .table-cell-dragging-source {
   background: #c8c8ff66;
   outline: 2px solid var(--tt-table-selected-stroke);
   outline-offset: -2px;
 }
 
-.tinyfy-editor .tiptap td[data-background-color],
-.tinyfy-editor .tiptap th[data-background-color] {
+.notion-like-editor-wrapper .tiptap td[data-background-color],
+.notion-like-editor-wrapper .tiptap th[data-background-color] {
   background-color: var(--cell-background-color);
 }
 
-.tinyfy-editor .tiptap td[data-text-align='left'],
-.tinyfy-editor .tiptap th[data-text-align='left'] {
+.notion-like-editor-wrapper .tiptap td[data-text-align='left'],
+.notion-like-editor-wrapper .tiptap th[data-text-align='left'] {
   text-align: left;
 }
 
-.tinyfy-editor .tiptap td[data-text-align='center'],
-.tinyfy-editor .tiptap th[data-text-align='center'] {
+.notion-like-editor-wrapper .tiptap td[data-text-align='center'],
+.notion-like-editor-wrapper .tiptap th[data-text-align='center'] {
   text-align: center;
 }
 
-.tinyfy-editor .tiptap td[data-text-align='right'],
-.tinyfy-editor .tiptap th[data-text-align='right'] {
+.notion-like-editor-wrapper .tiptap td[data-text-align='right'],
+.notion-like-editor-wrapper .tiptap th[data-text-align='right'] {
   text-align: right;
 }
 
-.tinyfy-editor .tiptap td[data-vertical-align='top'],
-.tinyfy-editor .tiptap th[data-vertical-align='top'] {
+.notion-like-editor-wrapper .tiptap td[data-vertical-align='top'],
+.notion-like-editor-wrapper .tiptap th[data-vertical-align='top'] {
   vertical-align: top;
 }
 
-.tinyfy-editor .tiptap td[data-vertical-align='middle'],
-.tinyfy-editor .tiptap th[data-vertical-align='middle'] {
+.notion-like-editor-wrapper .tiptap td[data-vertical-align='middle'],
+.notion-like-editor-wrapper .tiptap th[data-vertical-align='middle'] {
   vertical-align: middle;
 }
 
-.tinyfy-editor .tiptap td[data-vertical-align='bottom'],
-.tinyfy-editor .tiptap th[data-vertical-align='bottom'] {
+.notion-like-editor-wrapper .tiptap td[data-vertical-align='bottom'],
+.notion-like-editor-wrapper .tiptap th[data-vertical-align='bottom'] {
   vertical-align: bottom;
 }
 

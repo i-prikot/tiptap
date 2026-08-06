@@ -3,34 +3,7 @@ import { join } from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import prefixSelector from 'postcss-prefix-selector'
 import { visualizer } from 'rollup-plugin-visualizer'
-
-const editorRootSelector = '.tinyfy-editor'
-const rootSelectorPattern = /^(?::root|html|body)(?=$|[\s>+~.#[:])/
-
-function scopeEditorSelector(prefix: string, selector: string) {
-  const trimmedSelector = selector.trim()
-
-  if (
-    trimmedSelector === prefix ||
-    trimmedSelector.startsWith(`${prefix} `) ||
-    trimmedSelector.startsWith(`${prefix}:`) ||
-    trimmedSelector.startsWith(`${prefix}.`) ||
-    trimmedSelector.startsWith(`${prefix}[`) ||
-    trimmedSelector.startsWith(`${prefix}>`) ||
-    trimmedSelector.startsWith(`${prefix}+`) ||
-    trimmedSelector.startsWith(`${prefix}~`)
-  ) {
-    return selector
-  }
-
-  if (rootSelectorPattern.test(trimmedSelector)) {
-    return trimmedSelector.replace(rootSelectorPattern, prefix)
-  }
-
-  return `${prefix} ${trimmedSelector}`
-}
 
 const isHostRuntimeDependency = (id: string) => id === 'vue' || id.startsWith('@tiptap/')
 
@@ -91,16 +64,6 @@ export default defineConfig(({ mode }) => {
           ]
         : []),
     ],
-    css: {
-      postcss: {
-        plugins: [
-          prefixSelector({
-            prefix: editorRootSelector,
-            transform: scopeEditorSelector,
-          }),
-        ],
-      },
-    },
     resolve: {
       alias: {
         '@i-prikot/editor-schema': fileURLToPath(
@@ -116,10 +79,12 @@ export default defineConfig(({ mode }) => {
         entry: {
           index: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
           'icons/index': fileURLToPath(new URL('./src/icons/index.ts', import.meta.url)),
+          styles: fileURLToPath(new URL('./src/styles-entry.ts', import.meta.url)),
+          'light-theme': fileURLToPath(new URL('./src/light-theme-entry.ts', import.meta.url)),
+          'dark-theme': fileURLToPath(new URL('./src/dark-theme-entry.ts', import.meta.url)),
         },
         formats: ['es'],
         fileName: 'index',
-        cssFileName: 'index',
       },
       rollupOptions: {
         external: isExternalDependency,

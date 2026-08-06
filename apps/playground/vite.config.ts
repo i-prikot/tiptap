@@ -3,13 +3,8 @@ import { join } from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import prefixSelector from 'postcss-prefix-selector'
 import { visualizer } from 'rollup-plugin-visualizer'
 
-const editorRootSelector = '.tinyfy-editor'
-const rootSelectorPattern = /^(?::root|html|body)(?=$|[\s>+~.#[:])/
-const editorCssPathPattern =
-  /(?:packages[/\\]editor[/\\]src[/\\]styles(?:[/\\].*)?\.css|node_modules[/\\]katex[/\\]dist[/\\]katex\.min\.css)(?:\?.*)?$/
 const bundleAnalysisDirectory = fileURLToPath(new URL('./.bundle-analysis', import.meta.url))
 const bundleAnalysisReportPaths = {
   treemap: join(bundleAnalysisDirectory, 'treemap.html'),
@@ -42,7 +37,7 @@ function prepareBundleAnalysisOutput() {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     logBundleAnalysis('ERROR', `Unable to prepare reports: ${message}`)
-    throw new Error(`Unable to prepare bundle analysis reports: ${message}`)
+    throw new Error(`Unable to prepare bundle analysis reports: ${message}`, { cause: error })
   }
 }
 
@@ -96,29 +91,6 @@ function getVendorChunkName(moduleId: string): VendorChunkName | undefined {
   }
 }
 
-function scopeEditorSelector(prefix: string, selector: string) {
-  const trimmedSelector = selector.trim()
-
-  if (
-    trimmedSelector === prefix ||
-    trimmedSelector.startsWith(`${prefix} `) ||
-    trimmedSelector.startsWith(`${prefix}:`) ||
-    trimmedSelector.startsWith(`${prefix}.`) ||
-    trimmedSelector.startsWith(`${prefix}[`) ||
-    trimmedSelector.startsWith(`${prefix}>`) ||
-    trimmedSelector.startsWith(`${prefix}+`) ||
-    trimmedSelector.startsWith(`${prefix}~`)
-  ) {
-    return selector
-  }
-
-  if (rootSelectorPattern.test(trimmedSelector)) {
-    return trimmedSelector.replace(rootSelectorPattern, prefix)
-  }
-
-  return `${prefix} ${trimmedSelector}`
-}
-
 export default defineConfig(({ mode }) => {
   const isBundleAnalysis = mode === 'analyze'
 
@@ -146,23 +118,24 @@ export default defineConfig(({ mode }) => {
           ]
         : []),
     ],
-    css: {
-      postcss: {
-        plugins: [
-          prefixSelector({
-            prefix: editorRootSelector,
-            includeFiles: [editorCssPathPattern],
-            transform: scopeEditorSelector,
-          }),
-        ],
-      },
-    },
     resolve: {
       alias: [
         {
           find: '@i-prikot/editor/styles.css',
           replacement: fileURLToPath(
             new URL('../../packages/editor/src/styles.css', import.meta.url),
+          ),
+        },
+        {
+          find: '@i-prikot/editor/light-theme.css',
+          replacement: fileURLToPath(
+            new URL('../../packages/editor/src/light-theme.css', import.meta.url),
+          ),
+        },
+        {
+          find: '@i-prikot/editor/dark-theme.css',
+          replacement: fileURLToPath(
+            new URL('../../packages/editor/src/dark-theme.css', import.meta.url),
           ),
         },
         {

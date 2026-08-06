@@ -15,8 +15,10 @@ const expectedPackages = Object.freeze([
 ])
 const editorExportContract = Object.freeze({
   '.': Object.freeze({ types: './dist/types/index.d.ts', import: './dist/index.js' }),
-  './style.css': './dist/index.css',
-  './styles.css': './dist/index.css',
+  './style.css': './dist/styles.css',
+  './styles.css': './dist/styles.css',
+  './light-theme.css': './dist/light-theme.css',
+  './dark-theme.css': './dist/dark-theme.css',
 })
 
 function log(level, message, context = {}) {

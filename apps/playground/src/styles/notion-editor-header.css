@@ -4,7 +4,7 @@
   --tt-notion-like-editor-header-control-bg: var(--tt-gray-light-a-100);
   --tt-notion-like-editor-header-control-text: var(--tt-gray-light-a-700);
 }
-.tinyfy-editor.dark {
+.tinyfy-editor[data-tiptap-theme='dark'] {
   --tt-notion-like-editor-header-border: var(--tt-gray-dark-a-200);
   --tt-notion-like-editor-header-bg: var(--black);
   --tt-notion-like-editor-header-control-bg: var(--tt-gray-dark-a-100);

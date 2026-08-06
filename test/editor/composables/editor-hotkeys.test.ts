@@ -1,4 +1,6 @@
 import StarterKit from '@tiptap/starter-kit'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { NodeSelection, TextSelection } from '@tiptap/pm/state'
 import { Editor } from '@tiptap/vue-3'
 import { mount } from '@vue/test-utils'
@@ -15,7 +17,7 @@ const wrappers: Array<{ unmount: () => void }> = []
 
 function createHost() {
   const host = document.createElement('div')
-  host.className = 'tinyfy-editor'
+  host.className = 'consumer-editor-instance'
   const editorElement = document.createElement('div')
   editorElement.contentEditable = 'true'
   host.append(editorElement)
@@ -25,7 +27,7 @@ function createHost() {
 
 function createEditor(content = '<p>First block</p>') {
   const host = document.createElement('div')
-  host.className = 'tinyfy-editor'
+  host.className = 'consumer-editor-instance'
   document.body.append(host)
   const editor = new Editor({ element: host, content, extensions: [StarterKit] })
   editors.push(editor)
@@ -82,6 +84,15 @@ afterEach(() => {
 })
 
 describe('useEditorHotkeys', () => {
+  it('does not depend on a consumer-owned editor class', () => {
+    const source = readFileSync(
+      resolve(import.meta.dirname, '../../../packages/editor/src/composables/useEditorHotkeys.ts'),
+      'utf8',
+    )
+
+    expect(source).not.toContain('tinyfy-editor')
+  })
+
   it('dispatches an enabled shortcut once and prevents its browser default', () => {
     const { editorElement } = createHost()
     const execute = vi.fn(() => true)

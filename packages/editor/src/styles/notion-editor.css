@@ -1,6 +1,5 @@
-.tinyfy-editor {
+.notion-like-editor-wrapper {
   --tt-toolbar-height: 44px;
-  --tt-theme-text: var(--tt-gray-light-900);
   color: var(--tt-theme-text);
   background-color: var(--tt-bg-color);
   font-family: Inter, sans-serif;
@@ -9,21 +8,18 @@
   font-weight: 400;
   overscroll-behavior: none;
 }
-.tinyfy-editor.dark {
-  --tt-theme-text: var(--tt-gray-dark-900);
-}
-.tinyfy-editor ::-webkit-scrollbar {
+.notion-like-editor-wrapper ::-webkit-scrollbar {
   width: 0.25rem;
 }
-.tinyfy-editor * {
+.notion-like-editor-wrapper * {
   scrollbar-width: thin;
   scrollbar-color: var(--tt-scrollbar-color) #0000;
 }
-.tinyfy-editor ::-webkit-scrollbar-thumb {
+.notion-like-editor-wrapper ::-webkit-scrollbar-thumb {
   background-color: var(--tt-scrollbar-color);
   border-radius: 9999px;
 }
-.tinyfy-editor ::-webkit-scrollbar-track {
+.notion-like-editor-wrapper ::-webkit-scrollbar-track {
   background: 0 0;
 }
 .tiptap.ProseMirror {

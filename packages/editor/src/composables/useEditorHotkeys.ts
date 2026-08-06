@@ -53,10 +53,7 @@ function matchesShortcut(event: KeyboardEvent, shortcut: EditorHotkeyShortcut): 
 
 function getEditorHost(editor: Editor): HTMLElement {
   const editorElement = editor.view.dom
-  return (
-    editorElement.closest<HTMLElement>('.tinyfy-editor, .notion-like-editor-wrapper') ??
-    editorElement
-  )
+  return editorElement.closest<HTMLElement>('.notion-like-editor-wrapper') ?? editorElement
 }
 
 function isEligibleTarget(event: KeyboardEvent, editor: Editor): boolean {

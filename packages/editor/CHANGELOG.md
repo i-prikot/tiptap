@@ -1,5 +1,12 @@
 # @i-prikot/editor
 
+## 0.3.0
+
+### Minor Changes
+
+- Split editor styles into base, opt-in light-theme, and opt-in dark-theme CSS entry points.
+- Remove the application-owned editor root selector from package styles and runtime code.
+
 ## 0.2.2
 
 ### Patch Changes

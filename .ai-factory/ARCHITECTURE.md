@@ -78,7 +78,8 @@ Tinyfy cabinet не находится в `apps/` и не является ча�
   image NodeView и редакторским жизненным циклом;
 - использует `@i-prikot/editor-schema` для схемы, расширений, типов и общих
   утилит;
-- поставляет editor CSS, ограниченный host-контейнером `.tinyfy-editor`.
+- поставляет базовый editor CSS и opt-in light/dark theme CSS; host выбирает
+  собственный контейнер и применяет тему через `data-tiptap-theme`.
 
 Редакторские детали — провайдеры локализации, пользователя, collaboration, AI,
 оглавления и якорной навигации — остаются внутри этого пакета. Они не меняют
@@ -111,7 +112,7 @@ stylesheet `@i-prikot/editor/styles.css`; его исходники, host header
 | `@i-prikot/editor-schema` | `@i-prikot/editor-schema` | Типы документа, версия, миграции и shared editor extension kit. |
 | `@i-prikot/editor-schema` | `@i-prikot/editor-schema/renderer` | Renderer-safe extension kit. |
 | `@i-prikot/editor` | `@i-prikot/editor` | `NotionEditor`, публичные типы и поддерживаемые UI exports. |
-| `@i-prikot/editor` | `@i-prikot/editor/style.css`, `@i-prikot/editor/styles.css` | Стили интерактивного редактора. |
+| `@i-prikot/editor` | `@i-prikot/editor/style.css`, `@i-prikot/editor/styles.css`, `@i-prikot/editor/light-theme.css`, `@i-prikot/editor/dark-theme.css` | Базовые стили и opt-in темы интерактивного редактора. |
 | `@i-prikot/editor-renderer` | `@i-prikot/editor-renderer` | `renderDocument` для статического HTML. |
 | `@i-prikot/editor-renderer` | `@i-prikot/editor-renderer/styles.css`, `@i-prikot/editor-renderer/katex.css` | Стили опубликованного HTML и формул. |
 
@@ -181,7 +182,7 @@ Tinyfy использует `NotionEditor` как публичный Vue-ком�
 | Идентификация | Передать стабильный `documentId` и абсолютный `baseUrl`. |
 | Содержимое | Передать текущий `content`, обработать обновления и хранить JSON. |
 | Навигация | Управлять `currentAnchor` и сохранять полученный `anchor-change`. |
-| Тема | Разместить редактор под `.tinyfy-editor`; host задаёт классы темы, включая `.tinyfy-editor.dark`, и не ожидает глобальных эффектов на `html` или `body`. |
+| Тема | Выбрать собственный контейнер и установить на нём `data-tiptap-theme="light"` или `data-tiptap-theme="dark"`; библиотека не ожидает глобальных эффектов на `html` или `body`. |
 | Медиа | При необходимости передать `imageUpload` adapter и реализовать upload/download в собственной инфраструктуре. |
 | Локализация | Выбрать `locale` и передать `messages`; пакету не нужен host i18n plugin. |
 | Внешние сервисы | При необходимости сконфигурировать `collaboration` и `ai`, включая получение краткоживущих credentials. |
@@ -226,8 +227,9 @@ Tinyfy не должен загружать интерактивный Vue-па�
   использования в playground.
 - Изменение схемы требует совместимой миграции сохранённых документов и
   сохранения renderer-safe пути.
-- Изменение editor CSS не должно вводить глобальные селекторы: host-boundary
-  `.tinyfy-editor` остаётся изоляцией нескольких экземпляров редактора.
+- Изменение editor CSS не должно вводить глобальные селекторы: host изолирует
+  экземпляры собственным контейнером, а темы выбираются атрибутом
+  `data-tiptap-theme` на этом контейнере.
 - Изменение collaboration, AI, media или i18n не должно добавлять секреты,
   содержимое документа или каталоги сообщений в диагностические события.
 - Документация, примеры и импорты используют только scope `@i-prikot`; private

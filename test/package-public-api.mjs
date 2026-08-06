@@ -7,13 +7,26 @@ import test from 'node:test'
 const repositoryRoot = resolve(import.meta.dirname, '..')
 const consumerVerifierPath = resolve(repositoryRoot, 'scripts/verify-editor-consumer-build.mjs')
 
-test('editor CSS aliases resolve to the Vite library stylesheet', () => {
+test('editor CSS entry points resolve to the independent Vite assets', () => {
   const manifest = JSON.parse(
     readFileSync(resolve(repositoryRoot, 'packages/editor/package.json'), 'utf8'),
   )
 
-  assert.equal(manifest.exports['./style.css'], './dist/index.css')
-  assert.equal(manifest.exports['./styles.css'], './dist/index.css')
+  assert.equal(manifest.exports['./style.css'], './dist/styles.css')
+  assert.equal(manifest.exports['./styles.css'], './dist/styles.css')
+  assert.equal(manifest.exports['./light-theme.css'], './dist/light-theme.css')
+  assert.equal(manifest.exports['./dark-theme.css'], './dist/dark-theme.css')
+})
+
+test('clean consumer verifier covers the base stylesheet without a theme', () => {
+  const verifierSource = readFileSync(consumerVerifierPath, 'utf8')
+
+  assert.ok(
+    verifierSource.includes(
+      `name: 'base stylesheet only',\n        imports: ["import '@i-prikot/editor/styles.css'"],`,
+    ),
+    'the clean consumer verifier must build a consumer that imports only styles.css',
+  )
 })
 
 function buildFreshPackageArtifacts() {
@@ -104,7 +117,13 @@ function referencedRuntimePaths(filePath) {
 
 function assertPackedEditorRuntime(archivePath, destination) {
   const packageDirectory = unpackArchive(archivePath, destination)
-  const exportedPaths = ['dist/index.js', 'dist/index.css', 'dist/types/index.d.ts']
+  const exportedPaths = [
+    'dist/index.js',
+    'dist/styles.css',
+    'dist/light-theme.css',
+    'dist/dark-theme.css',
+    'dist/types/index.d.ts',
+  ]
 
   for (const path of exportedPaths) {
     assert.equal(existsSync(resolve(packageDirectory, path)), true, `${path} must be packed`)
@@ -143,14 +162,34 @@ function assertPackedEditorRuntime(archivePath, destination) {
 test('packed editor runtime is complete and builds in the shared clean consumer verifier', () => {
   buildFreshPackageArtifacts()
 
+  for (const sourceFile of listFiles(resolve(repositoryRoot, 'packages/editor/src'))) {
+    if (!/\.(?:css|ts|vue)$/.test(sourceFile)) continue
+    assert.equal(
+      readFileSync(sourceFile, 'utf8').includes('tinyfy-editor'),
+      false,
+      `${sourceFile} must not reference the former consumer editor class`,
+    )
+  }
+
   const schemaFiles = packedFiles('@i-prikot/editor-schema')
   const editorFiles = packedFiles('@i-prikot/editor')
 
   assert(schemaFiles.has('dist/extensions/block-id.js'))
   assert(schemaFiles.has('dist/extensions/block-role.js'))
   assert(editorFiles.has('dist/index.js'))
-  assert(editorFiles.has('dist/index.css'))
+  assert(editorFiles.has('dist/styles.css'))
+  assert(editorFiles.has('dist/light-theme.css'))
+  assert(editorFiles.has('dist/dark-theme.css'))
   assert(editorFiles.has('dist/types/index.d.ts'))
+  for (const cssPath of listFiles(resolve(repositoryRoot, 'packages/editor/dist')).filter((path) =>
+    path.endsWith('.css'),
+  )) {
+    assert.equal(
+      readFileSync(cssPath, 'utf8').includes('tinyfy-editor'),
+      false,
+      `${cssPath} must not contain the former consumer editor class`,
+    )
+  }
   assert.equal(
     [...editorFiles].some((path) => path.endsWith('.tsbuildinfo')),
     false,

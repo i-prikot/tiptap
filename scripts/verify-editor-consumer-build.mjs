@@ -39,6 +39,27 @@ async function run(command, arguments_, cwd, timeout = 120_000) {
   await execFileAsync(command, arguments_, { cwd, timeout })
 }
 
+async function writeConsumerFixture(consumerDirectory) {
+  await mkdir(join(consumerDirectory, 'src'))
+  await writeFile(
+    join(consumerDirectory, 'package.json'),
+    `${JSON.stringify(
+      {
+        name: 'i-prikot-editor-vite-consumer',
+        private: true,
+        type: 'module',
+        scripts: { build: 'vite build' },
+      },
+      null,
+      2,
+    )}\n`,
+  )
+  await writeFile(
+    join(consumerDirectory, 'index.html'),
+    '<!doctype html><html><body><div id="app"></div><script type="module" src="/src/main.ts"></script></body></html>\n',
+  )
+}
+
 async function verifyEditorConsumerBuild(artifactDirectory) {
   const resolvedArtifactDirectory = resolve(artifactDirectory)
   const [editorArchive, schemaArchive] = await Promise.all([
@@ -54,35 +75,7 @@ async function verifyEditorConsumerBuild(artifactDirectory) {
 
   log('info', 'Starting clean Vite consumer build.', { consumerDirectory })
   try {
-    await mkdir(join(consumerDirectory, 'src'))
-    await writeFile(
-      join(consumerDirectory, 'package.json'),
-      `${JSON.stringify(
-        {
-          name: 'i-prikot-editor-vite-consumer',
-          private: true,
-          type: 'module',
-          scripts: { build: 'vite build' },
-        },
-        null,
-        2,
-      )}\n`,
-    )
-    await writeFile(
-      join(consumerDirectory, 'index.html'),
-      '<!doctype html><html><body><div id="app"></div><script type="module" src="/src/main.ts"></script></body></html>\n',
-    )
-    await writeFile(
-      join(consumerDirectory, 'src/main.ts'),
-      [
-        "import { NotionEditor } from '@i-prikot/editor'",
-        "import '@i-prikot/editor/style.css'",
-        "import '@i-prikot/editor/styles.css'",
-        'void NotionEditor',
-        '',
-      ].join('\n'),
-    )
-
+    await writeConsumerFixture(consumerDirectory)
     await run(
       'npm',
       [
@@ -111,7 +104,47 @@ async function verifyEditorConsumerBuild(artifactDirectory) {
       ['--input-type=module', '--eval', "import('@i-prikot/editor')"],
       consumerDirectory,
     )
-    await run('npm', ['run', 'build'], consumerDirectory)
+
+    const styleCases = [
+      {
+        name: 'base stylesheet only',
+        imports: ["import '@i-prikot/editor/styles.css'"],
+      },
+      {
+        name: 'base plus light theme',
+        imports: [
+          "import '@i-prikot/editor/styles.css'",
+          "import '@i-prikot/editor/light-theme.css'",
+        ],
+      },
+      {
+        name: 'base plus dark theme',
+        imports: [
+          "import '@i-prikot/editor/styles.css'",
+          "import '@i-prikot/editor/dark-theme.css'",
+        ],
+      },
+      {
+        name: 'base plus both themes',
+        imports: [
+          "import '@i-prikot/editor/styles.css'",
+          "import '@i-prikot/editor/light-theme.css'",
+          "import '@i-prikot/editor/dark-theme.css'",
+        ],
+      },
+    ]
+
+    for (const styleCase of styleCases) {
+      log('info', 'Building clean Vite consumer style case.', { styleCase: styleCase.name })
+      const consumerEntry = [
+        "import { NotionEditor } from '@i-prikot/editor'",
+        ...styleCase.imports,
+        'void NotionEditor',
+        '',
+      ].join('\n')
+      await writeFile(join(consumerDirectory, 'src/main.ts'), consumerEntry)
+      await run('npm', ['run', 'build'], consumerDirectory)
+    }
   } finally {
     await rm(consumerDirectory, { force: true, recursive: true })
   }

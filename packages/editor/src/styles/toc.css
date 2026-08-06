@@ -11,19 +11,7 @@
 .tiptap-table-of-contents-node {
   --toc-indent: 1.5rem;
   --toc-depth-factor: 1;
-  --tt-toc-node-text-color: var(--tt-gray-light-a-600);
-  --tt-toc-node-text-hover-color: var(--tt-gray-light-a-800);
-  --tt-toc-node-bg-hover-color: var(--tt-gray-light-a-100);
-  --tt-toc-node-underline-color: var(--tt-gray-light-a-300);
-  --tt-toc-node-underline-hover-color: var(--tt-gray-light-a-400);
   margin: 1.5rem 0;
-}
-.tinyfy-editor.dark .tiptap-table-of-contents-node {
-  --tt-toc-node-text-color: var(--tt-gray-dark-a-600);
-  --tt-toc-node-text-hover-color: var(--tt-gray-dark-a-800);
-  --tt-toc-node-bg-hover-color: var(--tt-gray-dark-a-100);
-  --tt-toc-node-underline-color: var(--tt-gray-dark-a-300);
-  --tt-toc-node-underline-hover-color: var(--tt-gray-dark-a-400);
 }
 .tiptap-table-of-contents-node .tiptap-table-of-contents-empty {
   text-align: center;
@@ -86,29 +74,12 @@
   --toc-depth-factor: 1.25;
 }
 .toc-sidebar {
-  --tt-toc-sidebar-line-bg: var(--tt-gray-light-200);
-  --tt-toc-sidebar-line-bg-active: var(--tt-gray-light-900);
-  --tt-toc-sidebar-bg: var(--white);
-  --tt-toc-sidebar-border-color: var(--tt-gray-light-a-100);
-  --tt-toc-sidebar-text-color: var(--tt-gray-light-a-600);
-  --tt-toc-sidebar-text-hover-color: var(--tt-gray-light-a-800);
-  --tt-toc-sidebar-bg-hover-color: var(--tt-gray-light-a-100);
   --tt-toc-sidebar-text-active-color: var(--tt-brand-color-500);
   --toc-indent: 0.75rem;
   --toc-depth-factor: 1;
   --toc-progress-indent: 0.25rem;
   --toc-progress-width-base: 1rem;
   --toc-progress-width-min: 0.25rem;
-}
-.tinyfy-editor.dark .toc-sidebar {
-  --tt-toc-sidebar-line-bg: var(--tt-gray-dark-200);
-  --tt-toc-sidebar-line-bg-active: var(--tt-gray-dark-900);
-  --tt-toc-sidebar-bg: var(--tt-gray-dark-200);
-  --tt-toc-sidebar-border-color: var(--tt-gray-dark-a-100);
-  --tt-toc-sidebar-text-color: var(--tt-gray-dark-a-600);
-  --tt-toc-sidebar-text-hover-color: var(--tt-gray-dark-a-800);
-  --tt-toc-sidebar-bg-hover-color: var(--tt-gray-dark-a-100);
-  --tt-toc-sidebar-text-active-color: var(--tt-brand-color-400);
 }
 .toc-sidebar {
   z-index: 80;

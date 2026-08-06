@@ -1,5 +1,5 @@
 <template>
-  <main class="tinyfy-editor" :class="{ dark: isDarkMode }">
+  <main class="tinyfy-editor" :data-tiptap-theme="isDarkMode ? 'dark' : 'light'">
     <div ref="hostOverlayTarget" data-tiptap-overlay-root=""></div>
     <NotionEditorHeader
       :editor="editor"

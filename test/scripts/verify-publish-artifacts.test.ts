@@ -32,8 +32,10 @@ function createArchive(
           types: './dist/types/index.d.ts',
           exports: {
             '.': { types: './dist/types/index.d.ts', import: './dist/index.js' },
-            './style.css': './dist/index.css',
-            './styles.css': './dist/index.css',
+            './style.css': './dist/styles.css',
+            './styles.css': './dist/styles.css',
+            './light-theme.css': './dist/light-theme.css',
+            './dark-theme.css': './dist/dark-theme.css',
           },
         }
       : {}),
@@ -44,7 +46,9 @@ function createArchive(
   if (packageName === '@i-prikot/editor') {
     mkdirSync(join(packageDirectory, 'dist', 'types'), { recursive: true })
     writeFileSync(join(packageDirectory, 'dist', 'index.js'), 'export {}\n')
-    writeFileSync(join(packageDirectory, 'dist', 'index.css'), '')
+    writeFileSync(join(packageDirectory, 'dist', 'styles.css'), '')
+    writeFileSync(join(packageDirectory, 'dist', 'light-theme.css'), '')
+    writeFileSync(join(packageDirectory, 'dist', 'dark-theme.css'), '')
     writeFileSync(join(packageDirectory, 'dist', 'types', 'index.d.ts'), 'export {}\n')
   }
 
@@ -146,7 +150,7 @@ describe('verify publish artifacts script', () => {
       '@i-prikot/editor-renderer',
     ])
     createArchive(artifactDirectory, 'i-prikot-editor-1.2.3.tgz', '@i-prikot/editor', '1.2.3', {
-      exports: { './style.css': './dist/index.css' },
+      exports: { './style.css': './dist/styles.css' },
     })
 
     const result = runArtifactVerifier(artifactDirectory)

@@ -1,11 +1,3 @@
-.tinyfy-editor {
-  --tt-table-handle-bg-color: var(--tt-gray-light-a-100);
-}
-
-.tinyfy-editor.dark {
-  --tt-table-handle-bg-color: var(--tt-gray-dark-a-100);
-}
-
 .tiptap-table-handle-menu {
   background-color: var(--tt-table-handle-bg-color);
   border-radius: var(--tt-radius-lg);

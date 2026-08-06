@@ -1,26 +1,5 @@
-.tinyfy-editor {
-  --tiptap-ai-prompt-input-content-placeholder: var(--tt-gray-light-a-400);
-  --tiptap-ai-prompt-input-bg-color: var(--white);
+.notion-like-editor-wrapper {
   --tiptap-ai-prompt-input-focused-border-color: var(--tt-brand-color-500);
-  --tiptap-ai-prompt-input-border-color: var(--tt-gray-light-a-200);
-}
-.tinyfy-editor [data-active-state='off'] {
-  --tiptap-ai-prompt-input-text-color: var(--tt-gray-light-a-400);
-}
-.tinyfy-editor [data-active-state='off'].tiptap-ai-prompt-input:hover {
-  --tiptap-ai-prompt-input-border-color: var(--tt-gray-light-a-300);
-}
-.tinyfy-editor.dark {
-  --tiptap-ai-prompt-input-content-placeholder: var(--tt-gray-dark-a-400);
-  --tiptap-ai-prompt-input-bg-color: var(--tt-gray-dark-50);
-  --tiptap-ai-prompt-input-focused-border-color: var(--tt-brand-color-500);
-  --tiptap-ai-prompt-input-border-color: var(--tt-gray-dark-a-200);
-}
-.tinyfy-editor.dark [data-active-state='off'] {
-  --tiptap-ai-prompt-input-text-color: var(--tt-gray-dark-a-400);
-}
-.tinyfy-editor.dark [data-active-state='off'].tiptap-ai-prompt-input:hover {
-  --tiptap-ai-prompt-input-border-color: var(--tt-gray-dark-a-300);
 }
 .tiptap-ai-prompt-input {
   background-color: var(--tiptap-ai-prompt-input-bg-color);
@@ -100,15 +79,8 @@
   padding: 0.375rem 0.5rem;
   display: flex;
 }
-.tinyfy-editor {
+.notion-like-editor-wrapper {
   --tiptap-ai-prompt-focused-border-color: var(--tt-brand-color-500);
-  --tiptap-ai-prompt-border-color: var(--tt-gray-light-a-200);
-  --tiptap-ai-loading-background-color: var(--tt-gray-light-a-200);
-}
-.tinyfy-editor.dark {
-  --tiptap-ai-prompt-focused-border-color: var(--tt-brand-color-500);
-  --tiptap-ai-prompt-border-color: var(--tt-gray-dark-a-200);
-  --tiptap-ai-loading-background-color: var(--tt-gray-dark-a-200);
 }
 .tiptap-ai-menu {
   color: inherit;

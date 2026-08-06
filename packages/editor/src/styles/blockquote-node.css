@@ -1,9 +1,3 @@
-.tiptap.ProseMirror {
-  --blockquote-bg-color: var(--tt-gray-light-900);
-}
-.tinyfy-editor.dark .tiptap.ProseMirror {
-  --blockquote-bg-color: var(--tt-gray-dark-900);
-}
 .tiptap.ProseMirror blockquote {
   margin: 1.5rem 0;
   padding-top: 0.375em;

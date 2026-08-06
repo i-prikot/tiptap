@@ -1,5 +1,11 @@
 # @i-prikot/editor-schema
 
+## 0.3.0
+
+### Minor Changes
+
+- Release with the fixed editor package group.
+
 ## 0.2.2
 
 ### Patch Changes
