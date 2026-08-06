@@ -47,6 +47,7 @@ const isExternalDependency = (id: string) =>
   id === 'yjs'
 export default defineConfig(({ mode }) => {
   const isBundleAnalysis = mode === 'bundle-analysis'
+  const outputDirectory = fileURLToPath(new URL('./dist/', import.meta.url))
   const bundleAnalysisDirectory = fileURLToPath(new URL('./.bundle-analysis/', import.meta.url))
   const treemapReportPath = join(bundleAnalysisDirectory, 'treemap.html')
   const rawDataReportPath = join(bundleAnalysisDirectory, 'raw-data.json')
@@ -108,6 +109,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
+      outDir: outputDirectory,
       cssCodeSplit: true,
       emptyOutDir: false,
       lib: {

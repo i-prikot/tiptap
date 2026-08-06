@@ -13,6 +13,11 @@ const expectedPackages = Object.freeze([
   { name: '@i-prikot/editor', archivePrefix: 'i-prikot-editor-' },
   { name: '@i-prikot/editor-renderer', archivePrefix: 'i-prikot-editor-renderer-' },
 ])
+const editorExportContract = Object.freeze({
+  '.': Object.freeze({ types: './dist/types/index.d.ts', import: './dist/index.js' }),
+  './style.css': './dist/index.css',
+  './styles.css': './dist/index.css',
+})
 
 function log(level, message, context = {}) {
   if (logLevels[level] < currentLevel) {
@@ -111,6 +116,28 @@ function verifyExportTargets(archiveName, manifest, archiveFiles) {
   }
 }
 
+function verifyEditorManifestContract(manifest) {
+  if (manifest.type !== 'module') {
+    throw new Error('Package @i-prikot/editor must declare type: module.')
+  }
+
+  if (JSON.stringify(manifest.files) !== JSON.stringify(['dist'])) {
+    throw new Error('Package @i-prikot/editor must publish only its dist directory.')
+  }
+
+  if (manifest.types !== './dist/types/index.d.ts') {
+    throw new Error(
+      'Package @i-prikot/editor must declare dist/types/index.d.ts as its types entry.',
+    )
+  }
+
+  if (JSON.stringify(manifest.exports) !== JSON.stringify(editorExportContract)) {
+    throw new Error(
+      'Package @i-prikot/editor exports must preserve the root ESM entry and CSS aliases.',
+    )
+  }
+}
+
 async function verifyPublishArtifacts(artifactDirectory, tag) {
   log('info', 'Starting trusted release artifact verification.', { artifactDirectory, tag })
   const version = getExpectedVersion(tag)
@@ -159,6 +186,10 @@ async function verifyPublishArtifacts(artifactDirectory, tag) {
 
     if (manifest.publishConfig?.registry !== registry) {
       throw new Error(`Package ${expectedPackage.name} must publish to ${registry}.`)
+    }
+
+    if (expectedPackage.name === '@i-prikot/editor') {
+      verifyEditorManifestContract(manifest)
     }
 
     verifyExportTargets(archiveName, manifest, archiveFiles)

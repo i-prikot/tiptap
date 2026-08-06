@@ -36,14 +36,14 @@ npm run build --workspace=@i-prikot/editor
 
 ## Publishable Payload
 
-Only `dist/index.js` and `dist/styles.css` are measured below. Declaration
+Only `dist/index.js` and `dist/index.css` are measured below. Declaration
 files and source maps are intentionally excluded.
 
-| Artifact          |     Raw bytes |    Gzip bytes | Brotli bytes |
-| ----------------- | ------------: | ------------: | -----------: |
-| `dist/index.js`   |       436,339 |       100,277 |       79,866 |
-| `dist/styles.css` |     1,596,673 |       962,987 |      828,292 |
-| **Combined**      | **2,033,012** | **1,063,264** |  **908,158** |
+| Artifact         |     Raw bytes |    Gzip bytes | Brotli bytes |
+| ---------------- | ------------: | ------------: | -----------: |
+| `dist/index.js`  |       436,339 |       100,277 |       79,866 |
+| `dist/index.css` |     1,596,673 |       962,987 |      828,292 |
+| **Combined**     | **2,033,012** | **1,063,264** |  **908,158** |
 
 Measurements use Node.js `node:zlib`, matching visualizer compression settings:
 gzip compression level 9, and Brotli text mode at maximum quality with the
@@ -56,7 +56,7 @@ is included in this change.
 ## Visualizer Composition
 
 The raw-data report contains one JavaScript output chunk, `index.js`; Vite
-emits `styles.css` separately as the library CSS asset. The largest bundled
+emits `index.css` separately as the library CSS asset. The largest bundled
 source groups reported by the visualizer are:
 
 | Source group      | Module parts | Raw bytes | Gzip bytes | Brotli bytes |

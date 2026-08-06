@@ -21,19 +21,32 @@ function createArchive(
   temporaryDirectories.push(fixtureRoot)
   const packageDirectory = join(fixtureRoot, 'package')
   mkdirSync(packageDirectory, { recursive: true })
-  writeFileSync(
-    join(packageDirectory, 'package.json'),
-    `${JSON.stringify(
-      {
-        name: packageName,
-        version,
-        publishConfig: { registry: 'https://npm.pkg.github.com' },
-        ...manifestFields,
-      },
-      null,
-      2,
-    )}\n`,
-  )
+  const manifest = {
+    name: packageName,
+    version,
+    publishConfig: { registry: 'https://npm.pkg.github.com' },
+    ...(packageName === '@i-prikot/editor'
+      ? {
+          type: 'module',
+          files: ['dist'],
+          types: './dist/types/index.d.ts',
+          exports: {
+            '.': { types: './dist/types/index.d.ts', import: './dist/index.js' },
+            './style.css': './dist/index.css',
+            './styles.css': './dist/index.css',
+          },
+        }
+      : {}),
+    ...manifestFields,
+  }
+  writeFileSync(join(packageDirectory, 'package.json'), `${JSON.stringify(manifest, null, 2)}\n`)
+
+  if (packageName === '@i-prikot/editor') {
+    mkdirSync(join(packageDirectory, 'dist', 'types'), { recursive: true })
+    writeFileSync(join(packageDirectory, 'dist', 'index.js'), 'export {}\n')
+    writeFileSync(join(packageDirectory, 'dist', 'index.css'), '')
+    writeFileSync(join(packageDirectory, 'dist', 'types', 'index.d.ts'), 'export {}\n')
+  }
 
   execFileSync(
     'tar',
@@ -126,7 +139,7 @@ describe('verify publish artifacts script', () => {
     expect(result.stderr).toContain('expected @i-prikot/editor, received @tinyfy/editor')
   })
 
-  it('rejects an archive when an exported file is not packed', () => {
+  it('rejects editor manifest contract drift', () => {
     const artifactDirectory = createArtifactDirectory([
       '@i-prikot/editor-schema',
       '@i-prikot/editor',
@@ -139,8 +152,28 @@ describe('verify publish artifacts script', () => {
     const result = runArtifactVerifier(artifactDirectory)
 
     expect(result.status).toBe(1)
+    expect(result.stderr).toContain('exports must preserve the root ESM entry and CSS aliases')
+  })
+
+  it('rejects an archive when an exported file is not packed', () => {
+    const artifactDirectory = createArtifactDirectory([
+      '@i-prikot/editor-schema',
+      '@i-prikot/editor',
+      '@i-prikot/editor-renderer',
+    ])
+    createArchive(
+      artifactDirectory,
+      'i-prikot-editor-renderer-1.2.3.tgz',
+      '@i-prikot/editor-renderer',
+      '1.2.3',
+      { exports: { './styles.css': './styles.css' } },
+    )
+
+    const result = runArtifactVerifier(artifactDirectory)
+
+    expect(result.status).toBe(1)
     expect(result.stderr).toContain(
-      'Package @i-prikot/editor export target ./dist/index.css is missing',
+      'Package @i-prikot/editor-renderer export target ./styles.css is missing',
     )
   })
 })

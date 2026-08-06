@@ -1,6 +1,5 @@
 import { execFile } from 'node:child_process'
 import { mkdir, mkdtemp, readdir, rm, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { promisify } from 'node:util'
 
@@ -17,31 +16,41 @@ function log(level, message, context = {}) {
   writer(`[${level.toUpperCase()}] ${message}${serializedContext}`)
 }
 
-async function findArchive(artifactDirectory, archivePrefix) {
+async function findArchive(artifactDirectory, archivePrefix, excludedArchivePrefixes = []) {
+  log('debug', 'Discovering package archive.', { archivePrefix, excludedArchivePrefixes })
   const archiveNames = await readdir(artifactDirectory)
   const archiveName = archiveNames.find(
-    (candidate) => candidate.startsWith(archivePrefix) && candidate.endsWith('.tgz'),
+    (candidate) =>
+      candidate.startsWith(archivePrefix) &&
+      candidate.endsWith('.tgz') &&
+      !excludedArchivePrefixes.some((excludedPrefix) => candidate.startsWith(excludedPrefix)),
   )
 
   if (!archiveName) {
     throw new Error(`Unable to find ${archivePrefix}*.tgz in ${artifactDirectory}.`)
   }
 
+  log('debug', 'Selected package archive.', { archivePrefix, archiveName })
   return resolve(artifactDirectory, archiveName)
 }
 
-async function run(command, arguments_, cwd) {
+async function run(command, arguments_, cwd, timeout = 120_000) {
   log('debug', 'Running consumer verification command.', { command, arguments: arguments_ })
-  await execFileAsync(command, arguments_, { cwd, timeout: 120_000 })
+  await execFileAsync(command, arguments_, { cwd, timeout })
 }
 
 async function verifyEditorConsumerBuild(artifactDirectory) {
   const resolvedArtifactDirectory = resolve(artifactDirectory)
   const [editorArchive, schemaArchive] = await Promise.all([
-    findArchive(resolvedArtifactDirectory, 'i-prikot-editor-'),
+    findArchive(resolvedArtifactDirectory, 'i-prikot-editor-', [
+      'i-prikot-editor-schema-',
+      'i-prikot-editor-renderer-',
+    ]),
     findArchive(resolvedArtifactDirectory, 'i-prikot-editor-schema-'),
   ])
-  const consumerDirectory = await mkdtemp(join(tmpdir(), 'i-prikot-editor-vite-consumer-'))
+  const consumerDirectory = await mkdtemp(
+    join(resolvedArtifactDirectory, '.i-prikot-editor-vite-consumer-'),
+  )
 
   log('info', 'Starting clean Vite consumer build.', { consumerDirectory })
   try {
@@ -94,6 +103,12 @@ async function verifyEditorConsumerBuild(artifactDirectory) {
         schemaArchive,
         editorArchive,
       ],
+      consumerDirectory,
+      300_000,
+    )
+    await run(
+      process.execPath,
+      ['--input-type=module', '--eval', "import('@i-prikot/editor')"],
       consumerDirectory,
     )
     await run('npm', ['run', 'build'], consumerDirectory)
