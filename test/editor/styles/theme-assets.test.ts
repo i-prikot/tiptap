@@ -34,6 +34,10 @@ function readThemeTokens(styles: string, selector: string) {
   return tokens
 }
 
+function normalizeWhitespace(value: string) {
+  return value.replace(/\s+/g, ' ').trim()
+}
+
 describe('editor CSS theme entry points', () => {
   it('keeps base styles independent from a consumer root and publishes opt-in themes', () => {
     const manifest = JSON.parse(read(resolve(editorRoot, 'package.json')))
@@ -87,10 +91,14 @@ describe('editor CSS theme entry points', () => {
     expect(lightTokens.size).toBeGreaterThan(0)
     expect([...lightTokens.keys()].sort()).toEqual([...darkTokens.keys()].sort())
 
+    const normalizedReadme = normalizeWhitespace(readme)
+
     for (const [name, lightValue] of lightTokens) {
       const darkValue = darkTokens.get(name)
-      expect(readme, name).toContain(`| \`${name}\` |`)
-      expect(readme, name).toContain(`| \`${lightValue}\` | \`${darkValue}\` |`)
+      expect(normalizedReadme, name).toContain(`| \`${name}\` |`)
+      expect(normalizedReadme, name).toContain(
+        normalizeWhitespace(`| \`${lightValue}\` | \`${darkValue}\` |`),
+      )
     }
   })
 
