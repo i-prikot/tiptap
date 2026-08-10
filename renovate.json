@@ -9,6 +9,7 @@
   "prConcurrentLimit": 5,
   "prHourlyLimit": 2,
   "automerge": false,
+  "rebaseWhen": "behind-base-branch",
   "packageRules": [
     {
       "description": "Keep every direct Tiptap dependency on one reviewed release line.",
