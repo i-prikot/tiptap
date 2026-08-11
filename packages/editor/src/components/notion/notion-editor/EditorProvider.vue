@@ -29,7 +29,7 @@ import { computed, onBeforeUnmount, shallowRef, watch } from 'vue'
 import { Editor as TiptapEditor } from '@tiptap/vue-3'
 import type { JSONContent } from '@tiptap/core'
 import type { BlockRoleOption } from '@i-prikot/editor-schema'
-import type { TiptapCollabProvider } from '@hocuspocus/provider'
+import type { HocuspocusProvider } from '@hocuspocus/provider'
 import type * as Y from 'yjs'
 import { createExtensionKit } from '../../../extensions/extension-kit'
 import {
@@ -57,7 +57,7 @@ const logger = createLogger('EditorProvider')
 
 const props = withDefaults(
   defineProps<{
-    provider?: TiptapCollabProvider | null
+    provider?: HocuspocusProvider | null
     documentId: string
     ydoc: Y.Doc
     content?: JSONContent

@@ -18,7 +18,8 @@ The current editor includes rich text blocks, headings, lists, task lists, table
 
 Prerequisites:
 
-- Node.js compatible with Vite 6 and TypeScript 5
+- Node.js `^20.19.0 || >=22.12.0` for Vite 8; CI uses Node 22
+- TypeScript 6 development toolchain
 - npm, using the checked-in `package-lock.json`
 
 Install dependencies:
@@ -63,7 +64,7 @@ The editor works without collaboration or AI configuration. In that local mode, 
 
 When collaboration is configured, `App.vue` passes a room id to `NotionEditor` based on the current URL path. The collaboration document name is built from `VITE_TIPTAP_COLLAB_DOC_PREFIX` plus that room id. Add `?noCollab=1` to the URL to force local mode even when collaboration variables are present.
 
-If collaboration or AI is configured but token retrieval fails, the corresponding provider sets a setup error that is surfaced by the existing editor loading/error UI.
+If collaboration or AI is configured but token retrieval fails, the corresponding provider releases the editor to local mode.
 
 ## Environment Variables
 

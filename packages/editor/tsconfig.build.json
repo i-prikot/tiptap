@@ -5,7 +5,7 @@
     "outDir": "./dist/types",
     "tsBuildInfoFile": "./tsconfig.build.tsbuildinfo",
     "paths": {
-      "@i-prikot/editor-schema": ["packages/schema/dist/index.d.ts"]
+      "@i-prikot/editor-schema": ["../schema/dist/index.d.ts"]
     }
   },
   "references": [

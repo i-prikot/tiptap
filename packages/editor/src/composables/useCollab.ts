@@ -8,7 +8,7 @@ import { createLogger } from '@i-prikot/editor-schema'
 import { onBeforeUnmount, provide, inject, shallowRef } from 'vue'
 import type { InjectionKey, ShallowRef } from 'vue'
 import * as Y from 'yjs'
-import { TiptapCollabProvider } from '@hocuspocus/provider'
+import { HocuspocusProvider } from '@hocuspocus/provider'
 import type { CollaborationOptions } from '../components/notion'
 
 /** Получает JWT коллаборации с бэкенда (оригинал: POST /api/collaboration). */
@@ -54,39 +54,78 @@ export async function fetchCollabToken(config: CollaborationOptions): Promise<st
 
 export interface CollabContext {
   hasCollab: ShallowRef<boolean>
-  provider: ShallowRef<TiptapCollabProvider | null>
+  provider: ShallowRef<HocuspocusProvider | null>
   ydoc: Y.Doc
 }
 
 const logger = createLogger('useCollab')
 
 const collabInjectionKey: InjectionKey<CollabContext> = Symbol('collab')
+const validAppId = /^[a-z0-9][a-z0-9-]*$/i
+
+function getCollabUrl(appId: unknown): string | null {
+  if (typeof appId !== 'string' || !validAppId.test(appId)) return null
+  return `wss://${appId}.collab.tiptap.cloud`
+}
 
 export function provideCollab(documentId: string, config?: CollaborationOptions): CollabContext {
-  const collabConfigured = !!config?.appId
+  const collabUrl = getCollabUrl(config?.appId)
+  const collabConfigured = collabUrl !== null
   const hasCollab = shallowRef(collabConfigured)
-  const provider = shallowRef<TiptapCollabProvider | null>(null)
+  const provider = shallowRef<HocuspocusProvider | null>(null)
   const ydoc = new Y.Doc()
+  let isDisposed = false
 
-  if (config && hasCollab.value) {
-    fetchCollabToken(config).then((token) => {
-      if (!token) {
-        hasCollab.value = false
-        return
-      }
-      const documentNamePrefix = config.documentNamePrefix || ''
-      const documentName = `${documentNamePrefix}${documentId}`
-      provider.value = new TiptapCollabProvider({
-        name: documentName,
-        appId: config.appId,
-        token,
-        document: ydoc,
+  if (config && collabUrl) {
+    logger.debug('provider setup', { service: 'collaboration', result: 'started' })
+    void fetchCollabToken(config)
+      .then((token) => {
+        if (isDisposed) {
+          hasCollab.value = false
+          logger.debug('provider setup', { service: 'collaboration', result: 'skipped-after-dispose' })
+          return
+        }
+        if (!token) {
+          hasCollab.value = false
+          return
+        }
+
+        try {
+          const documentNamePrefix = config.documentNamePrefix || ''
+          provider.value = new HocuspocusProvider({
+            name: `${documentNamePrefix}${documentId}`,
+            url: collabUrl,
+            token,
+            document: ydoc,
+          })
+          logger.debug('provider setup', { service: 'collaboration', result: 'completed' })
+        } catch (error) {
+          hasCollab.value = false
+          logger.error('provider setup failed', {
+            service: 'collaboration',
+            stage: 'provider-construction',
+            failureType: error instanceof Error ? error.name : 'unknown',
+          })
+        }
       })
-    })
+      .catch((error: unknown) => {
+        // No provider exists on this path, and changing this detached ref is safe.
+        hasCollab.value = false
+        logger.error('provider setup failed', {
+          service: 'collaboration',
+          stage: 'token-retrieval',
+          failureType: error instanceof Error ? error.name : 'unknown',
+        })
+      })
   }
 
   onBeforeUnmount(() => {
-    provider.value?.destroy()
+    isDisposed = true
+    const activeProvider = provider.value
+    provider.value = null
+    if (!activeProvider) return
+    activeProvider.destroy()
+    logger.debug('provider setup', { service: 'collaboration', result: 'destroyed' })
   })
 
   const context: CollabContext = { hasCollab, provider, ydoc }

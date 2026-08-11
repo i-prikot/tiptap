@@ -1,6 +1,4 @@
 import StarterKit from '@tiptap/starter-kit'
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import { NodeSelection, TextSelection } from '@tiptap/pm/state'
 import { Editor } from '@tiptap/vue-3'
 import { mount } from '@vue/test-utils'
@@ -11,6 +9,7 @@ import {
   useEditorHotkeys,
 } from '../../../packages/editor/src/composables/useEditorHotkeys'
 import { useDeleteNode } from '../../../packages/editor/src/composables/useDeleteNode'
+import editorHotkeysSource from '../../../packages/editor/src/composables/useEditorHotkeys.ts?raw'
 
 const editors: Editor[] = []
 const wrappers: Array<{ unmount: () => void }> = []
@@ -85,12 +84,7 @@ afterEach(() => {
 
 describe('useEditorHotkeys', () => {
   it('does not depend on a consumer-owned editor class', () => {
-    const source = readFileSync(
-      resolve(import.meta.dirname, '../../../packages/editor/src/composables/useEditorHotkeys.ts'),
-      'utf8',
-    )
-
-    expect(source).not.toContain('tinyfy-editor')
+    expect(editorHotkeysSource).not.toContain('tinyfy-editor')
   })
 
   it('dispatches an enabled shortcut once and prevents its browser default', () => {

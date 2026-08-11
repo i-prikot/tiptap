@@ -1,4 +1,5 @@
 import { statSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { dirname, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitest/config'
@@ -7,6 +8,10 @@ import vue from '@vitejs/plugin-vue'
 const projectRoot = fileURLToPath(new URL('.', import.meta.url))
 const legacySourceRoot = resolve(projectRoot, 'src')
 const sourceExtensions = ['.ts', '.tsx', '.vue', '.js', '.mjs', '.cjs']
+const editorRequire = createRequire(resolve(projectRoot, 'packages/editor/package.json'))
+// Keep Vitest's module graph aligned with the editor workspace so vi.doMock()
+// intercepts the provider import regardless of npm's hoisting layout.
+const hocuspocusProviderEntry = editorRequire.resolve('@hocuspocus/provider')
 
 function resolveExistingSourceModule(sourcePath: string) {
   const candidatePaths = [
@@ -91,6 +96,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      '@hocuspocus/provider': hocuspocusProviderEntry,
       '@i-prikot/editor-schema/renderer': resolve(projectRoot, 'packages/schema/src/renderer.ts'),
       '@i-prikot/editor-schema': resolve(projectRoot, 'packages/schema/src/index.ts'),
       '@i-prikot/editor': resolve(projectRoot, 'packages/editor/src/index.ts'),
@@ -98,13 +104,19 @@ export default defineConfig({
   },
   test: {
     environment: 'happy-dom',
+    // DOM tests need a fresh module graph, but process forks can stall here.
     pool: 'threads',
-    maxWorkers: 4,
+    maxWorkers: 2,
     testTimeout: 10_000,
     isolate: true,
     setupFiles: ['./test/setup.ts'],
     exclude: ['e2e/**', '**/node_modules/**', '**/.git/**'],
     passWithNoTests: true,
+    server: {
+      deps: {
+        inline: ['@hocuspocus/provider', '@i-prikot/editor-schema'],
+      },
+    },
     coverage: {
       provider: 'v8',
       reportsDirectory: 'coverage',

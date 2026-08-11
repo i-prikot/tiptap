@@ -2,7 +2,7 @@ import { CURRENT_SCHEMA_VERSION } from '@i-prikot/editor-schema'
 import type { JSONContent } from '@tiptap/core'
 import type { Transaction } from '@tiptap/pm/state'
 import type { Editor as TiptapEditor } from '@tiptap/vue-3'
-import type { TiptapCollabProvider } from '@hocuspocus/provider'
+import type { HocuspocusProvider } from '@hocuspocus/provider'
 import { EDITOR_UPDATE_DEBOUNCE_MS } from './public-api'
 import type { EditorFeatureFlags, NotionEditorUpdatePayload } from './public-api'
 import type { createDevelopmentDiagnostics } from '../../../utils/development-diagnostics'
@@ -12,7 +12,7 @@ interface EditorLifecycleOptions {
   diagnostics: ReturnType<typeof createDevelopmentDiagnostics>
   getContent: () => JSONContent | undefined
   getFeatures: () => EditorFeatureFlags
-  getProvider: () => TiptapCollabProvider | null | undefined
+  getProvider: () => HocuspocusProvider | null | undefined
   onReady: (editor: TiptapEditor) => void
   onUpdate: (payload: NotionEditorUpdatePayload) => void
   onContentSyncError: () => void
@@ -29,7 +29,7 @@ interface EditorLifecycleState {
   lifecycleUpdateListener: (() => void) | undefined
   pendingUpdateCancellationListener: ((payload: { transaction: Transaction }) => void) | undefined
   collabSyncedListener: (() => void) | undefined
-  collabSyncedProvider: TiptapCollabProvider | undefined
+  collabSyncedProvider: HocuspocusProvider | undefined
 }
 
 function hasEqualContent(left: JSONContent, right: JSONContent) {

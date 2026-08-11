@@ -3,7 +3,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'no
 import { dirname, extname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { rollup, type Plugin } from 'rollup'
-import { transformWithEsbuild } from 'vite'
+import { transformWithOxc } from 'vite'
 import { afterEach, describe, expect, it } from 'vitest'
 
 const projectRoot = resolve(fileURLToPath(new URL('../../..', import.meta.url)))
@@ -30,10 +30,7 @@ function transpileIconSource(): Plugin {
         return null
       }
 
-      return transformWithEsbuild(readFileSync(id, 'utf8'), id, {
-        loader: 'ts',
-        target: 'esnext',
-      })
+      return transformWithOxc(readFileSync(id, 'utf8'), id)
     },
   }
 }

@@ -1,6 +1,6 @@
 import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
-import { mount } from '@vue/test-utils'
+import { mount, type VueWrapper } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, shallowRef } from 'vue'
 import { provideAnchorNavigation } from '../../../src/editor/composables/useAnchorNavigation'
@@ -82,6 +82,7 @@ vi.mock('../../../src/editor/utils/selection-utils', () => ({
 import MobileToolbar from '../../../src/editor/components/ui/mobile-toolbar/MobileToolbar.vue'
 
 const editors: Editor[] = []
+const wrappers: VueWrapper[] = []
 
 const passThrough = { template: '<div><slot /><slot name="trigger" /></div>' }
 const clickable = (testId: string, event = 'click') => ({
@@ -98,7 +99,7 @@ function mountToolbar() {
     },
   })
 
-  return mount(Harness, {
+  const wrapper = mount(Harness, {
     shallow: false,
     attachTo: document.body,
     global: {
@@ -131,6 +132,8 @@ function mountToolbar() {
       },
     },
   })
+  wrappers.push(wrapper)
+  return wrapper
 }
 
 beforeEach(() => {
@@ -150,6 +153,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  while (wrappers.length) wrappers.pop()?.unmount()
   while (editors.length) editors.pop()?.destroy()
   document.body.replaceChildren()
 })
