@@ -1,5 +1,14 @@
 # @i-prikot/editor
 
+## 0.4.1
+
+### Patch Changes
+
+- b75cf04: Upgrade the collaboration provider and development toolchain dependencies. The
+  editor now uses Hocuspocus Provider v4 internally without changing its public
+  collaboration configuration.
+  - @i-prikot/editor-schema@0.4.1
+
 ## 0.4.0
 
 ### Minor Changes
