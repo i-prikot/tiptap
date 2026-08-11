@@ -1,5 +1,11 @@
 # @i-prikot/editor-renderer
 
+## 0.4.1
+
+### Patch Changes
+
+- @i-prikot/editor-schema@0.4.1
+
 ## 0.4.0
 
 ### Minor Changes
