@@ -18,6 +18,14 @@ test('editor CSS entry points resolve to the independent Vite assets', () => {
   assert.equal(manifest.exports['./dark-theme.css'], './dist/dark-theme.css')
 })
 
+test('editor declares the retry runtime required by Hocuspocus provider', () => {
+  const manifest = JSON.parse(
+    readFileSync(resolve(repositoryRoot, 'packages/editor/package.json'), 'utf8'),
+  )
+
+  assert.equal(manifest.dependencies['@lifeomic/attempt'], '^3.1.0')
+})
+
 test('clean consumer verifier covers the base stylesheet without a theme', () => {
   const verifierSource = readFileSync(consumerVerifierPath, 'utf8')
 

@@ -7,6 +7,103 @@ const repositoryRoot = resolve(import.meta.dirname, '../../..')
 const editorRoot = resolve(repositoryRoot, 'packages/editor')
 const sourceRoot = resolve(editorRoot, 'src')
 
+const themeAssets = [
+  { name: 'light', path: resolve(sourceRoot, 'light-theme.css') },
+  { name: 'dark', path: resolve(sourceRoot, 'dark-theme.css') },
+] as const
+
+const componentOwnedProperties = new Set([
+  'appearance',
+  '-webkit-appearance',
+  'bottom',
+  'box-sizing',
+  'cursor',
+  'display',
+  'font',
+  'font-family',
+  'font-feature-settings',
+  'font-size',
+  'font-variation-settings',
+  'font-weight',
+  'height',
+  'letter-spacing',
+  'line-height',
+  'list-style',
+  'margin',
+  'max-height',
+  'max-width',
+  'opacity',
+  'outline',
+  'outline-offset',
+  'overflow-wrap',
+  'padding',
+  'position',
+  'resize',
+  'tab-size',
+  'text-indent',
+  'text-rendering',
+  'text-transform',
+  'top',
+  'vertical-align',
+  'width',
+  '-moz-osx-font-smoothing',
+  '-moz-text-size-adjust',
+  '-webkit-font-smoothing',
+  '-webkit-tap-highlight-color',
+  '-webkit-text-size-adjust',
+  'text-size-adjust',
+])
+
+const componentOwnedPropertyPrefixes = ['background', 'border', 'transition']
+
+const nativeElements = new Set([
+  'a',
+  'abbr',
+  'audio',
+  'b',
+  'blockquote',
+  'button',
+  'canvas',
+  'code',
+  'dd',
+  'dialog',
+  'dl',
+  'embed',
+  'fieldset',
+  'figure',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'hr',
+  'iframe',
+  'img',
+  'input',
+  'kbd',
+  'legend',
+  'menu',
+  'object',
+  'ol',
+  'optgroup',
+  'p',
+  'pre',
+  'progress',
+  'samp',
+  'select',
+  'small',
+  'strong',
+  'sub',
+  'summary',
+  'sup',
+  'svg',
+  'table',
+  'textarea',
+  'ul',
+  'video',
+])
+
 function read(path: string) {
   return readFileSync(path, 'utf8')
 }
@@ -39,7 +136,61 @@ function normalizeWhitespace(value: string) {
   return value.replace(/\s+/g, ' ').trim()
 }
 
+function isComponentOwnedProperty(property: string) {
+  return (
+    componentOwnedProperties.has(property) ||
+    componentOwnedPropertyPrefixes.some(
+      (prefix) => property === prefix || property.startsWith(`${prefix}-`),
+    )
+  )
+}
+
+function isBroadThemeSelector(selector: string, themeRoot: string) {
+  if (selector === themeRoot) return true
+  if (!selector.startsWith(themeRoot)) return false
+
+  const descendant = selector.slice(themeRoot.length).trim()
+  if (/^(?:\*|::?|\[)/.test(descendant)) return true
+
+  const nativeElement = descendant.match(/^([a-z][\w-]*)/i)?.[1].toLowerCase()
+  return nativeElement !== undefined && nativeElements.has(nativeElement)
+}
+
+function findThemeBoundaryViolations(theme: (typeof themeAssets)[number]) {
+  const styles = read(theme.path)
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/@import\s+['"][^'"]+['"];?/g, '')
+  const themeRoot = `[data-tiptap-theme='${theme.name}']`
+  const violations: string[] = []
+
+  for (const [, selectorList, declarationBlock] of styles.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const selectors = selectorList
+      .split(',')
+      .map((selector) => selector.trim())
+      .filter((selector) => isBroadThemeSelector(selector, themeRoot))
+
+    for (const [, property] of declarationBlock.matchAll(/^\s*([\w-]+)\s*:/gm)) {
+      const normalizedProperty = property.toLowerCase()
+      const conflictsWithComponentStyles = isComponentOwnedProperty(normalizedProperty)
+      const isNonTokenThemeRootDeclaration =
+        selectors.includes(themeRoot) && !normalizedProperty.startsWith('--')
+
+      if (!conflictsWithComponentStyles && !isNonTokenThemeRootDeclaration) continue
+
+      for (const selector of selectors) {
+        violations.push(`${theme.name}: ${selector} sets ${normalizedProperty}`)
+      }
+    }
+  }
+
+  return violations
+}
+
 describe('editor CSS theme entry points', () => {
+  it.each(themeAssets)('$name theme does not own component or document layout', (theme) => {
+    expect(findThemeBoundaryViolations(theme)).toEqual([])
+  })
+
   it('keeps base styles independent from a consumer root and publishes opt-in themes', () => {
     const manifest = JSON.parse(read(resolve(editorRoot, 'package.json')))
     const baseStyles = read(resolve(sourceRoot, 'styles.css'))
