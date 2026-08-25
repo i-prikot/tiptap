@@ -225,28 +225,28 @@ The schema contract must be:
 
 ### Phase 4: Public Exports
 
-- [ ] **Task 4.1: Create schema-contract index**
+- [x] **Task 4.1: Create schema-contract index**
 
   Create `/home/www/tiptap/packages/schema/src/schema-contract/index.ts` that re-exports the complete schema contract API.
 
   Export:
-  - [ ] `buildSchemaContract` function
-  - [ ] `getSchemaContract()` - pre-built contract for convenience
-  - [ ] All types from types.ts
-  - [ ] All validation rules from rules.ts
-  - [ ] All fixtures from fixtures/index.ts
-  - [ ] `CURRENT_SCHEMA_VERSION` constant
+  - [x] `buildSchemaContract` function
+  - [x] `getSchemaContract()` - pre-built contract for convenience
+  - [x] All types from types.ts
+  - [x] All validation rules from rules.ts
+  - [x] All fixtures from fixtures/index.ts
+  - [x] `CURRENT_SCHEMA_VERSION` constant
 
   **Logging:**
-  - [ ] DEBUG: Log when schema contract module is imported
+  - [x] DEBUG: Log when schema contract module is imported
 
   **Files to create:**
-  - [ ] `/home/www/tiptap/packages/schema/src/schema-contract/index.ts`
+  - [x] `/home/www/tiptap/packages/schema/src/schema-contract/index.ts`
 
   **Dependencies:**
-  - [ ] Blocked by Tasks 1.1, 1.2, 1.3, and 3.3
+  - [x] Blocked by Tasks 1.1, 1.2, 1.3, and 3.3
 
-- [ ] **Task 4.2: Add public export to package entry point**
+- [x] **Task 4.2: Add public export to package entry point**
 
   Modify `/home/www/tiptap/packages/schema/src/index.ts` to export the schema contract from the main package entry.
 
@@ -261,15 +261,15 @@ The schema contract must be:
   ```
 
   **Logging:**
-  - [ ] No additional logging needed (uses module-level exports)
+  - [x] No additional logging needed (uses module-level exports)
 
   **Files to modify:**
-  - [ ] `/home/www/tiptap/packages/schema/src/index.ts`
+  - [x] `/home/www/tiptap/packages/schema/src/index.ts`
 
   **Dependencies:**
-  - [ ] Blocked by Task 4.1
+  - [x] Blocked by Task 4.1
 
-- [ ] **Task 4.3: Update package.json exports**
+- [x] **Task 4.3: Update package.json exports**
 
   Verify that `/home/www/tiptap/packages/schema/package.json` exports configuration properly includes the new schema contract in the built package.
 
@@ -284,13 +284,13 @@ The schema contract must be:
   ```
 
   **Logging:**
-  - [ ] No logging (package.json modification)
+  - [x] No logging (package.json modification)
 
   **Files to modify:**
-  - [ ] `/home/www/tiptap/packages/schema/package.json` (only if dedicated export path is needed)
+  - [x] `/home/www/tiptap/packages/schema/package.json` (only if dedicated export path is needed)
 
   **Dependencies:**
-  - [ ] Blocked by Task 4.2
+  - [x] Blocked by Task 4.2
 
 ### Phase 5: Package Tests
 

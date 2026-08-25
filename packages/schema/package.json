@@ -13,6 +13,10 @@
     "./renderer": {
       "types": "./dist/renderer.d.ts",
       "import": "./dist/renderer.js"
+    },
+    "./schema-contract": {
+      "types": "./dist/schema-contract/index.d.ts",
+      "import": "./dist/schema-contract/index.js"
     }
   },
   "types": "./dist/index.d.ts",

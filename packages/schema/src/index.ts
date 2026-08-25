@@ -25,6 +25,7 @@ export {
   BlockRole,
   BLOCK_ROLE_ATTRIBUTE,
   BLOCK_ROLE_META,
+  CANONICAL_BLOCK_ROLES,
   isValidBlockRole,
   normalizeBlockRole,
   setBlockRoleAtPos,
@@ -36,6 +37,7 @@ export {
   type SetBlockRoleResult,
   type SetBlockRoleSuccess,
 } from './extensions/block-role.js'
+export { createRendererExtensionKit } from './extensions/renderer-extension-kit.js'
 export { HorizontalRule } from './extensions/horizontal-rule.js'
 export { Indent } from './extensions/indent.js'
 export { ListNormalization } from './extensions/list-normalization.js'
@@ -74,3 +76,4 @@ export * from './utils/table-utils.js'
 export { throttle, type ThrottledFunction } from './utils/throttle.js'
 export * from './utils/tiptap-utils.js'
 export { clamp } from './utils/tiptap-utils.js'
+export * from './schema-contract/index.js'
