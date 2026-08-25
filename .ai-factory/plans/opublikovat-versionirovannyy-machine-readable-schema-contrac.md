@@ -149,79 +149,79 @@ The schema contract must be:
 
 ### Phase 3: Fixtures for Validation
 
-- [ ] **Task 3.1: Create valid document fixtures**
+- [x] **Task 3.1: Create valid document fixtures**
 
   Create `/home/www/tiptap/packages/schema/src/schema-contract/fixtures/valid-documents.ts` with comprehensive valid document examples.
 
   Include fixtures for:
-  - [ ] Common blocks: paragraph, heading (levels 1-6), blockquote, codeBlock, horizontalRule
-  - [ ] Lists: bulletList, orderedList, taskList (with nested items)
-  - [ ] Table with resizable columns, merged cells, different alignments
-  - [ ] Images: with src, lqip, width, height, caption, alignment
-  - [ ] Marks: bold, italic, underline, strike, code, link, textStyle (color), highlight, subscript, superscript
-  - [ ] Mathematics: inlineMath and blockMath with latex
-  - [ ] TOC: tocNode with various configurations
-  - [ ] Block attributes: valid id on top-level blocks, valid blockRole (pricing, cta, cases)
-  - [ ] Nested structures: lists in blockquotes, images in tables
+  - [x] Common blocks: paragraph, heading (levels 1-6), blockquote, codeBlock, horizontalRule
+  - [x] Lists: bulletList, orderedList, taskList (with nested items)
+  - [x] Table with resizable columns, merged cells, different alignments
+  - [x] Images: with src, lqip, width, height, caption, alignment
+  - [x] Marks: bold, italic, underline, strike, code, link, textStyle (color), highlight, subscript, superscript
+  - [x] Mathematics: inlineMath and blockMath with latex
+  - [x] TOC: tocNode with various configurations
+  - [x] Block attributes: valid id on top-level blocks, valid blockRole (pricing, cta, cases)
+  - [x] Nested structures: lists in blockquotes, images in tables
 
   Each fixture should have:
-  - [ ] `key`: unique identifier
-  - [ ] `description`: what the fixture demonstrates
-  - [ ] `document`: valid JSONContent
+  - [x] `key`: unique identifier
+  - [x] `description`: what the fixture demonstrates
+  - [x] `document`: valid JSONContent
 
   **Logging:**
-  - [ ] DEBUG: Log when fixtures are loaded
+  - [x] DEBUG: Log when fixtures are loaded
 
   **Files to create:**
-  - [ ] `/home/www/tiptap/packages/schema/src/schema-contract/fixtures/valid-documents.ts`
+  - [x] `/home/www/tiptap/packages/schema/src/schema-contract/fixtures/valid-documents.ts`
 
-- [ ] **Task 3.2: Create invalid document fixtures**
+- [x] **Task 3.2: Create invalid document fixtures**
 
   Create `/home/www/tiptap/packages/schema/src/schema-contract/fixtures/invalid-documents.ts` with fixtures that should fail validation.
 
   Include fixtures for:
-  - [ ] Invalid id placement: id on nested paragraph, id on unsupported node types
-  - [ ] Invalid blockRole: blockRole on nested nodes, blockRole with unsupported values, blockRole on unsupported node types
-  - [ ] Unsafe URLs: javascript: scheme in href, data: scheme in src, file: scheme
-  - [ ] Unknown nodes: unsupported node type at top level, unknown nested nodes
-  - [ ] Invalid nesting: inline node where block expected, improper list nesting
-  - [ ] Malformed attributes: wrong type (string instead of number), invalid enum value
-  - [ ] Legacy blockId: document with deprecated blockId attribute
+  - [x] Invalid id placement: id on nested paragraph, id on unsupported node types
+  - [x] Invalid blockRole: blockRole on nested nodes, blockRole with unsupported values, blockRole on unsupported node types
+  - [x] Unsafe URLs: javascript: scheme in href, data: scheme in src, file: scheme
+  - [x] Unknown nodes: unsupported node type at top level, unknown nested nodes
+  - [x] Invalid nesting: inline node where block expected, improper list nesting
+  - [x] Malformed attributes: wrong type (string instead of number), invalid enum value
+  - [x] Legacy blockId: document with deprecated blockId attribute
 
   Each fixture should have:
-  - [ ] `key`: unique identifier
-  - [ ] `description`: what validation should fail
-  - [ ] `document`: invalid JSONContent
-  - [ ] `expectedError`: validation rule that should fail
+  - [x] `key`: unique identifier
+  - [x] `description`: what validation should fail
+  - [x] `document`: invalid JSONContent
+  - [x] `expectedError`: validation rule that should fail
 
   **Logging:**
-  - [ ] DEBUG: Log when invalid fixtures are loaded
+  - [x] DEBUG: Log when invalid fixtures are loaded
 
   **Files to create:**
-  - [ ] `/home/www/tiptap/packages/schema/src/schema-contract/fixtures/invalid-documents.ts`
+  - [x] `/home/www/tiptap/packages/schema/src/schema-contract/fixtures/invalid-documents.ts`
 
   **Dependencies:**
   - [ ] None (can be done in parallel with Task 3.1)
 
-- [ ] **Task 3.3: Create fixtures index and exports**
+- [x] **Task 3.3: Create fixtures index and exports**
 
   Create `/home/www/tiptap/packages/schema/src/schema-contract/fixtures/index.ts` that re-exports all fixtures and provides helper types.
 
   Export:
-  - [ ] `validDocuments` - array of all valid fixtures
-  - [ ] `invalidDocuments` - array of all invalid fixtures
-  - [ ] `ValidFixture` type
-  - [ ] `InvalidFixture` type
-  - [ ] Helper function `getFixtureByKey(key)` to retrieve specific fixtures
+  - [x] `validDocuments` - array of all valid fixtures
+  - [x] `invalidDocuments` - array of all invalid fixtures
+  - [x] `ValidFixture` type
+  - [x] `InvalidFixture` type
+  - [x] Helper function `getFixtureByKey(key)` to retrieve specific fixtures
 
   **Logging:**
-  - [ ] DEBUG: Log fixture counts on load
+  - [x] DEBUG: Log fixture counts on load
 
   **Files to create:**
-  - [ ] `/home/www/tiptap/packages/schema/src/schema-contract/fixtures/index.ts`
+  - [x] `/home/www/tiptap/packages/schema/src/schema-contract/fixtures/index.ts`
 
   **Dependencies:**
-  - [ ] Blocked by Task 3.1 and Task 3.2
+  - [x] Blocked by Task 3.1 and Task 3.2
 
 ### Phase 4: Public Exports
 
