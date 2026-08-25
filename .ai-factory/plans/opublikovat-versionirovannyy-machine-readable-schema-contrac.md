@@ -101,51 +101,51 @@ The schema contract must be:
 
 ### Phase 2: HTML Mapping & Parent-Child Relationships
 
-- [ ] **Task 2.1: Extract HTML mapping specifications**
+- [x] **Task 2.1: Extract HTML mapping specifications**
 
   Extend the schema contract builder to include HTML mapping for SSR.
 
   For each node and mark, extract:
-  - [ ] parseHTML rules: tag selectors, attribute mappings, priority, getAttrs functions (as string representations)
-  - [ ] renderHTML rules: element structure, attribute serialization
-  - [ ] Content element mappings (e.g., figcaption for image node)
+  - [x] parseHTML rules: tag selectors, attribute mappings, priority, getAttrs functions (as string representations)
+  - [x] renderHTML rules: element structure, attribute serialization
+  - [x] Content element mappings (e.g., figcaption for image node)
 
   Store in a format that consumers can use to understand HTML ↔ JSON conversion without executing Tiptap code.
 
   **Logging:**
-  - [ ] DEBUG: Log HTML mapping extraction for each extension
-  - [ ] WARN: Log if parseHTML/renderHTML rules are complex (functions that can't be easily serialized)
+  - [x] DEBUG: Log HTML mapping extraction for each extension
+  - [x] WARN: Log if parseHTML/renderHTML rules are complex (functions that can't be easily serialized)
 
   **Files to modify:**
-  - [ ] `/home/www/tiptap/packages/schema/src/schema-contract/builder.ts`
+  - [x] `/home/www/tiptap/packages/schema/src/schema-contract/builder.ts`
 
   **Dependencies:**
-  - [ ] Blocked by Task 1.2
+  - [x] Blocked by Task 1.2
 
-- [ ] **Task 2.2: Document parent-child relationships**
+- [x] **Task 2.2: Document parent-child relationships**
 
   Add parent-child relationship documentation to the schema contract.
 
   For each node type, document:
-  - [ ] Allowed parent nodes (inferred from content model and group memberships)
-  - [ ] Allowed child nodes (from node's content spec: "inline*", "block+", etc.)
-  - [ ] Whether node is inline, block, or atom
-  - [ ] Whether node is draggable, selectable
+  - [x] Allowed parent nodes (inferred from content model and group memberships)
+  - [x] Allowed child nodes (from node's content spec: "inline*", "block+", etc.)
+  - [x] Whether node is inline, block, or atom
+  - [x] Whether node is draggable, selectable
 
   Parse Tiptap content expressions into structured rules:
-  - [ ] `"inline*"` → zero or more inline nodes
-  - [ ] `"block+"` → one or more block nodes
-  - [ ] `"paragraph+"` → one or more paragraph nodes
+  - [x] `"inline*"` → zero or more inline nodes
+  - [x] `"block+"` → one or more block nodes
+  - [x] `"paragraph+"` → one or more paragraph nodes
 
   **Logging:**
-  - [ ] DEBUG: Log content model parsing for each node
-  - [ ] DEBUG: Log inferred parent-child relationships
+  - [x] DEBUG: Log content model parsing for each node
+  - [x] DEBUG: Log inferred parent-child relationships
 
   **Files to modify:**
-  - [ ] `/home/www/tiptap/packages/schema/src/schema-contract/builder.ts`
+  - [x] `/home/www/tiptap/packages/schema/src/schema-contract/builder.ts`
 
   **Dependencies:**
-  - [ ] Blocked by Task 1.2
+  - [x] Blocked by Task 1.2
 
 ### Phase 3: Fixtures for Validation
 
