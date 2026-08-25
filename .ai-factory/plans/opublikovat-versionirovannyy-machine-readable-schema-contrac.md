@@ -14,11 +14,11 @@ Create and publish a versioned machine-readable schema contract for `@i-prikot/e
 Tinyfy currently maintains JSON schema manifests manually. This plan establishes `@i-prikot/editor-schema` as the authoritative source by exporting a structured schema contract that Tinyfy and other consumers can import directly from the published package without workspace links or private imports.
 
 The schema contract must be:
-- [ ] Versioned (tied to CURRENT_SCHEMA_VERSION)
-- [ ] Machine-readable (structured TypeScript/JSON)
-- [ ] Publicly exported from the package entry point
-- [ ] Installable in a clean project via `npm ci`
-- [ ] Validated by package tests against real extensions
+- [x] Versioned (tied to CURRENT_SCHEMA_VERSION)
+- [x] Machine-readable (structured TypeScript/JSON)
+- [x] Publicly exported from the package entry point
+- [x] Installable in a clean project via `npm ci`
+- [x] Validated by package tests against real extensions
 
 ## Settings
 
@@ -294,202 +294,211 @@ The schema contract must be:
 
 ### Phase 5: Package Tests
 
-- [ ] **Task 5.1: Test schema contract generation**
+- [x] **Task 5.1: Test schema contract generation**
 
   Create `/home/www/tiptap/test/schema/schema-contract.test.ts` to validate schema contract generation.
 
   Test cases:
-  - [ ] Contract includes CURRENT_SCHEMA_VERSION
-  - [ ] Contract includes all expected nodes from extension kit (paragraph, heading, blockquote, codeBlock, bulletList, orderedList, taskList, table, image, tocNode, etc.)
-  - [ ] Contract includes all expected marks (bold, italic, underline, strike, code, link, textStyle, highlight, subscript, superscript)
-  - [ ] Each node definition has required fields (name, attributes, group)
-  - [ ] Each mark definition has required fields (name, attributes)
-  - [ ] Attributes have correct types (id: string, blockRole: string | null, level: number, etc.)
-  - [ ] HTML mapping is present for nodes that define parseHTML/renderHTML
+  - [x] Contract includes CURRENT_SCHEMA_VERSION
+  - [x] Contract includes all expected nodes from extension kit (paragraph, heading, blockquote, codeBlock, bulletList, orderedList, taskList, table, image, tocNode, etc.)
+  - [x] Contract includes all expected marks (bold, italic, underline, strike, code, link, textStyle, highlight, subscript, superscript)
+  - [x] Each node definition has required fields (name, attributes, group)
+  - [x] Each mark definition has required fields (name, attributes)
+  - [x] Attributes have correct types (id: string, blockRole: string | null, level: number, etc.)
+  - [x] HTML mapping is present for nodes that define parseHTML/renderHTML
 
   **Logging:**
-  - [ ] DEBUG: Log contract validation steps
-  - [ ] INFO: Log successful contract validation
+  - [x] DEBUG: Log contract validation steps
+  - [x] INFO: Log successful contract validation
 
   **Files to create:**
-  - [ ] `/home/www/tiptap/test/schema/schema-contract.test.ts`
+  - [x] `/home/www/tiptap/test/schema/schema-contract.test.ts`
 
   **Dependencies:**
-  - [ ] Blocked by Task 4.1
+  - [x] Blocked by Task 4.1
 
-- [ ] **Task 5.2: Test valid fixtures acceptance**
+- [x] **Task 5.2: Test valid fixtures acceptance**
 
   Add test cases to `/home/www/tiptap/test/schema/schema-contract.test.ts` (or separate file) to validate that all valid fixtures are accepted by the editor.
 
   For each fixture in `validDocuments`:
-  - [ ] Create an editor instance with the document
-  - [ ] Verify no normalization transactions are triggered (BlockRole normalization should pass)
-  - [ ] Verify getJSON() returns the expected structure
-  - [ ] Verify getHTML() produces valid HTML without errors
+  - [x] Create an editor instance with the document
+  - [x] Verify no normalization transactions are triggered (BlockRole normalization should pass)
+  - [x] Verify getJSON() returns the expected structure
+  - [x] Verify getHTML() produces valid HTML without errors
 
   **Logging:**
-  - [ ] DEBUG: Log each fixture being validated
-  - [ ] INFO: Log fixture acceptance results
+  - [x] DEBUG: Log each fixture being validated
+  - [x] INFO: Log fixture acceptance results
 
   **Files to modify:**
-  - [ ] `/home/www/tiptap/test/schema/schema-contract.test.ts`
+  - [x] `/home/www/tiptap/test/schema/schema-contract.test.ts`
 
   **Dependencies:**
-  - [ ] Blocked by Task 5.1 and Task 3.3
+  - [x] Blocked by Task 5.1 and Task 3.3
 
-- [ ] **Task 5.3: Test invalid fixtures rejection**
+- [x] **Task 5.3: Test invalid fixtures rejection**
 
   Add test cases to validate that invalid fixtures are properly rejected.
 
   For each fixture in `invalidDocuments`:
-  - [ ] Load the document into an editor instance
-  - [ ] Verify that the expected validation rule fails (normalization strips invalid attributes, unsupported nodes are rejected, etc.)
-  - [ ] Check that unsafe URLs are sanitized to '#'
-  - [ ] Check that nested blockRole attributes are stripped
-  - [ ] Check that invalid id attributes are rejected
+  - [x] Load the document into an editor instance
+  - [x] Verify that the expected validation rule fails (normalization strips invalid attributes, unsupported nodes are rejected, etc.)
+  - [x] Check that unsafe URLs are sanitized to '#'
+  - [x] Check that nested blockRole attributes are stripped
+  - [x] Check that invalid id attributes are rejected
 
   **Logging:**
-  - [ ] DEBUG: Log each invalid fixture being tested
-  - [ ] INFO: Log rejection confirmation
+  - [x] DEBUG: Log each invalid fixture being tested
+  - [x] INFO: Log rejection confirmation
 
   **Files to modify:**
-  - [ ] `/home/www/tiptap/test/schema/schema-contract.test.ts`
+  - [x] `/home/www/tiptap/test/schema/schema-contract.test.ts`
 
   **Dependencies:**
-  - [ ] Blocked by Task 5.2
+  - [x] Blocked by Task 5.2
 
-- [ ] **Task 5.4: Test public exports availability**
+- [x] **Task 5.4: Test public exports availability**
 
   Create `/home/www/tiptap/test/schema/public-exports.test.ts` to verify that the schema contract is importable from the built package.
 
   Test cases:
-  - [ ] Import `getSchemaContract` from `@i-prikot/editor-schema`
-  - [ ] Import `validDocuments`, `invalidDocuments` from `@i-prikot/editor-schema`
-  - [ ] Import types: `SchemaContract`, `NodeDefinition`, `MarkDefinition`
-  - [ ] Import validation rules from the package
-  - [ ] Verify all imports resolve without errors (this validates the package build and export map)
+  - [x] Import `getSchemaContract` from `@i-prikot/editor-schema`
+  - [x] Import `validDocuments`, `invalidDocuments` from `@i-prikot/editor-schema`
+  - [x] Import types: `SchemaContract`, `NodeDefinition`, `MarkDefinition`
+  - [x] Import validation rules from the package
+  - [x] Verify all imports resolve without errors (this validates the package build and export map)
 
   This test should run against the built package (`dist/`) to ensure consumers can import after `npm install`.
 
   **Logging:**
-  - [ ] INFO: Log successful import validation
+  - [x] INFO: Log successful import validation
 
   **Files to create:**
-  - [ ] `/home/www/tiptap/test/schema/public-exports.test.ts`
+  - [x] `/home/www/tiptap/test/schema/public-exports.test.ts`
 
   **Dependencies:**
-  - [ ] Blocked by Task 4.2
+  - [x] Blocked by Task 4.2
 
-- [ ] **Task 5.5: Test schema contract matches live extensions**
+- [x] **Task 5.5: Test schema contract matches live extensions**
 
   Add test to verify the generated contract matches the actual registered extensions.
 
   Test cases:
-  - [ ] Build schema contract from `createExtensionKit`
-  - [ ] Create an editor instance with the same extension kit
-  - [ ] Compare contract node list with editor.schema.nodes
-  - [ ] Compare contract mark list with editor.schema.marks
-  - [ ] Verify attribute definitions match `node.attrs` specs from editor.schema
-  - [ ] Verify no extensions are missing from the contract
-  - [ ] Verify no phantom extensions exist in contract that aren't in the editor
+  - [x] Build schema contract from `createExtensionKit`
+  - [x] Create an editor instance with the same extension kit
+  - [x] Compare contract node list with editor.schema.nodes
+  - [x] Compare contract mark list with editor.schema.marks
+  - [x] Verify attribute definitions match `node.attrs` specs from editor.schema
+  - [x] Verify no extensions are missing from the contract
+  - [x] Verify no phantom extensions exist in contract that aren't in the editor
 
   **Logging:**
-  - [ ] DEBUG: Log node/mark comparison
-  - [ ] WARN: Log mismatches between contract and live schema
+  - [x] DEBUG: Log node/mark comparison
+  - [x] WARN: Log mismatches between contract and live schema
 
   **Files to modify:**
-  - [ ] `/home/www/tiptap/test/schema/schema-contract.test.ts`
+  - [x] `/home/www/tiptap/test/schema/schema-contract.test.ts`
 
   **Dependencies:**
-  - [ ] Blocked by Task 5.1
+  - [x] Blocked by Task 5.1
 
 ### Phase 6: Documentation
 
-- [ ] **Task 6.1: Document schema contract usage**
+- [x] **Task 6.1: Document schema contract usage**
 
   Create `/home/www/tiptap/docs/schema-contract.md` with comprehensive documentation for consuming the schema contract.
 
   Sections:
-  - [ ] **Overview**: Purpose of the schema contract, why it exists
-  - [ ] **Installation**: How to install `@i-prikot/editor-schema` in a consumer project
-  - [ ] **Importing the contract**: Example imports for TypeScript and JavaScript consumers
-  - [ ] **Contract structure**: Explanation of SchemaContract, NodeDefinition, MarkDefinition
-  - [ ] **Validation rules**: How to use the exported validation rules
-  - [ ] **Fixtures**: How to use validDocuments and invalidDocuments for testing
-  - [ ] **Schema version**: How to check CURRENT_SCHEMA_VERSION and handle migrations
-  - [ ] **HTML mapping**: How to use HTML parsing/rendering specs for SSR
-  - [ ] **Examples**: Complete code examples for common use cases (validation, migration, SSR)
+  - [x] **Overview**: Purpose of the schema contract, why it exists
+  - [x] **Installation**: How to install `@i-prikot/editor-schema` in a consumer project
+  - [x] **Importing the contract**: Example imports for TypeScript and JavaScript consumers
+  - [x] **Contract structure**: Explanation of SchemaContract, NodeDefinition, MarkDefinition
+  - [x] **Validation rules**: How to use the exported validation rules
+  - [x] **Fixtures**: How to use validDocuments and invalidDocuments for testing
+  - [x] **Schema version**: How to check CURRENT_SCHEMA_VERSION and handle migrations
+  - [x] **HTML mapping**: How to use HTML parsing/rendering specs for SSR
+  - [x] **Examples**: Complete code examples for common use cases (validation, migration, SSR)
 
   **Logging:**
-  - [ ] No logging (documentation file)
+  - [x] No logging (documentation file)
 
   **Files to create:**
-  - [ ] `/home/www/tiptap/docs/schema-contract.md`
+  - [x] `/home/www/tiptap/docs/schema-contract.md`
 
   **Dependencies:**
-  - [ ] Blocked by Task 4.2 (public API must be complete)
+  - [x] Blocked by Task 4.2 (public API must be complete)
 
-- [ ] **Task 6.2: Update ARCHITECTURE.md**
+- [x] **Task 6.2: Update ARCHITECTURE.md**
 
   Update `/home/www/tiptap/.ai-factory/ARCHITECTURE.md` to document the schema contract as part of the `@i-prikot/editor-schema` public API.
 
   Add to the package description for `@i-prikot/editor-schema`:
-  - [ ] Schema contract export: `getSchemaContract()`, fixtures, validation rules
-  - [ ] Contract versioning tied to CURRENT_SCHEMA_VERSION
-  - [ ] Purpose: enable external validation, documentation, and SSR without duplicating schema manually
+  - [x] Schema contract export: `getSchemaContract()`, fixtures, validation rules
+  - [x] Contract versioning tied to CURRENT_SCHEMA_VERSION
+  - [x] Purpose: enable external validation, documentation, and SSR without duplicating schema manually
 
   Update the public entry points table to include schema contract exports.
 
   **Logging:**
-  - [ ] No logging (documentation file)
+  - [x] No logging (documentation file)
 
   **Files to modify:**
-  - [ ] `/home/www/tiptap/.ai-factory/ARCHITECTURE.md`
+  - [x] `/home/www/tiptap/.ai-factory/ARCHITECTURE.md`
 
   **Dependencies:**
-  - [ ] Blocked by Task 6.1
+  - [x] Blocked by Task 6.1
 
-- [ ] **Task 6.3: Add inline code documentation**
+- [x] **Task 6.3: Add inline code documentation**
 
   Add comprehensive JSDoc comments to all public exports in the schema-contract module.
 
   Document:
-  - [ ] `buildSchemaContract()` - purpose, return value, usage
-  - [ ] `getSchemaContract()` - cached vs. fresh contract
-  - [ ] `SchemaContract`, `NodeDefinition`, `MarkDefinition` interfaces - all fields explained
-  - [ ] Validation rules - what each rule checks, examples
-  - [ ] Fixtures - what each fixture demonstrates, how to use in tests
+  - [x] `buildSchemaContract()` - purpose, return value, usage
+  - [x] `getSchemaContract()` - cached vs. fresh contract
+  - [x] `SchemaContract`, `NodeDefinition`, `MarkDefinition` interfaces - all fields explained
+  - [x] Validation rules - what each rule checks, examples
+  - [x] Fixtures - what each fixture demonstrates, how to use in tests
 
   Ensure all JSDoc comments include `@example` blocks for common use cases.
 
   **Logging:**
-  - [ ] No logging (code comments)
+  - [x] No logging (code comments)
 
   **Files to modify:**
-  - [ ] `/home/www/tiptap/packages/schema/src/schema-contract/types.ts`
-  - [ ] `/home/www/tiptap/packages/schema/src/schema-contract/builder.ts`
-  - [ ] `/home/www/tiptap/packages/schema/src/schema-contract/rules.ts`
-  - [ ] `/home/www/tiptap/packages/schema/src/schema-contract/index.ts`
+  - [x] `/home/www/tiptap/packages/schema/src/schema-contract/types.ts`
+  - [x] `/home/www/tiptap/packages/schema/src/schema-contract/builder.ts`
+  - [x] `/home/www/tiptap/packages/schema/src/schema-contract/rules.ts`
+  - [x] `/home/www/tiptap/packages/schema/src/schema-contract/index.ts`
 
   **Dependencies:**
-  - [ ] Blocked by Tasks 1.1, 1.2, 1.3, 4.1
+  - [x] Blocked by Tasks 1.1, 1.2, 1.3, 4.1
 
 ## Acceptance Criteria
 
-- [ ] `@i-prikot/editor-schema` exports `getSchemaContract()`, `validDocuments`, `invalidDocuments`, and all types
-- [ ] Schema contract includes schemaVersion matching CURRENT_SCHEMA_VERSION
-- [ ] Schema contract includes all nodes and marks from extension kits
-- [ ] Attributes have type, default, and enum information
-- [ ] HTML mapping specs are included for SSR support
-- [ ] Parent-child relationships are documented
-- [ ] Validation rules for id, blockRole, URLs, and legacy blockId are exported
-- [ ] Valid fixtures pass editor validation without normalization
-- [ ] Invalid fixtures are properly rejected or normalized
-- [ ] Tests verify contract matches live extensions
-- [ ] Tests verify public exports are importable from built package
-- [ ] Documentation explains contract usage for external consumers
-- [ ] Running `npm ci` in a clean project and importing the contract works
-- [ ] Changing the JSON schema requires updating contract and tests
+- [x] `@i-prikot/editor-schema` exports `getSchemaContract()`, `validDocuments`, `invalidDocuments`, and all types
+- [x] Schema contract includes schemaVersion matching CURRENT_SCHEMA_VERSION
+- [x] Schema contract includes all nodes and marks from extension kits
+- [x] Attributes have type, default, and enum information
+- [x] HTML mapping specs are included for SSR support
+- [x] Parent-child relationships are documented
+- [x] Validation rules for id, blockRole, URLs, and legacy blockId are exported
+- [x] Valid fixtures pass editor validation without normalization
+- [x] Invalid fixtures are properly rejected or normalized
+- [x] Tests verify contract matches live extensions
+- [x] Tests verify public exports are importable from built package
+- [x] Documentation explains contract usage for external consumers
+- [x] Running `npm ci` in a clean project and importing the contract works
+- [x] Changing the JSON schema requires updating contract and tests
+
+## Verification Evidence
+
+- RED: `npm run test:package-public-api` failed because the clean-consumer verifier performed two full installs and cleanup masked the timeout with `ENOTEMPTY`.
+- RED: `LOG_LEVEL=debug npm run test:package-public-api` reached the clean `npm ci` consumer and failed declaration checking with TypeScript 6 `TS5112`; the isolated command now passes `--ignoreConfig`.
+- GREEN: `LOG_LEVEL=debug npm run test:package-public-api` passed 5/5 tests, including fresh builds, packed tarballs, clean `npm ci`, declaration checks, root/subpath runtime imports, and Vite consumer builds.
+- GREEN: `npx vitest run test/schema/schema-contract.test.ts test/schema/public-exports.test.ts test/editor/nodes/image-node.integration.test.ts --reporter=verbose` passed 17/17 tests.
+- GREEN: `npx vitest run test/schema/extensions/block-role.test.ts test/renderer/render-document.test.ts --reporter=verbose` passed 25/25 regression tests.
+- GREEN: `npm run typecheck`, schema workspace lint, changed-file lint, and `git diff --check` passed.
 
 ## Commit Plan
 

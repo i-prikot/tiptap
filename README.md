@@ -58,6 +58,8 @@ The portable document-level `BlockRole` contract, including installation,
 extension order, peer dependencies, and renderer scope, is documented in
 [BlockRole Contract](docs/block-role.md).
 
+The versioned JSON document catalog, validation rules, SSR metadata, and package fixtures are documented in the [Schema Contract guide](docs/schema-contract.md).
+
 ## Runtime Modes
 
 The editor works without collaboration or AI configuration. In that local mode, content is edited in the browser with the normal Tiptap history stack.

@@ -64,8 +64,13 @@ Tinyfy cabinet не находится в `apps/` и не является ча�
 
 - владеет `JSONContent`, версией сохранённой схемы, `createPersistedDocument`,
   `migrate` и `CURRENT_SCHEMA_VERSION`;
+- публикует JSON-сериализуемый schema contract через `getSchemaContract()`,
+  правила валидации и valid/invalid fixtures; версия контракта связана с
+  `CURRENT_SCHEMA_VERSION`;
 - предоставляет общие editor extension kits, типы и переиспользуемые
   расширения Tiptap;
+- позволяет внешним host валидировать и документировать JSON и проверять SSR
+  mapping без копирования реестра узлов и marks;
 - отделяет renderer-safe набор расширений от интерактивных Vue NodeView;
 - не зависит от `@i-prikot/editor`, `@i-prikot/editor-renderer` или приложений.
 
@@ -111,6 +116,7 @@ stylesheet `@i-prikot/editor/styles.css`; его исходники, host header
 | --- | --- | --- |
 | `@i-prikot/editor-schema` | `@i-prikot/editor-schema` | Типы документа, версия, миграции и shared editor extension kit. |
 | `@i-prikot/editor-schema` | `@i-prikot/editor-schema/renderer` | Renderer-safe extension kit. |
+| `@i-prikot/editor-schema` | `@i-prikot/editor-schema/schema-contract` | Версионированный schema contract, правила валидации и fixtures для host-интеграций. |
 | `@i-prikot/editor` | `@i-prikot/editor` | `NotionEditor`, публичные типы и поддерживаемые UI exports. |
 | `@i-prikot/editor` | `@i-prikot/editor/style.css`, `@i-prikot/editor/styles.css`, `@i-prikot/editor/light-theme.css`, `@i-prikot/editor/dark-theme.css` | Базовые стили и opt-in темы интерактивного редактора. |
 | `@i-prikot/editor-renderer` | `@i-prikot/editor-renderer` | `renderDocument` для статического HTML. |
