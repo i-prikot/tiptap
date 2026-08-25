@@ -1,7 +1,15 @@
 import type { InvalidFixture } from '../types.js'
 import { createLogger } from '../../utils/logger.js'
 
-/** Documents that each demonstrate a specific contract violation. */
+/**
+ * Documents that each demonstrate a specific contract violation.
+ *
+ * @example
+ * for (const fixture of invalidDocuments) {
+ *   const rules = validateSchemaDocument(fixture.document).errors.map(error => error.rule)
+ *   if (!rules.includes(fixture.expectedError)) throw new Error(fixture.key)
+ * }
+ */
 export const invalidDocuments: readonly InvalidFixture[] = [
   {
     key: 'nested-id',

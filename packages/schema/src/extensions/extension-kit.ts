@@ -23,7 +23,7 @@ import {
 import { Typography } from '@tiptap/extension-typography'
 
 import { HorizontalRule } from './horizontal-rule.js'
-import { BlockId } from './block-id.js'
+import { BlockId, BlockIdTopLevel } from './block-id.js'
 import { BlockRole, CANONICAL_BLOCK_ROLES } from './block-role.js'
 import { Indent } from './indent.js'
 import { ListNormalization } from './list-normalization.js'
@@ -31,6 +31,7 @@ import { Mathematics } from './mathematics.js'
 import { TripleClickBlockSelection } from './triple-click-block-selection.js'
 import { NodeBackground } from './node-background.js'
 import { NodeAlignment } from './node-alignment.js'
+import { RendererTocAttributes } from './renderer-toc-attributes.js'
 import { UiState } from './ui-state.js'
 import { TableKit } from './table-kit.js'
 import { TableHandleExtension } from './table-handle.js'
@@ -118,10 +119,7 @@ export function createRendererExtensionKitWithEmoji(emojiExtension: AnyExtension
     TaskItem.configure({ nested: true }),
     Highlight.configure({ multicolor: true }),
     Image,
-    TableOfContents.configure({
-      getIndex: getHierarchicalIndexes,
-      onUpdate: () => undefined,
-    }),
+    RendererTocAttributes,
     ImageUploadNode.configure({
       accept: 'image/*',
       maxSize: MAX_FILE_SIZE,
@@ -129,7 +127,8 @@ export function createRendererExtensionKitWithEmoji(emojiExtension: AnyExtension
     }),
     TocNode.configure({ topOffset: 48 }),
     BlockId.configure({ updateDocument: false }),
-    BlockRole.configure({ roles: CANONICAL_BLOCK_ROLES }),
+    BlockIdTopLevel,
+    BlockRole.configure({ roles: [] }),
     Typography,
   ]
 }
@@ -197,6 +196,7 @@ export async function createExtensionKit(
     }),
     (nodeOverrides.toc ?? TocNode).configure({ topOffset: 48 }),
     BlockId,
+    BlockIdTopLevel,
     BlockRole.configure({ roles: options.blockRoles ?? CANONICAL_BLOCK_ROLES }),
     Typography,
     UiState,

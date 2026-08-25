@@ -30,11 +30,11 @@ describe('image node extension', () => {
         {
           attrs: expect.objectContaining({
             alt: 'Cover',
-            height: '180',
+            height: 180,
             showCaption: true,
             src: 'https://example.test/cover.png',
             title: 'Title',
-            width: '320',
+            width: 320,
             'data-align': 'center',
           }),
           content: [{ text: 'Caption text', type: 'text' }],

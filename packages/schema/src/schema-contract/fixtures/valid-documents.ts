@@ -1,7 +1,14 @@
 import type { ValidFixture } from '../types.js'
 import { createLogger } from '../../utils/logger.js'
 
-/** Representative documents that must remain valid across package releases. */
+/**
+ * Representative documents that must remain valid across package releases.
+ *
+ * @example
+ * for (const fixture of validDocuments) {
+ *   if (!validateSchemaDocument(fixture.document).valid) throw new Error(fixture.key)
+ * }
+ */
 export const validDocuments: readonly ValidFixture[] = [
   {
     key: 'common-blocks-and-marks',
@@ -50,6 +57,11 @@ export const validDocuments: readonly ValidFixture[] = [
             },
             { type: 'text', text: ' sub', marks: [{ type: 'subscript' }] },
             { type: 'text', text: ' super', marks: [{ type: 'superscript' }] },
+            { type: 'text', text: ' assigned to ' },
+            {
+              type: 'mention',
+              attrs: { id: 'user-42', label: 'Ada', mentionSuggestionChar: '@' },
+            },
           ],
         },
         {

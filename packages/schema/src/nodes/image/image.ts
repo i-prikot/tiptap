@@ -6,14 +6,27 @@ import { Image as BaseImage } from '@tiptap/extension-image'
 import { NodeSelection, TextSelection } from '@tiptap/pm/state'
 import type { NodeType } from '@tiptap/pm/model'
 import type { Selection } from '@tiptap/pm/state'
+import { sanitizeUrl } from '../../utils/tiptap-utils.js'
+
+function numericImageAttribute(value: string | null): number | null {
+  if (value == null || value.trim() === '') return null
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null
+}
+
+function safeImageUrl(value: unknown): string {
+  if (typeof value !== 'string' || value.trim() === '') return ''
+  return sanitizeUrl(value, 'https://schema-contract.invalid/') === '#' ? '#' : value
+}
 
 function imgAttributes(img: HTMLElement) {
   return {
     src: img.getAttribute('src'),
+    lqip: img.getAttribute('data-lqip'),
     alt: img.getAttribute('alt'),
     title: img.getAttribute('title'),
-    width: img.getAttribute('width'),
-    height: img.getAttribute('height'),
+    width: numericImageAttribute(img.getAttribute('width')),
+    height: numericImageAttribute(img.getAttribute('height')),
   }
 }
 
@@ -48,6 +61,9 @@ export const Image = BaseImage.extend({
   addAttributes() {
     return {
       ...this.parent?.(),
+      lqip: { default: null },
+      width: { default: null },
+      height: { default: null },
       'data-align': { default: null },
       showCaption: {
         default: false,
@@ -86,10 +102,11 @@ export const Image = BaseImage.extend({
   },
 
   renderHTML({ node }) {
-    const { src, alt, title, width, height, showCaption } = node.attrs
+    const { src, lqip, alt, title, width, height, showCaption } = node.attrs
     const align = node.attrs['data-align']
 
-    const imgAttrs: Record<string, unknown> = { src: src || '' }
+    const imgAttrs: Record<string, unknown> = { src: safeImageUrl(src) }
+    if (lqip) imgAttrs['data-lqip'] = safeImageUrl(lqip)
     if (alt) imgAttrs.alt = alt
     if (title) imgAttrs.title = title
     if (width) imgAttrs.width = width

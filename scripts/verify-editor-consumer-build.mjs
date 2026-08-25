@@ -36,7 +36,22 @@ async function findArchive(artifactDirectory, archivePrefix, excludedArchivePref
 
 async function run(command, arguments_, cwd, timeout = 120_000) {
   log('debug', 'Running consumer verification command.', { command, arguments: arguments_ })
-  await execFileAsync(command, arguments_, { cwd, timeout })
+  try {
+    await execFileAsync(command, arguments_, { cwd, timeout })
+    log('debug', 'Consumer verification command completed.', { command })
+  } catch (error) {
+    const commandError = error instanceof Error ? error : new Error(String(error))
+    const output = [commandError.stdout, commandError.stderr]
+      .filter((value) => typeof value === 'string' && value.trim().length > 0)
+      .join('\n')
+      .slice(-8_000)
+    log('error', 'Consumer verification command failed.', {
+      command,
+      message: commandError.message,
+      ...(output ? { output } : {}),
+    })
+    throw error
+  }
 }
 
 async function writeConsumerFixture(consumerDirectory) {
@@ -48,7 +63,11 @@ async function writeConsumerFixture(consumerDirectory) {
         name: 'i-prikot-editor-vite-consumer',
         private: true,
         type: 'module',
-        scripts: { build: 'vite build' },
+        scripts: {
+          build: 'vite build',
+          'typecheck:schema-contract':
+            'tsc --ignoreConfig --noEmit --module NodeNext --moduleResolution NodeNext --target ES2022 --skipLibCheck schema-contract-types.ts',
+        },
       },
       null,
       2,
@@ -58,6 +77,114 @@ async function writeConsumerFixture(consumerDirectory) {
     join(consumerDirectory, 'index.html'),
     '<!doctype html><html><body><div id="app"></div><script type="module" src="/src/main.ts"></script></body></html>\n',
   )
+  await writeFile(
+    join(consumerDirectory, 'schema-contract-types.ts'),
+    [
+      'import {',
+      '  getSchemaContract,',
+      '  invalidDocuments,',
+      '  validDocuments,',
+      '  type MarkDefinition,',
+      '  type NodeDefinition,',
+      '  type SchemaContract,',
+      "} from '@i-prikot/editor-schema'",
+      '',
+      'const contract: SchemaContract = getSchemaContract()',
+      'const firstNode: NodeDefinition | undefined = contract.nodes[0]',
+      'const firstMark: MarkDefinition | undefined = contract.marks[0]',
+      'void [firstNode, firstMark, validDocuments, invalidDocuments]',
+      '',
+    ].join('\n'),
+  )
+}
+
+async function installConsumerDependencies(consumerDirectory, schemaArchive, editorArchive) {
+  await run(
+    'npm',
+    [
+      'install',
+      '--ignore-scripts',
+      '--no-audit',
+      '--no-fund',
+      '--package-lock-only',
+      '--prefer-offline',
+      'typescript@^6.0.3',
+      'vite@^6.0.3',
+      'vue@^3.5.13',
+      '@tiptap/core@^3.27.1',
+      '@tiptap/extension-drag-handle-vue-3@^3.27.1',
+      '@tiptap/extension-emoji@^3.27.1',
+      '@tiptap/pm@^3.27.1',
+      '@tiptap/suggestion@^3.27.1',
+      '@tiptap/vue-3@^3.27.1',
+      schemaArchive,
+      editorArchive,
+    ],
+    consumerDirectory,
+    300_000,
+  )
+  await run(
+    'npm',
+    ['ci', '--ignore-scripts', '--no-audit', '--no-fund', '--prefer-offline'],
+    consumerDirectory,
+    300_000,
+  )
+}
+
+async function verifySchemaContractImports(consumerDirectory) {
+  await run('npm', ['run', 'typecheck:schema-contract'], consumerDirectory)
+  await run(
+    process.execPath,
+    [
+      '--input-type=module',
+      '--eval',
+      [
+        "import * as root from '@i-prikot/editor-schema'",
+        "import * as subpath from '@i-prikot/editor-schema/schema-contract'",
+        "if (typeof root.getSchemaContract !== 'function') throw new Error('missing root schema contract export')",
+        "if (typeof subpath.getSchemaContract !== 'function') throw new Error('missing schema-contract subpath export')",
+        "if (!root.validDocuments?.length || !root.invalidDocuments?.length) throw new Error('missing public schema fixtures')",
+      ].join(';'),
+    ],
+    consumerDirectory,
+  )
+}
+
+async function verifyStyleCases(consumerDirectory) {
+  const styleCases = [
+    { name: 'base stylesheet only', imports: ["import '@i-prikot/editor/styles.css'"] },
+    {
+      name: 'base plus light theme',
+      imports: [
+        "import '@i-prikot/editor/styles.css'",
+        "import '@i-prikot/editor/light-theme.css'",
+      ],
+    },
+    {
+      name: 'base plus dark theme',
+      imports: ["import '@i-prikot/editor/styles.css'", "import '@i-prikot/editor/dark-theme.css'"],
+    },
+    {
+      name: 'base plus both themes',
+      imports: [
+        "import '@i-prikot/editor/styles.css'",
+        "import '@i-prikot/editor/light-theme.css'",
+        "import '@i-prikot/editor/dark-theme.css'",
+      ],
+    },
+  ]
+
+  for (const styleCase of styleCases) {
+    log('info', 'Building clean Vite consumer style case.', { styleCase: styleCase.name })
+    const consumerEntry = [
+      "import { NotionEditor } from '@i-prikot/editor'",
+      ...styleCase.imports,
+      'void NotionEditor',
+      '',
+    ].join('\n')
+    await writeFile(join(consumerDirectory, 'src/main.ts'), consumerEntry)
+    await run('npm', ['run', 'build'], consumerDirectory)
+  }
 }
 
 async function verifyEditorConsumerBuild(artifactDirectory) {
@@ -76,77 +203,21 @@ async function verifyEditorConsumerBuild(artifactDirectory) {
   log('info', 'Starting clean Vite consumer build.', { consumerDirectory })
   try {
     await writeConsumerFixture(consumerDirectory)
-    await run(
-      'npm',
-      [
-        'install',
-        '--ignore-scripts',
-        '--no-audit',
-        '--no-fund',
-        '--package-lock=false',
-        '--prefer-offline',
-        'vite@^6.0.3',
-        'vue@^3.5.13',
-        '@tiptap/core@^3.27.1',
-        '@tiptap/extension-drag-handle-vue-3@^3.27.1',
-        '@tiptap/extension-emoji@^3.27.1',
-        '@tiptap/pm@^3.27.1',
-        '@tiptap/suggestion@^3.27.1',
-        '@tiptap/vue-3@^3.27.1',
-        schemaArchive,
-        editorArchive,
-      ],
-      consumerDirectory,
-      300_000,
-    )
+    await installConsumerDependencies(consumerDirectory, schemaArchive, editorArchive)
+    await verifySchemaContractImports(consumerDirectory)
     await run(
       process.execPath,
       ['--input-type=module', '--eval', "import('@i-prikot/editor')"],
       consumerDirectory,
     )
-
-    const styleCases = [
-      {
-        name: 'base stylesheet only',
-        imports: ["import '@i-prikot/editor/styles.css'"],
-      },
-      {
-        name: 'base plus light theme',
-        imports: [
-          "import '@i-prikot/editor/styles.css'",
-          "import '@i-prikot/editor/light-theme.css'",
-        ],
-      },
-      {
-        name: 'base plus dark theme',
-        imports: [
-          "import '@i-prikot/editor/styles.css'",
-          "import '@i-prikot/editor/dark-theme.css'",
-        ],
-      },
-      {
-        name: 'base plus both themes',
-        imports: [
-          "import '@i-prikot/editor/styles.css'",
-          "import '@i-prikot/editor/light-theme.css'",
-          "import '@i-prikot/editor/dark-theme.css'",
-        ],
-      },
-    ]
-
-    for (const styleCase of styleCases) {
-      log('info', 'Building clean Vite consumer style case.', { styleCase: styleCase.name })
-      const consumerEntry = [
-        "import { NotionEditor } from '@i-prikot/editor'",
-        ...styleCase.imports,
-        'void NotionEditor',
-        '',
-      ].join('\n')
-      await writeFile(join(consumerDirectory, 'src/main.ts'), consumerEntry)
-      await run('npm', ['run', 'build'], consumerDirectory)
-    }
+    await verifyStyleCases(consumerDirectory)
   } finally {
-    await rm(consumerDirectory, { force: true, recursive: true })
+    await rm(consumerDirectory, {
+      force: true,
+      maxRetries: 10,
+      recursive: true,
+      retryDelay: 200,
+    })
   }
 
   log('info', 'Clean Vite consumer build completed.')

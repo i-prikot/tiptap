@@ -29,11 +29,22 @@ test('editor declares the retry runtime required by Hocuspocus provider', () => 
 test('clean consumer verifier covers the base stylesheet without a theme', () => {
   const verifierSource = readFileSync(consumerVerifierPath, 'utf8')
 
+  assert.ok(verifierSource.includes("name: 'base stylesheet only'"))
+  assert.ok(verifierSource.includes(`imports: ["import '@i-prikot/editor/styles.css'"]`))
+})
+
+test('clean consumer verifier typechecks schema contract public declarations', () => {
+  const verifierSource = readFileSync(consumerVerifierPath, 'utf8')
+
+  assert.ok(verifierSource.includes('typecheck:schema-contract'))
+  assert.ok(verifierSource.includes('type SchemaContract'))
+  assert.ok(verifierSource.includes('type NodeDefinition'))
+  assert.ok(verifierSource.includes('type MarkDefinition'))
+  assert.ok(verifierSource.includes('tsc --ignoreConfig'))
   assert.ok(
-    verifierSource.includes(
-      `name: 'base stylesheet only',\n        imports: ["import '@i-prikot/editor/styles.css'"],`,
-    ),
-    'the clean consumer verifier must build a consumer that imports only styles.css',
+    verifierSource.indexOf("['ci', '--ignore-scripts'") <
+      verifierSource.indexOf("['run', 'typecheck:schema-contract']"),
+    'schema contract declarations must be checked only after the clean npm ci install',
   )
 })
 
@@ -213,9 +224,14 @@ test('packed editor runtime is complete and builds in the shared clean consumer 
     execFileSync(process.execPath, [consumerVerifierPath, artifactDirectory], {
       cwd: repositoryRoot,
       stdio: 'inherit',
-      timeout: 420_000,
+      timeout: 600_000,
     })
   } finally {
-    rmSync(artifactDirectory, { recursive: true, force: true })
+    rmSync(artifactDirectory, {
+      recursive: true,
+      force: true,
+      maxRetries: 10,
+      retryDelay: 200,
+    })
   }
 })

@@ -203,7 +203,12 @@ export function extractNodeDefinition(type: NodeType, schema: Schema): NodeDefin
   return definition
 }
 
-/** Converts a live ProseMirror mark type to JSON-safe public metadata. */
+/**
+ * Converts a live ProseMirror mark type to JSON-safe public metadata.
+ *
+ * @example
+ * const link = extractMarkDefinition(schema.marks.link, schema)
+ */
 export function extractMarkDefinition(type: MarkType, schema: Schema): MarkDefinition {
   logger.debug('extract mark definition', { mark: type.name })
   return {
@@ -259,7 +264,12 @@ export function getSchemaContract(): SchemaContract {
   return cachedContract
 }
 
-/** Utility used by tests and hosts that need a typed JSON clone. */
+/**
+ * Returns a detached clone of a Tiptap JSON document.
+ *
+ * @example
+ * const candidate = cloneSchemaDocument(validDocuments[0].document)
+ */
 export function cloneSchemaDocument(document: JSONContent): JSONContent {
   return structuredClone(document)
 }
