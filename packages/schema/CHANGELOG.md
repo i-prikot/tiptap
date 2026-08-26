@@ -1,5 +1,11 @@
 # @i-prikot/editor-schema
 
+## 0.5.0
+
+### Minor Changes
+
+- 1ab0ef3: Publish a versioned machine-readable schema contract, validation rules, and valid and invalid document fixtures from the package entry point.
+
 ## 0.4.1
 
 ## 0.4.0
