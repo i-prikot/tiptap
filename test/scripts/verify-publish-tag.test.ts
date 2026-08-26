@@ -95,6 +95,41 @@ describe('verify publish tag script', () => {
     expect(`${result.stdout}${result.stderr}`).not.toContain('test-token-must-not-be-logged')
   })
 
+  it('accepts the exact registry mapping with Windows line endings', () => {
+    const fixtureRoot = createFixtureProject([
+      '@i-prikot/editor-schema',
+      '@i-prikot/editor',
+      '@i-prikot/editor-renderer',
+    ])
+    writeFileSync(join(fixtureRoot, '.npmrc'), '@i-prikot:registry=https://npm.pkg.github.com\r\n')
+
+    const result = runTagVerifier(fixtureRoot)
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('[INFO] Release tag validation completed.')
+  })
+
+  it('rejects additional registry credentials without logging them', () => {
+    const fixtureRoot = createFixtureProject([
+      '@i-prikot/editor-schema',
+      '@i-prikot/editor',
+      '@i-prikot/editor-renderer',
+    ])
+    writeFileSync(
+      join(fixtureRoot, '.npmrc'),
+      '@i-prikot:registry=https://npm.pkg.github.com\r\n' +
+        '//npm.pkg.github.com/:_authToken=committed-token\r\n',
+    )
+
+    const result = runTagVerifier(fixtureRoot)
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain(
+      '.npmrc must contain only the @i-prikot GitHub Packages registry mapping.',
+    )
+    expect(`${result.stdout}${result.stderr}`).not.toContain('committed-token')
+  })
+
   it('rejects a legacy @tinyfy package manifest', () => {
     const fixtureRoot = createFixtureProject([
       '@i-prikot/editor-schema',

@@ -9,6 +9,7 @@ const packageDefinitions = [
 ]
 const expectedRegistry = 'https://npm.pkg.github.com'
 const expectedNpmrc = '@i-prikot:registry=https://npm.pkg.github.com\n'
+const acceptedNpmrcContents = new Set([expectedNpmrc, expectedNpmrc.replace('\n', '\r\n')])
 const logLevels = { debug: 10, info: 20, error: 30, silent: Number.POSITIVE_INFINITY }
 const configuredLogLevel = process.env.LOG_LEVEL?.toLowerCase() ?? 'info'
 const minimumLogLevel = logLevels[configuredLogLevel] ?? logLevels.info
@@ -71,9 +72,13 @@ function validatePackage(packageJson, definition, expectedVersion) {
 
 async function validateRegistryConfiguration() {
   const npmrc = await readFile(resolve(repositoryRoot, '.npmrc'), 'utf8')
-  if (npmrc !== expectedNpmrc) {
+  if (!acceptedNpmrcContents.has(npmrc)) {
     throw new Error('.npmrc must contain only the @i-prikot GitHub Packages registry mapping.')
   }
+
+  log('debug', 'Validated npm registry configuration.', {
+    lineEnding: npmrc.endsWith('\r\n') ? 'crlf' : 'lf',
+  })
 }
 
 async function main() {

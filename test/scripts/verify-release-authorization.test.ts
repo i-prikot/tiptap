@@ -39,6 +39,17 @@ describe('release authorization verification', () => {
     expect(result.stdout).toContain('[INFO] Release authorization verification completed.')
   })
 
+  it('accepts a read-only ruleset response that omits bypass actors', () => {
+    const result = runAuthorizationVerifier(
+      acceptedFixtureRoot,
+      acceptedFixtureRoot,
+      resolve(fixturesRoot, 'accepted-hidden-bypass'),
+    )
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('Bypass actors are hidden from the read-only workflow token.')
+  })
+
   it.each(['rejected-wrong-user-reviewer', 'rejected-additional-team-reviewer'])(
     'rejects an environment without exactly the i-prikot reviewer (%s)',
     (fixtureName) => {
@@ -133,6 +144,11 @@ describe('release authorization verification', () => {
     expect(workflow).toContain('RELEASE_MAINTAINER_LOGIN: i-prikot')
     expect(workflow).toContain('NODE_AUTH_TOKEN: ${{ secrets.TINYFY_PACKAGES_TOKEN }}')
     expect(workflow).toContain('TINYFY_PACKAGES_TOKEN_SCOPE_ATTESTATION')
+    expect(workflow).toContain('TINYFY_RELEASE_TAG_BYPASS_ATTESTATION')
+    expect(workflow).toContain('release-maintainers-only-bypass')
+    expect(workflow.slice(0, workflow.indexOf('NODE_AUTH_TOKEN:'))).toContain(
+      'TINYFY_RELEASE_TAG_BYPASS_ATTESTATION',
+    )
     expect(workflow).toContain('/deployment-branch-policies')
     expect(workflow).toContain('/rulesets')
     expect(workflow).toContain('ruleset_details_dir')

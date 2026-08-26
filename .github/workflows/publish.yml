@@ -157,16 +157,22 @@ jobs:
           fi
           echo '[INFO] Release artifacts passed trusted verification.'
 
-      - name: 'INFO: Verify administrator registry-credential attestation'
+      - name: 'INFO: Verify administrator release attestations'
         env:
           TINYFY_PACKAGES_TOKEN_SCOPE_ATTESTATION: ${{ vars.TINYFY_PACKAGES_TOKEN_SCOPE_ATTESTATION }}
+          TINYFY_RELEASE_TAG_BYPASS_ATTESTATION: ${{ vars.TINYFY_RELEASE_TAG_BYPASS_ATTESTATION }}
         run: |
           if [ "${TINYFY_PACKAGES_TOKEN_SCOPE_ATTESTATION:-}" != 'i-prikot-three-package-writes-only' ]; then
             echo '[ERROR] Publishing is blocked until an i-prikot administrator sets the tinyfy-private-package-publish environment variable TINYFY_PACKAGES_TOKEN_SCOPE_ATTESTATION to i-prikot-three-package-writes-only after verifying the environment-only token and its exact package-write scope.' >&2
             exit 1
           fi
 
-          echo '[INFO] Environment-scoped administrator attestation is present.'
+          if [ "${TINYFY_RELEASE_TAG_BYPASS_ATTESTATION:-}" != 'release-maintainers-only-bypass' ]; then
+            echo '[ERROR] Publishing is blocked until an i-prikot administrator sets the tinyfy-private-package-publish environment variable TINYFY_RELEASE_TAG_BYPASS_ATTESTATION to release-maintainers-only-bypass after verifying the v* ruleset bypasses only for the i-prikot release maintainer.' >&2
+            exit 1
+          fi
+
+          echo '[INFO] Environment-scoped administrator attestations are present.'
 
       - name: 'INFO: Publish validated private @i-prikot packages'
         env:

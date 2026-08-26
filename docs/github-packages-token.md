@@ -111,10 +111,11 @@ Write в реестр подтверждается только protected publis
 environment `tinyfy-private-package-publish`; workflow также требует:
 
 1. Environment **`tinyfy-private-package-publish`** с единственным required reviewer — пользователем `i-prikot`; отключите **Prevent self-review**, потому что именно этот личный аккаунт создаёт `v*` release tags. Admin bypass должен оставаться выключенным.
-2. Environment variable **`TINYFY_PACKAGES_TOKEN_SCOPE_ATTESTATION`** = `i-prikot-three-package-writes-only`; это единственная attestation variable, которую читает publish workflow.
-3. Environment deployment policy, разрешающая только `v*`; её и reviewers workflow проверяет через trusted tooling из protected default branch.
-4. Active repository tag ruleset для `refs/tags/v*` с rules `creation`, `update` и `deletion`, bypass только у пользователя `i-prikot`; workflow обязательно проверяет его через trusted tooling из protected default branch.
-5. Успешный `Prepare GitHub Packages release artifacts`: publish workflow скачивает его три архива, запускает `verify-publish-artifacts.mjs` и публикует только проверенные байты.
+2. Environment variable **`TINYFY_PACKAGES_TOKEN_SCOPE_ATTESTATION`** = `i-prikot-three-package-writes-only`, установленная администратором после проверки точного package-write scope токена.
+3. Environment variable **`TINYFY_RELEASE_TAG_BYPASS_ATTESTATION`** = `release-maintainers-only-bypass`, установленная администратором после проверки, что ruleset позволяет always-bypass только пользователю `i-prikot`. Read-only workflow token может не видеть `bypass_actors`, поэтому это условие нельзя надёжно вывести из REST-ответа.
+4. Environment deployment policy, разрешающая только `v*`; её и reviewers workflow проверяет через trusted tooling из protected default branch.
+5. Active repository tag ruleset для `refs/tags/v*` с rules `creation`, `update` и `deletion`, bypass только у пользователя `i-prikot`; видимые ruleset controls workflow проверяет через trusted tooling из protected default branch.
+6. Успешный `Prepare GitHub Packages release artifacts`: publish workflow скачивает его три архива, запускает `verify-publish-artifacts.mjs` и публикует только проверенные байты.
 
 Без этого job упадёт на шагах authorization / artifact verification / attestation ещё до чтения `TINYFY_PACKAGES_TOKEN` и `npm publish`.
 
@@ -124,5 +125,5 @@ environment `tinyfy-private-package-publish`; workflow также требует
 - [ ] Секрет `TINYFY_PACKAGES_TOKEN` только в environment `tinyfy-private-package-publish` (не repository secret)
 - [ ] `npm whoami` → `i-prikot`
 - [ ] `npm view @i-prikot/editor-schema` → `E404` или существующая версия
-- [ ] Environment + token attestation + tag ruleset настроены
+- [ ] Environment + обе attestation variables + tag ruleset настроены
 - [ ] После независимого administrator confirmation: push тега `v<shared-version>`

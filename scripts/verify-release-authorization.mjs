@@ -171,20 +171,29 @@ function verifyTagRulesets(rulesets, releaseMaintainerUserId) {
     throw new Error('The active v* tag ruleset must protect tag creation, updates, and deletion.')
   }
 
-  const bypassActors = Array.isArray(releaseTagRuleset.bypass_actors)
-    ? releaseTagRuleset.bypass_actors
-    : []
-  const bypassActor = bypassActors[0]
-  const hasOnlyReleaseMaintainerBypass =
-    bypassActors.length === 1 &&
-    bypassActor?.actor_type === 'User' &&
-    bypassActor?.actor_id === releaseMaintainerUserId &&
-    bypassActor?.bypass_mode === 'always'
+  if (Object.hasOwn(releaseTagRuleset, 'bypass_actors')) {
+    const bypassActors = releaseTagRuleset.bypass_actors
+    const bypassActor = Array.isArray(bypassActors) ? bypassActors[0] : undefined
+    const hasOnlyReleaseMaintainerBypass =
+      bypassActors?.length === 1 &&
+      bypassActor?.actor_type === 'User' &&
+      bypassActor?.actor_id === releaseMaintainerUserId &&
+      bypassActor?.bypass_mode === 'always'
 
-  if (!hasOnlyReleaseMaintainerBypass) {
-    throw new Error(
-      `The active v* tag ruleset must bypass only for the ${releaseMaintainerLogin} user.`,
-    )
+    if (!hasOnlyReleaseMaintainerBypass) {
+      throw new Error(
+        `The active v* tag ruleset must bypass only for the ${releaseMaintainerLogin} user.`,
+      )
+    }
+
+    log('debug', 'Validated visible release-tag bypass actors.', {
+      rulesetId: releaseTagRuleset.id,
+      releaseMaintainerUserId,
+    })
+  } else {
+    log('debug', 'Bypass actors are hidden from the read-only workflow token.', {
+      rulesetId: releaseTagRuleset.id,
+    })
   }
 
   log('debug', 'Validated active v* tag ruleset protection.', {
