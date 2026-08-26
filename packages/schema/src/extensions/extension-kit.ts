@@ -24,7 +24,7 @@ import { Typography } from '@tiptap/extension-typography'
 
 import { HorizontalRule } from './horizontal-rule.js'
 import { BlockId, BlockIdTopLevel } from './block-id.js'
-import { BlockRole, CANONICAL_BLOCK_ROLES } from './block-role.js'
+import { BlockRole } from './block-role.js'
 import { Indent } from './indent.js'
 import { ListNormalization } from './list-normalization.js'
 import { Mathematics } from './mathematics.js'
@@ -197,7 +197,7 @@ export async function createExtensionKit(
     (nodeOverrides.toc ?? TocNode).configure({ topOffset: 48 }),
     BlockId,
     BlockIdTopLevel,
-    BlockRole.configure({ roles: options.blockRoles ?? CANONICAL_BLOCK_ROLES }),
+    BlockRole.configure({ roles: options.blockRoles ?? [] }),
     Typography,
     UiState,
   ]

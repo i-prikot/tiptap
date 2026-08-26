@@ -50,8 +50,9 @@ export const invalidDocuments: readonly InvalidFixture[] = [
   },
   {
     key: 'unknown-block-role',
-    description: 'Only pricing, cta, and cases are canonical roles.',
+    description: 'A role outside the host-provided editor allowlist is rejected.',
     expectedError: 'block-role',
+    validationOptions: { blockRoles: ['pricing', 'cta', 'cases'] },
     document: {
       type: 'doc',
       content: [{ type: 'paragraph', attrs: { blockRole: 'legacy' } }],

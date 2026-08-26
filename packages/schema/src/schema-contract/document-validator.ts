@@ -1,37 +1,21 @@
 import { getSchema, type JSONContent } from '@tiptap/core'
 import { TOP_LEVEL_BLOCK_ID_NODE_TYPES } from '../extensions/block-id.js'
-import { CANONICAL_BLOCK_ROLES } from '../extensions/block-role.js'
+import { isValidBlockRole } from '../extensions/block-role.js'
 import { createRendererExtensionKit } from '../extensions/renderer-extension-kit.js'
 import { createLogger } from '../utils/logger.js'
 import { sanitizeUrl } from '../utils/tiptap-utils.js'
-import type { SchemaValidationError, SchemaValidationResult } from './types.js'
+import { ATTRIBUTE_METADATA } from './attribute-metadata.js'
+import type {
+  AttributeValueType,
+  SchemaDocumentValidationOptions,
+  SchemaValidationError,
+  SchemaValidationResult,
+} from './types.js'
 
 const logger = createLogger('SchemaContractRules')
 const supportedTopLevelNodes = new Set<string>(TOP_LEVEL_BLOCK_ID_NODE_TYPES)
 
 type DocumentObject = Record<string, unknown>
-
-const attributeTypes: Record<
-  string,
-  { type: 'string' | 'number' | 'boolean' | 'array'; enum?: readonly unknown[] }
-> = {
-  id: { type: 'string' },
-  blockRole: { type: 'string', enum: CANONICAL_BLOCK_ROLES },
-  level: { type: 'number', enum: [1, 2, 3, 4, 5, 6] },
-  checked: { type: 'boolean' },
-  colspan: { type: 'number' },
-  rowspan: { type: 'number' },
-  colwidth: { type: 'array' },
-  src: { type: 'string' },
-  lqip: { type: 'string' },
-  width: { type: 'number' },
-  height: { type: 'number' },
-  showCaption: { type: 'boolean' },
-  topOffset: { type: 'number' },
-  maxShowCount: { type: 'number' },
-  showTitle: { type: 'boolean' },
-  indent: { type: 'number' },
-}
 
 function isObject(value: unknown): value is DocumentObject {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -58,9 +42,11 @@ export function isSchemaContractUrlSafe(value: unknown): value is string {
   return sanitizeUrl(value, 'https://schema-contract.invalid/') !== '#'
 }
 
-function valueMatchesType(value: unknown, type: (typeof attributeTypes)[string]['type']): boolean {
+function valueMatchesType(value: unknown, type: AttributeValueType): boolean {
   if (value === null) return true
   if (type === 'array') return Array.isArray(value)
+  if (type === 'object') return isObject(value)
+  if (type === 'enum') return ['string', 'number', 'boolean'].includes(typeof value)
   return typeof value === type
 }
 
@@ -70,6 +56,7 @@ function validateOwnedAttributes(
   parentType: string | null,
   path: string,
   errors: SchemaValidationError[],
+  blockRoles: readonly string[] | undefined,
 ): void {
   if ('blockId' in attrs) {
     addError(errors, 'legacy-block-id', `${path}.attrs.blockId`, 'blockId is deprecated.')
@@ -96,12 +83,14 @@ function validateOwnedAttributes(
       `${path}.attrs.blockRole`,
       'blockRole is allowed only on supported direct children of doc.',
     )
-  } else if (!CANONICAL_BLOCK_ROLES.includes(attrs.blockRole as never)) {
+  } else if (!isValidBlockRole(attrs.blockRole, blockRoles)) {
     addError(
       errors,
       'block-role',
       `${path}.attrs.blockRole`,
-      `blockRole must be one of ${CANONICAL_BLOCK_ROLES.join(', ')}.`,
+      blockRoles
+        ? 'blockRole must be included in the host-provided blockRoles configuration.'
+        : 'blockRole must be a non-empty string.',
     )
   }
 }
@@ -111,7 +100,7 @@ function validateAttributeTypes(
   path: string,
   errors: SchemaValidationError[],
 ): void {
-  for (const [name, metadata] of Object.entries(attributeTypes)) {
+  for (const [name, metadata] of Object.entries(ATTRIBUTE_METADATA)) {
     const value = attrs[name]
     if (value === undefined) continue
     if (!valueMatchesType(value, metadata.type)) {
@@ -123,7 +112,11 @@ function validateAttributeTypes(
       )
       continue
     }
-    if (value !== null && metadata.enum && !metadata.enum.includes(value)) {
+    if (
+      value !== null &&
+      metadata.enum &&
+      !metadata.enum.some((candidate) => Object.is(candidate, value))
+    ) {
       addError(
         errors,
         name === 'blockRole' ? 'block-role' : 'attribute-type',
@@ -140,9 +133,10 @@ function validateAttributes(
   parentType: string | null,
   path: string,
   errors: SchemaValidationError[],
+  blockRoles: readonly string[] | undefined,
 ): void {
   const attrs = isObject(node.attrs) ? node.attrs : {}
-  validateOwnedAttributes(attrs, nodeType, parentType, path, errors)
+  validateOwnedAttributes(attrs, nodeType, parentType, path, errors, blockRoles)
   validateAttributeTypes(attrs, path, errors)
 
   if (nodeType === 'image' && attrs.src != null && !isSchemaContractUrlSafe(attrs.src)) {
@@ -153,15 +147,13 @@ function validateAttributes(
 function validateMarks(node: DocumentObject, path: string, errors: SchemaValidationError[]): void {
   if (!Array.isArray(node.marks)) return
   node.marks.forEach((mark, index) => {
-    if (!isObject(mark) || mark.type !== 'link') return
+    if (!isObject(mark)) return
     const attrs = isObject(mark.attrs) ? mark.attrs : {}
+    const markPath = `${path}.marks[${index}]`
+    validateAttributeTypes(attrs, markPath, errors)
+    if (mark.type !== 'link') return
     if (!isSchemaContractUrlSafe(attrs.href)) {
-      addError(
-        errors,
-        'safe-url',
-        `${path}.marks[${index}].attrs.href`,
-        'Link href uses an unsafe URL scheme.',
-      )
+      addError(errors, 'safe-url', `${markPath}.attrs.href`, 'Link href uses an unsafe URL scheme.')
     }
   })
 }
@@ -171,15 +163,16 @@ function walkDocument(
   parentType: string | null,
   path: string,
   errors: SchemaValidationError[],
+  blockRoles: readonly string[] | undefined,
 ): void {
   if (!isObject(node)) return
   const nodeType = typeof node.type === 'string' ? node.type : ''
-  validateAttributes(node, nodeType, parentType, path, errors)
+  validateAttributes(node, nodeType, parentType, path, errors, blockRoles)
   validateMarks(node, path, errors)
 
   if (!Array.isArray(node.content)) return
   node.content.forEach((child, index) => {
-    walkDocument(child, nodeType, `${path}.content[${index}]`, errors)
+    walkDocument(child, nodeType, `${path}.content[${index}]`, errors, blockRoles)
   })
 }
 
@@ -204,11 +197,17 @@ function validateSchemaContent(document: JSONContent, errors: SchemaValidationEr
  * const result = validateSchemaDocument(document)
  * if (!result.valid) console.error(result.errors)
  */
-export function validateSchemaDocument(document: JSONContent): SchemaValidationResult {
-  logger.debug('validate document start', { rootType: document.type ?? null })
+export function validateSchemaDocument(
+  document: JSONContent,
+  options: SchemaDocumentValidationOptions = {},
+): SchemaValidationResult {
+  logger.debug('validate document start', {
+    rootType: document.type ?? null,
+    configuredBlockRoleCount: options.blockRoles?.length ?? null,
+  })
   const errors: SchemaValidationError[] = []
   validateSchemaContent(document, errors)
-  walkDocument(document, null, '$', errors)
+  walkDocument(document, null, '$', errors, options.blockRoles)
   const result = { valid: errors.length === 0, errors }
   logger.debug('validate document complete', {
     valid: result.valid,

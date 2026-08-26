@@ -39,6 +39,10 @@ function createBlockRoleEditor(content: unknown, includeTables = false, roles = 
 }
 
 describe('BlockRole', () => {
+  it('has no package-owned roles before the host configures the editor', () => {
+    expect(BlockRole.options.roles).toEqual([])
+  })
+
   it('accepts host-defined configured roles and rejects roles outside that configuration', async () => {
     editor = createExtensionEditor({
       content: {

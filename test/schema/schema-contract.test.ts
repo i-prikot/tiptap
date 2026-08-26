@@ -1,11 +1,11 @@
 import { Editor, getSchema, type JSONContent } from '@tiptap/core'
 import { afterEach, describe, expect, expectTypeOf, it } from 'vitest'
 import * as Y from 'yjs'
+import { ATTRIBUTE_METADATA } from '../../packages/schema/src/schema-contract/attribute-metadata.js'
 import {
   CURRENT_SCHEMA_VERSION,
   BLOCK_ROLE_META,
   BlockRole,
-  SCHEMA_CONTRACT_BLOCK_ROLES,
   TOP_LEVEL_BLOCK_ID_NODE_TYPES,
   buildSchemaContract,
   createExtensionKit,
@@ -23,11 +23,12 @@ import {
 } from '@i-prikot/editor-schema'
 
 let editor: Editor | undefined
+const FIXTURE_BLOCK_ROLES = ['pricing', 'cta', 'cases'] as const
 
 function createContractValidationExtensionKit() {
   return createRendererExtensionKit().map((extension) =>
     extension.name === BlockRole.name
-      ? BlockRole.configure({ roles: SCHEMA_CONTRACT_BLOCK_ROLES })
+      ? BlockRole.configure({ roles: FIXTURE_BLOCK_ROLES })
       : extension,
   )
 }
@@ -45,6 +46,7 @@ function createInteractiveContractExtensionKit() {
       tableControls: false,
     },
     imageUpload: async () => '',
+    blockRoles: FIXTURE_BLOCK_ROLES,
     onImageUploadError: () => undefined,
     onTableOfContentsUpdate: () => undefined,
   })
@@ -132,10 +134,10 @@ describe('schema contract', () => {
     })
     expect(paragraph?.attributes.id).toMatchObject({ type: 'string', default: null })
     expect(paragraph?.attributes.blockRole).toMatchObject({
-      type: 'enum',
+      type: 'string',
       default: null,
-      enum: SCHEMA_CONTRACT_BLOCK_ROLES,
     })
+    expect(paragraph?.attributes.blockRole).not.toHaveProperty('enum')
     expect(image?.attributes).toMatchObject({
       src: { type: 'string', default: null },
       lqip: { type: 'string', default: null },
@@ -182,9 +184,22 @@ describe('schema contract', () => {
     }
   })
 
-  it('publishes the canonical ownership rules for block attributes', () => {
+  it('keeps centralized metadata exhaustive for live node and mark attributes', () => {
+    const contract = buildSchemaContract()
+    const contractAttributeNames = new Set(
+      [...contract.nodes, ...contract.marks].flatMap(({ attributes }) => Object.keys(attributes)),
+    )
+
+    expect(
+      [...contractAttributeNames].filter((name) => !Object.hasOwn(ATTRIBUTE_METADATA, name)).sort(),
+    ).toEqual([])
+  })
+
+  it('publishes the ownership rules for block attributes', () => {
     const contract = getSchemaContract()
     const expectedTopLevelTypes = [...TOP_LEVEL_BLOCK_ID_NODE_TYPES].sort()
+    const safeUrlRule = contract.rules.find(({ id }) => id === 'safe-url')
+    const blockRoleRule = contract.rules.find(({ id }) => id === 'block-role')
 
     expect(
       contract.nodes
@@ -207,10 +222,75 @@ describe('schema contract', () => {
       'legacy-block-id',
       'attribute-type',
     ])
-    expect(contract.rules.find(({ id }) => id === 'safe-url')?.constraint).toEqual({
+    expect(safeUrlRule).toMatchObject({
+      affectedNodes: ['image'],
+      affectedMarks: ['link'],
+      affectedAttributes: ['href', 'src'],
+    })
+    expect(safeUrlRule?.constraint).toEqual({
       schemes: ['http', 'https', 'ftp', 'ftps', 'mailto', 'tel', 'callto', 'sms', 'cid', 'xmpp'],
       relative: true,
     })
+    expect(blockRoleRule?.constraint).toEqual({
+      parent: 'doc',
+      depth: 1,
+      valueType: 'non-empty-string',
+      allowlistSource: 'NotionEditorProps.blockRoles',
+    })
+  })
+
+  it('validates block roles against the host allowlist supplied at initialization', () => {
+    const customRoleDocument: JSONContent = {
+      type: 'doc',
+      content: [{ type: 'paragraph', attrs: { blockRole: 'other' } }],
+    }
+
+    expect(
+      validateSchemaDocument(customRoleDocument, {
+        blockRoles: ['pricing', 'cta', 'cases', 'other'],
+      }),
+    ).toEqual({ valid: true, errors: [] })
+    expect(
+      validateSchemaDocument(customRoleDocument, { blockRoles: ['pricing', 'cta', 'cases'] })
+        .errors,
+    ).toEqual([
+      expect.objectContaining({
+        rule: 'block-role',
+        path: '$.content[0].attrs.blockRole',
+      }),
+    ])
+  })
+
+  it('validates centralized attribute metadata for node and mark attributes', () => {
+    const document: JSONContent = {
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 2, 'data-toc-id': 42 },
+          content: [
+            {
+              type: 'text',
+              text: 'Metadata coverage',
+              marks: [{ type: 'link', attrs: { href: 'https://example.com', target: 42 } }],
+            },
+          ],
+        },
+      ],
+    }
+
+    expect(validateSchemaDocument(document).errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          rule: 'attribute-type',
+          path: '$.content[0].attrs.data-toc-id',
+        }),
+        expect.objectContaining({
+          rule: 'attribute-type',
+          path: '$.content[0].content[0].marks[0].attrs.target',
+        }),
+      ]),
+    )
   })
 
   it('accepts every valid fixture against the live schema and contract rules', () => {
@@ -260,7 +340,7 @@ describe('schema contract', () => {
 
   it('rejects every invalid fixture with its expected rule', () => {
     for (const fixture of invalidDocuments) {
-      const validation = validateSchemaDocument(fixture.document)
+      const validation = validateSchemaDocument(fixture.document, fixture.validationOptions)
 
       expect(validation.valid, fixture.key).toBe(false)
       expect(

@@ -1,11 +1,13 @@
 import type { AttributeValueType, SchemaContractJsonValue } from './types.js'
 
-const attributeMetadata: Record<
-  string,
-  { type: AttributeValueType; enum?: readonly SchemaContractJsonValue[] }
-> = {
+interface AttributeMetadata {
+  type: AttributeValueType
+  enum?: readonly SchemaContractJsonValue[]
+}
+
+export const ATTRIBUTE_METADATA: Readonly<Record<string, AttributeMetadata>> = {
   id: { type: 'string' },
-  blockRole: { type: 'enum', enum: ['pricing', 'cta', 'cases'] },
+  blockRole: { type: 'string' },
   level: { type: 'number', enum: [1, 2, 3, 4, 5, 6] },
   start: { type: 'number' },
   checked: { type: 'boolean' },
@@ -34,10 +36,20 @@ const attributeMetadata: Record<
   textAlign: { type: 'enum', enum: ['left', 'center', 'right', 'justify'] },
   indent: { type: 'number' },
   'data-align': { type: 'enum', enum: ['left', 'center', 'right'] },
+  language: { type: 'string' },
+  label: { type: 'string' },
+  mentionSuggestionChar: { type: 'string' },
+  'data-toc-id': { type: 'string' },
+  accept: { type: 'string' },
+  align: { type: 'string' },
+  limit: { type: 'number' },
+  maxSize: { type: 'number' },
+  name: { type: 'string' },
+  type: { type: 'string' },
 }
 
 export function getAttributeMetadata(name: string) {
-  return attributeMetadata[name]
+  return ATTRIBUTE_METADATA[name]
 }
 
 export function inferAttributeType(name: string, defaultValue: unknown): AttributeValueType {

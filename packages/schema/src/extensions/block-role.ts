@@ -6,7 +6,6 @@ import { createLogger } from '../utils/logger.js'
 
 export const BLOCK_ROLE_ATTRIBUTE = 'blockRole'
 export const BLOCK_ROLE_META = 'blockRole:normalized'
-export const CANONICAL_BLOCK_ROLES = ['pricing', 'cta', 'cases'] as const
 
 export type BlockRoleValue = string | null
 
@@ -231,7 +230,7 @@ export const BlockRole = Extension.create({
 
   addOptions(): BlockRoleOptions {
     return {
-      roles: CANONICAL_BLOCK_ROLES,
+      roles: [],
     }
   },
 

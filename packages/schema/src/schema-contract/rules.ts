@@ -1,16 +1,7 @@
 import { TOP_LEVEL_BLOCK_ID_NODE_TYPES } from '../extensions/block-id.js'
-import { CANONICAL_BLOCK_ROLES } from '../extensions/block-role.js'
 import { createLogger } from '../utils/logger.js'
 import { isSchemaContractUrlSafe, validateSchemaDocument } from './document-validator.js'
 import type { ExecutableValidationRule, ValidationRule } from './types.js'
-
-/**
- * Canonical roles serialized by new editor and renderer instances.
- *
- * @example
- * if (!SCHEMA_CONTRACT_BLOCK_ROLES.includes(role)) throw new Error('Unsupported role')
- */
-export const SCHEMA_CONTRACT_BLOCK_ROLES = CANONICAL_BLOCK_ROLES
 
 const SAFE_URL_SCHEMES = [
   'http',
@@ -57,15 +48,22 @@ export const schemaRuleDefinitions: readonly ValidationRule[] = [
   },
   {
     id: 'block-role',
-    description: 'blockRole is allowed only on supported direct doc children and canonical roles.',
+    description:
+      'blockRole is allowed only on supported direct doc children and must match the host-provided editor initialization allowlist.',
     affectedNodes: [...TOP_LEVEL_BLOCK_ID_NODE_TYPES],
     affectedAttributes: ['blockRole'],
-    constraint: { parent: 'doc', depth: 1, enum: [...SCHEMA_CONTRACT_BLOCK_ROLES] },
+    constraint: {
+      parent: 'doc',
+      depth: 1,
+      valueType: 'non-empty-string',
+      allowlistSource: 'NotionEditorProps.blockRoles',
+    },
   },
   {
     id: 'safe-url',
     description: 'Link href and image src must use an allowlisted URL scheme.',
-    affectedNodes: ['image', 'text'],
+    affectedNodes: ['image'],
+    affectedMarks: ['link'],
     affectedAttributes: ['href', 'src'],
     constraint: { schemes: [...SAFE_URL_SCHEMES], relative: true },
   },
@@ -98,8 +96,8 @@ export { isSchemaContractUrlSafe, validateSchemaDocument }
 export const schemaValidationRules: readonly ExecutableValidationRule[] = schemaRuleDefinitions.map(
   (definition) => ({
     ...definition,
-    validate(document) {
-      const errors = validateSchemaDocument(document).errors.filter(
+    validate(document, options) {
+      const errors = validateSchemaDocument(document, options).errors.filter(
         ({ rule }) => rule === definition.id,
       )
       return { valid: errors.length === 0, errors }

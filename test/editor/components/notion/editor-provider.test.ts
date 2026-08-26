@@ -338,10 +338,13 @@ describe('EditorProvider', () => {
   })
 
   it('snapshots initial menu roles so later prop changes cannot diverge from the editor', async () => {
-    const initialRoles = [{ label: 'Pricing', value: 'pricing' }] as const
+    const initialRoles = [
+      { label: 'Pricing', value: 'pricing' },
+      { label: 'Other', value: 'other' },
+    ] as const
     const { wrapper, ydoc } = await mountEditorProvider({ blockRoles: initialRoles })
 
-    expect(getExtension('blockRole').options.roles).toEqual(['pricing'])
+    expect(getExtension('blockRole').options.roles).toEqual(['pricing', 'other'])
     expect(testState.editorContentAreaProps?.blockRoles).toEqual(initialRoles)
 
     await wrapper.setProps({ blockRoles: [{ label: 'Call to action', value: 'cta' }] })

@@ -25,7 +25,6 @@ export {
   BlockRole,
   BLOCK_ROLE_ATTRIBUTE,
   BLOCK_ROLE_META,
-  CANONICAL_BLOCK_ROLES,
   isValidBlockRole,
   normalizeBlockRole,
   setBlockRoleAtPos,

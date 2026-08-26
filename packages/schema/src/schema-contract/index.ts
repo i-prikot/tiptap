@@ -9,7 +9,6 @@ export {
 } from './builder.js'
 export {
   isSchemaContractUrlSafe,
-  SCHEMA_CONTRACT_BLOCK_ROLES,
   schemaRuleDefinitions,
   schemaValidationRules,
   validateSchemaDocument,

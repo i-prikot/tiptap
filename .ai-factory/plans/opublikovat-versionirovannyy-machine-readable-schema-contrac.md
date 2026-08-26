@@ -499,6 +499,12 @@ The schema contract must be:
 - GREEN: `npx vitest run test/schema/schema-contract.test.ts test/schema/public-exports.test.ts test/editor/nodes/image-node.integration.test.ts --reporter=verbose` passed 17/17 tests.
 - GREEN: `npx vitest run test/schema/extensions/block-role.test.ts test/renderer/render-document.test.ts --reporter=verbose` passed 25/25 regression tests.
 - GREEN: `npm run typecheck`, schema workspace lint, changed-file lint, and `git diff --check` passed.
+- REWORK RED: `npx vitest run test/schema/schema-contract.test.ts --reporter=verbose` failed 2 assertions because `safe-url` targeted `text` without `affectedMarks`, and centralized node/mark attribute types were skipped.
+- REWORK RED: the metadata exhaustiveness regression test failed with six inferred-only live attributes (`accept`, `align`, `limit`, `maxSize`, `name`, `type`).
+- REWORK GREEN: the focused command passed 16/16 tests with all 40 live attributes represented centrally; schema workspace typecheck, focused lint, Prettier check, `git diff --check`, and `LOG_LEVEL=error npm run test:package-public-api` (5/5) also passed.
+- REWORK 2026-08-26 RED: the focused block-role/schema-contract tests failed because `BlockRole.options.roles` still defaulted to `pricing`, `cta`, and `cases`, the contract published `blockRole` as a fixed enum, and validation rejected the host-defined `other` role.
+- REWORK 2026-08-26 GREEN: `npx vitest run test/schema/extensions/block-role.test.ts test/schema/schema-contract.test.ts test/editor/components/notion/editor-provider.test.ts --reporter=verbose --maxWorkers=1 --no-file-parallelism` passed 37/37 tests.
+- REWORK 2026-08-26 GREEN: `npm run typecheck`, focused ESLint, Prettier check, `git diff --check`, and `LOG_LEVEL=error npm run test:package-public-api` (5/5) passed.
 
 ## Commit Plan
 
@@ -565,3 +571,12 @@ docs(schema): document schema contract usage
 - [ ] URL sanitization rules are already implemented in `sanitizeUrl()` - the contract documents them rather than re-implementing.
 - [ ] The contract is generated from the extension kits, not manually maintained, to ensure accuracy.
 - [ ] External consumers like Tinyfy will use the contract for validation without running the full editor.
+
+## Rework 2026-08-25
+
+- [x] Replace the validator's duplicate attribute type table with centralized attribute metadata and cover node and mark attributes consistently (`052c4e7ef995`).
+- [x] Describe `safe-url` as applying to image nodes and link marks (`87be2f884d95`).
+
+## Rework 2026-08-26
+
+- [x] Replace the fixed canonical block-role allowlist with host-provided editor initialization roles and align the public schema contract, validator, fixtures, tests, and docs with that configurable model.

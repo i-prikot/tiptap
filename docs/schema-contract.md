@@ -45,14 +45,16 @@ console.assert(contract.schemaVersion === CURRENT_SCHEMA_VERSION)
 
 Every attribute declares its JSON type, default, required state, and enum where applicable. Node and mark catalogs are derived from the registered renderer extensions during contract construction; package tests compare them with the live ProseMirror schema.
 
-The canonical roles are `pricing`, `cta`, and `cases`. `id` and `blockRole` are valid only on the supported direct children of `doc`. The legacy `blockId` attribute is rejected and is not part of any live node definition.
+`blockRole` is a host-defined non-empty string rather than a package-owned enum. It and `id` are valid only on the supported direct children of `doc`. The legacy `blockId` attribute is rejected and is not part of any live node definition.
 
 ## Validation
 
 Use `validateSchemaDocument` when a host needs the complete rule set:
 
 ```ts
-const result: SchemaValidationResult = validateSchemaDocument(candidateJson)
+const result: SchemaValidationResult = validateSchemaDocument(candidateJson, {
+  blockRoles: blockRoles.map(({ value }) => value),
+})
 
 if (!result.valid) {
   for (const error of result.errors) {
@@ -61,13 +63,13 @@ if (!result.valid) {
 }
 ```
 
-Validation covers registered node and mark names, ProseMirror content nesting, attribute types and enums, top-level `id`/`blockRole` placement, legacy `blockId`, and link/image URL schemes. Allowed schemes are `http`, `https`, `ftp`, `ftps`, `mailto`, `tel`, `callto`, `sms`, `cid`, and `xmpp`; relative URLs are accepted.
+Validation covers registered node and mark names, ProseMirror content nesting, attribute types and enums, top-level `id`/`blockRole` placement, the optional host-provided `blockRoles` allowlist, legacy `blockId`, and link/image URL schemes. Allowed schemes are `http`, `https`, `ftp`, `ftps`, `mailto`, `tel`, `callto`, `sms`, `cid`, and `xmpp`; relative URLs are accepted.
 
 `schemaValidationRules` exposes the rule metadata with an executable `validate` member for TypeScript/JavaScript hosts. Consumers that need a pure JSON artifact should serialize `getSchemaContract()` instead.
 
 ## Fixtures
 
-`validDocuments` and `invalidDocuments` are stable arrays of `{ key, description, document }`. Invalid fixtures also declare `expectedError`.
+`validDocuments` and `invalidDocuments` are stable arrays of `{ key, description, document }`. Invalid fixtures also declare `expectedError` and may provide `validationOptions` for host-configured rules.
 
 ```ts
 for (const fixture of validDocuments) {
@@ -76,7 +78,7 @@ for (const fixture of validDocuments) {
 }
 
 for (const fixture of invalidDocuments) {
-  const result = validateSchemaDocument(fixture.document)
+  const result = validateSchemaDocument(fixture.document, fixture.validationOptions)
   if (!result.errors.some((error) => error.rule === fixture.expectedError)) {
     throw new Error(`Missing rejection: ${fixture.key}`)
   }

@@ -53,11 +53,11 @@ import { BlockRole, setBlockRoleAtPos } from '@i-prikot/editor'
 ```
 
 `setBlockRoleAtPos(editor, pos, role)` accepts a position resolved by the host
-menu. Pass a canonical role or `null` to clear a role. It changes
+menu. Pass a role configured by the host or `null` to clear a role. It changes
 only supported direct children of `doc` and returns a typed success or
 rejection result. Rejected calls do not modify the document.
 
-`requestedRole` in a rejection result is normalized to a canonical role or
+`requestedRole` in a rejection result is normalized to a configured role or
 `null`. Callers must not receive or log the raw value that was supplied to the
 helper.
 
@@ -68,14 +68,22 @@ initialized. The block actions menu shows these labels and uses the matching
 values for document attributes:
 
 ```vue
-<NotionEditor
-  :block-roles="[
-    { label: 'Цена', value: 'pricing' },
-    { label: 'Призыв к действию', value: 'cta' },
-  ]"
-  document-id="page-42"
-  base-url="https://example.test/page-42"
-/>
+<script setup lang="ts">
+const blockRoles = [
+  { label: 'Цена', value: 'pricing' },
+  { label: 'Призыв к действию', value: 'cta' },
+  { label: 'Кейсы', value: 'cases' },
+  { label: 'Другое', value: 'other' },
+] as const
+</script>
+
+<template>
+  <NotionEditor
+    :block-roles="blockRoles"
+    document-id="page-42"
+    base-url="https://example.test/page-42"
+  />
+</template>
 ```
 
 When `blockRoles` is omitted, the editor accepts no block roles and does not

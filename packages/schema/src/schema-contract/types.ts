@@ -131,6 +131,8 @@ export interface ValidationRule {
   description: string
   /** Node types affected by this rule; `*` means all nodes. */
   affectedNodes: readonly string[]
+  /** Mark types affected by this rule; omitted when the rule does not target marks. */
+  affectedMarks?: readonly string[]
   /** Attributes affected by this rule; `*` means all attributes. */
   affectedAttributes: readonly string[]
   /** Data-only rule parameters for non-JavaScript hosts. */
@@ -139,7 +141,7 @@ export interface ValidationRule {
 
 /** A validation rule with the JavaScript validator attached. */
 export interface ExecutableValidationRule extends ValidationRule {
-  validate(document: JSONContent): SchemaValidationResult
+  validate(document: JSONContent, options?: SchemaDocumentValidationOptions): SchemaValidationResult
 }
 
 /**
@@ -173,6 +175,12 @@ export interface SchemaValidationResult {
   errors: readonly SchemaValidationError[]
 }
 
+/** Host-owned settings required to validate configurable document semantics. */
+export interface SchemaDocumentValidationOptions {
+  /** Values configured through `NotionEditorProps.blockRoles` for this editor instance. */
+  blockRoles?: readonly string[]
+}
+
 /**
  * Document known to satisfy the published schema contract.
  *
@@ -196,4 +204,6 @@ export interface ValidFixture {
  */
 export interface InvalidFixture extends ValidFixture {
   expectedError: string
+  /** Host configuration needed to reproduce a configuration-dependent violation. */
+  validationOptions?: SchemaDocumentValidationOptions
 }
